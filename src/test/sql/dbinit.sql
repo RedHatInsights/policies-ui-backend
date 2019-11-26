@@ -20,6 +20,7 @@ insert into policy values (1, '1', '1st policy', 'Just a test', true, '"cores" =
 insert into policy values (2, '1', '2nd policy', 'Another test', false, '"cpu" != "intel"','HOOK http://localhost:8080');
 insert into policy values (3, '1', '3rd policy', 'Another test', true, '"rhelversion" >= "8" OR "cores" == 5','EMAIL toor@root.org');
 insert into policy values (4, '2', '4th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel');
+insert into policy values (5, '1', 'Detect Nice box', 'Test for os and arch', true, '"os_version" == "7.5" AND "arch" == "x86_64"', 'NOTIFY; EMAIL foo@acme.org');
 
 -- create a sequence for hibernate id generator. Must start with a number higher than the id values
 -- of above tables
