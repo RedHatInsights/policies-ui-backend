@@ -1,0 +1,54 @@
+= Custom policies UI backend
+
+This backend is to serve (data to) the UI for Custom Policies
+
+For some functionality it relies on the Engine part.
+
+== Get started
+
+To get started (locally) you can build a local docker image with Postgres, that has example tables set up and then
+run this via Docker-Compose, which starts Postgres and a local Kafka instance for use with the Engine.
+
+[source,shell]
+----
+cd helpers
+sh build-local-pg.sh
+docker-compose up
+----
+
+The UI backend is written in Java and can be compiled via
+
+[source,shell]
+----
+mvn package
+----
+
+Which also runs some Rest-API tests (under the hood it starts a postgres instance in a container).
+
+When developing you can use Quarkus hot-reload
+
+[source,shell]
+----
+mvn compile quarkus:dev
+----
+
+== List existing policies
+
+[source,shell]
+----
+curl http://localhost:8080/api/v1/policies/<id> # id = 1 or 2
+----
+
+== Evaluate facts against rules on the engine
+This is internally used from the UI-backend to verify rules
+
+[source,shell]
+----
+curl -X POST -i -H 'content-type: application/json' -H 'accept: application/json' http://localhost:8083/api/v1/eval/1 -d @facts.json
+----
+
+== List fact keys (for the UI)
+[source,shell]
+----
+http://localhost:8080/api/v1/facts
+----
