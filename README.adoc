@@ -39,16 +39,17 @@ mvn compile quarkus:dev
 curl http://localhost:8080/api/v1/policies/<id> # id = 1 or 2
 ----
 
-== Evaluate facts against rules on the engine
-This is internally used from the UI-backend to verify rules
-
-[source,shell]
-----
-curl -X POST -i -H 'content-type: application/json' -H 'accept: application/json' http://localhost:8083/api/v1/eval/1 -d @facts.json
-----
 
 == List fact keys (for the UI)
 [source,shell]
 ----
 http://localhost:8080/api/v1/facts
 ----
+
+== OpenAPI Endpoint / Swagger-UI
+
+OpenAPI spec of the API is available under http://localhost:8080/openapi
+
+When the server is running in dev mode, there is also the Swagger-UI available under
+http://localhost:8080/swagger-ui/
+
