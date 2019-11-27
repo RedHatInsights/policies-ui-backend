@@ -38,8 +38,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jboss.resteasy.annotations.ResponseObject;
 
 /**
  * @author hrupp
@@ -59,6 +63,7 @@ public class PolicyCrudService {
   @Context
   UriInfo uriInfo;
 
+  @Operation(summary = "Return all policies for a given account")
   @GET
   @Path("/{customer}")
   public Response getPoliciesForCustomer(@PathParam("customer") String customer) {
@@ -78,6 +83,13 @@ public class PolicyCrudService {
     return builder.build();
   }
 
+  @Operation(summary = "Persist a passed policy for the given account")
+  @APIResponses({
+      @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
+      @APIResponse(responseCode = "400", description = "Policy validation failed"),
+      @APIResponse(responseCode = "409", description = "Persisting failed"),
+      @APIResponse(responseCode = "204", description = "Policy persisted")
+                })
   @POST
   @Path("/{customer}")
   @Transactional
@@ -122,6 +134,7 @@ public class PolicyCrudService {
 
   }
 
+  @Operation(summary = "Retrieve a single policy for a customer by its id")
   @GET
   @Path("/{customer}/policy/{id}")
   public Response getPolicy(@PathParam("customer") String customerId, @PathParam("id") Long policyId) {

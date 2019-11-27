@@ -15,7 +15,7 @@
     <maven.compiler.parameters>true</maven.compiler.parameters>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.version>1.0.0.CR2</quarkus.version>
+    <quarkus.version>1.0.0.Final</quarkus.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
   </properties>
@@ -55,6 +55,10 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
 
     <!-- Test dependencies -->

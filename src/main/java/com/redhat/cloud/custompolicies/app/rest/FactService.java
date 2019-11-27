@@ -22,6 +22,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 
 /**
  * @author hrupp
@@ -32,6 +33,7 @@ import javax.ws.rs.Produces;
 public class FactService {
 
   @GET
+  @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
   public List<Fact> listFacts() {
     return Fact.getFacts();
   }
