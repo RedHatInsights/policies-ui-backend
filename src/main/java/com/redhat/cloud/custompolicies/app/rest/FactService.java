@@ -17,11 +17,16 @@
 package com.redhat.cloud.custompolicies.app.rest;
 
 import com.redhat.cloud.custompolicies.app.model.Fact;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 /**
  * @author hrupp
@@ -32,8 +37,13 @@ import javax.ws.rs.Produces;
 public class FactService {
 
   @GET
-  public List<Fact> listFacts() {
-    return Fact.getFacts();
+  @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
+  @APIResponse(responseCode = "200", description = "List of facts", content =
+               @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
+  public Response listFacts() {
+    Response.ResponseBuilder builder = Response.ok();
+    builder.entity(Fact.getFacts());
+    return builder.build();
   }
 
 }
