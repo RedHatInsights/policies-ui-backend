@@ -45,6 +45,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @QuarkusTest
 class RestApiTest {
 
+  private static final String API_BASE = "/api/custom-policies/v1.0";
   @ClassRule
   private static PostgreSQLContainer postgreSQLContainer =
       new PostgreSQLContainer("postgres");
@@ -81,7 +82,7 @@ class RestApiTest {
   @Test
   void testFactEndpoint() {
     given()
-        .when().get("/api/v1/facts")
+        .when().get(API_BASE + "/facts")
         .then()
         .statusCode(200)
         .body(containsString("rhelversion"));
@@ -90,7 +91,7 @@ class RestApiTest {
   @Test
   void testGetPolicies() {
     given()
-        .when().get("/api/v1/policies/1")
+        .when().get(API_BASE + "/policies/1")
         .then()
         .statusCode(200)
         .body(containsString("2nd policy"));
@@ -99,7 +100,7 @@ class RestApiTest {
   @Test
   void testGetPoliciesForUnknownAccount() {
     given()
-        .when().get("/api/v1/policies/3")
+        .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
   }
@@ -108,7 +109,7 @@ class RestApiTest {
   void testGetOnePolicy() {
     JsonPath jsonPath =
     given()
-        .when().get("/api/v1/policies/1/policy/1")
+        .when().get(API_BASE + "/policies/1/policy/1")
         .then()
         .statusCode(200)
         .body(containsString("1st policy"))
@@ -123,7 +124,7 @@ class RestApiTest {
   @Test
   void testGetOneBadPolicy() {
     given()
-        .when().get("/api/v1/policies/1/policy/15")
+        .when().get(API_BASE + "/policies/1/policy/15")
         .then()
         .statusCode(404);
   }

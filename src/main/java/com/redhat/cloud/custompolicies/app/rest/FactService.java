@@ -31,7 +31,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 /**
  * @author hrupp
  */
-@Path("/api/v1/facts")
+@Path("/api/custom-policies/v1.0/facts")
 @Produces("application/json")
 @Consumes("application/json")
 public class FactService {
