@@ -1,0 +1,31 @@
+{
+  "openapi": "3.0.1",
+  "security": [
+    {
+      "Basic_auth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://cloud.redhat.com/{basePath}",
+      "description": "Production Server",
+      "variables": {
+        "basePath": {
+          "default": "/api/custom-policies/v1.0"
+        }
+      }
+    },
+    {
+      "url": "http://localhost:{port}/{basePath}",
+      "description": "Development Server",
+      "variables": {
+        "port": {
+          "default": "8080"
+        },
+        "basePath": {
+          "default": "/api/custom-policies/v1.0"
+        }
+      }
+    }
+  ]
+}
