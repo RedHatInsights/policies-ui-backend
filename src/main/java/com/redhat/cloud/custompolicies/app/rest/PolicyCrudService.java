@@ -56,8 +56,6 @@ import org.hibernate.exception.ConstraintViolationException;
 @Timed
 public class PolicyCrudService {
 
-  private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-  private static final String ALLOWED_ORIGINS = "*"; // TODO needs to change
   @Inject
   @RestClient
   VerifyEngine engine;
@@ -83,7 +81,6 @@ public class PolicyCrudService {
       EntityTag etag = new EntityTag(String.valueOf(policies.hashCode()));
       builder.header("ETag",etag);
     }
-    builder.header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS);
 
     return builder.build();
   }
@@ -99,9 +96,8 @@ public class PolicyCrudService {
   @Path("/{customer}")
   @Transactional
   public Response storePolicy(@PathParam("customer") String customer, @Valid Policy policy) {
-
     if (policy==null) {
-      return Response.status(500, "No policy passed").header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS).build();
+      return Response.status(500, "No policy passed").build();
     }
 
     policy.id = null;
@@ -112,7 +108,7 @@ public class PolicyCrudService {
     }
     catch (Exception e) {
       System.err.println("Rule verification failed: " + e.getMessage() + " -> " + msg);
-      return Response.status(400,e.getMessage()).entity(msg).header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS).build();
+      return Response.status(400,e.getMessage()).entity(msg).build();
     }
 
     // Basic validation was successful, so try to persist.
@@ -123,11 +119,11 @@ public class PolicyCrudService {
       id = policy.store(customer, policy);
     } catch (Throwable t) {
       if (t instanceof PersistenceException &&  t.getCause() instanceof ConstraintViolationException) {
-        return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS).build();
+        return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
       }
       else {
         t.printStackTrace();
-        return Response.status(500, t.getMessage()).header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS).build();
+        return Response.status(500, t.getMessage()).build();
       }
     }
 
@@ -156,7 +152,7 @@ public class PolicyCrudService {
       EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));
       builder.header("ETag",etag);
     }
-    builder.header(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGINS);
+
     return builder.build();
   }
 
