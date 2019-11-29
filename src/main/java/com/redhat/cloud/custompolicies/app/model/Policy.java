@@ -60,11 +60,23 @@ public class Policy extends PanacheEntity {
     return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
   }
 
+  public static Policy findByName(String customer, String name) {
+    return find("customerid = ?1 and name = ?2", customer, name).firstResult();
+  }
+
   public Long store(String customer, Policy policy) {
     if (!customer.equals(policy.customerid)) {
       throw new IllegalArgumentException("Store: customer id do not match");
     }
     policy.persistAndFlush();
     return id;
+  }
+
+  public void delete(Policy policy) {
+    if (policy==null || !policy.isPersistent()) {
+      throw new IllegalStateException("Policy was not persisted");
+    }
+    policy.delete();
+    policy.flush();
   }
 }

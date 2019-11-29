@@ -28,11 +28,13 @@ import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
@@ -96,12 +98,13 @@ public class PolicyCrudService {
       @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
       @APIResponse(responseCode = "400", description = "Policy validation failed"),
       @APIResponse(responseCode = "409", description = "Persisting failed"),
-      @APIResponse(responseCode = "204", description = "Policy persisted")
+      @APIResponse(responseCode = "201", description = "Policy persisted"),
+      @APIResponse(responseCode = "200", description = "Policy validated")
                 })
   @POST
   @Path("/")
   @Transactional
-  public Response storePolicy(@Valid Policy policy) {
+  public Response storePolicy(@QueryParam ("alsoStore") boolean alsoStore, @Valid Policy policy) {
     if (policy==null) {
       return Response.status(500, "No policy passed").build();
     }
@@ -109,13 +112,23 @@ public class PolicyCrudService {
     policy.id = null;
     policy.customerid = user.getAccount();
 
-    Msg msg = new Msg(policy.conditions);
+    Msg msg ;
     try {
-      msg = engine.verify(policy);
+      engine.verify(policy);
     }
     catch (Exception e) {
-      System.err.println("Rule verification failed: " + e.getMessage() + " -> " + msg);
+      msg = new Msg(e.getMessage());
       return Response.status(400,e.getMessage()).entity(msg).build();
+    }
+
+    if (!alsoStore) {
+      Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+      if (tmp != null) {
+        return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+      }
+      else {
+        return Response.status(200).entity(new Msg("Policy validated")).build();
+      }
     }
 
     // Basic validation was successful, so try to persist.
@@ -139,6 +152,29 @@ public class PolicyCrudService {
         UriBuilder.fromMethod(PolicyCrudService.class, "getPolicy").build(id);
     ResponseBuilder builder = Response.created(location);
     return builder.build();
+
+  }
+
+  @Operation(summary = "Delete a single policy for a customer by its id")
+  @DELETE
+  @Path("/{customer}/policy/{id}")
+  @APIResponse(responseCode = "200", description = "Policy deleted")
+  @APIResponse(responseCode = "400", description = "Deletion failed")
+  @Transactional
+  public Response deletePolicy(@PathParam("customer") String customerId, @PathParam("id") Long policyId) {
+
+    Policy policy = Policy.findById(customerId, policyId);
+
+    ResponseBuilder builder ;
+    if (policy==null) {
+      builder = Response.status(Response.Status.BAD_REQUEST);
+    } else {
+      policy.delete(policy);
+      builder = Response.ok(policy);
+    }
+
+    return builder.build();
+
 
   }
 
