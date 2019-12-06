@@ -1,0 +1,19 @@
+language: java 
+jdk:
+- openjdk8
+sudo: required
+cache:
+  directories:
+    - $HOME/.m2/repository 
+install:
+- git fetch origin
+- mvn -version 
+script:
+- mvn package 
+notifications:
+  irc:
+    channels:
+      - wolfe.freenode.net#custom-policies-ui-travis
+    on_success: change
+    on_failure: change
+#
