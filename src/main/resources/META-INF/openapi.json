@@ -7,7 +7,7 @@
   ],
   "servers": [
     {
-      "url": "https://cloud.redhat.com/{basePath}",
+      "url": "https://cloud.redhat.com",
       "description": "Production Server",
       "variables": {
         "basePath": {
@@ -16,7 +16,7 @@
       }
     },
     {
-      "url": "http://localhost:{port}/{basePath}",
+      "url": "http://localhost:{port}",
       "description": "Development Server",
       "variables": {
         "port": {

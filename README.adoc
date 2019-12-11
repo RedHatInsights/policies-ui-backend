@@ -36,19 +36,19 @@ mvn compile quarkus:dev
 
 [source,shell]
 ----
-curl http://localhost:8080/api/v1/policies/<id> # id = 1 or 2
+curl http://localhost:8080/api/custom-policies/v1.0/policies/<id> # id = 1 or 2
 ----
 
 
 == List fact keys (for the UI)
 [source,shell]
 ----
-http://localhost:8080/api/v1/facts
+http://localhost:8080//api/custom-policies/v1.0/facts
 ----
 
 == OpenAPI Endpoint / Swagger-UI
 
-OpenAPI spec of the API is available under http://localhost:8080/openapi
+OpenAPI spec of the API is available under http://localhost:8080/api/custom-policies/v1.0/openapi.json
 
 When the server is running in dev mode, there is also the Swagger-UI available under
 http://localhost:8080/swagger-ui/
