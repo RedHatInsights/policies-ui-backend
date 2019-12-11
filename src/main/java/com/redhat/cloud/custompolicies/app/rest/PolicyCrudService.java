@@ -51,7 +51,7 @@ import org.hibernate.exception.ConstraintViolationException;
 /**
  * @author hrupp
  */
-@Path("/api/custom-policies/v1.0/policies")
+@Path("/policies")
 @Produces("application/json")
 @Consumes("application/json")
 @Timed
