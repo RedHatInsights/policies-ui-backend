@@ -22,6 +22,7 @@ import static io.restassured.RestAssured.given;
 
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.Header;
 import io.restassured.path.json.JsonPath;
 import java.sql.SQLException;
 import liquibase.Contexts;
@@ -50,6 +51,8 @@ class RestApiTest {
   private static PostgreSQLContainer postgreSQLContainer =
       new PostgreSQLContainer("postgres");
 
+  private static Header authHeader;
+
   @BeforeAll
   static void configurePostgres() throws SQLException, LiquibaseException {
     postgreSQLContainer.start();
@@ -71,8 +74,11 @@ class RestApiTest {
     Liquibase liquibase = new Liquibase("dbinit.sql",ra, dbconn);
     liquibase.dropAll();
     liquibase.update(new Contexts());
-  }
 
+    // provide rh-id
+    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
+    authHeader = new Header("x-rh-identity",rhid);
+  }
 
   @AfterAll
   static void closePostgres() {
@@ -80,8 +86,26 @@ class RestApiTest {
   }
 
   @Test
+  void testNoAuth() {
+    given()
+        .when().get(API_BASE + "/facts")
+        .then()
+        .statusCode(401);
+  }
+
+  @Test
+  void testBadAuth() {
+    given()
+        .header("x-rh-identity","frobnitz")
+        .when().get(API_BASE + "/facts")
+        .then()
+        .statusCode(401);
+  }
+
+  @Test
   void testFactEndpoint() {
     given()
+        .header(authHeader)
         .when().get(API_BASE + "/facts")
         .then()
         .statusCode(200)
@@ -91,6 +115,7 @@ class RestApiTest {
   @Test
   void testGetPolicies() {
     given()
+        .header(authHeader)
         .when().get(API_BASE + "/policies/1")
         .then()
         .statusCode(200)
@@ -100,6 +125,7 @@ class RestApiTest {
   @Test
   void testGetPoliciesForUnknownAccount() {
     given()
+        .header(authHeader)
         .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
@@ -109,6 +135,7 @@ class RestApiTest {
   void testGetOnePolicy() {
     JsonPath jsonPath =
     given()
+        .header(authHeader)
         .when().get(API_BASE + "/policies/1/policy/1")
         .then()
         .statusCode(200)
@@ -124,9 +151,9 @@ class RestApiTest {
   @Test
   void testGetOneBadPolicy() {
     given()
+        .header(authHeader)
         .when().get(API_BASE + "/policies/1/policy/15")
         .then()
         .statusCode(404);
   }
-
 }
