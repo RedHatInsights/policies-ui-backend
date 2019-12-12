@@ -21,6 +21,7 @@ import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.URI;
 import java.util.List;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -54,6 +55,7 @@ import org.hibernate.exception.ConstraintViolationException;
 @Produces("application/json")
 @Consumes("application/json")
 @Timed
+@RequestScoped
 public class PolicyCrudService {
 
   @Inject

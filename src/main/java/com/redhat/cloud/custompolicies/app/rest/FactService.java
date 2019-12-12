@@ -17,6 +17,7 @@
 package com.redhat.cloud.custompolicies.app.rest;
 
 import com.redhat.cloud.custompolicies.app.model.Fact;
+import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,6 +35,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 @Path("/api/custom-policies/v1.0/facts")
 @Produces("application/json")
 @Consumes("application/json")
+@RequestScoped
 public class FactService {
 
   @GET
