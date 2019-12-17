@@ -1,15 +1,15 @@
-language: java 
+language: java
 jdk:
-- openjdk8
+- openjdk11
 sudo: required
 cache:
   directories:
-    - $HOME/.m2/repository 
+    - $HOME/.m2/repository
 install:
 - git fetch origin
-- mvn -version 
+- mvn -version
 script:
-- mvn package 
+- mvn package
 notifications:
   irc:
     channels:
