@@ -50,7 +50,7 @@ import javax.ws.rs.ext.Provider;
 public class IncomingRequestFilter implements ContainerRequestFilter {
 
   @Inject
-  private CPPrincipalProducer producer;
+  CPPrincipalProducer producer;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
