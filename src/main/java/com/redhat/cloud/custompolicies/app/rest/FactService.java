@@ -32,7 +32,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 /**
  * @author hrupp
  */
-@Path("/api/custom-policies/v1.0/facts")
+@Path("/facts")
 @Produces("application/json")
 @Consumes("application/json")
 @RequestScoped
