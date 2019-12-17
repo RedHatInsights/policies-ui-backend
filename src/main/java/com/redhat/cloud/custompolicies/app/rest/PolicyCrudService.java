@@ -106,7 +106,7 @@ public class PolicyCrudService {
 
     Msg msg = new Msg(policy.conditions);
     try {
-      msg = engine.verify(msg);
+      msg = engine.verify(policy);
     }
     catch (Exception e) {
       System.err.println("Rule verification failed: " + e.getMessage() + " -> " + msg);

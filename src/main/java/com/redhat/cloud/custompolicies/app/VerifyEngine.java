@@ -17,6 +17,7 @@
 package com.redhat.cloud.custompolicies.app;
 
 import com.redhat.cloud.custompolicies.app.model.Msg;
+import com.redhat.cloud.custompolicies.app.model.Policy;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,11 +28,11 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  * @author hrupp
  */
 @Path("/api/v1/verify")
-@RegisterRestClient
+@RegisterRestClient(configKey = "engine")
 public interface VerifyEngine {
 
   @POST
   @Consumes("application/json")
   @Produces("application/json")
-  Msg verify(Msg policy);
+  Msg verify(Policy policy);
 }

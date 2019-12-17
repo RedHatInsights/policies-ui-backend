@@ -3,3 +3,7 @@ target/
 .idea
 .ipr
 /helpers/dbinit.sql
+/deploy/tmp/
+app.iml
+
+.DS_Store/

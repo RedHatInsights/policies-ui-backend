@@ -59,3 +59,28 @@ OpenAPI spec of the API is available under http://localhost:8080/api/custom-poli
 When the server is running in dev mode, there is also the Swagger-UI available under
 http://localhost:8080/swagger-ui/
 
+== Container usage
+
+The `deploy/` directory contains a script to create a container image of the engine.
+
+[source,shell]
+----
+cd deploy
+sh create_docker_image.sh
+----
+
+To run the image you need to pass some parameters:
+
+[source,shell]
+----
+docker run -it -p 8080:8080 \                       # <1>
+    -e engine/mp-rest/url=http://172.31.7.7:8083    # <2>
+    -e quarkus.datasource.url=jdbc:postgres://1.2.3.4:5432/postgres \ # <3>
+     cp-app
+----
+<1> Expose the internal port.
+<2> Url of the engine (Rule execution engine)
+<3> Database URL of your postgres instance
+
+You can also pass the Postgres user name + password - see Dockerfile.
+
