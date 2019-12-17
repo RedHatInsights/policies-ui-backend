@@ -16,9 +16,6 @@
  */
 package com.redhat.cloud.custompolicies.app;
 
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.LoggerHandler;
-import javax.enterprise.event.Observes;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -28,12 +25,4 @@ import javax.ws.rs.core.Application;
  *
  */
 @ApplicationPath("/api/custom-policies/v1.0")
-public class JaxRsApplication extends Application {
-
-  // Produce access log
-  void observeRouter(@Observes Router router) {
-    router.route().order(-1000).handler(LoggerHandler.create());
-  }
-
-
-}
+public class JaxRsApplication extends Application { }
