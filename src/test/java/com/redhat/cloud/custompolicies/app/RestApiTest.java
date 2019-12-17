@@ -22,6 +22,7 @@ import static io.restassured.RestAssured.given;
 
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.path.json.JsonPath;
 import java.sql.SQLException;
@@ -155,5 +156,18 @@ class RestApiTest {
         .when().get(API_BASE + "/policies/1/policy/15")
         .then()
         .statusCode(404);
+  }
+
+  @Test
+  void testOpenApiEndpoint() {
+    given()
+        .header(authHeader)
+        .header("Accept",ContentType.JSON)
+        .when()
+        .get(API_BASE + "/openapi.json")
+        .then()
+        .statusCode(200)
+        .contentType("application/json");
+
   }
 }
