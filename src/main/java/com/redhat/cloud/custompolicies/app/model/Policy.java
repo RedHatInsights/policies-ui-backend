@@ -17,9 +17,9 @@
 package com.redhat.cloud.custompolicies.app.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
@@ -49,16 +49,7 @@ public class Policy extends PanacheEntity {
   // or alternatively storing of actions as json blob
   // See CPOL-33
   public void setActions(List<Map<String, String>> actionList) {
-    System.out.println(actionList);
-    Iterator<Map<String,String>> ite = actionList.iterator();
-    actions = "";
-    while (ite.hasNext()) {
-      Map<String,String> map = ite.next();
-      actions = actions + map.get("type");
-      if (ite.hasNext()) {
-        actions = actions + ", ";
-      }
-    }
+    actions = actionList.stream().map(m -> m.get("type")).collect(Collectors.joining(", "));
   }
 
   public static List<Policy> listPoliciesForCustomer(String customer) {
