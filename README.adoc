@@ -35,21 +35,21 @@ mvn compile quarkus:dev
 .NOTE
 The backend requires a valid `x-rh-identity` to be supplied on calls.
 For testing purposes you can take the one that is stored in
-link:src/test/resources/rhid.txt
+link:src/test/resources/rhid.txt It has accountId = '1234' set.
 
 
 == List existing policies
 
 [source,shell]
 ----
-curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/policies/<id> # id = 1 or 2
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/policies
 ----
 
 
 == List fact keys (for the UI)
 [source,shell]
 ----
-curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080//api/custom-policies/v1.0/facts
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/facts
 ----
 
 == OpenAPI Endpoint / Swagger-UI

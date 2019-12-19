@@ -87,7 +87,7 @@ class RestApiTest {
   }
 
   @Test
-  void testNoAuth() {
+  void testFactsNoAuth() {
     given()
         .when().get(API_BASE + "/facts")
         .then()
@@ -117,7 +117,7 @@ class RestApiTest {
   void testGetPolicies() {
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1")
+        .when().get(API_BASE + "/policies/")
         .then()
         .statusCode(200)
         .body(containsString("2nd policy"));
@@ -126,10 +126,9 @@ class RestApiTest {
   @Test
   void testGetPoliciesForUnknownAccount() {
     given()
-        .header(authHeader)
-        .when().get(API_BASE + "/policies/3")
+        .when().get(API_BASE + "/policies/")
         .then()
-        .statusCode(404);
+        .statusCode(401);
   }
 
   @Test
@@ -137,7 +136,7 @@ class RestApiTest {
     JsonPath jsonPath =
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1/policy/1")
+        .when().get(API_BASE + "/policies/1")
         .then()
         .statusCode(200)
         .body(containsString("1st policy"))
@@ -153,7 +152,7 @@ class RestApiTest {
   void testGetOneBadPolicy() {
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1/policy/15")
+        .when().get(API_BASE + "/policies/15")
         .then()
         .statusCode(404);
   }
@@ -161,7 +160,6 @@ class RestApiTest {
   @Test
   void testOpenApiEndpoint() {
     given()
-        .header(authHeader)
         .header("Accept",ContentType.JSON)
         .when()
         .get(API_BASE + "/openapi.json")

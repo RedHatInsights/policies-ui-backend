@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.custompolicies.app.auth;
 
-import java.security.Principal;
 import javax.annotation.Priority;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
@@ -29,17 +28,17 @@ import javax.enterprise.inject.Produces;
 @Priority(1)
 @Alternative
 @RequestScoped
-public class CPPrincipalProducer {
+public class RhIdPrincipalProducer {
 
-private Principal principal;
+private RhIdPrincipal principal;
 
-  public void setPrincipal(Principal principal) {
+  public void setPrincipal(RhIdPrincipal principal) {
     this.principal = principal;
   }
 
   @RequestScoped
   @Produces
-  Principal currentPrincipal() {
+  RhIdPrincipal currentPrincipal() {
     return this.principal;
   }
 }

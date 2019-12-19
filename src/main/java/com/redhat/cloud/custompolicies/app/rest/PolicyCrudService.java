@@ -17,6 +17,7 @@
 package com.redhat.cloud.custompolicies.app.rest;
 
 import com.redhat.cloud.custompolicies.app.VerifyEngine;
+import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.URI;
@@ -65,16 +66,19 @@ public class PolicyCrudService {
   @Context
   UriInfo uriInfo;
 
+  @Inject
+  RhIdPrincipal user;
+
   @Operation(summary = "Return all policies for a given account")
   @GET
-  @Path("/{customer}")
+  @Path("/")
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "200", description = "Policies found", content =
                  @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)))
-  public Response getPoliciesForCustomer(@PathParam("customer") String customer) {
+  public Response getPoliciesForCustomer() {
 
     ResponseBuilder builder ;
-    List<Policy> policies = Policy.listPoliciesForCustomer(customer);
+    List<Policy> policies = Policy.listPoliciesForCustomer(user.getAccount());
 
     if (policies.isEmpty()) {
       builder = Response.status(Response.Status.NOT_FOUND);
@@ -95,9 +99,9 @@ public class PolicyCrudService {
       @APIResponse(responseCode = "204", description = "Policy persisted")
                 })
   @POST
-  @Path("/{customer}")
+  @Path("/")
   @Transactional
-  public Response storePolicy(@PathParam("customer") String customer, @Valid Policy policy) {
+  public Response storePolicy(@Valid Policy policy) {
     if (policy==null) {
       return Response.status(500, "No policy passed").build();
     }
@@ -118,7 +122,7 @@ public class PolicyCrudService {
     // we need to check for that.
     Long id;
     try {
-      id = policy.store(customer, policy);
+      id = policy.store(user.getAccount(), policy);
     } catch (Throwable t) {
       if (t instanceof PersistenceException &&  t.getCause() instanceof ConstraintViolationException) {
         return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
@@ -131,7 +135,7 @@ public class PolicyCrudService {
 
     // Policy is persisted. Return its location.
     URI location =
-        UriBuilder.fromMethod(PolicyCrudService.class, "getPolicy").build(customer, id);
+        UriBuilder.fromMethod(PolicyCrudService.class, "getPolicy").build(id);
     ResponseBuilder builder = Response.created(location);
     return builder.build();
 
@@ -139,12 +143,12 @@ public class PolicyCrudService {
 
   @Operation(summary = "Retrieve a single policy for a customer by its id")
   @GET
-  @Path("/{customer}/policy/{id}")
+  @Path("/{id}")
   @APIResponse(responseCode = "200", description = "Policy found", content =
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
-  public Response getPolicy(@PathParam("customer") String customerId, @PathParam("id") Long policyId) {
-    Policy policy = Policy.findById(customerId, policyId);
+  public Response getPolicy(@PathParam("id") Long policyId) {
+    Policy policy = Policy.findById(user.getAccount(), policyId);
 
     ResponseBuilder builder ;
     if (policy==null) {
