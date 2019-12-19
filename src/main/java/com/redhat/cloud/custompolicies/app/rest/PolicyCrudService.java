@@ -107,6 +107,7 @@ public class PolicyCrudService {
     }
 
     policy.id = null;
+    policy.customerid = user.getAccount();
 
     Msg msg = new Msg(policy.conditions);
     try {
