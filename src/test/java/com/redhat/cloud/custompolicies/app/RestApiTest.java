@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 
 import static io.restassured.RestAssured.given;
 
-import com.redhat.cloud.custompolicies.app.model.Policy;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -142,7 +141,7 @@ class RestApiTest {
         .body(containsString("1st policy"))
         .extract().jsonPath();
 
-    Policy policy = jsonPath.getObject("",Policy.class);
+    TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
     Assert.assertEquals("Action does not match", "EMAIL roadrunner@acme.org", policy.actions);
     Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
     Assert.assertTrue("Policy is not enabled", policy.isEnabled);
