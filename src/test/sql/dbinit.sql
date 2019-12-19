@@ -1,9 +1,30 @@
 create user sarah password 'connor';
 create table fact (id integer primary key, name varchar unique not null , type varchar);
 ALTER TABLE fact OWNER TO sarah;
-insert into fact VALUES (1, 'cpu','STRING');
-insert into fact VALUES (2, 'cores','INT');
-insert into fact VALUES (3, 'rhelversion','STRING');
+insert into fact VALUES(10, 'last_boot_time', 'string');
+insert into fact VALUES(11, 'enabled_services', 'list');
+insert into fact VALUES(12, 'number_of_sockets', 'int');
+insert into fact VALUES(13, 'insights_egg_version', 'string');
+insert into fact VALUES(14, 'running_processes', 'list');
+insert into fact VALUES(15, 'yum_repos', 'list');
+insert into fact VALUES(16, 'bios_release_date', 'string');
+insert into fact VALUES(17, 'os_release', 'string');
+insert into fact VALUES(18, 'installed_packages', 'list');
+insert into fact VALUES(19, 'infrastructure_type', 'string');
+insert into fact VALUES(20, 'cores_per_socket', 'int');
+insert into fact VALUES(21, 'bios_version', 'string');
+insert into fact VALUES(22, 'os_kernel_version', 'string');
+insert into fact VALUES(23, 'cpu_flags', 'list');
+insert into fact VALUES(24, 'installed_services', 'list');
+insert into fact VALUES(25, 'network_interfaces', 'list');
+insert into fact VALUES(26, 'bios_vendor', 'string');
+insert into fact VALUES(27, 'number_of_cpus', 'int');
+insert into fact VALUES(28, 'insights_client_version', 'string');
+insert into fact VALUES(29, 'kernel_modules', 'list');
+insert into fact VALUES(30, 'system_memory_bytes', 'int');
+insert into fact VALUES(31, 'arch', 'string');
+insert into fact VALUES(32, 'satellite_managed', 'boolean');
+insert into fact VALUES(33, 'infrastructure_vendor', 'string');
 
 create table policy (id integer,
                      customerid varchar not null,
