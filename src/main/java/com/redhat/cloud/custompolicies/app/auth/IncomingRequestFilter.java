@@ -50,7 +50,7 @@ import javax.ws.rs.ext.Provider;
 public class IncomingRequestFilter implements ContainerRequestFilter {
 
   @Inject
-  CPPrincipalProducer producer;
+  RhIdPrincipalProducer producer;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -66,10 +66,11 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     Optional<XRhIdentity> xrhid = HeaderHelper.getRhIdFromString(xrhid_header);
     if (xrhid.isPresent()) {
       // header was good, so now create the security context
-      SecurityContext sctx = new CPSecurityContext(xrhid.get());
+      XRhIdentity rhIdentity = xrhid.get();
+      SecurityContext sctx = new RhIdSecurityContext(rhIdentity);
       requestContext.setSecurityContext(sctx);
       // And make the principal available for injection
-      producer.setPrincipal(sctx.getUserPrincipal());
+      producer.setPrincipal((RhIdPrincipal) sctx.getUserPrincipal());
     } else {
       // Header was present, but not correct
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());

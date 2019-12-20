@@ -14,32 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.cloud.custompolicies.app.auth;
+package com.redhat.cloud.custompolicies.app;
 
-import java.security.Principal;
-import javax.annotation.Priority;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Produces;
+import javax.persistence.Column;
 
 /**
- * Produce Principals for injection
+ * Stripped down policy object for testing purposes.
  * @author hrupp
  */
-@Priority(1)
-@Alternative
-@RequestScoped
-public class CPPrincipalProducer {
+public class TestPolicy {
 
-private Principal principal;
+  public long id;
+  public String customerid;
 
-  public void setPrincipal(Principal principal) {
-    this.principal = principal;
-  }
+  public String name;
+  public String description;
+  @Column(name = "is_enabled")
+  public boolean isEnabled;
 
-  @RequestScoped
-  @Produces
-  Principal currentPrincipal() {
-    return this.principal;
-  }
+  public String conditions;
+  public String actions;
+
 }

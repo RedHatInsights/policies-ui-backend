@@ -24,17 +24,17 @@ import javax.ws.rs.core.SecurityContext;
  * from the parsed x-rh-identity header.
  * @author hrupp
  */
-public class CPSecurityContext implements SecurityContext {
+public class RhIdSecurityContext implements SecurityContext {
 
   private XRhIdentity rhIdentity;
 
-  public CPSecurityContext(XRhIdentity rhIdentity) {
+  public RhIdSecurityContext(XRhIdentity rhIdentity) {
     this.rhIdentity = rhIdentity;
   }
 
   @Override
   public Principal getUserPrincipal() {
-    return new CPPrincipal(rhIdentity.getUsername());
+    return new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
   }
 
   @Override

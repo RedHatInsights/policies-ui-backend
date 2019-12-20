@@ -18,6 +18,8 @@ package com.redhat.cloud.custompolicies.app.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
@@ -28,8 +30,6 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 public class Policy extends PanacheEntity {
-  @NotNull
-  @NotEmpty
   public String customerid;
 
   @NotNull
@@ -43,6 +43,14 @@ public class Policy extends PanacheEntity {
   @NotNull
   public String conditions;
   public String actions;
+
+  // De-serialise the array form of actions coming from the UI
+  // this needs more work with some more typesafe translations
+  // or alternatively storing of actions as json blob
+  // See CPOL-33
+  public void setActions(List<Map<String, String>> actionList) {
+    actions = actionList.stream().map(m -> m.get("type")).collect(Collectors.joining(", "));
+  }
 
   public static List<Policy> listPoliciesForCustomer(String customer) {
     return find("customerid", customer).list();

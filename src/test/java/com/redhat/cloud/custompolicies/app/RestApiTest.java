@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 
 import static io.restassured.RestAssured.given;
 
-import com.redhat.cloud.custompolicies.app.model.Policy;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -87,7 +86,7 @@ class RestApiTest {
   }
 
   @Test
-  void testNoAuth() {
+  void testFactsNoAuth() {
     given()
         .when().get(API_BASE + "/facts")
         .then()
@@ -117,7 +116,7 @@ class RestApiTest {
   void testGetPolicies() {
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1")
+        .when().get(API_BASE + "/policies/")
         .then()
         .statusCode(200)
         .body(containsString("2nd policy"));
@@ -126,10 +125,9 @@ class RestApiTest {
   @Test
   void testGetPoliciesForUnknownAccount() {
     given()
-        .header(authHeader)
-        .when().get(API_BASE + "/policies/3")
+        .when().get(API_BASE + "/policies/")
         .then()
-        .statusCode(404);
+        .statusCode(401);
   }
 
   @Test
@@ -137,13 +135,13 @@ class RestApiTest {
     JsonPath jsonPath =
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1/policy/1")
+        .when().get(API_BASE + "/policies/1")
         .then()
         .statusCode(200)
         .body(containsString("1st policy"))
         .extract().jsonPath();
 
-    Policy policy = jsonPath.getObject("",Policy.class);
+    TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
     Assert.assertEquals("Action does not match", "EMAIL roadrunner@acme.org", policy.actions);
     Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
     Assert.assertTrue("Policy is not enabled", policy.isEnabled);
@@ -153,7 +151,7 @@ class RestApiTest {
   void testGetOneBadPolicy() {
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1/policy/15")
+        .when().get(API_BASE + "/policies/15")
         .then()
         .statusCode(404);
   }
@@ -161,7 +159,6 @@ class RestApiTest {
   @Test
   void testOpenApiEndpoint() {
     given()
-        .header(authHeader)
         .header("Accept",ContentType.JSON)
         .when()
         .get(API_BASE + "/openapi.json")
