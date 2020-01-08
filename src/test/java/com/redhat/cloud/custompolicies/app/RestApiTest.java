@@ -109,7 +109,7 @@ class RestApiTest {
         .when().get(API_BASE + "/facts")
         .then()
         .statusCode(200)
-        .body(containsString("rhelversion"));
+        .body(containsString("os_release"));
   }
 
   @Test
