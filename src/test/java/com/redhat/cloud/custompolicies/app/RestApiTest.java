@@ -23,6 +23,7 @@ import static io.restassured.RestAssured.given;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
+import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import java.sql.SQLException;
 import liquibase.Contexts;
@@ -152,6 +153,50 @@ class RestApiTest {
     given()
         .header(authHeader)
         .when().get(API_BASE + "/policies/15")
+        .then()
+        .statusCode(404);
+  }
+
+  // @Test  TODO we need a mock engine to 'verify' the policy before storing it.
+  void storeNewPolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+
+    tp.conditions = "\"cores\" == 2";
+    tp.name = "test1";
+
+    Headers headers =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().headers()
+        ;
+
+    assert headers.hasHeaderWithName("Location");
+    // TODO extract id and then check in subsequent call
+    // that the policy is stored
+
+  }
+
+  @Test
+  void deletePolicy() {
+
+    given()
+        .header(authHeader)
+      .when().delete(API_BASE + "/policies/3")
+        .then()
+        .statusCode(200)
+        ;
+
+    // Now check that it is gone
+    given()
+        .header(authHeader)
+      .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
   }

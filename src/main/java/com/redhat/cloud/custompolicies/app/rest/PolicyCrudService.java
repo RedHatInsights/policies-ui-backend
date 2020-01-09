@@ -157,13 +157,13 @@ public class PolicyCrudService {
 
   @Operation(summary = "Delete a single policy for a customer by its id")
   @DELETE
-  @Path("/{customer}/policy/{id}")
+  @Path("/{id}")
   @APIResponse(responseCode = "200", description = "Policy deleted")
   @APIResponse(responseCode = "400", description = "Deletion failed")
   @Transactional
-  public Response deletePolicy(@PathParam("customer") String customerId, @PathParam("id") Long policyId) {
+  public Response deletePolicy(@PathParam("id") Long policyId) {
 
-    Policy policy = Policy.findById(customerId, policyId);
+    Policy policy = Policy.findById(user.getAccount(), policyId);
 
     ResponseBuilder builder ;
     if (policy==null) {
