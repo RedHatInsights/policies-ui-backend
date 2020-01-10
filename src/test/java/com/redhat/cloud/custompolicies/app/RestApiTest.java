@@ -17,6 +17,8 @@
 package com.redhat.cloud.custompolicies.app;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import static io.restassured.RestAssured.given;
 
@@ -38,7 +40,9 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockserver.client.MockServerClient;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -52,10 +56,45 @@ class RestApiTest {
   private static PostgreSQLContainer postgreSQLContainer =
       new PostgreSQLContainer("postgres");
 
+  @ClassRule
+  public static MockServerContainer mockServer = new MockServerContainer();
+
+
   private static Header authHeader;
 
   @BeforeAll
-  static void configurePostgres() throws SQLException, LiquibaseException {
+  static void configureMockEnvironment() throws SQLException, LiquibaseException {
+    setupPostgres();
+    setupRhId();
+    setupMockEngine();
+
+  }
+
+  private static void setupMockEngine() {
+    // set up mock engine
+    mockServer.start();
+    System.err.println("Mock engine at http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
+    new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort())
+        .when(request()
+            .withPath("/api/v1/verifyPolicy")
+        )
+        .respond(response()
+            .withStatusCode(201)
+            .withHeader("Content-Type","application/json")
+            .withBody("{ \"msg\" : \"ok\" }")
+        );
+
+    System.setProperty("engine/mp-rest/url",
+                       "http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
+  }
+
+  private static void setupRhId() {
+    // provide rh-id
+    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
+    authHeader = new Header("x-rh-identity", rhid);
+  }
+
+  private static void setupPostgres() throws SQLException, LiquibaseException {
     postgreSQLContainer.start();
     // Now that postgres is started, we need to get its URL and tell Quarkus
     System.err.println("JDBC URL :" + postgreSQLContainer.getJdbcUrl());
@@ -72,13 +111,9 @@ class RestApiTest {
 
     DatabaseConnection dbconn = new JdbcConnection(ds.getConnection());
     ResourceAccessor ra = new FileSystemResourceAccessor("src/test/sql");
-    Liquibase liquibase = new Liquibase("dbinit.sql",ra, dbconn);
+    Liquibase liquibase = new Liquibase("dbinit.sql", ra, dbconn);
     liquibase.dropAll();
     liquibase.update(new Contexts());
-
-    // provide rh-id
-    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
-    authHeader = new Header("x-rh-identity",rhid);
   }
 
   @AfterAll
@@ -157,11 +192,10 @@ class RestApiTest {
         .statusCode(404);
   }
 
-  // @Test  TODO we need a mock engine to 'verify' the policy before storing it.
+  @Test
   void storeNewPolicy() {
     TestPolicy tp = new TestPolicy();
     tp.actions = "EMAIL roadrunner@acme.org";
-
     tp.conditions = "\"cores\" == 2";
     tp.name = "test1";
 
