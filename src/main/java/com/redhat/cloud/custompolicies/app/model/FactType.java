@@ -23,6 +23,7 @@ public enum FactType {
 
   STRING("STRING"),
   BOOLEAN("BOOLEAN"),
+  LIST("LIST"),
   INT("INT");
 
   String name;

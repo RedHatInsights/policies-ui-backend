@@ -44,13 +44,6 @@ public class Policy extends PanacheEntity {
   public String conditions;
   public String actions;
 
-  // De-serialise the array form of actions coming from the UI
-  // this needs more work with some more typesafe translations
-  // or alternatively storing of actions as json blob
-  // See CPOL-33
-  public void setActions(List<Map<String, String>> actionList) {
-    actions = actionList.stream().map(m -> m.get("type")).collect(Collectors.joining(", "));
-  }
 
   public static List<Policy> listPoliciesForCustomer(String customer) {
     return find("customerid", customer).list();
@@ -60,11 +53,23 @@ public class Policy extends PanacheEntity {
     return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
   }
 
+  public static Policy findByName(String customer, String name) {
+    return find("customerid = ?1 and name = ?2", customer, name).firstResult();
+  }
+
   public Long store(String customer, Policy policy) {
     if (!customer.equals(policy.customerid)) {
       throw new IllegalArgumentException("Store: customer id do not match");
     }
     policy.persistAndFlush();
     return id;
+  }
+
+  public void delete(Policy policy) {
+    if (policy==null || !policy.isPersistent()) {
+      throw new IllegalStateException("Policy was not persisted");
+    }
+    policy.delete();
+    policy.flush();
   }
 }

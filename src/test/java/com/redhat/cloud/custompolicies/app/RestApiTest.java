@@ -17,12 +17,15 @@
 package com.redhat.cloud.custompolicies.app;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import static io.restassured.RestAssured.given;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
+import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import java.sql.SQLException;
 import liquibase.Contexts;
@@ -37,7 +40,9 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockserver.client.MockServerClient;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -51,10 +56,45 @@ class RestApiTest {
   private static PostgreSQLContainer postgreSQLContainer =
       new PostgreSQLContainer("postgres");
 
+  @ClassRule
+  public static MockServerContainer mockServer = new MockServerContainer();
+
+
   private static Header authHeader;
 
   @BeforeAll
-  static void configurePostgres() throws SQLException, LiquibaseException {
+  static void configureMockEnvironment() throws SQLException, LiquibaseException {
+    setupPostgres();
+    setupRhId();
+    setupMockEngine();
+
+  }
+
+  private static void setupMockEngine() {
+    // set up mock engine
+    mockServer.start();
+    System.err.println("Mock engine at http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
+    new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort())
+        .when(request()
+            .withPath("/api/v1/verifyPolicy")
+        )
+        .respond(response()
+            .withStatusCode(201)
+            .withHeader("Content-Type","application/json")
+            .withBody("{ \"msg\" : \"ok\" }")
+        );
+
+    System.setProperty("engine/mp-rest/url",
+                       "http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
+  }
+
+  private static void setupRhId() {
+    // provide rh-id
+    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
+    authHeader = new Header("x-rh-identity", rhid);
+  }
+
+  private static void setupPostgres() throws SQLException, LiquibaseException {
     postgreSQLContainer.start();
     // Now that postgres is started, we need to get its URL and tell Quarkus
     System.err.println("JDBC URL :" + postgreSQLContainer.getJdbcUrl());
@@ -71,13 +111,9 @@ class RestApiTest {
 
     DatabaseConnection dbconn = new JdbcConnection(ds.getConnection());
     ResourceAccessor ra = new FileSystemResourceAccessor("src/test/sql");
-    Liquibase liquibase = new Liquibase("dbinit.sql",ra, dbconn);
+    Liquibase liquibase = new Liquibase("dbinit.sql", ra, dbconn);
     liquibase.dropAll();
     liquibase.update(new Contexts());
-
-    // provide rh-id
-    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
-    authHeader = new Header("x-rh-identity",rhid);
   }
 
   @AfterAll
@@ -109,7 +145,7 @@ class RestApiTest {
         .when().get(API_BASE + "/facts")
         .then()
         .statusCode(200)
-        .body(containsString("rhelversion"));
+        .body(containsString("os_release"));
   }
 
   @Test
@@ -152,6 +188,49 @@ class RestApiTest {
     given()
         .header(authHeader)
         .when().get(API_BASE + "/policies/15")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  void storeNewPolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "\"cores\" == 2";
+    tp.name = "test1";
+
+    Headers headers =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().headers()
+        ;
+
+    assert headers.hasHeaderWithName("Location");
+    // TODO extract id and then check in subsequent call
+    // that the policy is stored
+
+  }
+
+  @Test
+  void deletePolicy() {
+
+    given()
+        .header(authHeader)
+      .when().delete(API_BASE + "/policies/3")
+        .then()
+        .statusCode(200)
+        ;
+
+    // Now check that it is gone
+    given()
+        .header(authHeader)
+      .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
   }
