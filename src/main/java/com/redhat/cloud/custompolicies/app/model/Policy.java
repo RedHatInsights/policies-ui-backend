@@ -16,10 +16,11 @@
  */
 package com.redhat.cloud.custompolicies.app.model;
 
+import com.redhat.cloud.custompolicies.app.model.pager.Page;
+import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
@@ -45,8 +46,10 @@ public class Policy extends PanacheEntity {
   public String actions;
 
 
-  public static List<Policy> listPoliciesForCustomer(String customer) {
-    return find("customerid", customer).list();
+  public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
+    PanacheQuery<Policy> query = find("customerid", customer)
+            .page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
+    return new Page<>(query.list(), pager, query.count());
   }
 
   public static Policy findById(String customer, Long theId) {

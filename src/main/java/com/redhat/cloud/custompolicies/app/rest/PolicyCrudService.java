@@ -21,7 +21,6 @@ import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.URI;
-import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -41,6 +40,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import com.redhat.cloud.custompolicies.app.model.pager.Page;
+import com.redhat.cloud.custompolicies.app.model.pager.Pager;
+import com.redhat.cloud.custompolicies.app.rest.utils.PagingUtils;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -79,18 +82,10 @@ public class PolicyCrudService {
                  @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)))
   public Response getPoliciesForCustomer() {
 
-    ResponseBuilder builder ;
-    List<Policy> policies = Policy.listPoliciesForCustomer(user.getAccount());
+    Pager pager = PagingUtils.extractPager(uriInfo);
+    Page<Policy> page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
 
-    if (policies.isEmpty()) {
-      builder = Response.status(Response.Status.NOT_FOUND);
-    } else {
-      builder = Response.ok().entity(policies);
-      EntityTag etag = new EntityTag(String.valueOf(policies.hashCode()));
-      builder.header("ETag",etag);
-    }
-
-    return builder.build();
+    return PagingUtils.responseBuilder(page).build();
   }
 
   @Operation(summary = "Persist a passed policy for the given account")
