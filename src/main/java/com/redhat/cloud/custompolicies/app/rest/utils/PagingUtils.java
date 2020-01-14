@@ -36,16 +36,33 @@ public class PagingUtils {
         Pager.PagerBuilder pageBuilder = Pager.builder();
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
-        try {
-            pageBuilder.page(Integer.parseInt(queryParams.getFirst("page")));
-        } catch (NumberFormatException nfe) {
-            // Ignore the exception, the builder will use the default value
+        final String QUERY_PAGE = "page";
+        final String QUERY_PAGE_SIZE = "pageSize";
+
+        String page = queryParams.getFirst(QUERY_PAGE);
+        if (page != null) {
+            try {
+                pageBuilder.page(Integer.parseInt(page));
+            } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException(String.format(
+                        "%s expects an int but found [%s]",
+                        QUERY_PAGE,
+                        page
+                ), nfe);
+            }
         }
 
-        try {
-            pageBuilder.itemsPerPage(Integer.parseInt(queryParams.getFirst("pageSize")));
-        } catch (NumberFormatException nfe) {
-            // Ignore the exception, the builder will use the default value
+        String itemsPerPage = queryParams.getFirst(QUERY_PAGE_SIZE);
+        if (itemsPerPage != null) {
+            try {
+                pageBuilder.itemsPerPage(Integer.parseInt(itemsPerPage));
+            } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException(String.format(
+                        "%s expects an int but found [%s]",
+                        QUERY_PAGE_SIZE,
+                        itemsPerPage
+                ), nfe);
+            }
         }
 
         return pageBuilder.build();

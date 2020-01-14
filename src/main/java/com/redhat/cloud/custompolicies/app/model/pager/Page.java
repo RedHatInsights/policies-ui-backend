@@ -16,8 +16,6 @@
  */
 package com.redhat.cloud.custompolicies.app.model.pager;
 
-import lombok.Getter;
-
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,9 +25,7 @@ import java.util.ListIterator;
 public class Page<T> implements List<T> {
 
     private List<T> wrapped;
-    @Getter
     private Pager pager;
-    @Getter
     private long totalCount;
 
     public Page(List<T> wrapped, Pager pager, long totalCount) {
@@ -38,6 +34,13 @@ public class Page<T> implements List<T> {
         this.totalCount = totalCount;
     }
 
+    public Pager getPager() {
+        return pager;
+    }
+
+    public long getTotalCount() {
+        return totalCount;
+    }
 
     @Override
     public int size() {

@@ -16,22 +16,52 @@
  */
 package com.redhat.cloud.custompolicies.app.model.pager;
 
-import lombok.Builder;
-import lombok.Getter;
-
-@Builder
 public class Pager {
 
-    @Getter
-    @Builder.Default
-    private int page = 0;
-    @Getter
-    @Builder.Default
-    private int itemsPerPage = 10;
+    private int page;
+    private int itemsPerPage;
 
     public Pager(int page, int itemsPerPage) {
         this.page = page;
         this.itemsPerPage = itemsPerPage;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public int getItemsPerPage() {
+        return itemsPerPage;
+    }
+
+    public static PagerBuilder builder() {
+        return new PagerBuilder();
+    }
+
+    public static class PagerBuilder {
+
+        private int page;
+        private int itemsPerPage;
+
+        private PagerBuilder() {
+            this.page = 0;
+            this.itemsPerPage = 10;
+        }
+
+        public PagerBuilder page(int page) {
+            this.page = page;
+            return this;
+        }
+
+        public PagerBuilder itemsPerPage(int itemsPerPage) {
+            this.itemsPerPage = itemsPerPage;
+            return this;
+        }
+
+        public Pager build() {
+            return new Pager(this.page, this.itemsPerPage);
+        }
+
     }
 
 }
