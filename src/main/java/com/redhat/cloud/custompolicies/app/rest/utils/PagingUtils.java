@@ -72,7 +72,7 @@ public class PagingUtils {
         ResponseBuilder builder;
 
         if (page.isEmpty()) {
-            builder = Response.status(Response.Status.NO_CONTENT);
+            builder = Response.status(Response.Status.NOT_FOUND);
         } else {
             builder = Response.ok(page);
             EntityTag etag = new EntityTag(String.valueOf(page.hashCode()));
