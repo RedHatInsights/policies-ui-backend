@@ -50,9 +50,13 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
 
   private Msg getBody(Response response) {
     ByteArrayInputStream is = (ByteArrayInputStream) response.getEntity();
-    byte[] bytes = new byte[is.available()];
-    is.read(bytes,0,is.available());
-    String json = new String(bytes);
-    return JsonbBuilder.create().fromJson(json, Msg.class);
+    if (is != null ) {
+      byte[] bytes = new byte[is.available()];
+      is.read(bytes, 0, is.available());
+      String json = new String(bytes);
+      return JsonbBuilder.create().fromJson(json, Msg.class);
+    } else {
+      return new Msg("-- no body received, status code is " + response.getStatus());
+    }
   }
 }
