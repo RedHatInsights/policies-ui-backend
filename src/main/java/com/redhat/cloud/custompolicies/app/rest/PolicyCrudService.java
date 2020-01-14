@@ -46,9 +46,13 @@ import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import com.redhat.cloud.custompolicies.app.rest.utils.PagingUtils;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.headers.Header;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -77,9 +81,22 @@ public class PolicyCrudService {
   @Operation(summary = "Return all policies for a given account")
   @GET
   @Path("/")
+  @Parameters({
+          @Parameter(
+                  name = "page",
+                  in = ParameterIn.QUERY,
+                  description = "Page number, starts 0, if not specified uses 0."
+          ),
+          @Parameter(
+                  name = "pageSize",
+                  in = ParameterIn.QUERY,
+                  description = "Number of items per page, if not specified uses 10."
+          )
+  })
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "200", description = "Policies found", content =
-                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)))
+                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
+                 headers = @Header(name = "TotalCount", description = "Total number of items found"))
   public Response getPoliciesForCustomer() {
 
     Pager pager = PagingUtils.extractPager(uriInfo);
