@@ -67,7 +67,9 @@ class RestApiTest {
     System.err.println("Mock engine at http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
     new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort())
         .when(request()
-            .withPath("/api/v1/verifyPolicy")
+            .withPath("/hawkular/alerts/triggers/trigger")
+            .withQueryStringParameter("dry","true")
+            .withHeader("Hawkular-Tenant","1234")
         )
         .respond(response()
             .withStatusCode(201)
