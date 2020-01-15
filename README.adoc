@@ -6,13 +6,12 @@ For some functionality it relies on the Engine part.
 
 == Get started
 
-To get started (locally) you can build a local docker image with Postgres, that has example tables set up and then
-run this via Docker-Compose, which starts Postgres and a local Kafka instance for use with the Engine.
+To get started (locally) you can
+run Docker-Compose, which starts Postgres and a local Kafka instance for use with the Engine.
 
 [source,shell]
 ----
 cd helpers
-sh build-local-pg.sh
 docker-compose up
 ----
 

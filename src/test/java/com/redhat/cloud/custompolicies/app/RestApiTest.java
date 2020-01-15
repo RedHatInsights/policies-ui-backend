@@ -27,21 +27,12 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
-import java.sql.SQLException;
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -63,7 +54,7 @@ class RestApiTest {
   private static Header authHeader;
 
   @BeforeAll
-  static void configureMockEnvironment() throws SQLException, LiquibaseException {
+  static void configureMockEnvironment()  {
     setupPostgres();
     setupRhId();
     setupMockEngine();
@@ -94,7 +85,7 @@ class RestApiTest {
     authHeader = new Header("x-rh-identity", rhid);
   }
 
-  private static void setupPostgres() throws SQLException, LiquibaseException {
+  private static void setupPostgres() {
     postgreSQLContainer.start();
     // Now that postgres is started, we need to get its URL and tell Quarkus
     System.err.println("JDBC URL :" + postgreSQLContainer.getJdbcUrl());
@@ -102,18 +93,6 @@ class RestApiTest {
     System.setProperty("quarkus.datasource.username","test");
     System.setProperty("quarkus.datasource.password","test");
 
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-
-    // Datasource initialization
-    ds.setUrl(postgreSQLContainer.getJdbcUrl());
-    ds.setUser(postgreSQLContainer.getUsername());
-    ds.setPassword(postgreSQLContainer.getPassword());
-
-    DatabaseConnection dbconn = new JdbcConnection(ds.getConnection());
-    ResourceAccessor ra = new FileSystemResourceAccessor("src/test/sql");
-    Liquibase liquibase = new Liquibase("dbinit.sql", ra, dbconn);
-    liquibase.dropAll();
-    liquibase.update(new Contexts());
   }
 
   @AfterAll
