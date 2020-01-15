@@ -25,36 +25,6 @@ import java.util.List;
  */
 public class FullTrigger {
 
-  /*
-  {
-    "trigger": {
-      "tenantId": "tutorial",
-      "id": "detect-floating",
-      "name": "Node with no infra",
-      "description": "These hosts are not allocated to any known infrastructure provider",
-      "enabled": true,
-      "eventType": "ALERT",
-      "firingMatch": "ALL",
-      "tags": {
-        "demo": "new"
-      },
-      "actions": [
-        {
-          "actionPlugin": "webhook",
-          "actionId": "notify-slack"
-        }
-      ]
-    },
-    "conditions": [
-      {
-        "triggerMode": "FIRING",
-        "type": "EVENT",
-        "dataId": "insight_report",
-        "expr": "infrastructure_vendor = 'string' AND arch = 'string'"
-      }
-    ]
-  }
-   */
 
   public Trigger trigger;
   public List<Condition> conditions;
@@ -62,7 +32,7 @@ public class FullTrigger {
 
   public FullTrigger() {
     trigger = new Trigger();
-    conditions = new ArrayList<Condition>();
+    conditions = new ArrayList<>();
   }
 
   public FullTrigger(Policy policy) {
@@ -70,9 +40,9 @@ public class FullTrigger {
     trigger.name = policy.name;
     trigger.description = policy.description;
     trigger.enabled = policy.isEnabled;
-    conditions = new ArrayList<Condition>(1);
+    conditions = new ArrayList<>(1);
     Condition cond = new Condition();
-    cond.expr = policy.conditions;
+    cond.expression = policy.conditions;
     conditions.add(cond);
   }
 
@@ -89,6 +59,6 @@ public class FullTrigger {
     public String triggerMode = "FIRING";
     public String type = "EVENT";
     public String dataId = "insights_report";
-    public String expr;
+    public String expression;
   }
 }
