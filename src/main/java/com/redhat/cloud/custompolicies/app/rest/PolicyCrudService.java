@@ -21,7 +21,6 @@ import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.URI;
-import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -41,11 +40,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import com.redhat.cloud.custompolicies.app.model.pager.Page;
+import com.redhat.cloud.custompolicies.app.model.pager.Pager;
+import com.redhat.cloud.custompolicies.app.rest.utils.PagingUtils;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.headers.Header;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -74,23 +81,28 @@ public class PolicyCrudService {
   @Operation(summary = "Return all policies for a given account")
   @GET
   @Path("/")
+  @Parameters({
+          @Parameter(
+                  name = "page",
+                  in = ParameterIn.QUERY,
+                  description = "Page number, starts 0, if not specified uses 0."
+          ),
+          @Parameter(
+                  name = "pageSize",
+                  in = ParameterIn.QUERY,
+                  description = "Number of items per page, if not specified uses 10."
+          )
+  })
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "200", description = "Policies found", content =
-                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)))
+                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
+                 headers = @Header(name = "TotalCount", description = "Total number of items found"))
   public Response getPoliciesForCustomer() {
 
-    ResponseBuilder builder ;
-    List<Policy> policies = Policy.listPoliciesForCustomer(user.getAccount());
+    Pager pager = PagingUtils.extractPager(uriInfo);
+    Page<Policy> page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
 
-    if (policies.isEmpty()) {
-      builder = Response.status(Response.Status.NOT_FOUND);
-    } else {
-      builder = Response.ok().entity(policies);
-      EntityTag etag = new EntityTag(String.valueOf(policies.hashCode()));
-      builder.header("ETag",etag);
-    }
-
-    return builder.build();
+    return PagingUtils.responseBuilder(page).build();
   }
 
   @Operation(summary = "Persist a passed policy for the given account")
