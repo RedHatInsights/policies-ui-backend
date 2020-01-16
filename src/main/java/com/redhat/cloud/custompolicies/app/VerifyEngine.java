@@ -16,19 +16,22 @@
  */
 package com.redhat.cloud.custompolicies.app;
 
+import com.redhat.cloud.custompolicies.app.model.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
-import com.redhat.cloud.custompolicies.app.model.Policy;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
+ * Interface to the backend engine
  * @author hrupp
  */
-@Path("/api/v1/verifyPolicy")
+@Path("/hawkular/alerts/triggers/trigger")
 @RegisterRestClient(configKey = "engine")
 @RegisterProvider(value = EngineResponseExceptionMapper.class,
                   priority = 50)
@@ -37,5 +40,8 @@ public interface VerifyEngine {
   @POST
   @Consumes("application/json")
   @Produces("application/json")
-  Msg verify(Policy policy);
+  Msg verify(FullTrigger trigger,
+             @QueryParam("dry") boolean isDryRun,
+             @HeaderParam("Hawkular-Tenant" ) String customerId
+  );
 }

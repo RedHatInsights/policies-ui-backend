@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app.rest;
 
 import com.redhat.cloud.custompolicies.app.VerifyEngine;
 import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.custompolicies.app.model.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.URI;
@@ -126,7 +127,8 @@ public class PolicyCrudService {
 
     Msg msg ;
     try {
-      engine.verify(policy);
+      FullTrigger trigger = new FullTrigger(policy);
+      engine.verify(trigger, true, user.getAccount());
     }
     catch (Exception e) {
       msg = new Msg(e.getMessage());

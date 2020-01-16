@@ -18,6 +18,8 @@ package com.redhat.cloud.custompolicies.app;
 
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Priority;
 import javax.json.bind.JsonbBuilder;
 import javax.validation.ValidationException;
@@ -40,7 +42,7 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
 
     RuntimeException re ;
     switch (status) {
-      case 412: re = new ValidationException("Validation failed " + msg.msg);
+      case 400: re = new ValidationException("Validation failed: " + msg.msg);
       break;
       default:
         re = new WebApplicationException(status);
@@ -50,9 +52,13 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
 
   private Msg getBody(Response response) {
     ByteArrayInputStream is = (ByteArrayInputStream) response.getEntity();
-    byte[] bytes = new byte[is.available()];
-    is.read(bytes,0,is.available());
-    String json = new String(bytes);
-    return JsonbBuilder.create().fromJson(json, Msg.class);
+    if (is != null ) {
+      byte[] bytes = new byte[is.available()];
+      is.read(bytes, 0, is.available());
+      Map<String,String> errorMap  = JsonbBuilder.create().fromJson(new String(bytes), HashMap.class);
+      return new Msg(errorMap.get("errorMsg"));
+    } else {
+      return new Msg("-- no body received, status code is " + response.getStatus());
+    }
   }
 }
