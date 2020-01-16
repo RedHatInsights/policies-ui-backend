@@ -49,12 +49,14 @@ curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/ap
 By default this uses paging with a page-size of 10.
 You can select different pages and page sizes with the following query parameters
 
+|===
+|Parameter|Default|Comment
 
-|Parameter|Default|
-|---------|-------|
-|page     | 0     |
+|page     | 0     | Page numbers start at 0
 |pageSize | 10    |
+|===
 
+.Example:
 [source,shell]
 ----
 curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/policies?page=5
