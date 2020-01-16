@@ -47,7 +47,7 @@ public class Policy extends PanacheEntity {
 
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
-    PanacheQuery<Policy> query = find("customerid", customer)
+    PanacheQuery<Policy> query = find("customerid", pager.getSort(), customer)
             .page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
     return new Page<>(query.list(), pager, query.count());
   }

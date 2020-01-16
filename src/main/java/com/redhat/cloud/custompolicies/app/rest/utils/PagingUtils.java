@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app.rest.utils;
 
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
+import io.quarkus.panache.common.Sort;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.EntityTag;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 public class PagingUtils {
 
@@ -38,6 +40,8 @@ public class PagingUtils {
 
         final String QUERY_PAGE = "page";
         final String QUERY_PAGE_SIZE = "pageSize";
+        final String QUERY_COLUMN = "sortColumn";
+        final String QUERY_DIRECTION = "sortDirection";
 
         String page = queryParams.getFirst(QUERY_PAGE);
         if (page != null) {
@@ -62,6 +66,28 @@ public class PagingUtils {
                         QUERY_PAGE_SIZE,
                         itemsPerPage
                 ), nfe);
+            }
+        }
+
+        List<String> columns = queryParams.get(QUERY_COLUMN);
+        List<String> directions = queryParams.get(QUERY_DIRECTION);
+        if (columns != null) {
+            for (int i = 0; i < columns.size(); ++i) {
+                String column = columns.get(i);
+                Sort.Direction direction = Sort.Direction.Ascending;
+                if (directions != null && i < directions.size()) {
+                    switch(directions.get(i).toLowerCase()) {
+                        case "asc":
+                            direction = Sort.Direction.Ascending;
+                            break;
+                        case "desc":
+                            direction = Sort.Direction.Descending;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unexpected sort order found: [" + columns.get(i) + "]");
+                    }
+                }
+                pageBuilder.addSort(column, direction);
             }
         }
 
