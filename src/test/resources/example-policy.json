@@ -1,0 +1,8 @@
+{ "id":0,
+  "customerid":"1",
+  "description":"Another test",
+  "is_enabled":true,
+  "name":"3rd policy2",
+  "conditions":"os_version == 7.5",
+  "actions": "EMAIL roadrunner@acme.org"
+}

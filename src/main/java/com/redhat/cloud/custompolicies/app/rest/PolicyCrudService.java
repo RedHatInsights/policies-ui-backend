@@ -81,6 +81,7 @@ public class PolicyCrudService {
   @Context
   UriInfo uriInfo;
 
+  @SuppressWarnings("CdiInjectionPointsInspection")
   @Inject
   RhIdPrincipal user;
 
@@ -137,7 +138,9 @@ public class PolicyCrudService {
     return PagingUtils.responseBuilder(page).build();
   }
 
-  @Operation(summary = "Persist a passed policy for the given account")
+  @Operation(summary = "Validate (and possibly persist) a passed policy for the given account")
+  @Parameter(name = "alsoStore",
+             description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
   @APIResponses({
       @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
       @APIResponse(responseCode = "400", description = "Policy validation failed"),
