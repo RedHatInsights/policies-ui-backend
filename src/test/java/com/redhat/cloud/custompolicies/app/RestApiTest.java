@@ -193,7 +193,7 @@ class RestApiTest {
         ;
 
     assert headers.hasHeaderWithName("Location");
-    // TODO extract id and then check in subsequent call
+    // Extract location and then check in subsequent call
     // that the policy is stored
     Header locationHeader = headers.get("Location");
     String location = locationHeader.getValue();
