@@ -20,6 +20,7 @@ import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Sort;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,6 +48,11 @@ public class Policy extends PanacheEntity {
 
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
+
+    for (Sort.Column column : pager.getSort().getColumns()) {
+      SortableColumn.fromName(column.getName());
+    }
+
     PanacheQuery<Policy> query = find("customerid", pager.getSort(), customer)
             .page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
     return new Page<>(query.list(), pager, query.count());
@@ -75,4 +81,32 @@ public class Policy extends PanacheEntity {
     policy.delete();
     policy.flush();
   }
+
+
+  enum SortableColumn {
+    NAME("name"),
+    DESCRIPTION("description"),
+    IS_ENABLED("is_enabled");
+
+    private final String name;
+
+    SortableColumn(final String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public static SortableColumn fromName(String columnName) {
+      for (SortableColumn column : SortableColumn.values()) {
+        if (column.getName().equals(columnName)) {
+          return column;
+        }
+      }
+      throw new IllegalArgumentException("Unknown Policy.SortableColumn requested: [" + columnName + "]");
+    }
+
+  }
+
 }

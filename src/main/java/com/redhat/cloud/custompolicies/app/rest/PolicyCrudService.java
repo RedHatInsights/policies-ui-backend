@@ -99,7 +99,13 @@ public class PolicyCrudService {
                   name = "sortColumn",
                   in = ParameterIn.QUERY,
                   description = "Column to sort the results by",
-                  schema = @Schema(type = SchemaType.STRING)
+                  schema = @Schema(
+                          enumeration = {
+                                  "name",
+                                  "description",
+                                  "is_enabled"
+                          }
+                  )
           ),
           @Parameter(
                   name = "sortDirection",
