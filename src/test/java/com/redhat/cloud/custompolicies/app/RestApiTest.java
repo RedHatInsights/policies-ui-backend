@@ -193,9 +193,25 @@ class RestApiTest {
         ;
 
     assert headers.hasHeaderWithName("Location");
-    // TODO extract id and then check in subsequent call
+    // Extract location and then check in subsequent call
     // that the policy is stored
+    Header locationHeader = headers.get("Location");
+    String location = locationHeader.getValue();
+    // location is  a full url to the new resource.
+    System.out.println(location);
 
+    given()
+        .header(authHeader)
+        .when().get(location)
+        .then()
+        .statusCode(200);
+
+    // now delete it again
+    given()
+        .header(authHeader)
+      .when().delete(location)
+        .then()
+        .statusCode(200);
   }
 
   @Test
