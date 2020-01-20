@@ -49,8 +49,10 @@ public class Policy extends PanacheEntity {
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
 
-    for (Sort.Column column : pager.getSort().getColumns()) {
-      SortableColumn.fromName(column.getName());
+    if (pager.getSort() != null) {
+      for (Sort.Column column : pager.getSort().getColumns()) {
+        SortableColumn.fromName(column.getName());
+      }
     }
 
     PanacheQuery<Policy> query = find("customerid", pager.getSort(), customer)
