@@ -65,14 +65,14 @@ class RestApiTest {
     // set up mock engine
     mockServer.start();
     System.err.println("Mock engine at http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
-    new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort())
+    MockServerClient mockServerClient = new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort());
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger")
-            .withQueryStringParameter("dry","true")
             .withHeader("Hawkular-Tenant","1234")
         )
         .respond(response()
-            .withStatusCode(201)
+            .withStatusCode(200)
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
@@ -177,7 +177,7 @@ class RestApiTest {
   void storeNewPolicy() {
     TestPolicy tp = new TestPolicy();
     tp.actions = "EMAIL roadrunner@acme.org";
-    tp.conditions = "\"cores\" == 2";
+    tp.conditions = "cores = 2";
     tp.name = "test1";
 
     Headers headers =

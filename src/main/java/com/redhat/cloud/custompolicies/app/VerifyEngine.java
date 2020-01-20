@@ -37,11 +37,18 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
                   priority = 50)
 public interface VerifyEngine {
 
+  /**
+   * Store and/or verify the FullTrigger, which is a wrapped Policy.
+   * @param trigger Policy wrapped in a data structure, the engine expects
+   * @param isDryRun If true, the engine will only verify the Policy, but not store it
+   * @param customerId Id of the customer this policy belongs to.
+   * @return A message with verification/store results.
+   */
   @POST
   @Consumes("application/json")
   @Produces("application/json")
-  Msg verify(FullTrigger trigger,
-             @QueryParam("dry") boolean isDryRun,
-             @HeaderParam("Hawkular-Tenant" ) String customerId
+  Msg store(FullTrigger trigger,
+            @QueryParam("dry") boolean isDryRun,
+            @HeaderParam("Hawkular-Tenant" ) String customerId
   );
 }

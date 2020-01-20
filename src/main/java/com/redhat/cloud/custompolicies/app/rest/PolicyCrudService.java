@@ -46,6 +46,7 @@ import javax.ws.rs.core.UriInfo;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import com.redhat.cloud.custompolicies.app.rest.utils.PagingUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -69,6 +70,9 @@ import org.hibernate.exception.ConstraintViolationException;
 @Timed
 @RequestScoped
 public class PolicyCrudService {
+
+  @ConfigProperty(name = "engine.skip", defaultValue = "false")
+  boolean skipEngineCall;
 
   @Inject
   @RestClient
@@ -130,17 +134,18 @@ public class PolicyCrudService {
     policy.customerid = user.getAccount();
 
     Msg msg ;
-    try {
-      FullTrigger trigger = new FullTrigger(policy);
-      engine.verify(trigger, true, user.getAccount());
-    }
-    catch (Exception e) {
-      if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
-        msg = new Msg("Connection to backend-engine failed. Please retry later");
-      } else {
-        msg = new Msg(e.getMessage());
-      }
+    if (!skipEngineCall) {
+      try {
+        FullTrigger trigger = new FullTrigger(policy);
+        engine.store(trigger, true, user.getAccount());
+      } catch (Exception e) {
+        if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
+          msg = new Msg("Connection to backend-engine failed. Please retry later");
+        } else {
+          msg = new Msg(e.getMessage());
+        }
       return Response.status(400,e.getMessage()).entity(msg).build();
+      }
     }
 
     if (!alsoStore) {
@@ -159,6 +164,11 @@ public class PolicyCrudService {
     Long id;
     try {
       id = policy.store(user.getAccount(), policy);
+      // We persisted locally, now tell the engine
+      if (!skipEngineCall) {
+        FullTrigger trigger = new FullTrigger(policy);
+        engine.store(trigger, false, user.getAccount());
+      }
     } catch (Throwable t) {
       if (t instanceof PersistenceException &&  t.getCause() instanceof ConstraintViolationException) {
         return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
