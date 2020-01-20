@@ -86,18 +86,21 @@ public class PolicyCrudService {
           @Parameter(
                   name = "page",
                   in = ParameterIn.QUERY,
-                  description = "Page number, starts 0, if not specified uses 0."
+                  description = "Page number, starts 0, if not specified uses 0.",
+                  schema = @Schema(type = SchemaType.INTEGER)
           ),
           @Parameter(
                   name = "pageSize",
                   in = ParameterIn.QUERY,
-                  description = "Number of items per page, if not specified uses 10."
+                  description = "Number of items per page, if not specified uses 10.",
+                  schema = @Schema(type = SchemaType.INTEGER)
           )
   })
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "200", description = "Policies found", content =
                  @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
-                 headers = @Header(name = "TotalCount", description = "Total number of items found"))
+                 headers = @Header(name = "TotalCount", description = "Total number of items found",
+                                   schema = @Schema(type = SchemaType.INTEGER)))
   public Response getPoliciesForCustomer() {
 
     Pager pager = PagingUtils.extractPager(uriInfo);
