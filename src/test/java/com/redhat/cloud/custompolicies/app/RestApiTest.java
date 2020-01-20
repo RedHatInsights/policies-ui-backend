@@ -17,6 +17,7 @@
 package com.redhat.cloud.custompolicies.app;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -138,6 +139,28 @@ class RestApiTest {
         .statusCode(200)
         .body(containsString("2nd policy"));
   }
+
+  @Test
+  void testGetPoliciesSort() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE + "/policies/?sortColumn=description")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body("get(0).description", is("Another test"));
+  }
+
+  @Test
+  void testGetPoliciesInvalidSort() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE + "/policies/?sortColumn=foo")
+            .then()
+            .statusCode(500)
+            .body(containsString("Unknown Policy.SortableColumn requested: [foo]"));
+  }
+
 
   @Test
   void testGetPoliciesForUnknownAccount() {
