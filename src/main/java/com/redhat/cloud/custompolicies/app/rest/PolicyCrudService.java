@@ -21,6 +21,7 @@ import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
+import java.net.ConnectException;
 import java.net.URI;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -134,7 +135,11 @@ public class PolicyCrudService {
       engine.verify(trigger, true, user.getAccount());
     }
     catch (Exception e) {
-      msg = new Msg(e.getMessage());
+      if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
+        msg = new Msg("Connection to backend-engine failed. Please retry later");
+      } else {
+        msg = new Msg(e.getMessage());
+      }
       return Response.status(400,e.getMessage()).entity(msg).build();
     }
 
