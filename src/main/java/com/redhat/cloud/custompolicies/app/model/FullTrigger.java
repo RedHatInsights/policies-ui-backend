@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A trigger in the backend, that we send over
@@ -37,6 +38,7 @@ public class FullTrigger {
 
   public FullTrigger(Policy policy) {
     trigger = new Trigger();
+    trigger.id = generateId();
     trigger.name = policy.name;
     trigger.description = policy.description;
     trigger.enabled = policy.isEnabled;
@@ -46,8 +48,13 @@ public class FullTrigger {
     conditions.add(cond);
   }
 
+  private static String generateId() {
+    return UUID.randomUUID().toString();
+  }
+
 
   public class Trigger {
+    public String id;
     public String name;
     public String description;
     public boolean enabled;
