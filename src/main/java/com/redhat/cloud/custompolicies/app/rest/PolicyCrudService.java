@@ -99,6 +99,29 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Number of items per page, if not specified uses 10.",
                   schema = @Schema(type = SchemaType.INTEGER)
+          ),
+          @Parameter(
+                  name = "sortColumn",
+                  in = ParameterIn.QUERY,
+                  description = "Column to sort the results by",
+                  schema = @Schema(
+                          enumeration = {
+                                  "name",
+                                  "description",
+                                  "is_enabled"
+                          }
+                  )
+          ),
+          @Parameter(
+                  name = "sortDirection",
+                  in = ParameterIn.QUERY,
+                  description = "Sort direction used",
+                  schema = @Schema(
+                          enumeration = {
+                                  "asc",
+                                  "desc"
+                          }
+                  )
           )
   })
   @APIResponse(responseCode = "404", description = "No policies found for customer")

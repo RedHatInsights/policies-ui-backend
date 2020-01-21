@@ -16,14 +16,21 @@
  */
 package com.redhat.cloud.custompolicies.app.model.pager;
 
+import io.quarkus.panache.common.Sort;
+import io.reactivex.annotations.Nullable;
+
+
 public class Pager {
 
-    private int page;
-    private int itemsPerPage;
+    private final int page;
+    private final int itemsPerPage;
+    @Nullable
+    private final Sort sort;
 
-    public Pager(int page, int itemsPerPage) {
+    public Pager(int page, int itemsPerPage, Sort sort) {
         this.page = page;
         this.itemsPerPage = itemsPerPage;
+        this.sort = sort;
     }
 
     public int getPage() {
@@ -34,6 +41,10 @@ public class Pager {
         return itemsPerPage;
     }
 
+    public Sort getSort() {
+        return sort;
+    }
+
     public static PagerBuilder builder() {
         return new PagerBuilder();
     }
@@ -42,10 +53,12 @@ public class Pager {
 
         private int page;
         private int itemsPerPage;
+        private Sort sort;
 
         private PagerBuilder() {
             this.page = 0;
             this.itemsPerPage = 10;
+            this.sort = Sort.by();
         }
 
         public PagerBuilder page(int page) {
@@ -58,8 +71,13 @@ public class Pager {
             return this;
         }
 
+        public PagerBuilder addSort(String column, Sort.Direction direction) {
+            this.sort.and(column, direction);
+            return this;
+        }
+
         public Pager build() {
-            return new Pager(this.page, this.itemsPerPage);
+            return new Pager(this.page, this.itemsPerPage, this.sort.getColumns().size() == 0 ? null : this.sort);
         }
 
     }
