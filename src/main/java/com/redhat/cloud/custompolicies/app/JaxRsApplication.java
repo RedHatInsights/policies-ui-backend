@@ -22,6 +22,7 @@ import io.vertx.ext.web.RoutingContext;
 import javax.enterprise.event.Observes;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * Set the base path for the application
@@ -31,9 +32,12 @@ import javax.ws.rs.core.Application;
 @ApplicationPath("/api/custom-policies/v1.0")
 public class JaxRsApplication extends Application {
 
+  @ConfigProperty(name = "accesslog.filter.health", defaultValue = "true")
+  boolean filterHealth;
+
   // Produce access log
   void observeRouter(@Observes Router router) {
-    Handler<RoutingContext> handler = new JsonAccessLoggerHandler();
+    Handler<RoutingContext> handler = new JsonAccessLoggerHandler(filterHealth);
     router.route().order(-1000).handler(handler);
   }
 }
