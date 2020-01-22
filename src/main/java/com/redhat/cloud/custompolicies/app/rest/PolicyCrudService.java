@@ -108,7 +108,8 @@ public class PolicyCrudService {
                           enumeration = {
                                   "name",
                                   "description",
-                                  "is_enabled"
+                                  "is_enabled",
+                                  "mtime"
                           }
                   )
           ),

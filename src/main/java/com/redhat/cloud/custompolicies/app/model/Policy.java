@@ -22,6 +22,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
@@ -45,6 +46,8 @@ public class Policy extends PanacheEntity {
   @NotNull
   public String conditions;
   public String actions;
+
+  public Timestamp mtime=new Timestamp(System.currentTimeMillis());
 
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
@@ -88,7 +91,8 @@ public class Policy extends PanacheEntity {
   enum SortableColumn {
     NAME("name"),
     DESCRIPTION("description"),
-    IS_ENABLED("is_enabled");
+    IS_ENABLED("is_enabled"),
+    MTIME("mtime");
 
     private final String name;
 

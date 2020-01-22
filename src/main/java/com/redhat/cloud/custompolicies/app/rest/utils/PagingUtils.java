@@ -90,6 +90,10 @@ public class PagingUtils {
                 pageBuilder.addSort(column, direction);
             }
         }
+        else {
+            // default sort is by name
+            pageBuilder.addSort("name",Sort.Direction.Ascending);
+        }
 
         return pageBuilder.build();
     }
