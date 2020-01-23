@@ -19,9 +19,12 @@ package com.redhat.cloud.custompolicies.app;
 import com.redhat.cloud.custompolicies.app.model.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -31,7 +34,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  * Interface to the backend engine
  * @author hrupp
  */
-@Path("/hawkular/alerts/triggers/trigger")
+@Path("/hawkular/alerts/triggers")
 @RegisterRestClient(configKey = "engine")
 @RegisterProvider(value = EngineResponseExceptionMapper.class,
                   priority = 50)
@@ -45,10 +48,36 @@ public interface VerifyEngine {
    * @return A message with verification/store results.
    */
   @POST
+  @Path("/trigger")
   @Consumes("application/json")
   @Produces("application/json")
   Msg store(FullTrigger trigger,
             @QueryParam("dry") boolean isDryRun,
             @HeaderParam("Hawkular-Tenant" ) String customerId
   );
+
+  /**
+   * Update a trigger
+   * @param trigger Policy wrapped in a data structure, the engine expects
+   * @param customerId Id of the customer this policy belongs to.
+   * @return A message with update results
+   */
+  @PUT
+  @Consumes("application/json")
+  @Produces("application/json")
+  @Path("/trigger/{triggerId}")
+  Msg update(@PathParam("triggerId") String triggerId,
+             FullTrigger trigger,
+             @HeaderParam("Hawkular-Tenant") String customerId);
+
+  /**
+   * Delete the trigger with the given id
+   * @param triggerId Id of the trigger to delete
+   * @param customerId Id of the customer this policy belongs to.
+   */
+  @DELETE
+  @Consumes("application/json")
+  @Path("/{triggerId}")
+  void deleteTrigger(@PathParam("triggerId") String triggerId,
+                     @HeaderParam("Hawkular-Tenant" ) String customerId);
 }

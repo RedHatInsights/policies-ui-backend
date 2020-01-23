@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.custompolicies.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
@@ -48,6 +49,7 @@ public class Policy extends PanacheEntity {
   public String actions;
 
   public Timestamp mtime=new Timestamp(System.currentTimeMillis());
+  public String triggerId;
 
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
@@ -75,7 +77,7 @@ public class Policy extends PanacheEntity {
     if (!customer.equals(policy.customerid)) {
       throw new IllegalArgumentException("Store: customer id do not match");
     }
-    policy.persistAndFlush();
+    policy.persist();
     return id;
   }
 
@@ -87,6 +89,28 @@ public class Policy extends PanacheEntity {
     policy.flush();
   }
 
+  public void populateFrom(Policy policy) {
+    this.id = policy.id;
+    this.name = policy.name;
+    this.description = policy.description;
+    this.triggerId = policy.triggerId;
+    this.actions = policy.actions;
+    this.conditions = policy.conditions;
+    this.isEnabled = policy.isEnabled;
+    this.customerid = policy.customerid;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("Policy{");
+    sb.append("id=").append(id);
+    sb.append(", customerid='").append(customerid).append('\'');
+    sb.append(", name='").append(name).append('\'');
+    sb.append(", mtime=").append(mtime);
+    sb.append(", triggerId='").append(triggerId).append('\'');
+    sb.append('}');
+    return sb.toString();
+  }
 
   enum SortableColumn {
     NAME("name"),
