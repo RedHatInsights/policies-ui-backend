@@ -35,4 +35,5 @@ public class TestPolicy {
   public String conditions;
   public String actions;
 
+  public String mtime;
 }

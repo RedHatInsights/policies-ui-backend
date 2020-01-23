@@ -91,8 +91,8 @@ public class PagingUtils {
             }
         }
         else {
-            // default sort is by name
-            pageBuilder.addSort("name",Sort.Direction.Ascending);
+            // default sort is by mtime descending, so that newest end up on top
+            pageBuilder.addSort("mtime",Sort.Direction.Descending);
         }
 
         return pageBuilder.build();
