@@ -47,6 +47,7 @@ curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/ap
 ----
 
 By default this uses paging with a page-size of 10.
+Default sorting is by mtime (last updated, descending).
 You can select different pages, page sizes and sorting with the following query parameters:
 
 |===
@@ -54,10 +55,10 @@ You can select different pages, page sizes and sorting with the following query 
 
 |page     | 0     | Page numbers start at 0
 |pageSize | 10    |
-|sortColumn |  | Sort can happen by column names ("name",
+|sortColumn | mtime | Sort can happen by column names ("name",
                                   "description",
-                                  "is_enabled")
-|sortDirection|asc| Allowed values : asc, desc
+                                  "is_enabled", "mtime")
+|sortDirection|desc| Allowed values : asc, desc
 |===
 
 .Example:
