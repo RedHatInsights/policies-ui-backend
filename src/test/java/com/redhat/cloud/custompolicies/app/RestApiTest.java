@@ -36,6 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.model.HttpResponse;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -53,8 +54,8 @@ class RestApiTest {
   @ClassRule
   public static MockServerContainer mockEngineServer = new MockServerContainer();
 
-
   private static Header authHeader;
+  private static MockServerClient mockServerClient;
 
   @BeforeAll
   static void configureMockEnvironment()  {
@@ -63,12 +64,20 @@ class RestApiTest {
     setupMockEngine();
   }
 
+  // Helper to debug mock server issues
+//  @AfterAll
+//  static void mockLog() {
+//    System.err.println(mockServerClient.retrieveLogMessages(request()));
+//    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
+//  }
+
   private static void setupMockEngine() {
     // set up mock engine
     mockEngineServer.start();
-    System.err.println("Mock engine at http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
-    MockServerClient mockEngineClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
-    mockEngineClient
+    String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
+    System.err.println("Mock engine at " + mockServerUrl);
+    mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger")
             .withHeader("Hawkular-Tenant","1234")
@@ -78,7 +87,7 @@ class RestApiTest {
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
-    mockEngineClient
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/.*")
             .withMethod("DELETE")
@@ -89,7 +98,7 @@ class RestApiTest {
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
-    mockEngineClient
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger/.*")
             .withMethod("PUT")
@@ -101,13 +110,42 @@ class RestApiTest {
             .withBody("{ \"msg\" : \"ok\" }")
         );
 
-    System.setProperty("engine/mp-rest/url",
-                       "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
-  }
+    // RBac server
+    String fullAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_full_access.json", false);
+    String noAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_no_access.json", false);
+    RestApiTest.mockServerClient
+        .when(request()
+                  .withPath("/api/rbac/v1/access/")
+                  .withQueryStringParameter("application","custom-policies")
+                  .withHeader("x-rh-identity",".*2UtZG9lLXVzZXIifQ==") // normal user all allowed
+        )
+        .respond(HttpResponse.response()
+                     .withStatusCode(200)
+                     .withHeader("Content-Type","application/json")
+                     .withBody(fullAccessRbac)
+
+        );
+    RestApiTest.mockServerClient
+        .when(request()
+                  .withPath("/api/rbac/v1/access/")
+                  .withQueryStringParameter("application","custom-policies")
+                  .withHeader("x-rh-identity",".*kYW1wZi11c2VyIn0=") // hans dampf user nothing allowed
+        )
+        .respond(HttpResponse.response()
+                     .withStatusCode(200)
+                     .withHeader("Content-Type","application/json")
+                     .withBody(noAccessRbac)
+        );
+
+    System.setProperty("engine/mp-rest/url",mockServerUrl);
+    System.setProperty("rbac/mp-rest/url",mockServerUrl);
+
+
+                         }
 
   private static void setupRhId() {
     // provide rh-id
-    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
+    String rhid = HeaderHelperTest.getStringFromFile("rhid.txt",false);
     authHeader = new Header("x-rh-identity", rhid);
   }
 

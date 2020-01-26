@@ -129,11 +129,16 @@ public class PolicyCrudService {
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
   @APIResponse(responseCode = "404", description = "No policies found for customer")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "Policies found", content =
                  @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
                  headers = @Header(name = "TotalCount", description = "Total number of items found",
                                    schema = @Schema(type = SchemaType.INTEGER)))
   public Response getPoliciesForCustomer() {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+    }
 
     Pager pager = PagingUtils.extractPager(uriInfo);
     Page<Policy> page = null;
@@ -153,6 +158,7 @@ public class PolicyCrudService {
       @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
       @APIResponse(responseCode = "400", description = "Policy validation failed"),
       @APIResponse(responseCode = "409", description = "Persisting failed"),
+      @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
       @APIResponse(responseCode = "201", description = "Policy persisted"),
       @APIResponse(responseCode = "200", description = "Policy validated")
                 })
@@ -160,6 +166,11 @@ public class PolicyCrudService {
   @Path("/")
   @Transactional
   public Response storePolicy(@QueryParam ("alsoStore") boolean alsoStore, @Valid Policy policy) {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+    }
+
     if (policy==null) {
       return Response.status(500, "No policy passed").build();
     }
@@ -190,6 +201,10 @@ public class PolicyCrudService {
       else {
         return Response.status(200).entity(new Msg("Policy validated")).build();
       }
+    }
+
+    if (!user.canWriteAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
     }
 
     // Basic validation was successful, so try to persist.
@@ -227,9 +242,13 @@ public class PolicyCrudService {
   @Path("/{id}")
   @APIResponse(responseCode = "200", description = "Policy deleted")
   @APIResponse(responseCode = "400", description = "Deletion failed")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @Transactional
   public Response deletePolicy(@PathParam("id") Long policyId) {
 
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
+     }
     Policy policy = Policy.findById(user.getAccount(), policyId);
 
     ResponseBuilder builder ;
@@ -282,7 +301,13 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "200", description = "Policy found", content =
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   public Response getPolicy(@PathParam("id") Long policyId) {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+    }
+
     Policy policy = Policy.findById(user.getAccount(), policyId);
 
     ResponseBuilder builder ;

@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.custompolicies.app.auth;
 
-import com.redhat.cloud.custompolicies.app.auth.XRhIdentity;
 import java.util.Base64;
 import java.util.Optional;
 import javax.json.bind.Jsonb;
