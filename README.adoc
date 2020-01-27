@@ -31,25 +31,69 @@ When developing you can use Quarkus hot-reload
 mvn compile quarkus:dev
 ----
 
+== Talking to the endpoint
+
 .NOTE
 The backend requires a valid `x-rh-identity` to be supplied on calls.
 For testing purposes you can take the one that is stored in
 link:src/test/resources/rhid.txt It has accountId = '1234' set.
 
 
-== List existing policies
+=== List existing policies
 
 [source,shell]
 ----
 curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/policies
 ----
 
+By default this uses paging with a page-size of 10.
+Default sorting is by mtime (last updated, descending).
+You can select different pages, page sizes and sorting with the following query parameters:
 
-== List fact keys (for the UI)
+|===
+|Parameter|Default|Comment
+
+|page     | 0     | Page numbers start at 0
+|pageSize | 10    |
+|sortColumn | mtime | Sort can happen by column names ("name",
+                                  "description",
+                                  "is_enabled", "mtime")
+|sortDirection|desc| Allowed values : asc, desc
+|===
+
+.Example:
+[source,shell]
+----
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/policies?page=5
+----
+
+A header `TotalCount` returns the total number of policies.
+
+=== List fact keys (for the UI)
 [source,shell]
 ----
 curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/custom-policies/v1.0/facts
 ----
+
+=== Validating (and storing) a policy
+
+A POST to the /policies endpoint validates and potentially stores a passed policy.
+
+[source,shell]
+----
+ curl -i -HContent-Type:application/json  \
+         -Hx-rh-identity:`cat src/test/resources/rhid.txt` -XPOST \
+         -d @src/test/resources/example-policy.json \
+          http://localhost:8080/api/custom-policies/v1.0/policies
+----
+
+This sends the policy from the file 'example-policy.json' to the server for validation.
+By default this does not store the policy.
+
+To also store the policy, one needs to pass `?alsoStore=true` as query parameter in the url.
+
+.NOTE
+Validation of a policy requires the engine to be up and reachable.
 
 == OpenAPI Endpoint / Swagger-UI
 
