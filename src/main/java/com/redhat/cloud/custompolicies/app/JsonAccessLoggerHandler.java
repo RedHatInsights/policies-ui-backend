@@ -37,9 +37,11 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
 
   Jsonb jsonb;
   JsonObjectBuilder jsonObjectBuilder;
+  private boolean filterHealthCalls;
 
 
-  public JsonAccessLoggerHandler() {
+  public JsonAccessLoggerHandler(boolean filterHealthCalls) {
+    this.filterHealthCalls = filterHealthCalls;
     jsonb = JsonbBuilder.create();
     jsonObjectBuilder = Json.createObjectBuilder();
   }
@@ -47,11 +49,19 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
 
   void log(RoutingContext context, long timestamp, String remoteClient, HttpVersion version, HttpMethod method, String uri) {
 
+    HttpServerRequest request = context.request();
+    int status = request.response().getStatusCode();
+    // By default omit requests for metrics and health check if they return a 200
+    if (filterHealthCalls) {
+      if (status==200 && (uri.startsWith("/health") || uri.startsWith("/metrics"))) {
+        return;
+      }
+    }
+
     jsonObjectBuilder.add("date", Utils.formatRFC1123DateTime(timestamp));
     jsonObjectBuilder.add("method",method.name());
     jsonObjectBuilder.add("uri",uri);
 
-    HttpServerRequest request = context.request();
     String versionFormatted ;
     switch (version){
       case HTTP_1_0:
@@ -69,7 +79,7 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
     jsonObjectBuilder.add("http_version",versionFormatted);
     long contentLength = request.response().bytesWritten();
 
-    int status = request.response().getStatusCode();
+
     jsonObjectBuilder.add("status",status);
     jsonObjectBuilder.add("content_length",contentLength);
 
