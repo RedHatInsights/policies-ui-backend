@@ -264,6 +264,7 @@ public class PolicyCrudService {
         builder = Response.status(400, "Invalid policy");
       } else {
         storedPolicy.populateFrom(policy);
+        storedPolicy.customerid = user.getAccount();
         storedPolicy.persist(storedPolicy);
         FullTrigger trigger = new FullTrigger(storedPolicy);
         trigger.trigger.id = storedPolicy.triggerId;

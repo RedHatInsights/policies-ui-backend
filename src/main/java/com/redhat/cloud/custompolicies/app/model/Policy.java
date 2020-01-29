@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.custompolicies.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
@@ -24,32 +23,60 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 
 import java.sql.Timestamp;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  * @author hrupp
  */
 @Entity
 public class Policy extends PanacheEntity {
+  @JsonbTransient
   public String customerid;
 
   @NotNull
   @NotEmpty
+  @Schema(description = "Name of the rule. Must be unique per customer account.")
   public String name;
+
+  @Schema(description = "A short description of the policy.")
   public String description;
   @Column(name = "is_enabled")
   public boolean isEnabled;
 
+  @Schema(description = "Condition string.",
+          example = "arch = \"x86_64\"")
   @NotEmpty
   @NotNull
   public String conditions;
+
+  @Schema(description = "String describing actions when the policy is evaluated to true.")
   public String actions;
 
-  public Timestamp mtime=new Timestamp(System.currentTimeMillis());
+  @Schema(type = SchemaType.STRING,
+          description = "Last update time in a form like '2020-01-24 12:19:56.718', output only",
+          readOnly = true,
+          format = "yyyy-MM-dd hh:mm:ss.ddd",
+  implementation = String.class)
+  private Timestamp mtime=new Timestamp(System.currentTimeMillis());
+
+
   public String triggerId;
+
+
+  @JsonbTransient
+  public void setMtime(String mtime) {
+    this.mtime = Timestamp.valueOf(mtime);
+  }
+
+  public String getMtime() {
+    return mtime.toString();
+  }
 
 
   public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
