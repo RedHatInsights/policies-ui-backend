@@ -28,6 +28,8 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
@@ -49,7 +51,7 @@ class RestApiTest {
       new PostgreSQLContainer("postgres");
 
   @ClassRule
-  public static MockServerContainer mockServer = new MockServerContainer();
+  public static MockServerContainer mockEngineServer = new MockServerContainer();
 
 
   private static Header authHeader;
@@ -59,15 +61,14 @@ class RestApiTest {
     setupPostgres();
     setupRhId();
     setupMockEngine();
-
   }
 
   private static void setupMockEngine() {
     // set up mock engine
-    mockServer.start();
-    System.err.println("Mock engine at http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
-    MockServerClient mockServerClient = new MockServerClient(mockServer.getContainerIpAddress(), mockServer.getServerPort());
-    mockServerClient
+    mockEngineServer.start();
+    System.err.println("Mock engine at http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
+    MockServerClient mockEngineClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
+    mockEngineClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger")
             .withHeader("Hawkular-Tenant","1234")
@@ -77,9 +78,31 @@ class RestApiTest {
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
+    mockEngineClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers/.*")
+            .withMethod("DELETE")
+            .withHeader("Hawkular-Tenant","1234")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type","application/json")
+            .withBody("{ \"msg\" : \"ok\" }")
+        );
+    mockEngineClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers/trigger/.*")
+            .withMethod("PUT")
+            .withHeader("Hawkular-Tenant","1234")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type","application/json")
+            .withBody("{ \"msg\" : \"ok\" }")
+        );
 
     System.setProperty("engine/mp-rest/url",
-                       "http://" + mockServer.getContainerIpAddress() + ":" + mockServer.getServerPort());
+                       "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
   }
 
   private static void setupRhId() {
@@ -157,8 +180,8 @@ class RestApiTest {
             .header(authHeader)
             .when().get(API_BASE + "/policies/?sortColumn=foo")
             .then()
-            .statusCode(500)
-            .body(containsString("Unknown Policy.SortableColumn requested: [foo]"));
+            .statusCode(400);
+    //        .statusLine(containsString("Unknown Policy.SortableColumn requested: [foo]"));
   }
 
 
@@ -223,11 +246,17 @@ class RestApiTest {
     // location is  a full url to the new resource.
     System.out.println(location);
 
+    JsonPath body =
     given()
         .header(authHeader)
         .when().get(location)
         .then()
-        .statusCode(200);
+        .statusCode(200)
+        .extract().body()
+        .jsonPath();
+
+    assert body.get("conditions").equals("cores = 2");
+    assert body.get("name").equals("test1");
 
     // now delete it again
     given()
@@ -236,6 +265,81 @@ class RestApiTest {
         .then()
         .statusCode(200);
   }
+
+  @Test
+  void storeAndUpdatePolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "cores = 2";
+    tp.name = "test2";
+    tp.triggerId ="123-abc";
+
+    Headers headers =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().headers()
+        ;
+
+    assert headers.hasHeaderWithName("Location");
+    // Extract location and then check in subsequent call
+    // that the policy is stored
+    Header locationHeader = headers.get("Location");
+    String location = locationHeader.getValue();
+    // location is  a full url to the new resource.
+    System.out.println(location);
+
+    String resp =
+    given()
+        .header(authHeader)
+      .when().get(location)
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .asString();
+
+    Jsonb jsonb = JsonbBuilder.create();
+    TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
+    assert tp.triggerId.equals(ret.triggerId);
+
+    try {
+      // update
+      ret.conditions = "cores = 3";
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+          .body(ret)
+        .when().put(location)
+          .then()
+          .statusCode(200);
+
+      JsonPath jsonPath =
+          given()
+              .header(authHeader)
+              .when().get(location)
+              .then()
+              .statusCode(200)
+              .extract().body().jsonPath();
+      String content = jsonPath.getString("conditions");
+      assert content.equalsIgnoreCase("cores = 3");
+
+    }
+    finally {
+      // now delete it again
+      given()
+          .header(authHeader)
+          .when().delete(location)
+          .then()
+          .statusCode(200);
+    }
+  }
+
 
   @Test
   void deletePolicy() {

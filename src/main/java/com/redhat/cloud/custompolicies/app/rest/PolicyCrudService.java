@@ -32,6 +32,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -126,6 +127,7 @@ public class PolicyCrudService {
                   )
           )
   })
+  @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "200", description = "Policies found", content =
                  @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
@@ -134,7 +136,12 @@ public class PolicyCrudService {
   public Response getPoliciesForCustomer() {
 
     Pager pager = PagingUtils.extractPager(uriInfo);
-    Page<Policy> page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
+    Page<Policy> page = null;
+    try {
+      page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
+    } catch (IllegalArgumentException iae) {
+      return Response.status(400,iae.getLocalizedMessage()).build();
+    }
 
     return PagingUtils.responseBuilder(page).build();
   }
@@ -195,6 +202,7 @@ public class PolicyCrudService {
       if (!skipEngineCall) {
         FullTrigger trigger = new FullTrigger(policy);
         engine.store(trigger, false, user.getAccount());
+        policy.triggerId = trigger.trigger.id;
       }
     } catch (Throwable t) {
       if (t instanceof PersistenceException &&  t.getCause() instanceof ConstraintViolationException) {
@@ -229,13 +237,44 @@ public class PolicyCrudService {
       builder = Response.status(Response.Status.BAD_REQUEST);
     } else {
       policy.delete(policy);
+      engine.deleteTrigger(policy.triggerId, user.getAccount());
       builder = Response.ok(policy);
     }
 
     return builder.build();
 
-
   }
+
+  @Operation(summary = "Update a single policy for a customer by its id")
+  @PUT
+  @Path("/{policyId}")
+  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "400", description = "Invalid policy provided")
+  @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
+  @Transactional
+  public Response updatePolicy(@PathParam("policyId") Long policyId, @Valid Policy policy) {
+
+    Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+
+    ResponseBuilder builder ;
+    if (storedPolicy==null) {
+      builder = Response.status(404, "Original policy not found");
+    } else {
+      if (!policy.id.equals(policyId)) {
+        builder = Response.status(400, "Invalid policy");
+      } else {
+        storedPolicy.populateFrom(policy);
+        storedPolicy.persist(storedPolicy);
+        FullTrigger trigger = new FullTrigger(storedPolicy);
+        trigger.trigger.id = storedPolicy.triggerId;
+        engine.update(storedPolicy.triggerId, trigger, user.getAccount());
+        builder = Response.ok(storedPolicy);
+      }
+    }
+
+    return builder.build();
+  }
+
 
   @Operation(summary = "Retrieve a single policy for a customer by its id")
   @GET

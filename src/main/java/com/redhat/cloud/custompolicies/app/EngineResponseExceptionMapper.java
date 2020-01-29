@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.annotation.Priority;
 import javax.json.bind.JsonbBuilder;
 import javax.validation.ValidationException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
@@ -43,6 +44,7 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
     RuntimeException re ;
     switch (status) {
       case 400: re = new ValidationException("Validation failed: " + msg.msg);
+      case 404: re = new NotFoundException(msg.msg);
       break;
       default:
         re = new WebApplicationException(status);

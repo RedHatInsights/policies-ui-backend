@@ -38,7 +38,12 @@ public class FullTrigger {
 
   public FullTrigger(Policy policy) {
     trigger = new Trigger();
-    trigger.id = generateId();
+    if (policy.triggerId == null || policy.triggerId.isEmpty()) {
+      trigger.id = generateId();
+    }
+    else {
+      trigger.id = policy.triggerId;
+    }
     trigger.name = policy.name;
     trigger.description = policy.description;
     trigger.enabled = policy.isEnabled;
