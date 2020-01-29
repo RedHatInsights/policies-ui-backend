@@ -248,7 +248,7 @@ public class PolicyCrudService {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
-     }
+    }
     Policy policy = Policy.findById(user.getAccount(), policyId);
 
     ResponseBuilder builder ;
@@ -269,9 +269,14 @@ public class PolicyCrudService {
   @Path("/{policyId}")
   @APIResponse(responseCode = "200", description = "Policy updated")
   @APIResponse(responseCode = "400", description = "Invalid policy provided")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
   @Transactional
   public Response updatePolicy(@PathParam("policyId") Long policyId, @Valid Policy policy) {
+
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+     }
 
     Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 

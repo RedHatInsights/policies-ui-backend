@@ -56,6 +56,7 @@ class RestApiTest {
 
   private static Header authHeader;
   private static MockServerClient mockServerClient;
+  private static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
 
   @BeforeAll
   static void configureMockEnvironment()  {
@@ -147,6 +148,8 @@ class RestApiTest {
     // provide rh-id
     String rhid = HeaderHelperTest.getStringFromFile("rhid.txt",false);
     authHeader = new Header("x-rh-identity", rhid);
+    rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt",false);
+    authRbacNoAccess = new Header("x-rh-identity", rhid);
   }
 
   private static void setupPostgres() {
@@ -249,6 +252,15 @@ class RestApiTest {
   }
 
   @Test
+  void testGetOnePolicyNoAccess() {
+    given()
+        .header(authRbacNoAccess)
+        .when().get(API_BASE + "/policies/1")
+        .then()
+        .statusCode(403);
+  }
+
+  @Test
   void testGetOneBadPolicy() {
     given()
         .header(authHeader)
@@ -302,6 +314,23 @@ class RestApiTest {
       .when().delete(location)
         .then()
         .statusCode(200);
+  }
+
+  @Test
+  void storeNewPolicyNoRbac() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "cores = 2";
+    tp.name = "test1";
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+        .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(403);
   }
 
   @Test
@@ -378,6 +407,72 @@ class RestApiTest {
     }
   }
 
+  // Check that update is protected by RBAC.
+  // we need to store as user with access first.
+  @Test
+  void storeAndUpdatePolicyNoUpdateAccess() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "cores = 2";
+    tp.name = "test2";
+    tp.triggerId ="123-abc";
+
+    Headers headers =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().headers()
+        ;
+
+    assert headers.hasHeaderWithName("Location");
+    // Extract location and then check in subsequent call
+    // that the policy is stored
+    Header locationHeader = headers.get("Location");
+    String location = locationHeader.getValue();
+    // location is  a full url to the new resource.
+    System.out.println(location);
+
+    String resp =
+    given()
+        .header(authHeader)
+      .when().get(location)
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .asString();
+
+    Jsonb jsonb = JsonbBuilder.create();
+    TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
+    assert tp.triggerId.equals(ret.triggerId);
+
+    try {
+      // update
+      ret.conditions = "cores = 3";
+      given()
+          .header(authRbacNoAccess)
+          .contentType(ContentType.JSON)
+          .body(ret)
+        .when().put(location)
+          .then()
+          .statusCode(403);
+
+    }
+    finally {
+      // now delete it again
+      given()
+          .header(authHeader)
+          .when().delete(location)
+          .then()
+          .statusCode(200);
+    }
+  }
+
 
   @Test
   void deletePolicy() {
@@ -395,6 +490,18 @@ class RestApiTest {
       .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
+  }
+
+  @Test
+  void deletePolicyNoRbacAccess() {
+
+    given()
+        .header(authRbacNoAccess)
+        .when().delete(API_BASE + "/policies/3")
+        .then()
+        .statusCode(403)
+    ;
+
   }
 
   @Test
