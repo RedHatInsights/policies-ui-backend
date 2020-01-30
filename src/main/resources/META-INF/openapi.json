@@ -1,5 +1,10 @@
 {
   "openapi": "3.0.1",
+  "info" : {
+    "description": "The API for Custom-Policies",
+    "version": "1.0",
+    "title": "Custom-Policies"
+  },
   "security": [
     {
       "Basic_auth": []
