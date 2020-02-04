@@ -89,8 +89,6 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
       RbacRaw result;
       try {
         result = rbac.get("custom-policies", xrhid_header);
-        System.out.println(result);
-
       } catch (Throwable e) {
         requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
         return;
