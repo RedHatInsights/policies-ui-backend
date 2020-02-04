@@ -69,7 +69,7 @@ public class HeaderHelperTest {
 
   @Test
   public void testSimpleHeaderGoodRID() {
-    String rhid = getRhidFromFile("rhid.txt");
+    String rhid = getStringFromFile("rhid.txt",true);
 
     Optional<XRhIdentity> user = HeaderHelper.getRhIdFromString(rhid);
     Assert.assertTrue(user.isPresent());
@@ -81,7 +81,7 @@ public class HeaderHelperTest {
   @Test
   public void testSimpleHeaderGoodRID2() {
     MultivaluedMap<String,String> map = new MultivaluedHashMap<>();
-    String rhid = getRhidFromFile("rhid.txt");
+    String rhid = getStringFromFile("rhid.txt",true);
     map.putSingle(RHID, rhid);
     HttpHeaders headers = new ResteasyHttpHeaders(map);
 
@@ -93,7 +93,7 @@ public class HeaderHelperTest {
   }
 
   @NotNull
-  public static String getRhidFromFile(String filename) {
+  public static String getStringFromFile(String filename, boolean removeTrailingNewline) {
     String rhid = "";
     try (FileInputStream fis = new FileInputStream("src/test/resources/" + filename)) {
       Reader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
@@ -106,7 +106,7 @@ public class HeaderHelperTest {
       }
       r.close();
       rhid = sb.toString();
-      if (rhid.endsWith("\n")) {
+      if (removeTrailingNewline && rhid.endsWith("\n")) {
         rhid = rhid.substring(0,rhid.indexOf('\n'));
       }
     }

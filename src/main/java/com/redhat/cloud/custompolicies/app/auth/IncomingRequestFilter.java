@@ -16,7 +16,10 @@
  */
 package com.redhat.cloud.custompolicies.app.auth;
 
+import com.redhat.cloud.custompolicies.app.RbacServer;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -25,6 +28,8 @@ import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+import jdk.net.SocketFlow;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
  * Request filter. This runs on all incoming requests before method matching
@@ -52,6 +57,12 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
   @Inject
   RhIdPrincipalProducer producer;
 
+  @Inject
+  @RestClient
+  RbacServer rbac;
+
+  Map<RhIdPrincipal,TimedRbac> rbacCache = new HashMap();
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
 
@@ -67,13 +78,41 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     if (xrhid.isPresent()) {
       // header was good, so now create the security context
       XRhIdentity rhIdentity = xrhid.get();
-      SecurityContext sctx = new RhIdSecurityContext(rhIdentity);
+      RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
+      if (rbacCache.containsKey(rhPrincipal)) {
+        TimedRbac tr = rbacCache.get(rhPrincipal);
+        if (tr.isOutdated()) {
+          rbacCache.remove(rhPrincipal);
+        }
+      }
+
+      RbacRaw result;
+      try {
+        result = rbac.get("custom-policies", xrhid_header);
+      } catch (Throwable e) {
+        requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+        return;
+      }
+
+      // TODO add rbac to principal and cache it
+      rhPrincipal.setRbac(result.canReadAll(),result.canWriteAll());
+      SecurityContext sctx = new RhIdSecurityContext(rhIdentity,rhPrincipal);
       requestContext.setSecurityContext(sctx);
       // And make the principal available for injection
       producer.setPrincipal((RhIdPrincipal) sctx.getUserPrincipal());
     } else {
       // Header was present, but not correct
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+    }
+  }
+
+  private static class TimedRbac {
+    private long lastUpdated;
+    private Rbac rbac;
+
+    // Old after X seconds TODO make configurable
+    boolean isOutdated(){
+      return Math.abs(System.currentTimeMillis() - lastUpdated) > 10*1000;
     }
   }
 }

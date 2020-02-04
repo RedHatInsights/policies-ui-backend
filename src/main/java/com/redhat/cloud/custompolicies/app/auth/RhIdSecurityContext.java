@@ -27,14 +27,16 @@ import javax.ws.rs.core.SecurityContext;
 public class RhIdSecurityContext implements SecurityContext {
 
   private XRhIdentity rhIdentity;
+  private RhIdPrincipal rhPrincipal;
 
-  public RhIdSecurityContext(XRhIdentity rhIdentity) {
+  public RhIdSecurityContext(XRhIdentity rhIdentity, RhIdPrincipal rhPrincipal) {
     this.rhIdentity = rhIdentity;
+    this.rhPrincipal = rhPrincipal;
   }
 
   @Override
   public Principal getUserPrincipal() {
-    return new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
+    return rhPrincipal;
   }
 
   @Override

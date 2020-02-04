@@ -36,6 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.model.HttpResponse;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -53,8 +54,9 @@ class RestApiTest {
   @ClassRule
   public static MockServerContainer mockEngineServer = new MockServerContainer();
 
-
   private static Header authHeader;
+  private static MockServerClient mockServerClient;
+  private static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
 
   @BeforeAll
   static void configureMockEnvironment()  {
@@ -63,12 +65,20 @@ class RestApiTest {
     setupMockEngine();
   }
 
+  // Helper to debug mock server issues
+//  @AfterAll
+//  static void mockLog() {
+//    System.err.println(mockServerClient.retrieveLogMessages(request()));
+//    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
+//  }
+
   private static void setupMockEngine() {
     // set up mock engine
     mockEngineServer.start();
-    System.err.println("Mock engine at http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
-    MockServerClient mockEngineClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
-    mockEngineClient
+    String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
+    System.err.println("Mock engine at " + mockServerUrl);
+    mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger")
             .withHeader("Hawkular-Tenant","1234")
@@ -78,7 +88,7 @@ class RestApiTest {
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
-    mockEngineClient
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/.*")
             .withMethod("DELETE")
@@ -89,7 +99,7 @@ class RestApiTest {
             .withHeader("Content-Type","application/json")
             .withBody("{ \"msg\" : \"ok\" }")
         );
-    mockEngineClient
+    mockServerClient
         .when(request()
             .withPath("/hawkular/alerts/triggers/trigger/.*")
             .withMethod("PUT")
@@ -101,14 +111,45 @@ class RestApiTest {
             .withBody("{ \"msg\" : \"ok\" }")
         );
 
-    System.setProperty("engine/mp-rest/url",
-                       "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort());
-  }
+    // RBac server
+    String fullAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_full_access.json", false);
+    String noAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_no_access.json", false);
+    RestApiTest.mockServerClient
+        .when(request()
+                  .withPath("/api/rbac/v1/access/")
+                  .withQueryStringParameter("application","custom-policies")
+                  .withHeader("x-rh-identity",".*2UtZG9lLXVzZXIifQ==") // normal user all allowed
+        )
+        .respond(HttpResponse.response()
+                     .withStatusCode(200)
+                     .withHeader("Content-Type","application/json")
+                     .withBody(fullAccessRbac)
+
+        );
+    RestApiTest.mockServerClient
+        .when(request()
+                  .withPath("/api/rbac/v1/access/")
+                  .withQueryStringParameter("application","custom-policies")
+                  .withHeader("x-rh-identity",".*kYW1wZi11c2VyIn0=") // hans dampf user nothing allowed
+        )
+        .respond(HttpResponse.response()
+                     .withStatusCode(200)
+                     .withHeader("Content-Type","application/json")
+                     .withBody(noAccessRbac)
+        );
+
+    System.setProperty("engine/mp-rest/url",mockServerUrl);
+    System.setProperty("rbac/mp-rest/url",mockServerUrl);
+
+
+                         }
 
   private static void setupRhId() {
     // provide rh-id
-    String rhid = HeaderHelperTest.getRhidFromFile("rhid.txt");
+    String rhid = HeaderHelperTest.getStringFromFile("rhid.txt",false);
     authHeader = new Header("x-rh-identity", rhid);
+    rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt",false);
+    authRbacNoAccess = new Header("x-rh-identity", rhid);
   }
 
   private static void setupPostgres() {
@@ -211,6 +252,15 @@ class RestApiTest {
   }
 
   @Test
+  void testGetOnePolicyNoAccess() {
+    given()
+        .header(authRbacNoAccess)
+        .when().get(API_BASE + "/policies/1")
+        .then()
+        .statusCode(403);
+  }
+
+  @Test
   void testGetOneBadPolicy() {
     given()
         .header(authHeader)
@@ -264,6 +314,23 @@ class RestApiTest {
       .when().delete(location)
         .then()
         .statusCode(200);
+  }
+
+  @Test
+  void storeNewPolicyNoRbac() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "cores = 2";
+    tp.name = "test1";
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+        .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(403);
   }
 
   @Test
@@ -340,6 +407,72 @@ class RestApiTest {
     }
   }
 
+  // Check that update is protected by RBAC.
+  // we need to store as user with access first.
+  @Test
+  void storeAndUpdatePolicyNoUpdateAccess() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.conditions = "cores = 2";
+    tp.name = "test2";
+    tp.triggerId ="123-abc";
+
+    Headers headers =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().headers()
+        ;
+
+    assert headers.hasHeaderWithName("Location");
+    // Extract location and then check in subsequent call
+    // that the policy is stored
+    Header locationHeader = headers.get("Location");
+    String location = locationHeader.getValue();
+    // location is  a full url to the new resource.
+    System.out.println(location);
+
+    String resp =
+    given()
+        .header(authHeader)
+      .when().get(location)
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .asString();
+
+    Jsonb jsonb = JsonbBuilder.create();
+    TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
+    assert tp.triggerId.equals(ret.triggerId);
+
+    try {
+      // update
+      ret.conditions = "cores = 3";
+      given()
+          .header(authRbacNoAccess)
+          .contentType(ContentType.JSON)
+          .body(ret)
+        .when().put(location)
+          .then()
+          .statusCode(403);
+
+    }
+    finally {
+      // now delete it again
+      given()
+          .header(authHeader)
+          .when().delete(location)
+          .then()
+          .statusCode(200);
+    }
+  }
+
 
   @Test
   void deletePolicy() {
@@ -357,6 +490,18 @@ class RestApiTest {
       .when().get(API_BASE + "/policies/3")
         .then()
         .statusCode(404);
+  }
+
+  @Test
+  void deletePolicyNoRbacAccess() {
+
+    given()
+        .header(authRbacNoAccess)
+        .when().delete(API_BASE + "/policies/3")
+        .then()
+        .statusCode(403)
+    ;
+
   }
 
   @Test

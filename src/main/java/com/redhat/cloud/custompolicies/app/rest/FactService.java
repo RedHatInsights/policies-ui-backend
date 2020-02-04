@@ -16,8 +16,11 @@
  */
 package com.redhat.cloud.custompolicies.app.rest;
 
+import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.Fact;
+import com.redhat.cloud.custompolicies.app.model.Msg;
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,11 +41,19 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 @RequestScoped
 public class FactService {
 
+  @Inject
+  RhIdPrincipal user;
+
   @GET
   @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
   @APIResponse(responseCode = "200", description = "List of facts", content =
                @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
   public Response listFacts() {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts")).build();
+    }
+
     Response.ResponseBuilder builder = Response.ok();
     builder.entity(Fact.getFacts());
     return builder.build();

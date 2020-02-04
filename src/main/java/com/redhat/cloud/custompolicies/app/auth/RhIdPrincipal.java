@@ -27,6 +27,8 @@ public class RhIdPrincipal implements Principal {
 
   private String name;
   private String account;
+  private boolean canReadAll;
+  private boolean canWriteAll;
 
   public RhIdPrincipal() {
   }
@@ -36,6 +38,11 @@ public class RhIdPrincipal implements Principal {
     this.account = account;
   }
 
+  void setRbac(boolean canReadAll, boolean canWriteAll) {
+
+    this.canReadAll = canReadAll;
+    this.canWriteAll = canWriteAll;
+  }
   @Override
   public String getName() {
     return name;
@@ -43,6 +50,14 @@ public class RhIdPrincipal implements Principal {
 
   public String getAccount() {
     return account;
+  }
+
+  public boolean canReadAll() {
+    return canReadAll;
+  }
+
+  public boolean canWriteAll() {
+    return canWriteAll;
   }
 
   @Override
