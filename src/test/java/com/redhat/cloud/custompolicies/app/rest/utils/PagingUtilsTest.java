@@ -79,6 +79,43 @@ public class PagingUtilsTest {
     }
 
     @Test
+    public void testExtractFilter() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[guy]=brush"));
+        Pager pager = PagingUtils.extractPager(info);
+        Assert.assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
+    }
+
+    @Test
+    public void testExtractFilterCustomOperator() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[guy]=%25brush%25&filter:op[guy]=like"));
+        Pager pager = PagingUtils.extractPager(info);
+        Assert.assertEquals("%brush%", pager.getFilter().getParameters().map().get("guy"));
+        Assert.assertEquals("guy LIKE :guy", pager.getFilter().getQuery());
+    }
+
+    @Test
+    public void testExtractFilterBooleanOperator() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=boolean_is"));
+        Pager pager = PagingUtils.extractPager(info);
+        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("bar"));
+    }
+
+    @Test
+    public void testExtractFilterMultipleParams() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[guy]=brush&filter[foo]=bar&filter[raw]=ewf"));
+        Pager pager = PagingUtils.extractPager(info);
+        Assert.assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
+        Assert.assertEquals("bar", pager.getFilter().getParameters().map().get("foo"));
+        Assert.assertEquals("ewf", pager.getFilter().getParameters().map().get("raw"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testExtractFilterInvalidOperator() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=wrong"));
+        PagingUtils.extractPager(info);
+    }
+
+    @Test
     public void testResponseBuilder() {
         Page<String> page = new Page<>(
                 List.of("Hello", "World"),

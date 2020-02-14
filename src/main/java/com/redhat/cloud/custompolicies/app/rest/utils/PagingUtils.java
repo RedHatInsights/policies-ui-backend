@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app.rest.utils;
 
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
+import com.redhat.cloud.custompolicies.app.model.filter.Filter;
 import io.quarkus.panache.common.Sort;
 
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PagingUtils {
 
@@ -42,6 +45,8 @@ public class PagingUtils {
         final String QUERY_PAGE_SIZE = "pageSize";
         final String QUERY_COLUMN = "sortColumn";
         final String QUERY_DIRECTION = "sortDirection";
+        final Pattern FILTER_PATTERN = Pattern.compile("filter\\[(.+)\\]");
+        final String FILTER_OP = "filter:op";
 
         String page = queryParams.getFirst(QUERY_PAGE);
         if (page != null) {
@@ -93,6 +98,20 @@ public class PagingUtils {
         else {
             // default sort is by mtime descending, so that newest end up on top
             pageBuilder.addSort("mtime",Sort.Direction.Descending);
+        }
+
+        for (String key: queryParams.keySet()) {
+            Matcher filterMatcher = FILTER_PATTERN.matcher(key);
+            if (filterMatcher.find()) {
+                String column = filterMatcher.group(1);
+                String value = queryParams.getFirst(key);
+                String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
+                Filter.Operator operator = Filter.Operator.EQUAL;
+                if (operatorString != null) {
+                    operator = Filter.Operator.fromName(operatorString);
+                }
+                pageBuilder.filter(column, operator, value);
+            }
         }
 
         return pageBuilder.build();

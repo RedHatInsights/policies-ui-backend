@@ -225,6 +225,41 @@ class RestApiTest {
     //        .statusLine(containsString("Unknown Policy.SortableColumn requested: [foo]"));
   }
 
+  @Test
+  void testGetPoliciesFilter() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE + "/policies/?filter[name]=Detect%&filter:op[name]=like")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body("size()", is(1))
+            .assertThat()
+            .body("get(0).name", is("Detect Nice box"));
+  }
+
+  @Test
+  void testGetPoliciesFilterILike() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE + "/policies/?filter[name]=detect%&filter:op[name]=ilike")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body("size()", is(1))
+            .assertThat()
+            .body("get(0).name", is("Detect Nice box"));
+  }
+
+  @Test
+  void testGetPoliciesInvalidFilter() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE + "/policies/?filter[actions]=email&filter:op[name]=ilike")
+            .then()
+            .statusCode(400);
+  }
+
 
   @Test
   void testGetPoliciesForUnknownAccount() {

@@ -18,11 +18,14 @@ package com.redhat.cloud.custompolicies.app.model;
 
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
+import com.redhat.cloud.custompolicies.app.model.filter.Filter;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Optional;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -87,9 +90,21 @@ public class Policy extends PanacheEntity {
       }
     }
 
-    PanacheQuery<Policy> query = find("customerid", pager.getSort(), customer)
-            .page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
-    return new Page<>(query.list(), pager, query.count());
+    pager
+            .getFilter()
+            .getParameters()
+            .map()
+            .keySet()
+            .forEach(FilterableColumn::fromName);
+
+    Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
+
+    PanacheQuery<Policy> panacheQuery = find(
+            filter.getQuery(),
+            pager.getSort(),
+            filter.getParameters()
+    ).page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
+    return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
   }
 
   public static Policy findById(String customer, Long theId) {
@@ -164,6 +179,28 @@ public class Policy extends PanacheEntity {
       throw new IllegalArgumentException("Unknown Policy.SortableColumn requested: [" + columnName + "]");
     }
 
+  }
+
+  enum FilterableColumn {
+    NAME("name"),
+    DESCRIPTION("description"),
+    IS_ENABLED("is_enabled");
+
+    private final String name;
+
+    FilterableColumn(final String name) {
+      this.name = name;
+    }
+
+    public static FilterableColumn fromName(String columnName) {
+      Optional<FilterableColumn> result = Arrays.stream(FilterableColumn.values())
+              .filter(val -> val.name.equals(columnName))
+              .findAny();
+      if (result.isPresent()) {
+        return result.get();
+      }
+      throw new IllegalArgumentException("Unknown Policy.FilterableColumn requested: [" + columnName + "]");
+    }
   }
 
 }
