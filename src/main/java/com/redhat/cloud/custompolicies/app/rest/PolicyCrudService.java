@@ -232,7 +232,7 @@ public class PolicyCrudService {
     // Policy is persisted. Return its location.
     URI location =
         UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(id);
-    ResponseBuilder builder = Response.created(location);
+    ResponseBuilder builder = Response.created(location).entity(policy);
     return builder.build();
 
   }
