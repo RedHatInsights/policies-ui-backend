@@ -47,6 +47,7 @@ import javax.validation.constraints.NotNull;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.Test;
  */
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
+@Tag("integration")
 class RestApiTest extends AbstractITest {
 
   @Inject
@@ -174,13 +176,13 @@ class RestApiTest extends AbstractITest {
   @Test
   void testGetPoliciesSort() {
     given()
-            .header(authHeader)
+        .header(authHeader)
       .when()
         .get(API_BASE_V1_0 + "/policies/?sortColumn=description")
-            .then()
-            .statusCode(200)
-            .assertThat()
-            .body(" data.get(0).description", is("Another test"));
+      .then()
+        .statusCode(200)
+      .assertThat()
+        .body(" data.get(0).description", is("Another test"));
   }
 
   @Test
@@ -1056,10 +1058,10 @@ class RestApiTest extends AbstractITest {
         .header(authHeader)
       .when().get(location)
         .then()
-        .statusCode(200)
+      .statusCode(200)
         .extract()
         .body()
-        .asString();
+      .asString();
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
@@ -1107,7 +1109,7 @@ class RestApiTest extends AbstractITest {
           .header(authHeader)
         .when()
           .delete(location)
-          .then()
+        .then()
           .statusCode(200);
     }
   }

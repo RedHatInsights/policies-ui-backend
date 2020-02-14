@@ -27,6 +27,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.Assert;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -38,6 +39,7 @@ import java.util.Map;
  */
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
+@Tag("integration")
 public class RestApiRedirectTest extends AbstractITest {
 
     @Test

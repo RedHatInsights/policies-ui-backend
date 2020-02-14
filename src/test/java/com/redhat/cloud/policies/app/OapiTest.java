@@ -24,6 +24,7 @@ import com.reprezen.kaizen.oasparser.val.ValidationResults;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.Assert;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -38,6 +39,7 @@ import java.util.Map;
  * @author hrupp
  */
 @QuarkusTest
+@Tag("integration")
 public class OapiTest extends AbstractITest {
 
   private static final String OAPI_JSON = "openapi.json";

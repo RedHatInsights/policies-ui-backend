@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockserver.model.HttpRequest;
@@ -36,6 +37,7 @@ import org.mockserver.model.HttpRequest;
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("integration")
 public class UserConfigServiceTest extends AbstractITest {
 
   private static final String PREFERENCE_URL = API_BASE_V1_0 + "/user-config/email-preference";
