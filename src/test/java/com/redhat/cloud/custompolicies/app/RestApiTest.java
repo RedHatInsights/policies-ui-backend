@@ -29,6 +29,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
+import java.util.Map;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
@@ -213,7 +214,56 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("get(0).description", is("Another test"));
+            .body(" data.get(0).description", is("Another test"));
+  }
+
+  @Test
+  void testGetPoliciesPaged() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=2&offset=1")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 5;
+    Map<String, String> links = jsonPath.get("links");
+    assert links.size() == 4;
+    extractAndCheck(links,"first",2,0);
+    extractAndCheck(links,"prev",2,0);
+    extractAndCheck(links,"last",2,2);
+    extractAndCheck(links,"next",2,2);
+  }
+
+  @Test
+  void testGetPoliciesPaged2() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=3&offset=1")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 5;
+    Map<String, String> links = jsonPath.get("links");
+    assert links.size() == 3;
+    extractAndCheck(links,"first",3,0);
+    extractAndCheck(links,"prev",3,0);
+    extractAndCheck(links,"last",3,1);
+  }
+
+
+  private void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
+    String url = links.get(rel);
+    assert url != null;
+    String tmp = String.format("limit=%d&offset=%d",limit,offset);
+    assert url.endsWith(tmp);
   }
 
   @Test
@@ -234,9 +284,9 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("size()", is(1))
+            .body("data.size()", is(1))
             .assertThat()
-            .body("get(0).name", is("Detect Nice box"));
+            .body("data.get(0).name", is("Detect Nice box"));
   }
 
   @Test
@@ -247,9 +297,9 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("size()", is(1))
+            .body("data.size()", is(1))
             .assertThat()
-            .body("get(0).name", is("Detect Nice box"));
+            .body("data.get(0).name", is("Detect Nice box"));
   }
 
   @Test
