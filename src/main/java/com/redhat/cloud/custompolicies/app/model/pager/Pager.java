@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.custompolicies.app.model.pager;
 
+import com.redhat.cloud.custompolicies.app.model.filter.Filter;
 import io.quarkus.panache.common.Sort;
 import io.reactivex.annotations.Nullable;
 
@@ -26,10 +27,12 @@ public class Pager {
     private final int itemsPerPage;
     @Nullable
     private final Sort sort;
+    private final Filter filter;
 
-    public Pager(int page, int itemsPerPage, Sort sort) {
+    public Pager(int page, int itemsPerPage, Filter filter, Sort sort) {
         this.page = page;
         this.itemsPerPage = itemsPerPage;
+        this.filter = filter;
         this.sort = sort;
     }
 
@@ -39,6 +42,10 @@ public class Pager {
 
     public int getItemsPerPage() {
         return itemsPerPage;
+    }
+
+    public Filter getFilter() {
+        return (Filter) filter.clone();
     }
 
     public Sort getSort() {
@@ -54,11 +61,13 @@ public class Pager {
         private int page;
         private int itemsPerPage;
         private Sort sort;
+        private Filter filter;
 
         private PagerBuilder() {
             this.page = 0;
             this.itemsPerPage = 10;
             this.sort = Sort.by();
+            this.filter = new Filter();
         }
 
         public PagerBuilder page(int page) {
@@ -76,8 +85,18 @@ public class Pager {
             return this;
         }
 
+        public PagerBuilder filter(String column, Filter.Operator operator, String value) {
+            Object transformedValue = value;
+            if (operator.equals(Filter.Operator.BOOLEAN_IS)) {
+                transformedValue = Boolean.valueOf(value);
+            }
+
+            this.filter.and(column, operator, transformedValue);
+            return this;
+        }
+
         public Pager build() {
-            return new Pager(this.page, this.itemsPerPage, this.sort.getColumns().size() == 0 ? null : this.sort);
+            return new Pager(this.page, this.itemsPerPage, (Filter) this.filter.clone(), this.sort.getColumns().size() == 0 ? null : this.sort);
         }
 
     }

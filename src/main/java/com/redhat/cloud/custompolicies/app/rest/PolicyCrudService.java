@@ -125,7 +125,67 @@ public class PolicyCrudService {
                                   "desc"
                           }
                   )
-          )
+          ),
+          @Parameter(
+                  name = "filter[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the name depending on the Filter operator used."
+          ),
+          @Parameter(
+                  name="filter:op[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the description depending on the Filter operator used."
+          ),
+          @Parameter(
+                  name="filter:op[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used."
+          ),
+          @Parameter(
+                  name="filter:op[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
   @APIResponse(responseCode = "404", description = "No policies found for customer")
