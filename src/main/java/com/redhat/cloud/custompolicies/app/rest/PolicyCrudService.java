@@ -238,29 +238,22 @@ public class PolicyCrudService {
     policy.id = null;
     policy.customerid = user.getAccount();
 
-    Msg msg ;
+    Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+    if (tmp != null) {
+      return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+    }
+
     if (!skipEngineCall) {
       try {
         FullTrigger trigger = new FullTrigger(policy);
         engine.store(trigger, true, user.getAccount());
       } catch (Exception e) {
-        if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
-          msg = new Msg("Connection to backend-engine failed. Please retry later");
-        } else {
-          msg = new Msg(e.getMessage());
-        }
-      return Response.status(400,e.getMessage()).entity(msg).build();
+        return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
       }
     }
 
     if (!alsoStore) {
-      Policy tmp = Policy.findByName(user.getAccount(), policy.name);
-      if (tmp != null) {
-        return Response.status(409).entity(new Msg("Policy name is not unique")).build();
-      }
-      else {
-        return Response.status(200).entity(new Msg("Policy validated")).build();
-      }
+      return Response.status(200).entity(new Msg("Policy validated")).build();
     }
 
     if (!user.canWriteAll()) {
@@ -276,17 +269,15 @@ public class PolicyCrudService {
       // We persisted locally, now tell the engine
       if (!skipEngineCall) {
         FullTrigger trigger = new FullTrigger(policy);
-        engine.store(trigger, false, user.getAccount());
+        try {
+          engine.store(trigger, false, user.getAccount());
+        } catch (Exception e) {
+          return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+        }
         policy.triggerId = trigger.trigger.id;
       }
     } catch (Throwable t) {
-      if (t instanceof PersistenceException &&  t.getCause() instanceof ConstraintViolationException) {
-        return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
-      }
-      else {
-        t.printStackTrace();
-        return Response.status(500, t.getMessage()).build();
-      }
+      return getResponseSavingPolicyThrowable(t);
     }
 
     // Policy is persisted. Return its location.
@@ -295,6 +286,25 @@ public class PolicyCrudService {
     ResponseBuilder builder = Response.created(location);
     return builder.build();
 
+  }
+
+  private Response getResponseSavingPolicyThrowable(Throwable t) {
+    if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
+      return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
+    } else {
+      t.printStackTrace();
+      return Response.status(500, t.getMessage()).build();
+    }
+  }
+
+  private Msg getEngineExceptionMsg(Exception e) {
+    Msg msg;
+    if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
+      msg = new Msg("Connection to backend-engine failed. Please retry later");
+    } else {
+      msg = new Msg(e.getMessage());
+    }
+    return msg;
   }
 
   @Operation(summary = "Delete a single policy for a customer by its id")
@@ -332,7 +342,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
   @Transactional
-  public Response updatePolicy(@PathParam("policyId") Long policyId, @Valid Policy policy) {
+  public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") Long policyId, @Valid Policy policy) {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
@@ -347,12 +357,44 @@ public class PolicyCrudService {
       if (!policy.id.equals(policyId)) {
         builder = Response.status(400, "Invalid policy");
       } else {
-        storedPolicy.populateFrom(policy);
-        storedPolicy.customerid = user.getAccount();
-        storedPolicy.persist(storedPolicy);
-        FullTrigger trigger = new FullTrigger(storedPolicy);
-        trigger.trigger.id = storedPolicy.triggerId;
-        engine.update(storedPolicy.triggerId, trigger, user.getAccount());
+
+        Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+        if (tmp != null && !tmp.id.equals(policy.id)) {
+          return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+        }
+
+        if (!skipEngineCall) {
+          try {
+            FullTrigger trigger = new FullTrigger(policy);
+            trigger.trigger.id = policy.triggerId;
+            engine.update(policy.triggerId, trigger, true, user.getAccount());
+          } catch (Exception e) {
+            return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+          }
+        }
+
+        if (dryRun) {
+          return Response.status(200).entity(new Msg("Policy validated")).build();
+        }
+
+        try {
+          storedPolicy.populateFrom(policy);
+          storedPolicy.customerid = user.getAccount();
+          storedPolicy.persist(storedPolicy);
+          FullTrigger trigger = new FullTrigger(storedPolicy);
+          trigger.trigger.id = storedPolicy.triggerId;
+
+          if (!skipEngineCall) {
+            try {
+              engine.update(storedPolicy.triggerId, trigger, false, user.getAccount());
+            } catch (Exception e) {
+              return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+            }
+          }
+        } catch (Throwable t) {
+          return getResponseSavingPolicyThrowable(t);
+        }
+
         builder = Response.ok(storedPolicy);
       }
     }
