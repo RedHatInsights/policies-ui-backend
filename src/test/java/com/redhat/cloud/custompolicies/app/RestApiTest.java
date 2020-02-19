@@ -28,6 +28,7 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
+import io.restassured.response.ExtractableResponse;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
@@ -311,7 +312,7 @@ class RestApiTest {
     tp.conditions = "cores = 2";
     tp.name = "test1";
 
-    Headers headers =
+    ExtractableResponse er =
     given()
         .header(authHeader)
         .contentType(ContentType.JSON)
@@ -320,8 +321,14 @@ class RestApiTest {
       .when().post(API_BASE + "/policies")
         .then()
         .statusCode(201)
-        .extract().headers()
+        .extract()
         ;
+
+    Headers headers = er.headers();
+    TestPolicy returnedBody = er.body().as(TestPolicy.class);
+    assert returnedBody.id != 0 ;
+    assert returnedBody.conditions.equals("cores = 2");
+    assert returnedBody.name.equals("test1");
 
     assert headers.hasHeaderWithName("Location");
     // Extract location and then check in subsequent call
@@ -342,6 +349,7 @@ class RestApiTest {
 
     assert body.get("conditions").equals("cores = 2");
     assert body.get("name").equals("test1");
+    assert (Integer)body.get("id") == returnedBody.id;
 
     // now delete it again
     given()
