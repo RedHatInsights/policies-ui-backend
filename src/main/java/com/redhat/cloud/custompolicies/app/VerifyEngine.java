@@ -68,6 +68,7 @@ public interface VerifyEngine {
   @Path("/trigger/{triggerId}")
   Msg update(@PathParam("triggerId") String triggerId,
              FullTrigger trigger,
+             @QueryParam("dry") boolean isDryRun,
              @HeaderParam("Hawkular-Tenant") String customerId);
 
   /**
