@@ -25,6 +25,7 @@ import java.net.ConnectException;
 import java.net.URI;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -85,6 +86,9 @@ public class PolicyCrudService {
   @SuppressWarnings("CdiInjectionPointsInspection")
   @Inject
   RhIdPrincipal user;
+
+  @Inject
+  EntityManager entityManager;
 
   @Operation(summary = "Return all policies for a given account")
   @GET
@@ -203,7 +207,7 @@ public class PolicyCrudService {
     Pager pager = PagingUtils.extractPager(uriInfo);
     Page<Policy> page = null;
     try {
-      page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
+      page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
     } catch (IllegalArgumentException iae) {
       return Response.status(400,iae.getLocalizedMessage()).build();
     }

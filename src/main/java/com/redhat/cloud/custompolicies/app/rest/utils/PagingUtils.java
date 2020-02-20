@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.custompolicies.app.rest.utils;
 
+import static java.lang.Long.max;
+
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
@@ -45,34 +47,34 @@ public class PagingUtils {
         Pager.PagerBuilder pageBuilder = Pager.builder();
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
-        final String QUERY_PAGE = "offset";
-        final String QUERY_PAGE_SIZE = "limit";
+        final String QUERY_OFFSET = "offset";
+        final String QUERY_LIMIT = "limit";
         final String QUERY_COLUMN = "sortColumn";
         final String QUERY_DIRECTION = "sortDirection";
         final Pattern FILTER_PATTERN = Pattern.compile("filter\\[(.+)\\]");
         final String FILTER_OP = "filter:op";
 
-        String page = queryParams.getFirst(QUERY_PAGE);
+        String page = queryParams.getFirst(QUERY_OFFSET);
         if (page != null) {
             try {
                 pageBuilder.page(Integer.parseInt(page));
             } catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException(String.format(
                         "%s expects an int but found [%s]",
-                        QUERY_PAGE,
+                        QUERY_OFFSET,
                         page
                 ), nfe);
             }
         }
 
-        String itemsPerPage = queryParams.getFirst(QUERY_PAGE_SIZE);
+        String itemsPerPage = queryParams.getFirst(QUERY_LIMIT);
         if (itemsPerPage != null) {
             try {
                 pageBuilder.itemsPerPage(Integer.parseInt(itemsPerPage));
             } catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException(String.format(
                         "%s expects an int but found [%s]",
-                        QUERY_PAGE_SIZE,
+                        QUERY_LIMIT,
                         itemsPerPage
                 ), nfe);
             }
@@ -161,13 +163,15 @@ public class PagingUtils {
             String format = "%s?limit=%d&offset=%d";
 
             Pager pager = page.getPager();
-            links.put("first", String.format(format, location, pager.getItemsPerPage(), 0));
-            links.put("last", String.format(format, location, pager.getItemsPerPage(), page.getTotalCount() / pager.getItemsPerPage()));
-            if (pager.getPage() < page.getTotalCount() / pager.getItemsPerPage()) {
-                links.put("next", String.format(format, location, pager.getItemsPerPage(), pager.getPage() +1));
+            int limit = pager.getLimit();
+            links.put("first", String.format(format, location, limit, 0));
+            links.put("last", String.format(format, location, limit, (page.getTotalCount() / limit) * limit));
+            if (pager.getOffset() < page.getTotalCount() - limit) {
+                links.put("next", String.format(format, location, limit, pager.getOffset() + limit));
             }
-            if (pager.getPage() > 0) {
-                links.put("prev", String.format(format, location, pager.getItemsPerPage(), pager.getPage() -1));
+            if (pager.getOffset() > 0) {
+                links.put("prev", String.format(format, location, limit,
+                                                max(0,pager.getOffset() - limit)));
             }
         }
     }

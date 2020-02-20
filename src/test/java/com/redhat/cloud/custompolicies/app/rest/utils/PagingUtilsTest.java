@@ -19,16 +19,16 @@ public class PagingUtilsTest {
     public void testExtractDefaultPager() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo"));
         Pager pager = PagingUtils.extractPager(info);
-        Assert.assertEquals(10, pager.getItemsPerPage());
-        Assert.assertEquals(0, pager.getPage());
+        Assert.assertEquals(10, pager.getLimit());
+        Assert.assertEquals(0, pager.getOffset());
     }
 
     @Test
     public void testExtractPager() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?page=12&pageSize=100"));
         Pager pager = PagingUtils.extractPager(info);
-        Assert.assertEquals(100, pager.getItemsPerPage());
-        Assert.assertEquals(12, pager.getPage());
+        Assert.assertEquals(100, pager.getLimit());
+        Assert.assertEquals(12, pager.getOffset());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -234,8 +234,8 @@ class RestApiTest {
     assert links.size() == 4;
     extractAndCheck(links,"first",2,0);
     extractAndCheck(links,"prev",2,0);
-    extractAndCheck(links,"last",2,2);
-    extractAndCheck(links,"next",2,2);
+    extractAndCheck(links,"last",2,4);
+    extractAndCheck(links,"next",2,3);
   }
 
   @Test
@@ -255,15 +255,15 @@ class RestApiTest {
     assert links.size() == 3;
     extractAndCheck(links,"first",3,0);
     extractAndCheck(links,"prev",3,0);
-    extractAndCheck(links,"last",3,1);
+    extractAndCheck(links,"last",3,3);
   }
 
 
   private void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
     String url = links.get(rel);
-    assert url != null;
+    Assert.assertNotNull("Rel [" + rel + "] not found" , url);
     String tmp = String.format("limit=%d&offset=%d",limit,offset);
-    assert url.endsWith(tmp);
+    Assert.assertTrue("Url for rel ["+rel+"] should end in ["+tmp+"], but was [" + url +"]", url.endsWith(tmp));
   }
 
   @Test

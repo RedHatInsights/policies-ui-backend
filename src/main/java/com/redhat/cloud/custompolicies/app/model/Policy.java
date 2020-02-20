@@ -25,10 +25,15 @@ import io.quarkus.panache.common.Sort;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
+import javax.persistence.Query;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -82,7 +87,7 @@ public class Policy extends PanacheEntity {
   }
 
 
-  public static Page<Policy> pagePoliciesForCustomer(String customer, Pager pager) {
+  public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
 
     if (pager.getSort() != null) {
       for (Sort.Column column : pager.getSort().getColumns()) {
@@ -90,8 +95,7 @@ public class Policy extends PanacheEntity {
       }
     }
 
-    pager
-            .getFilter()
+    pager.getFilter()
             .getParameters()
             .map()
             .keySet()
@@ -99,12 +103,39 @@ public class Policy extends PanacheEntity {
 
     Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 
-    PanacheQuery<Policy> panacheQuery = find(
-            filter.getQuery(),
-            pager.getSort(),
-            filter.getParameters()
-    ).page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
-    return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
+//    PanacheQuery<Policy> panacheQuery = find(
+//            filter.getQuery(),
+//            pager.getSort(),
+//            filter.getParameters()
+//    ).page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
+//    return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
+
+    String qs = "SELECT p FROM Policy p WHERE ";
+    String cond =  filter.getQuery() + pager.getSort().toOrderBy();
+    qs = qs + cond;
+
+    Query q = em.createQuery(qs);
+    q.setParameter("customerid",customer);
+    q.setFirstResult(0);
+    q.setMaxResults(10);
+    for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
+      q.setParameter(param.getKey(),param.getValue());
+    }
+    List<Policy> results = q.getResultList();
+
+    qs = "SELECT count(p) FROM Policy p WHERE ";
+    qs = qs + filter.getQuery();
+
+    q = em.createQuery(qs);
+    q.setParameter("customerid",customer);
+    q.setFirstResult(0);
+    q.setMaxResults(10);
+    for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
+      q.setParameter(param.getKey(),param.getValue());
+    }
+    long count = (long) q.getSingleResult();
+
+    return new Page<>(results,pager,count);
   }
 
   public static Policy findById(String customer, Long theId) {
