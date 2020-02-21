@@ -218,26 +218,24 @@ class RestApiTest {
   }
 
   @Test
-  void testGetPoliciesPaged() {
+  void testGetPoliciesPaged1() {
 
     JsonPath jsonPath =
     given()
             .header(authHeader)
           .when()
-            .get(API_BASE + "/policies/?limit=2&offset=1")
+            .get(API_BASE + "/policies/")
           .then()
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 5;
+    assert (Integer)jsonPath.get("meta.count") == 11;
     Map<String, String> links = jsonPath.get("links");
-    assert links.size() == 4;
-    extractAndCheck(links,"first",2,0);
-    extractAndCheck(links,"prev",2,0);
-    extractAndCheck(links,"last",2,4);
-    extractAndCheck(links,"next",2,3);
+    Assert.assertEquals(links.size(),3);
+    extractAndCheck(links,"first",10,0);
+    extractAndCheck(links,"last",10,10);
+    extractAndCheck(links,"next",10,10);
   }
-
   @Test
   void testGetPoliciesPaged2() {
 
@@ -245,19 +243,60 @@ class RestApiTest {
     given()
             .header(authHeader)
           .when()
-            .get(API_BASE + "/policies/?limit=3&offset=1")
+            .get(API_BASE + "/policies/?limit=5")
           .then()
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 5;
+    assert (Integer)jsonPath.get("meta.count") == 11;
     Map<String, String> links = jsonPath.get("links");
-    assert links.size() == 3;
-    extractAndCheck(links,"first",3,0);
-    extractAndCheck(links,"prev",3,0);
-    extractAndCheck(links,"last",3,3);
+    Assert.assertEquals(links.size(),3);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"last",5,10);
+    extractAndCheck(links,"next",5,5);
   }
 
+  @Test
+  void testGetPoliciesPaged3() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=5&offset=5")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),4);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"prev",5,0);
+    extractAndCheck(links,"next",5,10);
+    extractAndCheck(links,"last",5,10);
+  }
+
+  @Test
+  void testGetPoliciesPaged4() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=5&offset=2")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),4);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"prev",5,0);
+    extractAndCheck(links,"next",5,7);
+    extractAndCheck(links,"last",5,10);
+  }
 
   private void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
     String url = links.get(rel);

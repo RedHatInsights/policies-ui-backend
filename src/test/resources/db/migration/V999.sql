@@ -8,4 +8,11 @@ insert into policy (id, customerId, name, description, is_enabled, conditions, a
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (4, '1234', '4th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (5, '1234', 'Detect Nice box', 'Test for os and arch', true, '"os_version" == "7.5" AND "arch" == "x86_64"', 'NOTIFY; EMAIL foo@acme.org','123-abc');
 
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (6, '1234', '5th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (7, '1234', '6th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (8, '1234', '7th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (9, '1234', '8th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (10, '1234', '9th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions, triggerId) values (11, '1234', 'Xth policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel','123-abc');
+
 
