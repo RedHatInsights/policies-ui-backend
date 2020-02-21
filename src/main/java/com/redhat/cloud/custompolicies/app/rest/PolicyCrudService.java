@@ -129,7 +129,8 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[name]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the name depending on the Filter operator used."
+                  description = "Filtering policies by the name depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
           ),
           @Parameter(
                   name="filter:op[name]",
@@ -149,7 +150,8 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[description]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the description depending on the Filter operator used."
+                  description = "Filtering policies by the description depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
           ),
           @Parameter(
                   name="filter:op[description]",
@@ -169,7 +171,8 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[is_enabled]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used."
+                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
           ),
           @Parameter(
                   name="filter:op[is_enabled]",
