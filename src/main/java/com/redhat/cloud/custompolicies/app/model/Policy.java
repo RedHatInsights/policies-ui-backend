@@ -102,7 +102,10 @@ public class Policy extends PanacheEntity {
             .forEach(FilterableColumn::fromName);
 
     Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-
+//  Todo: There is an oingoing discussion about quarkus supporting a "range" paging
+//  https://github.com/quarkusio/quarkus/issues/3870
+//  Should make below code easier to read.    
+//    
 //    PanacheQuery<Policy> panacheQuery = find(
 //            filter.getQuery(),
 //            pager.getSort(),
