@@ -29,6 +29,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
+import java.util.Map;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
@@ -213,7 +214,95 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("get(0).description", is("Another test"));
+            .body(" data.get(0).description", is("Another test"));
+  }
+
+  @Test
+  void testGetPoliciesPaged1() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),3);
+    extractAndCheck(links,"first",10,0);
+    extractAndCheck(links,"last",10,10);
+    extractAndCheck(links,"next",10,10);
+  }
+  @Test
+  void testGetPoliciesPaged2() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=5")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),3);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"last",5,10);
+    extractAndCheck(links,"next",5,5);
+  }
+
+  @Test
+  void testGetPoliciesPaged3() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=5&offset=5")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),4);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"prev",5,0);
+    extractAndCheck(links,"next",5,10);
+    extractAndCheck(links,"last",5,10);
+  }
+
+  @Test
+  void testGetPoliciesPaged4() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE + "/policies/?limit=5&offset=2")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),4);
+    extractAndCheck(links,"first",5,0);
+    extractAndCheck(links,"prev",5,0);
+    extractAndCheck(links,"next",5,7);
+    extractAndCheck(links,"last",5,10);
+  }
+
+  private void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
+    String url = links.get(rel);
+    Assert.assertNotNull("Rel [" + rel + "] not found" , url);
+    String tmp = String.format("limit=%d&offset=%d",limit,offset);
+    Assert.assertTrue("Url for rel ["+rel+"] should end in ["+tmp+"], but was [" + url +"]", url.endsWith(tmp));
   }
 
   @Test
@@ -234,9 +323,9 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("size()", is(1))
+            .body("data.size()", is(1))
             .assertThat()
-            .body("get(0).name", is("Detect Nice box"));
+            .body("data.get(0).name", is("Detect Nice box"));
   }
 
   @Test
@@ -247,9 +336,9 @@ class RestApiTest {
             .then()
             .statusCode(200)
             .assertThat()
-            .body("size()", is(1))
+            .body("data.size()", is(1))
             .assertThat()
-            .body("get(0).name", is("Detect Nice box"));
+            .body("data.get(0).name", is("Detect Nice box"));
   }
 
   @Test

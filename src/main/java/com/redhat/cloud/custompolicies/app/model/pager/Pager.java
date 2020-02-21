@@ -23,25 +23,25 @@ import io.reactivex.annotations.Nullable;
 
 public class Pager {
 
-    private final int page;
-    private final int itemsPerPage;
+    private final int offset;
+    private final int limit;
     @Nullable
     private final Sort sort;
     private final Filter filter;
 
-    public Pager(int page, int itemsPerPage, Filter filter, Sort sort) {
-        this.page = page;
-        this.itemsPerPage = itemsPerPage;
+    public Pager(int offset, int limit, Filter filter, Sort sort) {
+        this.offset = offset;
+        this.limit = limit;
         this.filter = filter;
         this.sort = sort;
     }
 
-    public int getPage() {
-        return page;
+    public int getOffset() {
+        return offset;
     }
 
-    public int getItemsPerPage() {
-        return itemsPerPage;
+    public int getLimit() {
+        return limit;
     }
 
     public Filter getFilter() {
@@ -58,25 +58,25 @@ public class Pager {
 
     public static class PagerBuilder {
 
-        private int page;
-        private int itemsPerPage;
+        private int offset;
+        private int limit;
         private Sort sort;
         private Filter filter;
 
         private PagerBuilder() {
-            this.page = 0;
-            this.itemsPerPage = 10;
+            this.offset = 0;
+            this.limit = 10;
             this.sort = Sort.by();
             this.filter = new Filter();
         }
 
-        public PagerBuilder page(int page) {
-            this.page = page;
+        public PagerBuilder page(int offset) {
+            this.offset = offset;
             return this;
         }
 
-        public PagerBuilder itemsPerPage(int itemsPerPage) {
-            this.itemsPerPage = itemsPerPage;
+        public PagerBuilder itemsPerPage(int limit) {
+            this.limit = limit;
             return this;
         }
 
@@ -96,7 +96,8 @@ public class Pager {
         }
 
         public Pager build() {
-            return new Pager(this.page, this.itemsPerPage, (Filter) this.filter.clone(), this.sort.getColumns().size() == 0 ? null : this.sort);
+            return new Pager(this.offset, this.limit, (Filter) this.filter.clone(),
+                             this.sort.getColumns().size() == 0 ? null : this.sort);
         }
 
     }

@@ -25,6 +25,7 @@ import java.net.ConnectException;
 import java.net.URI;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -86,18 +87,21 @@ public class PolicyCrudService {
   @Inject
   RhIdPrincipal user;
 
+  @Inject
+  EntityManager entityManager;
+
   @Operation(summary = "Return all policies for a given account")
   @GET
   @Path("/")
   @Parameters({
           @Parameter(
-                  name = "page",
+                  name = "offset",
                   in = ParameterIn.QUERY,
                   description = "Page number, starts 0, if not specified uses 0.",
                   schema = @Schema(type = SchemaType.INTEGER)
           ),
           @Parameter(
-                  name = "pageSize",
+                  name = "limit",
                   in = ParameterIn.QUERY,
                   description = "Number of items per page, if not specified uses 10.",
                   schema = @Schema(type = SchemaType.INTEGER)
@@ -194,7 +198,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "Policies found", content =
-                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Policy.class)),
+                 @Content(schema = @Schema(implementation = PagingUtils.PagedResponse.class)),
                  headers = @Header(name = "TotalCount", description = "Total number of items found",
                                    schema = @Schema(type = SchemaType.INTEGER)))
   public Response getPoliciesForCustomer() {
@@ -206,7 +210,7 @@ public class PolicyCrudService {
     Pager pager = PagingUtils.extractPager(uriInfo);
     Page<Policy> page = null;
     try {
-      page = Policy.pagePoliciesForCustomer(user.getAccount(), pager);
+      page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
     } catch (IllegalArgumentException iae) {
       return Response.status(400,iae.getLocalizedMessage()).build();
     }
