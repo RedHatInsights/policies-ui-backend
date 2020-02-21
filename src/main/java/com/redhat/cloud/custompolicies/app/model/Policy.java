@@ -115,9 +115,10 @@ public class Policy extends PanacheEntity {
     qs = qs + cond;
 
     Query q = em.createQuery(qs);
+    // Always set the customer id - even if that may be part of parameters below
     q.setParameter("customerid",customer);
-    q.setFirstResult(0);
-    q.setMaxResults(10);
+    q.setFirstResult(pager.getOffset());
+    q.setMaxResults(pager.getLimit());
     for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
       q.setParameter(param.getKey(),param.getValue());
     }
@@ -127,9 +128,8 @@ public class Policy extends PanacheEntity {
     qs = qs + filter.getQuery();
 
     q = em.createQuery(qs);
+    // Always set the customer id - even if that may be part of parameters below
     q.setParameter("customerid",customer);
-    q.setFirstResult(0);
-    q.setMaxResults(10);
     for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
       q.setParameter(param.getKey(),param.getValue());
     }
