@@ -17,7 +17,11 @@
 package com.redhat.cloud.custompolicies.app.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -51,6 +55,26 @@ public class FullTrigger {
     var cond = new Condition();
     cond.expression = policy.conditions;
     conditions.add(cond);
+    storeActions(trigger, policy);
+  }
+
+  private void storeActions(Trigger trigger, Policy policy) {
+    String[] actionsIn = policy.actions.split(";");
+    for (String actionIn : actionsIn) {
+      TriggerAction ta = new TriggerAction();
+      if (actionIn.startsWith("EMAIL")) {
+        ta.actionPlugin = "email";
+      } else if (actionIn.startsWith("HOOK")) { // TODO what does the UI send?
+        ta.actionPlugin = "webhook";
+        String endpoint = actionIn.substring(actionIn.indexOf(' ')+1);
+        ta.properties.put("endpoint_id",endpoint);
+      }
+      else {
+        throw new IllegalArgumentException("Unknown action type " + actionIn);
+      }
+
+      trigger.actions.add(ta);
+    }
   }
 
   public FullTrigger(Policy policy) {
@@ -67,7 +91,7 @@ public class FullTrigger {
     public String name;
     public String description;
     public boolean enabled;
-
+    public Set<TriggerAction> actions;
 
   }
 
@@ -76,5 +100,10 @@ public class FullTrigger {
     public String type = "EVENT";
     public String dataId = "insights_report";
     public String expression;
+  }
+
+  public static class TriggerAction {
+    public String actionPlugin;
+    public Map<String,Object> properties = new HashMap<>();
   }
 }
