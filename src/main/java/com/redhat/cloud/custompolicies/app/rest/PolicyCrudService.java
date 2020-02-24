@@ -409,8 +409,9 @@ public class PolicyCrudService {
   @POST
   @Path("/validate")
   @APIResponses({
+          @APIResponse(responseCode = "200", description = "Condition validated"),
           @APIResponse(responseCode = "400", description = "Condition not valid"),
-          @APIResponse(responseCode = "200", description = "Condition validated")
+          @APIResponse(responseCode = "500", description = "No policy provided or internal error")
   })
   public Response validateCondition(Policy policy) {
 
