@@ -344,7 +344,7 @@ public class PolicyCrudService {
   @Operation(summary = "Update a single policy for a customer by its id")
   @PUT
   @Path("/{policyId}")
-  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "200", description = "Policy updated or policy validated")
   @APIResponse(responseCode = "400", description = "Invalid policy provided")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
@@ -407,6 +407,44 @@ public class PolicyCrudService {
     }
 
     return builder.build();
+  }
+
+  @Operation(summary = "Validates a Policy condition")
+  @POST
+  @Path("/validate")
+  @APIResponses({
+          @APIResponse(responseCode = "200", description = "Condition validated"),
+          @APIResponse(responseCode = "400", description = "Condition not valid"),
+          @APIResponse(responseCode = "500", description = "No policy provided or internal error")
+  })
+  public Response validateCondition(Policy policy) {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+    }
+
+    if (policy == null) {
+      return Response.status(500, "No policy passed").build();
+    }
+
+    policy.customerid = user.getAccount();
+
+    if (!skipEngineCall) {
+      try {
+        FullTrigger trigger = new FullTrigger(policy);
+        if (policy.triggerId == null) {
+          engine.store(trigger, true, user.getAccount());
+        } else {
+          trigger.trigger.id = policy.triggerId;
+          engine.update(policy.triggerId, trigger, true, user.getAccount());
+        }
+      } catch (Exception e) {
+        return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+      }
+    }
+
+    return Response.status(200).entity(new Msg("Policy.condition validated")).build();
+
   }
 
 
