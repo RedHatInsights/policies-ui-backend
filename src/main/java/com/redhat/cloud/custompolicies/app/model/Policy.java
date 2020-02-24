@@ -89,10 +89,8 @@ public class Policy extends PanacheEntity {
 
   public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
 
-    if (pager.getSort() != null) {
-      for (Sort.Column column : pager.getSort().getColumns()) {
-        SortableColumn.fromName(column.getName());
-      }
+    for (Sort.Column column : pager.getSort().getColumns()) {
+      SortableColumn.fromName(column.getName());
     }
 
     pager.getFilter()
