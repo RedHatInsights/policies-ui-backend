@@ -96,8 +96,7 @@ public class Pager {
         }
 
         public Pager build() {
-            return new Pager(this.offset, this.limit, (Filter) this.filter.clone(),
-                             this.sort.getColumns().size() == 0 ? null : this.sort);
+            return new Pager(this.offset, this.limit, (Filter) this.filter.clone(), this.sort);
         }
 
     }
