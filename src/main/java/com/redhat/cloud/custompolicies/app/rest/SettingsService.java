@@ -75,16 +75,16 @@ public class SettingsService {
     }
     // Also send to notification service
     if (values.immediateEmail) {
-      notifications.addNotification(user.getName(), "custom-policies-instant-mail", user.getRawRhIdHeader());
+      notifications.addNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
     }
     else {
-      notifications.removeNotification(user.getName(), "custom-policies-instant-mail", user.getRawRhIdHeader());
+      notifications.removeNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
     }
     if (values.dailyEmail) {
-      notifications.addNotification(user.getName(), "custom-policies-daily-mail", user.getRawRhIdHeader());
+      notifications.addNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
     }
     else {
-      notifications.removeNotification(user.getName(), "custom-policies-daily-mail", user.getRawRhIdHeader());
+      notifications.removeNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
     }
 
     Response.ResponseBuilder builder = Response.ok();

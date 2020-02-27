@@ -33,16 +33,14 @@ public interface NotificationSystem {
 
 
   @PUT
-  @Path("/{userId}/{event}")
+  @Path("/{event}")
   CompletionStage<String> addNotification(
-      @PathParam("userId") String userId,
       @PathParam("event") String event,
       @HeaderParam("x-rh-identity") String rhIdentity);
 
   @DELETE
-  @Path("/{userId}/{event}")
+  @Path("/{event}")
   CompletionStage<String> removeNotification(
-      @PathParam("userId") String userId,
       @PathParam("event") String event,
       @HeaderParam("x-rh-identity") String rhIdentity);
 }
