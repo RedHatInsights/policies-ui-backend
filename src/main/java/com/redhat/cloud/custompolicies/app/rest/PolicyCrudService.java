@@ -69,7 +69,7 @@ import org.hibernate.exception.ConstraintViolationException;
 @Path("/policies")
 @Produces("application/json")
 @Consumes("application/json")
-@Timed
+@Timed(absolute = true, name="PolicyService")
 @RequestScoped
 public class PolicyCrudService {
 
