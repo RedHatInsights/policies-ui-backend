@@ -59,12 +59,19 @@ public class FullTrigger {
   }
 
   private void storeActions(Trigger trigger, Policy policy) {
+    if (policy.actions == null) {
+      return;
+    }
+
     String[] actionsIn = policy.actions.split(";");
     for (String actionIn : actionsIn) {
       TriggerAction ta = new TriggerAction();
-      if (actionIn.startsWith("EMAIL")) {
+      if (actionIn.trim().isEmpty()) {
+        continue;
+      }
+      if (actionIn.toLowerCase().startsWith("email")) {
         ta.actionPlugin = "email";
-      } else if (actionIn.startsWith("HOOK")) { // TODO what does the UI send?
+      } else if (actionIn.toLowerCase().startsWith("webhook")) {
         ta.actionPlugin = "webhook";
         String endpoint = actionIn.substring(actionIn.indexOf(' ')+1);
         ta.properties.put("endpoint_id",endpoint);
