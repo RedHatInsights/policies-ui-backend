@@ -364,7 +364,7 @@ class RestApiTest {
     JsonPath jsonPath =
     given()
         .header(authHeader)
-        .when().get(API_BASE + "/policies/1")
+        .when().get(API_BASE + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
         .then()
         .statusCode(200)
         .body(containsString("1st policy"))
@@ -380,7 +380,7 @@ class RestApiTest {
   void testGetOnePolicyNoAccess() {
     given()
         .header(authRbacNoAccess)
-        .when().get(API_BASE + "/policies/1")
+        .when().get(API_BASE + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
         .then()
         .statusCode(403);
   }
@@ -415,9 +415,9 @@ class RestApiTest {
 
     Headers headers = er.headers();
     TestPolicy returnedBody = er.body().as(TestPolicy.class);
-    assert returnedBody.id != 0 ;
-    assert returnedBody.conditions.equals("cores = 2");
-    assert returnedBody.name.equals("test1");
+    Assert.assertNotNull(returnedBody);
+    Assert.assertEquals("cores = 2", returnedBody.conditions);
+    Assert.assertEquals("test1", returnedBody.name);
 
     assert headers.hasHeaderWithName("Location");
     // Extract location and then check in subsequent call
@@ -438,7 +438,7 @@ class RestApiTest {
 
     assert body.get("conditions").equals("cores = 2");
     assert body.get("name").equals("test1");
-    assert (Integer)body.get("id") == returnedBody.id;
+    Assert.assertEquals(body.get("id").toString(), returnedBody.id.toString());
 
     // now delete it again
     given()
@@ -471,7 +471,6 @@ class RestApiTest {
     tp.actions = "EMAIL roadrunner@acme.org";
     tp.conditions = "cores = 2";
     tp.name = "test2";
-    tp.triggerId ="123-abc";
 
     Headers headers =
     given()
@@ -505,7 +504,7 @@ class RestApiTest {
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
-    assert tp.triggerId.equals(ret.triggerId);
+    assert tp.conditions.equals(ret.conditions);
 
     try {
       // update
@@ -547,7 +546,6 @@ class RestApiTest {
     tp.actions = "EMAIL roadrunner@acme.org";
     tp.conditions = "cores = 2";
     tp.name = "test2";
-    tp.triggerId ="123-abc";
 
     Headers headers =
     given()
@@ -581,7 +579,7 @@ class RestApiTest {
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
-    assert tp.triggerId.equals(ret.triggerId);
+    assert tp.conditions.equals(ret.conditions);
 
     try {
       // update
@@ -611,7 +609,7 @@ class RestApiTest {
 
     given()
         .header(authHeader)
-      .when().delete(API_BASE + "/policies/3")
+      .when().delete(API_BASE + "/policies/e3bdc9dd-18d4-4900-805d-7f59b3c736f7")
         .then()
         .statusCode(200)
         ;
@@ -619,7 +617,7 @@ class RestApiTest {
     // Now check that it is gone
     given()
         .header(authHeader)
-      .when().get(API_BASE + "/policies/3")
+      .when().get(API_BASE + "/policies/e3bdc9dd-18d4-4900-805d-7f59b3c736f7")
         .then()
         .statusCode(404);
   }
@@ -629,7 +627,7 @@ class RestApiTest {
 
     given()
         .header(authRbacNoAccess)
-        .when().delete(API_BASE + "/policies/3")
+        .when().delete(API_BASE + "/policies/e3bdc9dd-18d4-4900-805d-7f59b3c736f7")
         .then()
         .statusCode(403)
     ;

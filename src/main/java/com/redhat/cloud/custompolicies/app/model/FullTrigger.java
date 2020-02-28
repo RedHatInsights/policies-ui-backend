@@ -36,21 +36,25 @@ public class FullTrigger {
     conditions = new ArrayList<>();
   }
 
-  public FullTrigger(Policy policy) {
+  public FullTrigger(Policy policy, boolean generatePseudoId) {
     trigger = new Trigger();
-    if (policy.triggerId == null || policy.triggerId.isEmpty()) {
+    if (generatePseudoId) {
       trigger.id = generateId();
     }
     else {
-      trigger.id = policy.triggerId;
+      trigger.id = policy.id.toString();
     }
     trigger.name = policy.name;
     trigger.description = policy.description;
     trigger.enabled = policy.isEnabled;
     conditions = new ArrayList<>(1);
-    Condition cond = new Condition();
+    var cond = new Condition();
     cond.expression = policy.conditions;
     conditions.add(cond);
+  }
+
+  public FullTrigger(Policy policy) {
+    this(policy,false);
   }
 
   private static String generateId() {

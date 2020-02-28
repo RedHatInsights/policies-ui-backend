@@ -19,8 +19,7 @@ package com.redhat.cloud.custompolicies.app.model;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import com.redhat.cloud.custompolicies.app.model.filter.Filter;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Sort;
 
 import java.sql.Timestamp;
@@ -28,22 +27,35 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Query;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  * @author hrupp
  */
 @Entity
-public class Policy extends PanacheEntity {
+public class Policy extends PanacheEntityBase {
+
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(
+      name = "UUID",
+      strategy = "org.hibernate.id.UUIDGenerator"
+  )
+  @Id
+  public
+  UUID id;
+
   @JsonbTransient
   public String customerid;
 
@@ -70,11 +82,10 @@ public class Policy extends PanacheEntity {
           description = "Last update time in a form like '2020-01-24 12:19:56.718', output only",
           readOnly = true,
           format = "yyyy-MM-dd hh:mm:ss.ddd",
-  implementation = String.class)
+          implementation = String.class)
   private Timestamp mtime=new Timestamp(System.currentTimeMillis());
 
 
-  public String triggerId;
 
 
   @JsonbTransient
@@ -102,8 +113,8 @@ public class Policy extends PanacheEntity {
     Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 //  Todo: There is an oingoing discussion about quarkus supporting a "range" paging
 //  https://github.com/quarkusio/quarkus/issues/3870
-//  Should make below code easier to read.    
-//    
+//  Should make below code easier to read.
+//
 //    PanacheQuery<Policy> panacheQuery = find(
 //            filter.getQuery(),
 //            pager.getSort(),
@@ -139,7 +150,7 @@ public class Policy extends PanacheEntity {
     return new Page<>(results,pager,count);
   }
 
-  public static Policy findById(String customer, Long theId) {
+  public static Policy findById(String customer, UUID theId) {
     return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
   }
 
@@ -147,7 +158,7 @@ public class Policy extends PanacheEntity {
     return find("customerid = ?1 and name = ?2", customer, name).firstResult();
   }
 
-  public Long store(String customer, Policy policy) {
+  public UUID store(String customer, Policy policy) {
     if (!customer.equals(policy.customerid)) {
       throw new IllegalArgumentException("Store: customer id do not match");
     }
@@ -167,7 +178,6 @@ public class Policy extends PanacheEntity {
     this.id = policy.id;
     this.name = policy.name;
     this.description = policy.description;
-    this.triggerId = policy.triggerId;
     this.actions = policy.actions;
     this.conditions = policy.conditions;
     this.isEnabled = policy.isEnabled;
@@ -181,7 +191,6 @@ public class Policy extends PanacheEntity {
     sb.append(", customerid='").append(customerid).append('\'');
     sb.append(", name='").append(name).append('\'');
     sb.append(", mtime=").append(mtime);
-    sb.append(", triggerId='").append(triggerId).append('\'');
     sb.append('}');
     return sb.toString();
   }
