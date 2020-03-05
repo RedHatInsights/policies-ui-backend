@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.custompolicies.app;
 
+import java.util.UUID;
 import javax.persistence.Column;
 
 /**
@@ -24,7 +25,7 @@ import javax.persistence.Column;
  */
 public class TestPolicy {
 
-  public long id;
+  public UUID id;
   public String customerid;
 
   public String name;
@@ -36,5 +37,4 @@ public class TestPolicy {
   public String actions;
 
   public String mtime;
-  public String triggerId;
 }

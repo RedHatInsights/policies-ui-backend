@@ -23,6 +23,7 @@ import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.UUID;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -208,7 +209,7 @@ public class PolicyCrudService {
     }
 
     Pager pager = PagingUtils.extractPager(uriInfo);
-    Page<Policy> page = null;
+    Page<Policy> page;
     try {
       page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
     } catch (IllegalArgumentException iae) {
@@ -252,7 +253,7 @@ public class PolicyCrudService {
 
     if (!skipEngineCall) {
       try {
-        FullTrigger trigger = new FullTrigger(policy);
+        FullTrigger trigger = new FullTrigger(policy,true);
         engine.store(trigger, true, user.getAccount());
       } catch (Exception e) {
         return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
@@ -270,7 +271,7 @@ public class PolicyCrudService {
     // Basic validation was successful, so try to persist.
     // This may still fail du to unique name violation, so
     // we need to check for that.
-    Long id;
+    UUID id;
     try {
       id = policy.store(user.getAccount(), policy);
       // We persisted locally, now tell the engine
@@ -281,7 +282,6 @@ public class PolicyCrudService {
         } catch (Exception e) {
           return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
-        policy.triggerId = trigger.trigger.id;
       }
     } catch (Throwable t) {
       return getResponseSavingPolicyThrowable(t);
@@ -321,7 +321,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "400", description = "Deletion failed")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @Transactional
-  public Response deletePolicy(@PathParam("id") Long policyId) {
+  public Response deletePolicy(@PathParam("id") UUID policyId) {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
@@ -333,7 +333,7 @@ public class PolicyCrudService {
       builder = Response.status(Response.Status.BAD_REQUEST);
     } else {
       policy.delete(policy);
-      engine.deleteTrigger(policy.triggerId, user.getAccount());
+      engine.deleteTrigger(policy.id, user.getAccount());
       builder = Response.ok(policy);
     }
 
@@ -349,7 +349,8 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
   @Transactional
-  public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") Long policyId, @Valid Policy policy) {
+  public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
+                               @Valid Policy policy) {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
@@ -373,8 +374,7 @@ public class PolicyCrudService {
         if (!skipEngineCall) {
           try {
             FullTrigger trigger = new FullTrigger(policy);
-            trigger.trigger.id = policy.triggerId;
-            engine.update(policy.triggerId, trigger, true, user.getAccount());
+            engine.update(policy.id, trigger, true, user.getAccount());
           } catch (Exception e) {
             return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
           }
@@ -387,13 +387,12 @@ public class PolicyCrudService {
         try {
           storedPolicy.populateFrom(policy);
           storedPolicy.customerid = user.getAccount();
-          storedPolicy.persist(storedPolicy);
+          Policy.persist(storedPolicy);
           FullTrigger trigger = new FullTrigger(storedPolicy);
-          trigger.trigger.id = storedPolicy.triggerId;
 
           if (!skipEngineCall) {
             try {
-              engine.update(storedPolicy.triggerId, trigger, false, user.getAccount());
+              engine.update(storedPolicy.id, trigger, false, user.getAccount());
             } catch (Exception e) {
               return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
@@ -432,11 +431,11 @@ public class PolicyCrudService {
     if (!skipEngineCall) {
       try {
         FullTrigger trigger = new FullTrigger(policy);
-        if (policy.triggerId == null) {
+        if (policy.id == null) {
+          trigger.trigger.id = UUID.randomUUID().toString(); // We need a pseudo one
           engine.store(trigger, true, user.getAccount());
         } else {
-          trigger.trigger.id = policy.triggerId;
-          engine.update(policy.triggerId, trigger, true, user.getAccount());
+          engine.update(policy.id, trigger, true, user.getAccount());
         }
       } catch (Exception e) {
         return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
@@ -455,7 +454,7 @@ public class PolicyCrudService {
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-  public Response getPolicy(@PathParam("id") Long policyId) {
+  public Response getPolicy(@PathParam("id") UUID policyId) {
 
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();

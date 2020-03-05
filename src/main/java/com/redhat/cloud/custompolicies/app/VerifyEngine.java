@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app;
 
 import com.redhat.cloud.custompolicies.app.model.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
+import java.util.UUID;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.HeaderParam;
@@ -66,7 +67,7 @@ public interface VerifyEngine {
   @Consumes("application/json")
   @Produces("application/json")
   @Path("/trigger/{triggerId}")
-  Msg update(@PathParam("triggerId") String triggerId,
+  Msg update(@PathParam("triggerId") UUID triggerId,
              FullTrigger trigger,
              @QueryParam("dry") boolean isDryRun,
              @HeaderParam("Hawkular-Tenant") String customerId);
@@ -79,6 +80,6 @@ public interface VerifyEngine {
   @DELETE
   @Consumes("application/json")
   @Path("/{triggerId}")
-  void deleteTrigger(@PathParam("triggerId") String triggerId,
+  void deleteTrigger(@PathParam("triggerId") UUID triggerId,
                      @HeaderParam("Hawkular-Tenant" ) String customerId);
 }
