@@ -1,4 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Fact key table for fact-key -> type mapping
 create table fact (id integer primary key, name varchar unique not null , type varchar);
