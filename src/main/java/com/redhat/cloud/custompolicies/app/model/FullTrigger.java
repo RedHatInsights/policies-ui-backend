@@ -38,10 +38,11 @@ public class FullTrigger {
   public FullTrigger() {
     trigger = new Trigger();
     conditions = new ArrayList<>();
+    trigger.actions = new HashSet<>();
   }
 
   public FullTrigger(Policy policy, boolean generatePseudoId) {
-    trigger = new Trigger();
+    this();
     if (generatePseudoId) {
       trigger.id = generateId();
     }
@@ -51,7 +52,6 @@ public class FullTrigger {
     trigger.name = policy.name;
     trigger.description = policy.description;
     trigger.enabled = policy.isEnabled;
-    conditions = new ArrayList<>(1);
     var cond = new Condition();
     cond.expression = policy.conditions;
     conditions.add(cond);
@@ -65,14 +65,14 @@ public class FullTrigger {
 
     String[] actionsIn = policy.actions.split(";");
     for (String actionIn : actionsIn) {
-      TriggerAction ta = new TriggerAction();
+      var ta = new TriggerAction();
       if (actionIn.trim().isEmpty()) {
         continue;
       }
       if (actionIn.toLowerCase().startsWith("email")) {
         ta.actionPlugin = "email";
       } else if (actionIn.toLowerCase().startsWith("webhook")) {
-        ta.actionPlugin = "webhook";
+        ta.actionPlugin = "hook"; // The legacy hooks apps
         String endpoint = actionIn.substring(actionIn.indexOf(' ')+1);
         ta.properties.put("endpoint_id",endpoint);
       }
