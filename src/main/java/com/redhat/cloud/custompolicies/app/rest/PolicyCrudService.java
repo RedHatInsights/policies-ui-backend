@@ -224,7 +224,7 @@ public class PolicyCrudService {
   @APIResponses({
       @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
       @APIResponse(responseCode = "400", description = "Policy validation failed",
-                   content = @Content(schema =@Schema(implementation = String.class,
+                   content = @Content(schema =@Schema(implementation = Msg.class,
                                                                          description = "Reason for failure"))),
       @APIResponse(responseCode = "409", description = "Persisting failed",
                    content = @Content(schema =@Schema(implementation = String.class,
