@@ -73,8 +73,6 @@ public class FullTrigger {
         ta.actionPlugin = "email";
       } else if (actionIn.toLowerCase().startsWith("webhook")) {
         ta.actionPlugin = "hooks"; // The legacy hooks apps
-        String endpoint = actionIn.substring(actionIn.indexOf(' ')+1);
-        ta.properties.put("endpoint_id",endpoint);
       }
       else {
         throw new IllegalArgumentException("Unknown action type " + actionIn);
