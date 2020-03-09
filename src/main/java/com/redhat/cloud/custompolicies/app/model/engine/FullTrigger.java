@@ -145,5 +145,4 @@ public class FullTrigger {
     return actionName;
   }
 
-
 }

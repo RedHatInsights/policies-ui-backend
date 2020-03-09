@@ -35,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Query;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -85,7 +86,13 @@ public class Policy extends PanacheEntityBase {
           implementation = String.class)
   private Timestamp mtime=new Timestamp(System.currentTimeMillis());
 
-
+  @Schema(type = SchemaType.STRING,
+          description = "Last evaluation time in a form like '2020-01-24 12:19:56.718', output only",
+          readOnly = true,
+          format = "yyyy-MM-dd hh:mm:ss.ddd",
+          implementation = String.class)
+  @Transient
+  private Timestamp lastEvaluation;
 
 
   @JsonbTransient
@@ -95,6 +102,15 @@ public class Policy extends PanacheEntityBase {
 
   public String getMtime() {
     return mtime.toString();
+  }
+
+  @JsonbTransient
+  public void setLastEvaluation(long lastEvaluation) {
+    this.lastEvaluation = new Timestamp(lastEvaluation);
+  }
+
+  public String getLastEvaluation() {
+    return lastEvaluation != null ? lastEvaluation.toString() : "";
   }
 
 
