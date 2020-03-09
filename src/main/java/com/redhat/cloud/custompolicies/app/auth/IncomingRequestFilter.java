@@ -28,7 +28,6 @@ import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import jdk.net.SocketFlow;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**

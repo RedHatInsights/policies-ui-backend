@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 
@@ -30,7 +31,7 @@ import org.eclipse.microprofile.openapi.models.Paths;
  * servers part of the document.
  * @author hrupp
  */
-public class OAPathModifier implements OASFilter {
+public class OASModifier implements OASFilter {
 
   @Override
   public void filterOpenAPI(OpenAPI openAPI) {
@@ -41,6 +42,15 @@ public class OAPathModifier implements OASFilter {
       PathItem p = paths.getPathItem(key);
       String mangledName = mangleName(key);
       replacementItems.put(mangledName,p);
+
+      Map<PathItem.HttpMethod, Operation> operations = p.getOperations();
+      for (Map.Entry<PathItem.HttpMethod,Operation> entry: operations.entrySet()) {
+        Operation op = entry.getValue();
+
+        String id = mangledName.replace('/','_') ;
+        id = entry.getKey().toString() + id ;
+        op.setOperationId(id);
+      }
     }
     paths.setPathItems(replacementItems);
   }
