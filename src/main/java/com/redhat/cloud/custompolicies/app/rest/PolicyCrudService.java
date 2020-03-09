@@ -224,10 +224,15 @@ public class PolicyCrudService {
              description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
   @APIResponses({
       @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
-      @APIResponse(responseCode = "400", description = "Policy validation failed"),
-      @APIResponse(responseCode = "409", description = "Persisting failed"),
+      @APIResponse(responseCode = "400", description = "Policy validation failed",
+                   content = @Content(schema =@Schema(implementation = Msg.class,
+                                                                         description = "Reason for failure"))),
+      @APIResponse(responseCode = "409", description = "Persisting failed",
+                   content = @Content(schema =@Schema(implementation = Msg.class,
+                                                      description = "Reason for failure"))),
       @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
-      @APIResponse(responseCode = "201", description = "Policy persisted"),
+      @APIResponse(responseCode = "201", description = "Policy persisted",
+                   content = @Content(schema = @Schema(implementation = Policy.class))),
       @APIResponse(responseCode = "200", description = "Policy validated")
                 })
   @POST
