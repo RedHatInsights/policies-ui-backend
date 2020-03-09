@@ -30,6 +30,7 @@ import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import java.util.Map;
+import java.util.UUID;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
@@ -601,6 +602,37 @@ class RestApiTest {
           .then()
           .statusCode(200);
     }
+  }
+
+  @Test
+  void validateNewPolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE + "/policies/validate")
+            .then()
+            .statusCode(200)
+            ;
+  }
+
+  @Test
+  void validateExistingPolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.id = UUID.randomUUID();
+    tp.conditions = "cores = 2";
+
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE + "/policies/validate")
+            .then()
+            .statusCode(200)
+    ;
   }
 
 

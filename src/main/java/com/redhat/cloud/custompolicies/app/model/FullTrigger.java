@@ -41,7 +41,7 @@ public class FullTrigger {
     if (generatePseudoId) {
       trigger.id = generateId();
     }
-    else {
+    else if (policy.id != null) {
       trigger.id = policy.id.toString();
     }
     trigger.name = policy.name;

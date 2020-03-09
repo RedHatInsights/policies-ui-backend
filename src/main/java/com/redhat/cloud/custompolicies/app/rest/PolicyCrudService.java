@@ -435,9 +435,8 @@ public class PolicyCrudService {
 
     if (!skipEngineCall) {
       try {
-        FullTrigger trigger = new FullTrigger(policy);
+        FullTrigger trigger = new FullTrigger(policy, policy.id == null);
         if (policy.id == null) {
-          trigger.trigger.id = UUID.randomUUID().toString(); // We need a pseudo one
           engine.store(trigger, true, user.getAccount());
         } else {
           engine.update(policy.id, trigger, true, user.getAccount());
