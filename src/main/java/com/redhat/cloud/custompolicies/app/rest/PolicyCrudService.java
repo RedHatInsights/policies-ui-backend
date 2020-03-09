@@ -227,7 +227,7 @@ public class PolicyCrudService {
                    content = @Content(schema =@Schema(implementation = Msg.class,
                                                                          description = "Reason for failure"))),
       @APIResponse(responseCode = "409", description = "Persisting failed",
-                   content = @Content(schema =@Schema(implementation = String.class,
+                   content = @Content(schema =@Schema(implementation = Msg.class,
                                                       description = "Reason for failure"))),
       @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
       @APIResponse(responseCode = "201", description = "Policy persisted",
