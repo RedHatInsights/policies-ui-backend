@@ -47,12 +47,42 @@ public class OASModifier implements OASFilter {
       for (Map.Entry<PathItem.HttpMethod,Operation> entry: operations.entrySet()) {
         Operation op = entry.getValue();
 
-        String id = mangledName.replace('/','_') ;
-        id = entry.getKey().toString() + id ;
-        op.setOperationId(id);
+        if (op.getOperationId() == null || op.getOperationId().isEmpty()) {
+
+          String id = toCamelCase(mangledName);
+          id = entry.getKey().toString().toLowerCase() + id;
+          op.setOperationId(id);
+        }
       }
     }
     paths.setPathItems(replacementItems);
+  }
+
+  private String toCamelCase(String mangledName) {
+    StringBuilder sb = new StringBuilder();
+    boolean needsUpper = false;
+    for (char c: mangledName.toCharArray()) {
+      if (c == '/') {
+        needsUpper = true;
+        continue;
+      }
+      if (c == '}') {
+        continue;
+      }
+      if (c == '{') {
+        sb.append("By");
+        needsUpper = true;
+        continue;
+      }
+      if (needsUpper) {
+        sb.append(Character.toUpperCase(c));
+        needsUpper = false;
+      }
+      else {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
   }
 
   private String mangleName(String key) {
