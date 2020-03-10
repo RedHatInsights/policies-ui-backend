@@ -62,6 +62,12 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
     jsonObjectBuilder.add("method",method.name());
     jsonObjectBuilder.add("uri",uri);
 
+    // See IncomingRequestFilter on how this is populated
+    String acctId = (String) context.data().get("x-rh-account");
+    if (acctId!=null) {
+      jsonObjectBuilder.add("acct", acctId);
+    }
+
     String versionFormatted ;
     switch (version){
       case HTTP_1_0:
