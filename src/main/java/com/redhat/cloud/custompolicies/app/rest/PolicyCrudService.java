@@ -259,7 +259,7 @@ public class PolicyCrudService {
     if (!skipEngineCall) {
       try {
         FullTrigger trigger = new FullTrigger(policy,true);
-        engine.store(trigger, true, user.getAccount());
+        engine.storeTrigger(trigger, true, user.getAccount());
       } catch (Exception e) {
         return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
       }
@@ -283,7 +283,7 @@ public class PolicyCrudService {
       if (!skipEngineCall) {
         FullTrigger trigger = new FullTrigger(policy);
         try {
-          engine.store(trigger, false, user.getAccount());
+          engine.storeTrigger(trigger, false, user.getAccount());
         } catch (Exception e) {
           return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
@@ -379,7 +379,7 @@ public class PolicyCrudService {
         if (!skipEngineCall) {
           try {
             FullTrigger trigger = new FullTrigger(policy);
-            engine.update(policy.id, trigger, true, user.getAccount());
+            engine.updateTrigger(policy.id, trigger, true, user.getAccount());
           } catch (Exception e) {
             return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
           }
@@ -397,7 +397,7 @@ public class PolicyCrudService {
 
           if (!skipEngineCall) {
             try {
-              engine.update(storedPolicy.id, trigger, false, user.getAccount());
+              engine.updateTrigger(storedPolicy.id, trigger, false, user.getAccount());
             } catch (Exception e) {
               return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
@@ -437,9 +437,9 @@ public class PolicyCrudService {
       try {
         FullTrigger trigger = new FullTrigger(policy, policy.id == null);
         if (policy.id == null) {
-          engine.store(trigger, true, user.getAccount());
+          engine.storeTrigger(trigger, true, user.getAccount());
         } else {
-          engine.update(policy.id, trigger, true, user.getAccount());
+          engine.updateTrigger(policy.id, trigger, true, user.getAccount());
         }
       } catch (Exception e) {
         return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();

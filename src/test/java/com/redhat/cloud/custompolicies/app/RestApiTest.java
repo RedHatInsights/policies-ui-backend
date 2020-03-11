@@ -199,12 +199,15 @@ class RestApiTest {
 
   @Test
   void testGetPolicies() {
+    JsonPath jsonPath =
     given()
         .header(authHeader)
         .when().get(API_BASE + "/policies/")
         .then()
         .statusCode(200)
-        .body(containsString("2nd policy"));
+        .extract().body().jsonPath();
+
+    Assert.assertEquals(10, jsonPath.getList("data").size());
   }
 
   @Test
@@ -450,11 +453,64 @@ class RestApiTest {
   }
 
   @Test
+  void storeNewPolicyNoActions() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+    tp.name = UUID.randomUUID().toString();
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE + "/policies")
+      .then()
+        .statusCode(201)
+        .extract();
+  }
+
+  @Test
+  void storeNewPolicyEmptyActions() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+    tp.name = UUID.randomUUID().toString();
+    tp.actions = "";
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE + "/policies")
+      .then()
+        .statusCode(201)
+        .extract();
+
+    tp.name = UUID.randomUUID().toString();
+    tp.actions = "; ";
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE + "/policies")
+      .then()
+        .statusCode(201)
+        .extract();
+
+
+  }
+
+  @Test
   void storeNewPolicyNoRbac() {
     TestPolicy tp = new TestPolicy();
     tp.actions = "EMAIL roadrunner@acme.org";
     tp.conditions = "cores = 2";
-    tp.name = "test1";
+    tp.name = UUID.randomUUID().toString();
 
     given()
         .header(authRbacNoAccess)

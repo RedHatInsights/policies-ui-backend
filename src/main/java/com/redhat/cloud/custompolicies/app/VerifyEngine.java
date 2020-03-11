@@ -52,9 +52,9 @@ public interface VerifyEngine {
   @Path("/trigger")
   @Consumes("application/json")
   @Produces("application/json")
-  Msg store(FullTrigger trigger,
-            @QueryParam("dry") boolean isDryRun,
-            @HeaderParam("Hawkular-Tenant" ) String customerId
+  Msg storeTrigger(FullTrigger trigger,
+                   @QueryParam("dry") boolean isDryRun,
+                   @HeaderParam("Hawkular-Tenant" ) String customerId
   );
 
   /**
@@ -67,7 +67,7 @@ public interface VerifyEngine {
   @Consumes("application/json")
   @Produces("application/json")
   @Path("/trigger/{triggerId}")
-  Msg update(@PathParam("triggerId") UUID triggerId,
+  Msg updateTrigger(@PathParam("triggerId") UUID triggerId,
              FullTrigger trigger,
              @QueryParam("dry") boolean isDryRun,
              @HeaderParam("Hawkular-Tenant") String customerId);
