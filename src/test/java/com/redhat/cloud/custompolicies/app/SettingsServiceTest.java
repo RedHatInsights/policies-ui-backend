@@ -39,7 +39,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SettingsServiceTest extends AbstractITest {
 
-  private static final String PREFERENCE_URL = API_BASE + "/user-config/email-preference";
+  private static final String PREFERENCE_URL = API_BASE + "/settings";
 
   @ClassRule
   private static PostgreSQLContainer postgreSQLContainer =

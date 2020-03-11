@@ -41,7 +41,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 /**
  * @author hrupp
  */
-@Path("/user-config")
+@Path("/settings")
 @Produces("application/json")
 @Consumes("application/json")
 @Timed
@@ -60,7 +60,7 @@ public class SettingsService {
   @Operation(summary = "Save or update settings from the settings UI")
   @APIResponse(responseCode = "200", description = "Saving was ok")
   @POST
-  @Path("/email-preference")
+  @Path("/")
   @Transactional
   public Response saveSettings(@Valid SettingsValues values) {
 
@@ -93,7 +93,7 @@ public class SettingsService {
 
 
   @GET
-  @Path("/email-preference")
+  @Path("/")
   public Response getSettingsSchema() {
 
     String response ;
