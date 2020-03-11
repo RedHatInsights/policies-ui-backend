@@ -17,10 +17,13 @@
 package com.redhat.cloud.custompolicies.app.auth;
 
 import com.redhat.cloud.custompolicies.app.RbacServer;
+import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
+import io.vertx.ext.web.RoutingContext;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -62,8 +65,12 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
   Map<RhIdPrincipal,TimedRbac> rbacCache = new HashMap();
 
+  volatile CurrentVertxRequest currentVertxRequest;
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
+
+    RoutingContext routingContext = request().getCurrent();
 
     String xrhid_header = requestContext.getHeaderString("x-rh-identity");
 
@@ -85,6 +92,9 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         }
       }
 
+      // Attach account id to the context so we can log it later
+      routingContext.put("x-rh-account",rhIdentity.identity.accountNumber);
+
       RbacRaw result;
       try {
         result = rbac.get("custom-policies", xrhid_header);
@@ -103,6 +113,14 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
       // Header was present, but not correct
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
     }
+  }
+
+  // Helper to get the vert.x routing context
+  CurrentVertxRequest request() {
+    if (currentVertxRequest == null) {
+      currentVertxRequest = CDI.current().select(CurrentVertxRequest.class).get();
+    }
+    return currentVertxRequest;
   }
 
   private static class TimedRbac {
