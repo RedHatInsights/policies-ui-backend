@@ -29,13 +29,15 @@ public class RhIdPrincipal implements Principal {
   private String account;
   private boolean canReadAll;
   private boolean canWriteAll;
+  private String rhidHeaderRaw;
 
   public RhIdPrincipal() {
   }
 
-  public RhIdPrincipal(String name, String account) {
+  public RhIdPrincipal(String name, String account, String rhidHeaderRaw) {
     this.name = name;
     this.account = account;
+    this.rhidHeaderRaw = rhidHeaderRaw;
   }
 
   void setRbac(boolean canReadAll, boolean canWriteAll) {
@@ -50,6 +52,10 @@ public class RhIdPrincipal implements Principal {
 
   public String getAccount() {
     return account;
+  }
+
+  public String getRawRhIdHeader() {
+    return rhidHeaderRaw;
   }
 
   public boolean canReadAll() {

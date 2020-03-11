@@ -84,7 +84,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     if (xrhid.isPresent()) {
       // header was good, so now create the security context
       XRhIdentity rhIdentity = xrhid.get();
-      RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
+      RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber,xrhid_header);
       if (rbacCache.containsKey(rhPrincipal)) {
         TimedRbac tr = rbacCache.get(rhPrincipal);
         if (tr.isOutdated()) {
@@ -103,12 +103,11 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         return;
       }
 
-      // TODO add rbac to principal and cache it
       rhPrincipal.setRbac(result.canReadAll(),result.canWriteAll());
       SecurityContext sctx = new RhIdSecurityContext(rhIdentity,rhPrincipal);
       requestContext.setSecurityContext(sctx);
       // And make the principal available for injection
-      producer.setPrincipal((RhIdPrincipal) sctx.getUserPrincipal());
+      producer.setPrincipal(rhPrincipal);
     } else {
       // Header was present, but not correct
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());

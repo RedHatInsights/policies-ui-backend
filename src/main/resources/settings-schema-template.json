@@ -1,0 +1,17 @@
+[{
+  "fields": [ {
+    "name": "immediateEmail",
+    "label": "Instant email notification",
+    "initialValue": %1,
+    "component": "switch-field",
+    "validate": []
+  },
+  {
+    "name": "dailyEmail",
+    "label": "Daily email notification",
+    "initialValue": %2,
+    "component": "switch-field",
+    "validate": []
+
+  }]
+}]
