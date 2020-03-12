@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app.rest;
 
 import com.redhat.cloud.custompolicies.app.NotificationSystem;
 import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.SettingsValues;
 import java.net.URL;
 import java.nio.file.Files;
@@ -97,6 +98,7 @@ public class SettingsService {
   public Response getSettingsSchema() {
 
     String response ;
+    Response.ResponseBuilder builder;
     try {
       URL resource = getClass().getClassLoader().getResource("settings-schema-template.json");
       response = new String(Files.readAllBytes(Paths.get(resource.toURI())));
@@ -112,14 +114,16 @@ public class SettingsService {
         response = response.replace("%1", "false");
         response = response.replace("%2", "false");
       }
-
+      builder = Response.ok(response);
+      EntityTag etag = new EntityTag(String.valueOf(response.hashCode()));
+      builder.header("ETag",etag);
     }
     catch (Exception e) {
-      return Response.serverError().entity(e.getMessage()).build();
+      builder= Response.serverError();
+      builder.entity(new Msg(e.getMessage()));
+      e.printStackTrace();
     }
-    Response.ResponseBuilder builder = Response.ok(response);
-    EntityTag etag = new EntityTag(String.valueOf(response.hashCode()));
-    builder.header("ETag",etag);
+
     return builder.build();
   }
 }
