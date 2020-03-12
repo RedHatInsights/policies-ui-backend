@@ -20,9 +20,6 @@ import com.redhat.cloud.custompolicies.app.NotificationSystem;
 import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.SettingsValues;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -100,8 +97,7 @@ public class SettingsService {
     String response ;
     Response.ResponseBuilder builder;
     try {
-      URL resource = getClass().getClassLoader().getResource("settings-schema-template.json");
-      response = new String(Files.readAllBytes(Paths.get(resource.toURI())));
+      response = settingsString;
 
       // Now we need to find the user record and populate the reply accordingly
       SettingsValues values = SettingsValues.findById(user.getName());
@@ -126,4 +122,23 @@ public class SettingsService {
 
     return builder.build();
   }
+
+  private static final String settingsString =
+      "[{\n" +
+          "  \"fields\": [ {\n" +
+          "    \"name\": \"immediateEmail\",\n" +
+          "    \"label\": \"Instant email notification\",\n" +
+          "    \"initialValue\": %1,\n" +
+          "    \"component\": \"switch-field\",\n" +
+          "    \"validate\": []\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"dailyEmail\",\n" +
+          "    \"label\": \"Daily email notification\",\n" +
+          "    \"initialValue\": %2,\n" +
+          "    \"component\": \"switch-field\",\n" +
+          "    \"validate\": []\n" +
+          "\n" +
+          "  }]\n" +
+          "}]";
 }
