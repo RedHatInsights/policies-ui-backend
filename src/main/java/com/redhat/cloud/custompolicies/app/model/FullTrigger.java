@@ -103,7 +103,7 @@ public class FullTrigger {
   public class Condition {
     public String triggerMode = "FIRING";
     public String type = "EVENT";
-    public String dataId = "insights_report";
+    public String dataId = "platform.inventory.host-egress";
     public String expression;
   }
 
