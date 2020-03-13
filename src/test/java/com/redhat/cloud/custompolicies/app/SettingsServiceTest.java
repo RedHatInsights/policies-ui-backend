@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.model.HttpRequest;
 
 /**
  * @author hrupp
