@@ -18,48 +18,30 @@ package com.redhat.cloud.custompolicies.app;
 
 import static io.restassured.RestAssured.given;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.path.json.JsonPath;
-import io.restassured.response.ValidatableResponse;
 import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.containers.MockServerContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * @author hrupp
  */
 @QuarkusTest
+@QuarkusTestResource(TestLifecycleManager.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SettingsServiceTest extends AbstractITest {
 
   private static final String PREFERENCE_URL = API_BASE + "/settings";
 
-  @ClassRule
-  private static PostgreSQLContainer postgreSQLContainer =
-      new PostgreSQLContainer("postgres");
-
-  @ClassRule
-  public static MockServerContainer mockEngineServer = new MockServerContainer();
-
   @BeforeAll
   static void setUpEnv() {
-    setupPostgres(postgreSQLContainer);
     setupRhId();
-    setupMockEngine(mockEngineServer);
   }
-
-  @AfterAll
-  static void closePostgres() {
-  //  postgreSQLContainer.stop();
-  }
-
 
   @Test()
   @Order(1)
@@ -108,8 +90,8 @@ public class SettingsServiceTest extends AbstractITest {
 
   }
 
-  private ValidatableResponse sendPayload(String payload) {
-    return given()
+  private void sendPayload(String payload) {
+    given()
         .header(authHeader)
         .contentType("application/json")
         .body(payload)
