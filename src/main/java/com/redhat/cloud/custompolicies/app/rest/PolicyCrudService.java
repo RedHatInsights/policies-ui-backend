@@ -112,6 +112,7 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Column to sort the results by",
                   schema = @Schema(
+                          type = SchemaType.STRING,
                           enumeration = {
                                   "name",
                                   "description",
@@ -125,6 +126,7 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Sort direction used",
                   schema = @Schema(
+                          type = SchemaType.STRING,
                           enumeration = {
                                   "asc",
                                   "desc"
@@ -142,6 +144,7 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Operations used with the filter",
                   schema = @Schema(
+                          type = SchemaType.STRING,
                           enumeration = {
                                   "equal",
                                   "like",
@@ -163,6 +166,7 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Operations used with the filter",
                   schema = @Schema(
+                          type = SchemaType.STRING,
                           enumeration = {
                                   "equal",
                                   "like",
@@ -184,6 +188,7 @@ public class PolicyCrudService {
                   in = ParameterIn.QUERY,
                   description = "Operations used with the filter",
                   schema = @Schema(
+                          type = SchemaType.STRING,
                           enumeration = {
                                   "equal",
                                   "like",
