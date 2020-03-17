@@ -38,8 +38,8 @@ public interface RbacServer {
   @Path("/access/") // trailing slash is required by api
   @Consumes("application/json")
   @Produces("application/json")
-  RbacRaw get(@QueryParam("application") String application,
-              @HeaderParam("x-rh-identity") String rhIdentity
+  RbacRaw getRbacInfo(@QueryParam("application") String application,
+                           @HeaderParam("x-rh-identity") String rhIdentity
 
              ) ;
 }

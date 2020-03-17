@@ -16,12 +16,9 @@
  */
 package com.redhat.cloud.custompolicies.app.auth;
 
-import com.redhat.cloud.custompolicies.app.RbacServer;
 import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
 import io.vertx.ext.web.RoutingContext;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
@@ -31,7 +28,6 @@ import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
  * Request filter. This runs on all incoming requests before method matching
@@ -41,8 +37,13 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  * If the header is present and valid, we produce a {{@link java.security.Principal}}
  * and inject that into the call chain via {{@link SecurityContext}}. The
  * principal will also be made available for Injection, so that you can write in
- * your code
+ * your code.
  *
+ * We don't yet query for RBAC here, but in its own filter after the
+ * JAX-RS engine has selected the endpoint to call.
+ * See {@link RbacFilter} for this purpose.
+ *
+ * Usage in code:
  * <pre>{@code
  * @Inject
  * Principal user;
@@ -58,12 +59,6 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
   @Inject
   RhIdPrincipalProducer producer;
-
-  @Inject
-  @RestClient
-  RbacServer rbac;
-
-  Map<RhIdPrincipal,TimedRbac> rbacCache = new HashMap();
 
   volatile CurrentVertxRequest currentVertxRequest;
 
@@ -84,26 +79,12 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     if (xrhid.isPresent()) {
       // header was good, so now create the security context
       XRhIdentity rhIdentity = xrhid.get();
-      RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber,xrhid_header);
-      if (rbacCache.containsKey(rhPrincipal)) {
-        TimedRbac tr = rbacCache.get(rhPrincipal);
-        if (tr.isOutdated()) {
-          rbacCache.remove(rhPrincipal);
-        }
-      }
+      RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
+      rhPrincipal.setRawRhIdHeader(xrhid_header);
 
       // Attach account id to the context so we can log it later
       routingContext.put("x-rh-account",rhIdentity.identity.accountNumber);
 
-      RbacRaw result;
-      try {
-        result = rbac.get("custom-policies", xrhid_header);
-      } catch (Throwable e) {
-        requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-        return;
-      }
-
-      rhPrincipal.setRbac(result.canReadAll(),result.canWriteAll());
       SecurityContext sctx = new RhIdSecurityContext(rhIdentity,rhPrincipal);
       requestContext.setSecurityContext(sctx);
       // And make the principal available for injection
@@ -122,13 +103,4 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     return currentVertxRequest;
   }
 
-  private static class TimedRbac {
-    private long lastUpdated;
-    private Rbac rbac;
-
-    // Old after X seconds TODO make configurable
-    boolean isOutdated(){
-      return Math.abs(System.currentTimeMillis() - lastUpdated) > 10*1000;
-    }
-  }
 }
