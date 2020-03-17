@@ -16,11 +16,12 @@
  */
 package com.redhat.cloud.custompolicies.app;
 
-import com.redhat.cloud.custompolicies.app.model.FullTrigger;
+import com.redhat.cloud.custompolicies.app.model.engine.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import java.util.UUID;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -39,12 +40,13 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @RegisterRestClient(configKey = "engine")
 @RegisterProvider(value = EngineResponseExceptionMapper.class,
                   priority = 50)
-public interface VerifyEngine {
+public interface PolicyEngine {
 
   /**
    * Store and/or verify the FullTrigger, which is a wrapped Policy.
-   * @param trigger Policy wrapped in a data structure, the engine expects
-   * @param isDryRun If true, the engine will only verify the Policy, but not store it
+   *
+   * @param trigger    Policy wrapped in a data structure, the engine expects
+   * @param isDryRun   If true, the engine will only verify the Policy, but not store it
    * @param customerId Id of the customer this policy belongs to.
    * @return A message with verification/store results.
    */
@@ -54,12 +56,13 @@ public interface VerifyEngine {
   @Produces("application/json")
   Msg storeTrigger(FullTrigger trigger,
                    @QueryParam("dry") boolean isDryRun,
-                   @HeaderParam("Hawkular-Tenant" ) String customerId
+                   @HeaderParam("Hawkular-Tenant") String customerId
   );
 
   /**
    * Update a trigger
-   * @param trigger Policy wrapped in a data structure, the engine expects
+   *
+   * @param trigger    Policy wrapped in a data structure, the engine expects
    * @param customerId Id of the customer this policy belongs to.
    * @return A message with update results
    */
@@ -68,18 +71,31 @@ public interface VerifyEngine {
   @Produces("application/json")
   @Path("/trigger/{triggerId}")
   Msg updateTrigger(@PathParam("triggerId") UUID triggerId,
-             FullTrigger trigger,
-             @QueryParam("dry") boolean isDryRun,
-             @HeaderParam("Hawkular-Tenant") String customerId);
+                    FullTrigger trigger,
+                    @QueryParam("dry") boolean isDryRun,
+                    @HeaderParam("Hawkular-Tenant") String customerId);
 
   /**
    * Delete the trigger with the given id
-   * @param triggerId Id of the trigger to delete
+   *
+   * @param triggerId  Id of the trigger to delete
    * @param customerId Id of the customer this policy belongs to.
    */
   @DELETE
   @Consumes("application/json")
   @Path("/{triggerId}")
   void deleteTrigger(@PathParam("triggerId") UUID triggerId,
-                     @HeaderParam("Hawkular-Tenant" ) String customerId);
+                     @HeaderParam("Hawkular-Tenant") String customerId);
+
+  /**
+   * Get the trigger with the given ID
+   * @param triggerId Id of the trigger to retrieve
+   * @param customerId Id of the customer this policy belongs to.
+   * @return a FullTrigger
+   */
+  @GET
+  @Produces("application/json")
+  @Path("/trigger/{triggerId}")
+  FullTrigger fetchTrigger(@PathParam("triggerId") UUID triggerId,
+                           @HeaderParam("Hawkular-Tenant") String customerId);
 }
