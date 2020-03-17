@@ -123,7 +123,7 @@ public class Policy extends PanacheEntityBase {
 //    return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
 
     String qs = "SELECT p FROM Policy p WHERE ";
-    String cond =  filter.getQuery() + pager.getSort().toOrderBy();
+    String cond =  filter.getQuery() + sortToOrderBy(pager.getSort());
     qs = qs + cond;
 
     Query q = em.createQuery(qs);
@@ -244,4 +244,17 @@ public class Policy extends PanacheEntityBase {
     }
   }
 
+  static String sortToOrderBy(Sort sort) {
+    var columns = sort.getColumns();
+        StringBuilder sb = new StringBuilder(" ORDER BY ");
+        for (int i = 0; i < columns.size(); i++) {
+            Sort.Column column = columns.get(i);
+            if (i > 0)
+                sb.append(" , ");
+            sb.append(column.getName());
+            if (column.getDirection() != Sort.Direction.Ascending)
+                sb.append(" DESC");
+        }
+        return sb.toString();
+    }
 }

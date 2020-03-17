@@ -18,11 +18,10 @@ package com.redhat.cloud.custompolicies.app;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 import static io.restassured.RestAssured.given;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -34,50 +33,15 @@ import java.util.UUID;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.model.HttpResponse;
-import org.testcontainers.containers.MockServerContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * @author hrupp
  */
 @QuarkusTest
+@QuarkusTestResource(TestLifecycleManager.class)
 class RestApiTest extends AbstractITest {
 
-  @ClassRule
-  private static PostgreSQLContainer postgreSQLContainer =
-      new PostgreSQLContainer("postgres");
-
-  @ClassRule
-  public static MockServerContainer mockEngineServer = new MockServerContainer();
-
-
-  @BeforeAll
-  static void configureMockEnvironment()  {
-    setupPostgres(postgreSQLContainer);
-    setupRhId();
-    setupMockEngine(mockEngineServer);
-  }
-
-  // Helper to debug mock server issues
-//  @AfterAll
-//  static void mockLog() {
-//    System.err.println(mockServerClient.retrieveLogMessages(request()));
-//    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
-//  }
-
-
-
-
-  @AfterAll
-  static void closePostgres() {
-    postgreSQLContainer.stop();
-  }
 
   @Test
   void testFactsNoAuth() {
