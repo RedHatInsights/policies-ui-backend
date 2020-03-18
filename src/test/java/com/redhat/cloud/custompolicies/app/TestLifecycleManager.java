@@ -36,7 +36,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   MockServerContainer mockEngineServer;
   MockServerClient mockServerClient;
 
-
   @Override
   public Map<String, String> start() {
     System.err.println("++++  TestLifecycleManager start +++");
@@ -97,7 +96,20 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"msg\" : \"ok\" }")
         );
-    mockServerClient
+      mockServerClient
+          .when(request()
+              // special case to simulate that the engine does not have the policy. CPOL-130
+              // must come before the more generic match below.
+                    .withPath("/hawkular/alerts/triggers/c49e92c4-764c-4163-9200-245b31933e94")
+                    .withMethod("DELETE")
+                    .withHeader("Hawkular-Tenant", "1234")
+          )
+          .respond(response()
+                       .withStatusCode(404)
+                       .withHeader("Content-Type", "application/json")
+                       .withBody("{ \"errorMessage\" : \"does not exist\" }")
+          );
+      mockServerClient
         .when(request()
                   .withPath("/hawkular/alerts/triggers/.*")
                   .withMethod("DELETE")
