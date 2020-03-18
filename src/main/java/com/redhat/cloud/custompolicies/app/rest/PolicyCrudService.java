@@ -33,6 +33,7 @@ import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -338,8 +339,16 @@ public class PolicyCrudService {
       builder = Response.status(Response.Status.BAD_REQUEST);
     } else {
       policy.delete(policy);
-      engine.deleteTrigger(policy.id, user.getAccount());
-      builder = Response.ok(policy);
+      try {
+        engine.deleteTrigger(policy.id, user.getAccount());
+        builder = Response.ok(policy);
+      } catch (NotFoundException nfe) {
+        // Engine does not have it - we can delete anyway
+        builder = Response.ok(policy);
+      } catch (Exception e) {
+        e.printStackTrace();  // TODO: Customise this generated block
+        builder = Response.serverError().entity(new Msg(e.getMessage()));
+      }
     }
 
     return builder.build();
