@@ -57,10 +57,18 @@ public class SettingsService {
 
   @Operation(summary = "Save or update settings from the settings UI")
   @APIResponse(responseCode = "200", description = "Saving was ok")
+  @APIResponse(responseCode = "403", description = "User has no permission to change settings")
+  @APIResponse(responseCode = "500", description = "Saving of settings failed")
   @POST
   @Path("/")
   @Transactional
   public Response saveSettings(@Valid SettingsValues values) {
+
+    Response.ResponseBuilder builder;
+
+    if (!user.canWriteAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type("text/plain").build();
+    }
 
     values.username = user.getName();
     values.accountId = user.getAccount();
@@ -69,30 +77,43 @@ public class SettingsService {
       tmp.immediateEmail = values.immediateEmail;
       tmp.dailyEmail = values.dailyEmail;
     } else {
-      values.persistAndFlush();
-    }
-    // Also send to notification service
-    if (values.immediateEmail) {
-      notifications.addNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
-    }
-    else {
-      notifications.removeNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
-    }
-    if (values.dailyEmail) {
-      notifications.addNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
-    }
-    else {
-      notifications.removeNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
+      values.persist();
     }
 
-    Response.ResponseBuilder builder = Response.ok();
+    try {
+      // Also send to notification service
+      if (values.immediateEmail) {
+        notifications.addNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
+      } else {
+        notifications.removeNotification("custom-policies-instant-mail", user.getRawRhIdHeader());
+      }
+      if (values.dailyEmail) {
+        notifications.addNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
+      } else {
+        notifications.removeNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
+      }
+      builder = Response.ok();
+    }
+    catch (Exception e) {
+      builder = Response.serverError().entity("Storing of settings in notification service failed.");
+      builder.type("text/plain");
+      System.err.println("Storing settings failed: " + e.getMessage());
+    }
+
     return builder.build();
   }
 
-
+  @Operation(summary = "Get settings for the settings UI")
+  @APIResponse(responseCode = "200", description = "Reading was ok")
+  @APIResponse(responseCode = "403", description = "User has no permission to read settings")
+  @APIResponse(responseCode = "500", description = "Reading of settings failed")
   @GET
   @Path("/")
   public Response getSettingsSchema() {
+
+    if (!user.canReadAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type("text/plain").build();
+     }
 
     String response ;
     Response.ResponseBuilder builder;
