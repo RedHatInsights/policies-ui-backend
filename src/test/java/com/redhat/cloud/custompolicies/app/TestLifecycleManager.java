@@ -34,6 +34,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
   PostgreSQLContainer postgreSQLContainer ;
   MockServerContainer mockEngineServer;
+  MockServerClient mockServerClient;
 
 
   @Override
@@ -55,8 +56,17 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
    //    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
   }
 
+  // Does not work yet and needs Quarkus 1.3.1
+//    @Override
+//    public void inject(Object testInstance) {
+//        System.out.println(testInstance);
+//        if (testInstance instanceof SettingsServiceTest) {
+//            SettingsServiceTest test = (SettingsServiceTest) testInstance;
+//            test.mockServerClient = mockServerClient;
+//        }
+//    }
 
-  void setupPostgres(Map<String, String> props) {
+    void setupPostgres(Map<String, String> props) {
     postgreSQLContainer =
          new PostgreSQLContainer("postgres");
     postgreSQLContainer.start();
@@ -73,7 +83,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   void setupMockEngine(Map<String, String> props) {
     mockEngineServer = new MockServerContainer();
 
-    MockServerClient mockServerClient;
     // set up mock engine
     mockEngineServer.start();
     String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
@@ -138,8 +147,28 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withBody(noAccessRbac)
         );
 
+    // notifications service
+    mockServerClient
+        .when(request()
+              .withPath("/endpoints/email/subscription/.*")
+              .withMethod("PUT")
+        )
+        .respond(response()
+                 .withStatusCode(204)
+        );
+      mockServerClient
+          .when(request()
+                .withPath("/endpoints/email/subscription/.*")
+                .withMethod("DELETE")
+          )
+          .respond(response()
+                   .withStatusCode(204)
+          );
+
     props.put("engine/mp-rest/url", mockServerUrl);
     props.put("rbac/mp-rest/url", mockServerUrl);
+    props.put("notifications/mp-rest/url", mockServerUrl);
+
   }
 
 }
