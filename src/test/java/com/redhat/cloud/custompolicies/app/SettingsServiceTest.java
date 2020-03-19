@@ -39,7 +39,7 @@ import org.mockserver.model.HttpRequest;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SettingsServiceTest extends AbstractITest {
 
-  private static final String PREFERENCE_URL = API_BASE + "/settings";
+  private static final String PREFERENCE_URL = API_BASE + "/user-config/email-preference";
   public MockServerClient mockServerClient;
 
   @BeforeAll
