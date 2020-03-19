@@ -73,12 +73,6 @@ public class SettingsService {
     values.username = user.getName();
     values.accountId = user.getAccount();
     SettingsValues tmp = SettingsValues.findById(user.getName());
-    if (tmp != null) {
-      tmp.immediateEmail = values.immediateEmail;
-      tmp.dailyEmail = values.dailyEmail;
-    } else {
-      values.persist();
-    }
 
     try {
       // Also send to notification service
@@ -91,6 +85,12 @@ public class SettingsService {
         notifications.addNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("custom-policies-daily-mail", user.getRawRhIdHeader());
+      }
+      if (tmp != null) {
+        tmp.immediateEmail = values.immediateEmail;
+        tmp.dailyEmail = values.dailyEmail;
+      } else {
+        values.persist();
       }
       builder = Response.ok();
     }
