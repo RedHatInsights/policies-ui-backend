@@ -39,7 +39,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 /**
  * @author hrupp
  */
-@Path("/settings")
+@Path("/user-config")
 @Produces("application/json")
 @Consumes("application/json")
 @Timed
@@ -60,7 +60,7 @@ public class SettingsService {
   @APIResponse(responseCode = "403", description = "User has no permission to change settings")
   @APIResponse(responseCode = "500", description = "Saving of settings failed")
   @POST
-  @Path("/")
+  @Path("/email-preference")
   @Transactional
   public Response saveSettings(@Valid SettingsValues values) {
 
@@ -108,7 +108,7 @@ public class SettingsService {
   @APIResponse(responseCode = "403", description = "User has no permission to read settings")
   @APIResponse(responseCode = "500", description = "Reading of settings failed")
   @GET
-  @Path("/")
+  @Path("/email-preference")
   public Response getSettingsSchema() {
 
     if (!user.canReadAll()) {
@@ -148,16 +148,18 @@ public class SettingsService {
       "[{\n" +
           "  \"fields\": [ {\n" +
           "    \"name\": \"immediateEmail\",\n" +
-          "    \"label\": \"Instant email notification\",\n" +
+          "    \"label\": \"Instant notification\",\n" +
+          "    \"description\": \"Immediate email for each system with triggered policies\",\n" +
           "    \"initialValue\": %1,\n" +
-          "    \"component\": \"switch-field\",\n" +
+          "    \"component\": \"descriptiveCheckbox\",\n" +
           "    \"validate\": []\n" +
           "  },\n" +
           "  {\n" +
           "    \"name\": \"dailyEmail\",\n" +
-          "    \"label\": \"Daily email notification\",\n" +
+          "    \"label\": \"Daily digest\",\n" +
+          "    \"description\": \"Daily summary of all systems with triggered policies in 24 hour span\",\n" +
           "    \"initialValue\": %2,\n" +
-          "    \"component\": \"switch-field\",\n" +
+          "    \"component\": \"descriptiveCheckbox\",\n" +
           "    \"validate\": []\n" +
           "\n" +
           "  }]\n" +
