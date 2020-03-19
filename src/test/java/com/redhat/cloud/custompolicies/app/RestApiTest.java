@@ -584,6 +584,17 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void deletePolicyNotInEngine() {
+
+    given()
+        .header(authHeader)
+        .when().delete(API_BASE + "/policies/c49e92c4-764c-4163-9200-245b31933e94")
+        .then()
+        .statusCode(200)
+    ;
+  }
+
+  @Test
   void deletePolicyNoRbacAccess() {
 
     given()
