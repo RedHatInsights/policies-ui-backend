@@ -120,6 +120,7 @@ public class FullTrigger {
         if (taName.equals(actionName)) {
           newActions.add(ta);
           found = true;
+          break;
         }
       }
       if (!found) {

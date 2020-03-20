@@ -423,22 +423,15 @@ public class PolicyCrudService {
           storedPolicy.populateFrom(policy);
           storedPolicy.customerid = user.getAccount();
 
-          boolean okToStore;
           existingTrigger.updateFromPolicy(storedPolicy);
           if (!skipEngineCall) {
             try {
               engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
-              okToStore = true;
             } catch (Exception e) {
               return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
           }
-          else {
-            okToStore = true;
-          }
-          if (okToStore) {
-            Policy.persist(storedPolicy);
-          }
+          Policy.persist(storedPolicy);
         } catch (Throwable t) {
           return getResponseSavingPolicyThrowable(t);
         }
