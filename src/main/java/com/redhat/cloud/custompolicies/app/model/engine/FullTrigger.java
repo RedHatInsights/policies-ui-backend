@@ -74,14 +74,7 @@ public class FullTrigger {
       if (actionIn.trim().isEmpty()) {
         continue;
       }
-      if (actionIn.toLowerCase().startsWith("email")) {
-        ta.actionPlugin = "email";
-      } else if (actionIn.toLowerCase().startsWith("webhook")) {
-        ta.actionPlugin = "hooks"; // The legacy hooks apps
-      }
-      else {
-        throw new IllegalArgumentException("Unknown action type " + actionIn);
-      }
+      ta.actionPlugin = getActionName(actionIn);
 
       trigger.actions.add(ta);
     }
@@ -106,13 +99,7 @@ public class FullTrigger {
         continue;
       }
       String actionName;
-      if (actionIn.contains(" ")) {
-        actionName = actionIn.substring(0, actionIn.indexOf(' '));
-      }
-      else {
-        actionName = actionIn;
-      }
-      actionName = actionToTriggerActionMap.get(actionName);
+      actionName = getActionName(actionIn);
 
       boolean found = false;
       for (TriggerAction ta : trigger.actions) {
@@ -141,6 +128,21 @@ public class FullTrigger {
       condition.expression = policy.conditions;
       conditions.add(condition);
     }
+  }
+
+  private String getActionName(String actionIn) {
+    String actionName = actionIn.toLowerCase();
+    if (actionName.contains(" ")) {
+      actionName = actionName.substring(0, actionName.indexOf(' '));
+    }
+    else {
+      actionName = actionIn;
+    }
+    if (!actionToTriggerActionMap.containsKey(actionName)) {
+      throw new IllegalArgumentException("Key " + actionName + " not found");
+    }
+    actionName = actionToTriggerActionMap.get(actionName);
+    return actionName;
   }
 
 
