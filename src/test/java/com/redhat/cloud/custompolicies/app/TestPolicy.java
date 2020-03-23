@@ -37,4 +37,6 @@ public class TestPolicy {
   public String actions;
 
   public String mtime;
+
+  public String lastEvaluation;
 }

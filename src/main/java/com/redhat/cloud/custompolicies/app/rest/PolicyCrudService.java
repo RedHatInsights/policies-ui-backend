@@ -218,6 +218,18 @@ public class PolicyCrudService {
     Page<Policy> page;
     try {
       page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
+      // TODO once the engine supports batching, rewrite this.
+      page.stream().forEach(p -> {
+        try {
+          FullTrigger ft = engine.fetchTrigger(p.id, user.getAccount());
+          if (ft.conditions != null && !ft.conditions.isEmpty()) {
+            p.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
+          }
+        } catch (Exception e) {
+          p.setLastEvaluation(0);
+        }
+      });
+
     } catch (IllegalArgumentException iae) {
       return Response.status(400,iae.getLocalizedMessage()).build();
     }
@@ -500,6 +512,16 @@ public class PolicyCrudService {
     if (policy==null) {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
+      if (!skipEngineCall) {
+        try {
+          FullTrigger ft = engine.fetchTrigger(policyId, user.getAccount());
+          if (ft.conditions != null && !ft.conditions.isEmpty()) {
+            policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
+          }
+        } catch (Exception e) {
+          policy.setLastEvaluation(0); // TODO does this make sense?
+        }
+      }
       builder = Response.ok(policy);
       EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));
       builder.header("ETag",etag);

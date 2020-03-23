@@ -18,6 +18,7 @@ package com.redhat.cloud.custompolicies.app;
 
 import com.redhat.cloud.custompolicies.app.model.engine.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
+import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -98,4 +99,9 @@ public interface PolicyEngine {
   @Path("/trigger/{triggerId}")
   FullTrigger fetchTrigger(@PathParam("triggerId") UUID triggerId,
                            @HeaderParam("Hawkular-Tenant") String customerId);
+
+  @GET
+  @Produces("application/json")
+  List<FullTrigger> findTriggersById(@QueryParam("triggerIds") String triggerIds,
+                                     @HeaderParam("Hawkular-Tenant" ) String customerId);
 }

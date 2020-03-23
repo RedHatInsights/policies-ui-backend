@@ -27,6 +27,7 @@ public class Condition {
   public String type = "EVENT";
   public String dataId = "platform.inventory.host-egress";
   public String expression;
+  public long lastEvaluation;
 
   public Condition() {
   }
