@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.cloud.custompolicies.app.model;
+package com.redhat.cloud.custompolicies.app.model.engine;
 
+import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.UUID;
  */
 public class FullTrigger {
 
+  private Map<String,String> actionToTriggerActionMap;
 
   public Trigger trigger;
   public List<Condition> conditions;
@@ -39,6 +41,9 @@ public class FullTrigger {
     trigger = new Trigger();
     conditions = new ArrayList<>();
     trigger.actions = new HashSet<>();
+    actionToTriggerActionMap = new HashMap<>();
+    actionToTriggerActionMap.put("webhook","hooks");
+    actionToTriggerActionMap.put("email","email");
   }
 
   public FullTrigger(Policy policy, boolean generatePseudoId) {
@@ -69,14 +74,7 @@ public class FullTrigger {
       if (actionIn.trim().isEmpty()) {
         continue;
       }
-      if (actionIn.toLowerCase().startsWith("email")) {
-        ta.actionPlugin = "email";
-      } else if (actionIn.toLowerCase().startsWith("webhook")) {
-        ta.actionPlugin = "hooks"; // The legacy hooks apps
-      }
-      else {
-        throw new IllegalArgumentException("Unknown action type " + actionIn);
-      }
+      ta.actionPlugin = getActionName(actionIn);
 
       trigger.actions.add(ta);
     }
@@ -90,25 +88,62 @@ public class FullTrigger {
     return UUID.randomUUID().toString();
   }
 
+  public void updateFromPolicy(Policy policy) {
+    if (policy.actions == null || policy.actions.isEmpty()) {
+      trigger.actions.clear();
+    }
+    String[] actionsIn = policy.actions.split(";");
+    Set<TriggerAction> newActions = new HashSet<>();
+    for (String actionIn : actionsIn) {
+      if (actionIn.trim().isEmpty()) {
+        continue;
+      }
+      String actionName;
+      actionName = getActionName(actionIn);
 
-  public class Trigger {
-    public String id;
-    public String name;
-    public String description;
-    public boolean enabled;
-    public Set<TriggerAction> actions;
+      boolean found = false;
+      for (TriggerAction ta : trigger.actions) {
+        String taName = ta.actionPlugin;
+        if (taName.equals(actionName)) {
+          newActions.add(ta);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        var ta = new TriggerAction();
+        ta.actionPlugin = actionName;
+        newActions.add(ta);
+      }
+    }
+    trigger.actions.removeIf(ta -> !newActions.contains(ta));
+    trigger.actions.addAll(newActions);
 
+    trigger.enabled = policy.isEnabled;
+    if (conditions.size()!=0) {
+      conditions.get(0).expression = policy.conditions;
+    }
+    else {
+      Condition condition = new Condition();
+      condition.expression = policy.conditions;
+      conditions.add(condition);
+    }
   }
 
-  public class Condition {
-    public String triggerMode = "FIRING";
-    public String type = "EVENT";
-    public String dataId = "platform.inventory.host-egress";
-    public String expression;
+  private String getActionName(String actionIn) {
+    String actionName = actionIn.toLowerCase();
+    if (actionName.contains(" ")) {
+      actionName = actionName.substring(0, actionName.indexOf(' '));
+    }
+    else {
+      actionName = actionIn;
+    }
+    if (!actionToTriggerActionMap.containsKey(actionName)) {
+      throw new IllegalArgumentException("Key " + actionName + " not found");
+    }
+    actionName = actionToTriggerActionMap.get(actionName);
+    return actionName;
   }
 
-  public static class TriggerAction {
-    public String actionPlugin;
-    public Map<String,Object> properties = new HashMap<>();
-  }
+
 }

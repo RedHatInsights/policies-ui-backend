@@ -16,9 +16,9 @@
  */
 package com.redhat.cloud.custompolicies.app.rest;
 
-import com.redhat.cloud.custompolicies.app.VerifyEngine;
+import com.redhat.cloud.custompolicies.app.PolicyEngine;
 import com.redhat.cloud.custompolicies.app.auth.RhIdPrincipal;
-import com.redhat.cloud.custompolicies.app.model.FullTrigger;
+import com.redhat.cloud.custompolicies.app.model.engine.FullTrigger;
 import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.ConnectException;
@@ -80,7 +80,7 @@ public class PolicyCrudService {
 
   @Inject
   @RestClient
-  VerifyEngine engine;
+  PolicyEngine engine;
 
   @Context
   UriInfo uriInfo;
@@ -403,19 +403,35 @@ public class PolicyCrudService {
           return Response.status(200).entity(new Msg("Policy validated")).build();
         }
 
+        // All is good, we can now do the real work
+        // The engine requires that we update existing structures,
+        // so we need to first poll from it.
         try {
-          storedPolicy.populateFrom(policy);
-          storedPolicy.customerid = user.getAccount();
-          Policy.persist(storedPolicy);
-          FullTrigger trigger = new FullTrigger(storedPolicy);
-
+          FullTrigger existingTrigger;
           if (!skipEngineCall) {
             try {
-              engine.updateTrigger(storedPolicy.id, trigger, false, user.getAccount());
+              existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
             } catch (Exception e) {
               return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
           }
+          else {
+            // To make the compiler happy
+            existingTrigger = new FullTrigger(storedPolicy);
+          }
+
+          storedPolicy.populateFrom(policy);
+          storedPolicy.customerid = user.getAccount();
+
+          existingTrigger.updateFromPolicy(storedPolicy);
+          if (!skipEngineCall) {
+            try {
+              engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
+            } catch (Exception e) {
+              return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+            }
+          }
+          Policy.persist(storedPolicy);
         } catch (Throwable t) {
           return getResponseSavingPolicyThrowable(t);
         }

@@ -5,4 +5,4 @@ target/
 /deploy/tmp/
 app.iml
 
-.DS_Store/
+.DS_Store
