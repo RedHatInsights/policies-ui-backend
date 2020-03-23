@@ -19,6 +19,7 @@ package com.redhat.cloud.custompolicies.app.model;
 import com.redhat.cloud.custompolicies.app.model.pager.Page;
 import com.redhat.cloud.custompolicies.app.model.pager.Pager;
 import com.redhat.cloud.custompolicies.app.model.filter.Filter;
+import com.redhat.cloud.custompolicies.app.model.validation.ValidActionS;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Sort;
 
@@ -76,7 +77,9 @@ public class Policy extends PanacheEntityBase {
   @NotNull
   public String conditions;
 
-  @Schema(description = "String describing actions when the policy is evaluated to true.")
+  @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true." +
+      "Allowed values are 'email' and 'webhook'")
+  @ValidActionS
   public String actions;
 
   @Schema(type = SchemaType.STRING,

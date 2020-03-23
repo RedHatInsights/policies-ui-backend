@@ -276,7 +276,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeNewPolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.actions = "EMAIL";
     tp.conditions = "cores = 2";
     tp.name = "test1";
 
@@ -376,14 +376,29 @@ class RestApiTest extends AbstractITest {
       .then()
         .statusCode(201)
         .extract();
+  }
 
+  @Test
+  void storeNewPolicyBadActions() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+    tp.name = UUID.randomUUID().toString();
+    tp.actions = "hula";
 
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .when()
+        .post(API_BASE + "/policies")
+        .then()
+        .statusCode(400);
   }
 
   @Test
   void storeNewPolicyNoRbac() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.actions = "EMAIL;webhook";
     tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
 
@@ -400,7 +415,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeAndUpdatePolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.actions = "EMAIL";
     tp.conditions = "cores = 2";
     tp.name = "test2";
 
@@ -477,7 +492,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeAndUpdatePolicyNoUpdateAccess() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL roadrunner@acme.org";
+    tp.actions = "webhook";
     tp.conditions = "cores = 2";
     tp.name = "test2";
 
