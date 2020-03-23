@@ -23,10 +23,7 @@ import com.redhat.cloud.custompolicies.app.model.Msg;
 import com.redhat.cloud.custompolicies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -224,7 +221,7 @@ public class PolicyCrudService {
       // TODO once the engine supports batching, rewrite this.
       page.stream().forEach(p -> {
         try {
-          FullTrigger ft = engine.fetch(p.id, user.getAccount());
+          FullTrigger ft = engine.fetchTrigger(p.id, user.getAccount());
           if (ft.conditions != null && !ft.conditions.isEmpty()) {
             p.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
           }
@@ -517,7 +514,7 @@ public class PolicyCrudService {
     } else {
       if (!skipEngineCall) {
         try {
-          FullTrigger ft = engine.fetch(policyId, user.getAccount());
+          FullTrigger ft = engine.fetchTrigger(policyId, user.getAccount());
           if (ft.conditions != null && !ft.conditions.isEmpty()) {
             policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
           }
