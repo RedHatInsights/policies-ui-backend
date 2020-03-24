@@ -124,6 +124,7 @@ public class Policy extends PanacheEntityBase {
     return lastEvaluation != null ? lastEvaluation.toString() : "";
   }
 
+  @JsonbTransient
   public void setCtime(String ctime) {
     this.ctime = Timestamp.valueOf(ctime);
   }
