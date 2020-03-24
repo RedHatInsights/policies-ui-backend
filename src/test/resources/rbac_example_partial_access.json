@@ -12,11 +12,11 @@
   },
   "data": [
     {
-      "permission": "custom-policies:*:execute",
+      "permission": "policies:*:execute",
       "resourceDefinitions": []
     },
     {
-      "permission": "custom-policies:*:read",
+      "permission": "policies:*:read",
       "resourceDefinitions": []
     }
   ]
