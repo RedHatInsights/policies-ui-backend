@@ -12,7 +12,7 @@
   },
   "data": [
     {
-      "permission": "custom-policies:*:*",
+      "permission": "policies:*:*",
       "resourceDefinitions": []
     }
   ]
