@@ -121,4 +121,13 @@ public class FullTriggerHandlingTest {
     }
 
 
+    @Test
+    void testActionWithParam() {
+        Policy p = createPolicy();
+        p.actions = "email hans@dampf.de";
+
+        FullTrigger ft = new FullTrigger(p);
+
+        Assert.assertEquals(1,ft.trigger.actions.size());
+    }
 }

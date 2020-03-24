@@ -138,9 +138,7 @@ public class FullTrigger {
     if (actionName.contains(" ")) {
       actionName = actionName.substring(0, actionName.indexOf(' '));
     }
-    else {
-      actionName = actionIn;
-    }
+
     if (!actionToTriggerActionMap.containsKey(actionName)) {
       throw new IllegalArgumentException("Key " + actionName + " not found");
     }
