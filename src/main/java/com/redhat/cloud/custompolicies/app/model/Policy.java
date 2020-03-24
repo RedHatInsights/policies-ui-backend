@@ -97,10 +97,21 @@ public class Policy extends PanacheEntityBase {
   @Transient
   private Timestamp lastEvaluation;
 
+  @Schema (type = SchemaType.STRING,
+          description = "Create time in a form like '2020-01-24 12:19:56.718', output only",
+          readOnly = true,
+          format = "yyyy-MM-dd hh:mm:ss.ddd",
+          implementation = String.class)
+  private Timestamp ctime=new Timestamp(System.currentTimeMillis());
+
 
   @JsonbTransient
   public void setMtime(String mtime) {
     this.mtime = Timestamp.valueOf(mtime);
+  }
+
+  public void setMtimeToNow() {
+    this.mtime = new Timestamp(System.currentTimeMillis());
   }
 
   public String getMtime() {
@@ -114,6 +125,15 @@ public class Policy extends PanacheEntityBase {
 
   public String getLastEvaluation() {
     return lastEvaluation != null ? lastEvaluation.toString() : "";
+  }
+
+  @JsonbTransient
+  public void setCtime(String ctime) {
+    this.ctime = Timestamp.valueOf(ctime);
+  }
+
+  public String getCtime() {
+    return ctime.toString();
   }
 
 

@@ -28,6 +28,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.UUID;
 import javax.json.bind.Jsonb;
@@ -451,12 +452,18 @@ class RestApiTest extends AbstractITest {
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
-    assert tp.conditions.equals(ret.conditions);
+    Assert.assertEquals(tp.conditions,ret.conditions);
+
+    Assert.assertNotNull(ret.ctime);
+    Assert.assertNotNull(ret.mtime);
+    String storeTime = ret.mtime; // keep for below
+    Assert.assertEquals(storeTime,ret.ctime);
 
     try {
       // update
       ret.conditions = "cores = 3";
-/*
+/* TODO re-enable once we know how to persist data in the mock-server on POST/PUT and retrieve later again.
+       See https://github.com/mock-server/mockserver/issues/749
       given()
           .header(authHeader)
           .contentType(ContentType.JSON)
@@ -474,8 +481,13 @@ class RestApiTest extends AbstractITest {
               .extract().body().jsonPath();
       String content = jsonPath.getString("conditions");
       assert content.equalsIgnoreCase("cores = 3");
-*/
 
+      Assert.assertEquals(storeTime,jsonPath.getString("ctime"));
+      Assert.assertNotEquals(storeTime,jsonPath.getString("mtime"));
+      Timestamp ctime = Timestamp.valueOf(jsonPath.getString("ctime"));
+      Timestamp mtime = Timestamp.valueOf(jsonPath.getString("mtime"));
+      Assert.assertTrue(ctime.before(mtime));
+*/
     }
     finally {
       // now delete it again

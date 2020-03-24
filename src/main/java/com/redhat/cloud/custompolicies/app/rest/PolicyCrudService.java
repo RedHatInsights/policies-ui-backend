@@ -434,11 +434,13 @@ public class PolicyCrudService {
 
           storedPolicy.populateFrom(policy);
           storedPolicy.customerid = user.getAccount();
+          storedPolicy.setMtimeToNow();
 
           existingTrigger.updateFromPolicy(storedPolicy);
           if (!skipEngineCall) {
             try {
               engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
+              Policy.persist(storedPolicy);
             } catch (Exception e) {
               return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }

@@ -36,7 +36,9 @@ public class TestPolicy {
   public String conditions;
   public String actions;
 
+  @Column(name = "mtime")
   public String mtime;
 
   public String lastEvaluation;
+  public String ctime;
 }
