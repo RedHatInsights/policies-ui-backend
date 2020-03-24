@@ -89,6 +89,9 @@ public class FullTrigger {
   }
 
   public void updateFromPolicy(Policy policy) {
+    if (trigger.actions == null) {
+      trigger.actions = new HashSet<>();
+    }
     if (policy.actions == null || policy.actions.isEmpty()) {
       trigger.actions.clear();
     }
