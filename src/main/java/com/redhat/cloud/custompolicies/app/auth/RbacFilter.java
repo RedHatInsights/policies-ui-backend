@@ -17,6 +17,7 @@
 package com.redhat.cloud.custompolicies.app.auth;
 
 import com.redhat.cloud.custompolicies.app.RbacServer;
+import io.opentracing.Tracer;
 import io.quarkus.cache.CacheResult;
 import java.io.IOException;
 import javax.annotation.Priority;
@@ -35,6 +36,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @Priority(Priorities.HEADER_DECORATOR +1)
 public class RbacFilter implements ContainerRequestFilter {
 
+  @Inject
+  Tracer tracer;
 
   @Inject
   @RestClient
