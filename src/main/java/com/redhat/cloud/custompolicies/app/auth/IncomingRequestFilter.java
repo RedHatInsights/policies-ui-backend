@@ -39,13 +39,8 @@ import javax.ws.rs.ext.Provider;
  * principal will also be made available for Injection, so that you can write in
  * your code.
  *
-<<<<<<< HEAD
- * We don't yet query for RBAC here, but in its own filter after the
- * JAX-RS engine has selected the endpoint to call.
-=======
  * We don't yet query for RBAC here, as this filter is not part of the tracing
  * span, so we would not be able to trace the rbac calls.
->>>>>>> Add support for distributed tracing
  * See {@link RbacFilter} for this purpose.
  *
  * Usage in code:
