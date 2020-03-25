@@ -4,14 +4,16 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import io.quarkus.panache.common.Sort;
 import org.jboss.resteasy.specimpl.ResteasyUriInfo;
-import org.junit.Assert;
-import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PagingUtilsTest {
 
@@ -25,22 +27,22 @@ public class PagingUtilsTest {
 
     @Test
     public void testExtractPager() throws URISyntaxException {
-        UriInfo info = new ResteasyUriInfo(new URI("https://foo?page=12&pageSize=100"));
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=12&limit=100"));
         Pager pager = PagingUtils.extractPager(info);
         Assert.assertEquals(100, pager.getLimit());
         Assert.assertEquals(12, pager.getOffset());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExtractPagerInvalidPage() throws URISyntaxException {
-        UriInfo info = new ResteasyUriInfo(new URI("https://foo?page=bar&pageSize=100"));
-        PagingUtils.extractPager(info);
+    @Test
+    public void testExtractPagerInvalidOffset() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=bar&limit=100"));
+        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExtractPagerInvalidPageSize() throws URISyntaxException {
-        UriInfo info = new ResteasyUriInfo(new URI("https://foo?page=12&pageSize=foo"));
-        PagingUtils.extractPager(info);
+    @Test
+    public void testExtractPagerInvalidLimit() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=12&limit=foo"));
+        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
     }
 
     @Test
@@ -72,10 +74,10 @@ public class PagingUtilsTest {
         Assert.assertEquals(Sort.Direction.Ascending, pager.getSort().getColumns().get(1).getDirection());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExtractPagerSortWrongDirection() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?sortColumn=foo&sortDirection=bar"));
-        PagingUtils.extractPager(info);
+        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
     }
 
     @Test
@@ -109,10 +111,10 @@ public class PagingUtilsTest {
         Assert.assertEquals("ewf", pager.getFilter().getParameters().map().get("raw"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExtractFilterInvalidOperator() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=wrong"));
-        PagingUtils.extractPager(info);
+        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
     }
 
     @Test

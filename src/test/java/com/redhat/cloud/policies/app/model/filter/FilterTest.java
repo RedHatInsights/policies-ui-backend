@@ -2,7 +2,7 @@ package com.redhat.cloud.policies.app.model.filter;
 
 import io.quarkus.panache.common.Parameters;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FilterTest {
 
