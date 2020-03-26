@@ -521,7 +521,7 @@ public class PolicyCrudService {
             policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
           }
         } catch (Exception e) {
-          policy.setLastEvaluation(0); // TODO does this make sense?
+          policy.setLastEvaluation(0);
         }
       }
       builder = Response.ok(policy);
