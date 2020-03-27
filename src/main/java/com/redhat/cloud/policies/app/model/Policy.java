@@ -90,7 +90,7 @@ public class Policy extends PanacheEntityBase {
   private Timestamp mtime=new Timestamp(System.currentTimeMillis());
 
   @Schema(type = SchemaType.STRING,
-          description = "Last evaluation time in a form like '2020-01-24 12:19:56.718', output only",
+          description = "Last evaluation time in a form like '2020-01-24 12:19:56.718', output only, empty if not set",
           readOnly = true,
           format = "yyyy-MM-dd hh:mm:ss.ddd",
           implementation = String.class)
@@ -120,7 +120,11 @@ public class Policy extends PanacheEntityBase {
 
   @JsonbTransient
   public void setLastEvaluation(long lastEvaluation) {
-    this.lastEvaluation = new Timestamp(lastEvaluation);
+    if (lastEvaluation == 0) {
+      this.lastEvaluation = null;
+    } else {
+      this.lastEvaluation = new Timestamp(lastEvaluation);
+    }
   }
 
   public String getLastEvaluation() {
