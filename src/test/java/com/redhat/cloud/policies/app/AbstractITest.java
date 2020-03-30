@@ -30,7 +30,7 @@ public abstract class AbstractITest {
   static Header authHeader;       // User with access rights
   static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
 
-  static final String API_BASE = "/api/policies/v1.0";
+  static final String API_BASE = "/api/policies/v1";
 
   @BeforeAll
   static void setupRhId() {

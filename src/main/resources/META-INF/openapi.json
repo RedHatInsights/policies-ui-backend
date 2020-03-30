@@ -16,7 +16,7 @@
       "description": "Production Server",
       "variables": {
         "basePath": {
-          "default": "/api/policies/v1.0"
+          "default": "/api/policies/v1"
         }
       }
     },
@@ -28,7 +28,7 @@
           "default": "8080"
         },
         "basePath": {
-          "default": "/api/policies/v1.0"
+          "default": "/api/policies/v1"
         }
       }
     }

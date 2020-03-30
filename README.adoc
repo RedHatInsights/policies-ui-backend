@@ -43,7 +43,7 @@ link:src/test/resources/rhid.txt It has accountId = '1234' set.
 
 [source,shell]
 ----
-curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1.0/policies
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1/policies
 ----
 
 By default this uses paging with a page-size of 10.
@@ -64,7 +64,7 @@ You can select different pages, page sizes and sorting with the following query 
 .Example:
 [source,shell]
 ----
-curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1.0/policies?page=5
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1/policies?page=5
 ----
 
 A header `TotalCount` returns the total number of policies.
@@ -72,7 +72,7 @@ A header `TotalCount` returns the total number of policies.
 === List fact keys (for the UI)
 [source,shell]
 ----
-curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1.0/facts
+curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1/facts
 ----
 
 === Validating (and storing) a policy
@@ -84,7 +84,7 @@ A POST to the /policies endpoint validates and potentially stores a passed polic
  curl -i -HContent-Type:application/json  \
          -Hx-rh-identity:`cat src/test/resources/rhid.txt` -XPOST \
          -d @src/test/resources/example-policy.json \
-          http://localhost:8080/api/policies/v1.0/policies
+          http://localhost:8080/api/policies/v1/policies
 ----
 
 This sends the policy from the file 'example-policy.json' to the server for validation.
@@ -97,7 +97,7 @@ Validation of a policy requires the engine to be up and reachable.
 
 == OpenAPI Endpoint / Swagger-UI
 
-OpenAPI spec of the API is available under http://localhost:8080/api/policies/v1.0/openapi.json
+OpenAPI spec of the API is available under http://localhost:8080/api/policies/v1/openapi.json
 
 When the server is running in dev mode, there is also the Swagger-UI available under
 http://localhost:8080/swagger-ui/

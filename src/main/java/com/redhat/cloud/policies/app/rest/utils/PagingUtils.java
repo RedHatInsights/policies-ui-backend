@@ -159,7 +159,7 @@ public class PagingUtils {
             data.addAll(page);
 
 
-            String location = "/api/policies/v1.0/policies";
+            String location = "/api/policies/v1/policies";
             String format = "%s?limit=%d&offset=%d";
 
             Pager pager = page.getPager();

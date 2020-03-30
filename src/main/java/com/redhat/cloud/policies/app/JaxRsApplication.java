@@ -29,7 +29,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author hrupp
  *
  */
-@ApplicationPath("/api/policies/v1.0")
+@ApplicationPath("/api/policies/v1")
 public class JaxRsApplication extends Application {
 
   @ConfigProperty(name = "accesslog.filter.health", defaultValue = "true")

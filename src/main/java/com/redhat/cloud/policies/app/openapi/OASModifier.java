@@ -86,6 +86,6 @@ public class OASModifier implements OASFilter {
   }
 
   private String mangleName(String key) {
-    return key.replace("/api/policies/v1.0","");
+    return key.replace("/api/policies/v1","");
   }
 }
