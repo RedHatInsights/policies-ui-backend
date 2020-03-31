@@ -624,6 +624,16 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
     ;
   }
+  @Test
+  void deleteUnknownPolicy() {
+
+    given()
+        .header(authHeader)
+        .when().delete(API_BASE + "/policies/aaaaaaaa-bbbb-cccc-dddd-245b31933e94")
+        .then()
+        .statusCode(404)
+    ;
+  }
 
   @Test
   void deletePolicyNoRbacAccess() {

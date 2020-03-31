@@ -341,7 +341,7 @@ public class PolicyCrudService {
   @DELETE
   @Path("/{id}")
   @APIResponse(responseCode = "200", description = "Policy deleted")
-  @APIResponse(responseCode = "400", description = "Deletion failed")
+  @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @Transactional
   public Response deletePolicy(@PathParam("id") UUID policyId) {
@@ -353,7 +353,7 @@ public class PolicyCrudService {
 
     ResponseBuilder builder ;
     if (policy==null) {
-      builder = Response.status(Response.Status.BAD_REQUEST);
+      builder = Response.status(Response.Status.NOT_FOUND);
     } else {
       policy.delete(policy);
       try {
