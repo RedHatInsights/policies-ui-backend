@@ -94,35 +94,39 @@ public class FullTrigger {
     }
     if (policy.actions == null || policy.actions.isEmpty()) {
       trigger.actions.clear();
-    }
-    String[] actionsIn = policy.actions.split(";");
-    Set<TriggerAction> newActions = new HashSet<>();
-    for (String actionIn : actionsIn) {
-      if (actionIn.trim().isEmpty()) {
-        continue;
-      }
-      String actionName;
-      actionName = getActionName(actionIn);
+    } else {
+      String[] actionsIn = policy.actions.split(";");
+      Set<TriggerAction> newActions = new HashSet<>();
+      for (String actionIn : actionsIn) {
+        if (actionIn.trim().isEmpty()) {
+          continue;
+        }
+        String actionName;
+        actionName = getActionName(actionIn);
 
-      boolean found = false;
-      for (TriggerAction ta : trigger.actions) {
-        String taName = ta.actionPlugin;
-        if (taName.equals(actionName)) {
+        boolean found = false;
+        for (TriggerAction ta : trigger.actions) {
+          String taName = ta.actionPlugin;
+          if (taName.equals(actionName)) {
+            newActions.add(ta);
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          var ta = new TriggerAction();
+          ta.actionPlugin = actionName;
           newActions.add(ta);
-          found = true;
-          break;
         }
       }
-      if (!found) {
-        var ta = new TriggerAction();
-        ta.actionPlugin = actionName;
-        newActions.add(ta);
-      }
+      trigger.actions.removeIf(ta -> !newActions.contains(ta));
+      trigger.actions.addAll(newActions);
     }
-    trigger.actions.removeIf(ta -> !newActions.contains(ta));
-    trigger.actions.addAll(newActions);
 
     trigger.enabled = policy.isEnabled;
+    trigger.name = policy.name;
+    trigger.description = policy.description;
+
     if (conditions.size()!=0) {
       conditions.get(0).expression = policy.conditions;
     }
