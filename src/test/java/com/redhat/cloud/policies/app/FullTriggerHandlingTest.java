@@ -42,6 +42,10 @@ public class FullTriggerHandlingTest {
 
         Assert.assertEquals(1,ft.trigger.actions.size());
         Assert.assertEquals("email",ft.trigger.actions.iterator().next().actionPlugin);
+
+        Assert.assertEquals("hula", ft.trigger.name);
+
+        Assert.assertEquals("some text",ft.trigger.description);
     }
 
     @NotNull
@@ -51,6 +55,7 @@ public class FullTriggerHandlingTest {
         p.conditions = "bla";
         p.actions = "email";
         p.name = "hula";
+        p.description = "some text";
         return p;
     }
 
@@ -80,6 +85,7 @@ public class FullTriggerHandlingTest {
         int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("hooks")).count();
         Assert.assertEquals(2,i);
     }
+
     @Test
     void testActionUpdate3() {
         Policy p = createPolicy();
@@ -92,6 +98,19 @@ public class FullTriggerHandlingTest {
 
         Assert.assertEquals(1,ft.trigger.actions.size());
         Assert.assertEquals("hooks",ft.trigger.actions.iterator().next().actionPlugin);
+    }
+
+    @Test
+    void testActionUpdate4() {
+        Policy p = createPolicy();
+        p.actions = "webhook";
+
+        FullTrigger ft = new FullTrigger(p);
+
+        p.actions = null;
+        ft.updateFromPolicy(p);
+
+        Assert.assertEquals(0,ft.trigger.actions.size());
     }
 
     @Test
@@ -130,4 +149,29 @@ public class FullTriggerHandlingTest {
 
         Assert.assertEquals(1,ft.trigger.actions.size());
     }
+
+    @Test
+    void testNameUpdate() {
+        Policy p = createPolicy();
+
+        FullTrigger ft = new FullTrigger(p);
+
+        p.name = p.name + "-2";
+        ft.updateFromPolicy(p);
+
+        Assert.assertEquals("hula-2", ft.trigger.name);
+    }
+
+    @Test
+    void testDescriptionUpdate() {
+        Policy p = createPolicy();
+
+        FullTrigger ft = new FullTrigger(p);
+
+        p.description = p.description + "-2";
+        ft.updateFromPolicy(p);
+
+        Assert.assertEquals("some text-2", ft.trigger.description);
+    }
+
 }
