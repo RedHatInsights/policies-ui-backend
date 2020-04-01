@@ -499,6 +499,84 @@ class RestApiTest extends AbstractITest {
     }
   }
 
+  @Test
+  void storeAndEnableDisablePolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL";
+    tp.conditions = "cores = 2";
+    tp.name = "test2";
+    tp.isEnabled = false;
+
+    TestPolicy testPolicy =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore","true")
+      .when().post(API_BASE + "/policies")
+        .then()
+        .statusCode(201)
+        .extract().body().as(TestPolicy.class)
+        ;
+
+    try {
+      // Now enable
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+          .queryParam("enabled",true)
+          .when().post(API_BASE + "/policies/" + testPolicy.id + "/enabled")
+          .then()
+          .statusCode(200);
+
+      // check if good
+      //boolean  isEnabled =
+      JsonPath jp =
+          given()
+              .header(authHeader)
+              .when().get(API_BASE + "/policies/" + testPolicy.id)
+              .then()
+              .statusCode(200)
+              .extract()
+              .body()
+              .jsonPath();
+
+      boolean isEnabled = jp.getBoolean("isEnabled");
+      Assert.assertTrue(isEnabled);
+
+      // Now disable
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+          .queryParam("enabled",false)
+          .when().post(API_BASE + "/policies/" + testPolicy.id + "/enabled")
+          .then()
+          .statusCode(200);
+
+      // check if good
+      isEnabled =
+          given()
+              .header(authHeader)
+              .when().get(API_BASE + "/policies/" + testPolicy.id)
+              .then()
+              .statusCode(200)
+              .extract()
+              .body()
+              .jsonPath().get("isEnabled");
+
+      Assert.assertFalse(isEnabled);
+
+    }
+    finally {
+      // now delete it again
+      given()
+          .header(authHeader)
+          .when().delete(API_BASE + "/policies/" + testPolicy.id)
+          .then()
+          .statusCode(200);
+    }
+  }
+
   // Check that update is protected by RBAC.
   // we need to store as user with access first.
   @Test

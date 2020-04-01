@@ -88,6 +88,19 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     mockEngineServer.start();
     String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
     mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
+
+    mockServerClient
+        .when(request()
+          .withPath("/hawkular/alerts/triggers/.*/enable")
+          .withMethod("PUT")
+        )
+        .respond(response().withStatusCode(200));
+    mockServerClient
+        .when(request()
+          .withPath("/hawkular/alerts/triggers/.*/enable")
+          .withMethod("DELETE")
+        )
+        .respond(response().withStatusCode(200));
     mockServerClient
         .when(request()
                   .withPath("/hawkular/alerts/triggers/trigger")
