@@ -24,6 +24,7 @@ import com.redhat.cloud.policies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -74,6 +75,8 @@ import org.hibernate.exception.ConstraintViolationException;
 @Timed(absolute = true, name="PolicyService")
 @RequestScoped
 public class PolicyCrudService {
+
+  Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @ConfigProperty(name = "engine.skip", defaultValue = "false")
   boolean skipEngineCall;
@@ -370,6 +373,49 @@ public class PolicyCrudService {
 
     return builder.build();
 
+  }
+
+  @Operation(summary = "Enable/disable a policy")
+  @Parameter(name = "id", description = "ID of the Policy")
+  @Parameter(name = "enabled",
+      schema =  @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"),
+      description = "Should the policy be enabled (true) or disabled (false, default)")
+  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "404", description = "Policy not found")
+  @APIResponse(responseCode = "500", description = "Updating failed")
+  @POST
+  @Path("/{id}/enabled")
+  @Transactional
+  public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+     }
+
+    Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+
+    ResponseBuilder builder ;
+    if (storedPolicy==null) {
+      builder = Response.status(404, "Original policy not found");}
+    else {
+      try {
+        if (shouldBeEnabled) {
+          engine.enableTrigger(storedPolicy.id, user.getAccount());
+        } else {
+          engine.disableTrigger(storedPolicy.id, user.getAccount());
+        }
+        storedPolicy.isEnabled = shouldBeEnabled;
+        storedPolicy.persist();
+        builder = Response.ok();
+      } catch (NotFoundException nfe) {
+        builder = Response.status(404, "Policy not found in engine");
+        log.warning("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
+      }
+      catch (Exception e ) {
+        builder = Response.status(500, "Update failed: " + e.getMessage());
+      }
+    }
+    return builder.build();
   }
 
   @Operation(summary = "Update a single policy for a customer by its id")

@@ -104,4 +104,15 @@ public interface PolicyEngine {
   @Produces("application/json")
   List<FullTrigger> findTriggersById(@QueryParam("triggerIds") String triggerIds,
                                      @HeaderParam("Hawkular-Tenant" ) String customerId);
+
+  @PUT
+  @Path("/{triggerId}/enable")
+  void enableTrigger(@PathParam("triggerId") UUID triggerId,
+                     @HeaderParam("Hawkular-Tenant" ) String customerId);
+
+  @DELETE
+  @Path("/{triggerId}/enable")
+  void disableTrigger(@PathParam("triggerId") UUID triggerId,
+                      @HeaderParam("Hawkular-Tenant" ) String customerId);
+
 }
