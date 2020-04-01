@@ -55,17 +55,16 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
    //    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
   }
 
-  // Does not work yet and needs Quarkus 1.3.1
-//    @Override
-//    public void inject(Object testInstance) {
-//        System.out.println(testInstance);
-//        if (testInstance instanceof SettingsServiceTest) {
-//            SettingsServiceTest test = (SettingsServiceTest) testInstance;
-//            test.mockServerClient = mockServerClient;
-//        }
-//    }
 
-    void setupPostgres(Map<String, String> props) {
+  @Override
+  public void inject(Object testInstance) {
+    if (testInstance instanceof SettingsServiceTest) {
+      SettingsServiceTest test = (SettingsServiceTest) testInstance;
+      test.mockServerClient = mockServerClient;
+    }
+  }
+
+  void setupPostgres(Map<String, String> props) {
     postgreSQLContainer =
          new PostgreSQLContainer("postgres");
     postgreSQLContainer.start();

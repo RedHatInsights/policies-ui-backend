@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.model.HttpRequest;
 
 /**
  * @author hrupp
@@ -108,21 +109,23 @@ public class SettingsServiceTest extends AbstractITest {
     getJsonPath(authRbacNoAccess,403);
   }
 
-  // This does not work yet, needs Quarkus 1.3.1
+  // This needs to run as last test in here, as it clears out
+  // the route to the (mocked) notification pod, so that the
+  // value can not be set.
   // See also TestLifecycleManager.invoke()
-//  @Test()
-//  @Order(2999)
-//  public void setAndFail() {
-//
-//    mockServerClient.clear(HttpRequest.request()
-//                 .withMethod("PUT")
-//                 .withPath("/endpoints/email/subscription/.*")
-//    );
-//
-//    String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
-//    sendPayload(payload, authHeader, 500);
-//
-//  }
+  @Test()
+  @Order(2999)
+  public void setAndFail() {
+
+    mockServerClient.clear(HttpRequest.request()
+                 .withMethod("PUT")
+                 .withPath("/endpoints/email/subscription/.*")
+    );
+
+    String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
+    sendPayload(payload, authHeader, 500);
+
+  }
 
   private void sendPayload(String payload, Header authHeader, int expectedStatus) {
     given()
