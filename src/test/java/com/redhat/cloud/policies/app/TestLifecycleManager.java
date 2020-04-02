@@ -58,8 +58,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
   @Override
   public void inject(Object testInstance) {
-    if (testInstance instanceof SettingsServiceTest) {
-      SettingsServiceTest test = (SettingsServiceTest) testInstance;
+    if (testInstance instanceof UserConfigServiceTest) {
+      UserConfigServiceTest test = (UserConfigServiceTest) testInstance;
       test.mockServerClient = mockServerClient;
     }
   }
