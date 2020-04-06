@@ -76,7 +76,7 @@ import org.hibernate.exception.ConstraintViolationException;
 @RequestScoped
 public class PolicyCrudService {
 
-  Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @ConfigProperty(name = "engine.skip", defaultValue = "false")
   boolean skipEngineCall;
@@ -222,7 +222,7 @@ public class PolicyCrudService {
     try {
       page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
       // TODO once the engine supports batching, rewrite this.
-      page.stream().forEach(p -> {
+      page.forEach(p -> {
         try {
           FullTrigger ft = engine.fetchTrigger(p.id, user.getAccount());
           if (ft.conditions != null && !ft.conditions.isEmpty()) {
@@ -306,7 +306,9 @@ public class PolicyCrudService {
         try {
           engine.storeTrigger(trigger, false, user.getAccount());
         } catch (Exception e) {
-          return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+          Msg engineExceptionMsg = getEngineExceptionMsg(e);
+          log.info("Storing policy in engine failed: " + engineExceptionMsg.msg);
+          return Response.status(400,e.getMessage()).entity(engineExceptionMsg).build();
         }
       }
     } catch (Throwable t) {
