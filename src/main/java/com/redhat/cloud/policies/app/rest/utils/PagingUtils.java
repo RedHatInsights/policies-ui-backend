@@ -18,7 +18,6 @@ package com.redhat.cloud.policies.app.rest.utils;
 
 import static java.lang.Long.max;
 
-import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.model.filter.Filter;
@@ -129,7 +128,7 @@ public class PagingUtils {
         if (page.isEmpty()) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
-            builder = Response.ok(new PagedResponse(page));
+            builder = Response.ok(new PagedResponse<>(page));
             EntityTag etag = new EntityTag(String.valueOf(page.hashCode()));
             builder.header("ETag",etag);
             builder.header("TotalCount", Long.toString(page.getTotalCount()));
@@ -149,12 +148,12 @@ public class PagingUtils {
     "prev": "/api/myapp/v1/collection/?limit=5&offset=0"
      </pre>
      */
-    public static class PagedResponse {
+    public static class PagedResponse<T> {
       public Map<String,Long> meta = new HashMap<>(1);
       public Map<String,String> links = new HashMap<>(3);
-      public List<Policy> data = new ArrayList<>();
+      public List<T> data = new ArrayList<>();
 
-        public PagedResponse(Page page) {
+        public PagedResponse(Page<T> page) {
             meta.put("count", page.getTotalCount());
             data.addAll(page);
 

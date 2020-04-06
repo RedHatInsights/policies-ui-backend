@@ -44,6 +44,7 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
     RuntimeException re ;
     switch (status) {
       case 400: re = new ValidationException("Validation failed: " + msg.msg);
+        break;
       case 404: re = new NotFoundException(msg.msg);
       break;
       default:

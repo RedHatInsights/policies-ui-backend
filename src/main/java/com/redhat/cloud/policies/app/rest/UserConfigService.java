@@ -37,6 +37,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import java.util.logging.Logger;
+
 /**
  * @author hrupp
  */
@@ -47,6 +49,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @RequestScoped
 public class UserConfigService {
 
+  private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
   @Inject
@@ -98,7 +101,7 @@ public class UserConfigService {
     catch (Exception e) {
       builder = Response.serverError().entity("Storing of settings in notification service failed.");
       builder.type("text/plain");
-      System.err.println("Storing settings failed: " + e.getMessage());
+      log.warning("Storing settings failed: " + e.getMessage());
     }
 
     return builder.build();
@@ -139,7 +142,7 @@ public class UserConfigService {
     catch (Exception e) {
       builder= Response.serverError();
       builder.entity(new Msg(e.getMessage()));
-      e.printStackTrace();
+      log.warning("Retrieving settings failed: " + e.getMessage());
     }
 
     return builder.build();
