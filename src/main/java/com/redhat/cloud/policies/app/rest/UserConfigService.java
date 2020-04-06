@@ -31,7 +31,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
-import org.eclipse.microprofile.metrics.annotation.Timed;
+
+import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -42,9 +43,9 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @Path("/user-config")
 @Produces("application/json")
 @Consumes("application/json")
-@Timed
+@SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
-public class SettingsService {
+public class UserConfigService {
 
 
   @SuppressWarnings("CdiInjectionPointsInspection")

@@ -37,7 +37,7 @@ import org.mockserver.model.HttpRequest;
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SettingsServiceTest extends AbstractITest {
+public class UserConfigServiceTest extends AbstractITest {
 
   private static final String PREFERENCE_URL = API_BASE + "/user-config/email-preference";
   public MockServerClient mockServerClient;
