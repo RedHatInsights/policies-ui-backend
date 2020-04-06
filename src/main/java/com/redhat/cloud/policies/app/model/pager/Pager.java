@@ -23,6 +23,8 @@ import io.reactivex.annotations.Nullable;
 
 public class Pager {
 
+    public static final int NO_LIMIT = -1;
+
     private final int offset;
     private final int limit;
     @Nullable

@@ -173,7 +173,9 @@ public class Policy extends PanacheEntityBase {
     // Always set the customer id - even if that may be part of parameters below
     q.setParameter("customerid",customer);
     q.setFirstResult(pager.getOffset());
-    q.setMaxResults(pager.getLimit());
+    if (pager.getLimit() != Pager.NO_LIMIT) {
+      q.setMaxResults(pager.getLimit());
+    }
     for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
       q.setParameter(param.getKey(),param.getValue());
     }

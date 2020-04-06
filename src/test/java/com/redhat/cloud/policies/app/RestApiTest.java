@@ -29,6 +29,7 @@ import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.json.bind.Jsonb;
@@ -178,6 +179,48 @@ class RestApiTest extends AbstractITest {
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,7);
     extractAndCheck(links,"last",5,10);
+  }
+
+  @Test
+  void testGetPoliciesWithNoLimit() {
+    JsonPath jsonPath =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?limit=-1&offset=0")
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    List<?> data = jsonPath.get("data");
+
+    Assert.assertEquals(11, data.size());
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(), 2);
+    extractAndCheck(links,"first",-1,0);
+    extractAndCheck(links,"last",-1,0);
+  }
+
+  @Test
+  void testGetPoliciesWithNoLimitIgnoresOffset() {
+    JsonPath jsonPath =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?limit=-1&offset=12321")
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    List<?> data = jsonPath.get("data");
+
+    Assert.assertEquals(11, data.size());
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(), 2);
+    extractAndCheck(links,"first",-1,0);
+    extractAndCheck(links,"last",-1,0);
   }
 
   @Test

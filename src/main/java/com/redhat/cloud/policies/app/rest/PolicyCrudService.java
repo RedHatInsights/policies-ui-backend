@@ -108,7 +108,7 @@ public class PolicyCrudService {
           @Parameter(
                   name = "limit",
                   in = ParameterIn.QUERY,
-                  description = "Number of items per page, if not specified uses 10.",
+                  description = "Number of items per page, if not specified uses 10. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset" ,
                   schema = @Schema(type = SchemaType.INTEGER)
           ),
           @Parameter(
