@@ -34,7 +34,7 @@ public class OASAcceptHeaderMangler {
      * header or the use of a query parameter.
      *
      * We now look at the path and if it ends in .json, replace the
-     * existing Accept heder with one that requests Json format.
+     * existing Accept header with one that requests Json format.
      */
     @RouteFilter(401)
     void oasAcceptHeaderMangler(RoutingContext rc) {

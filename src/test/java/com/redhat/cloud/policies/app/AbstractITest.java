@@ -18,7 +18,10 @@ package com.redhat.cloud.policies.app;
 
 
 import io.restassured.http.Header;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
+
+import java.util.Map;
 
 /**
  * Test base for a few common things.
@@ -30,7 +33,8 @@ public abstract class AbstractITest {
   static Header authHeader;       // User with access rights
   static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
 
-  static final String API_BASE = "/api/policies/v1.0";
+  static final String API_BASE_V1_0 = "/api/policies/v1.0";
+  static final String API_BASE_V1 = "/api/policies/v1";
 
   @BeforeAll
   static void setupRhId() {
@@ -41,4 +45,10 @@ public abstract class AbstractITest {
     authRbacNoAccess = new Header("x-rh-identity", rhid);
   }
 
+  protected void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
+    String url = links.get(rel);
+    Assert.assertNotNull("Rel [" + rel + "] not found" , url);
+    String tmp = String.format("limit=%d&offset=%d",limit,offset);
+    Assert.assertTrue("Url for rel ["+rel+"] should end in ["+tmp+"], but was [" + url +"]", url.endsWith(tmp));
+  }
 }
