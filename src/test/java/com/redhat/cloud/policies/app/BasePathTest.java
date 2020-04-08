@@ -36,7 +36,7 @@ public class BasePathTest extends AbstractITest {
         .header(authHeader)
         .accept(ContentType.JSON)
       .when()
-        .get(API_BASE)
+        .get(API_BASE_V1_0)
       .then()
         .statusCode(404);
   }
@@ -47,7 +47,7 @@ public class BasePathTest extends AbstractITest {
         .header(authHeader)
         .accept(ContentType.TEXT)
       .when()
-        .get(API_BASE)
+        .get(API_BASE_V1_0)
       .then()
         .statusCode(404);
   }
@@ -58,7 +58,7 @@ public class BasePathTest extends AbstractITest {
         .header(authHeader)
         .accept(ContentType.HTML)
       .when()
-        .get(API_BASE)
+        .get(API_BASE_V1_0)
       .then()
         .statusCode(404);
   }

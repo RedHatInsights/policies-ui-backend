@@ -19,6 +19,9 @@ package com.redhat.cloud.policies.app;
 import io.quarkus.vertx.web.RouteFilter;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Redirect routes with only the major version
  * to major.minor ones.
@@ -30,21 +33,29 @@ public class RouteRedirector {
   private static final String API_POLICIES_V_1 = "/api/policies/v1/";
   private static final String API_POLICIES_V_1_0 = "/api/policies/v1.0/";
 
+  Logger log = Logger.getLogger(this.getClass().getSimpleName());
+
   /**
    * If the requested route is the one with major version only,
-   * send a 307 "Moved temporarily" with the location of the version
-   * with major.minor.
-   * See https://tools.ietf.org/html/rfc7231#section-6.4.7
-   * Using a 308 code "Moved permanently" would make sense, but
-   * it is not clear how much this code is supported in the wild.
+   * we rewrite it on the fly.
+   * We need to take the URI from the underlying http request, as the
+   * normalised path does not contain query parameters.
    * @param rc RoutingContext from vert.x
    */
   @RouteFilter(400)
   void myRedirector(RoutingContext rc) {
-    if (rc.normalisedPath().startsWith(API_POLICIES_V_1)) {
-      String remain = rc.normalisedPath().substring(API_POLICIES_V_1.length());
-      rc.response().putHeader("Location", API_POLICIES_V_1_0 +remain);
-      rc.fail(307);
+    String uri = rc.request().uri();
+    if (log.isLoggable(Level.FINER)) {
+      log.finer("Incoming uri: " + uri);
+    }
+    if (uri.startsWith(API_POLICIES_V_1)) {
+      String remain = uri.substring(API_POLICIES_V_1.length());
+      if (log.isLoggable(Level.FINER)) {
+        log.finer("Rerouting to :" + API_POLICIES_V_1_0 +remain);
+      }
+
+      rc.reroute(API_POLICIES_V_1_0 +remain);
+      return;
     }
     rc.next();
   }
