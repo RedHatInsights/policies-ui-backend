@@ -53,29 +53,37 @@ public class PagingUtils {
         final Pattern FILTER_PATTERN = Pattern.compile("filter\\[(.+)\\]");
         final String FILTER_OP = "filter:op";
 
-        String page = queryParams.getFirst(QUERY_OFFSET);
-        if (page != null) {
-            try {
-                pageBuilder.page(Integer.parseInt(page));
-            } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException(String.format(
-                        "%s expects an int but found [%s]",
-                        QUERY_OFFSET,
-                        page
-                ), nfe);
-            }
-        }
-
         String itemsPerPage = queryParams.getFirst(QUERY_LIMIT);
+        boolean usingNoLimit = false;
         if (itemsPerPage != null) {
             try {
-                pageBuilder.itemsPerPage(Integer.parseInt(itemsPerPage));
+                int limit = Integer.parseInt(itemsPerPage);
+                if (limit == Pager.NO_LIMIT) {
+                    usingNoLimit = true;
+                    pageBuilder.page(0);
+                }
+                pageBuilder.itemsPerPage(limit);
             } catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException(String.format(
                         "%s expects an int but found [%s]",
                         QUERY_LIMIT,
                         itemsPerPage
                 ), nfe);
+            }
+        }
+
+        if (!usingNoLimit) {
+            String page = queryParams.getFirst(QUERY_OFFSET);
+            if (page != null) {
+                try {
+                    pageBuilder.page(Integer.parseInt(page));
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalArgumentException(String.format(
+                            "%s expects an int but found [%s]",
+                            QUERY_OFFSET,
+                            page
+                    ), nfe);
+                }
             }
         }
 
@@ -164,13 +172,19 @@ public class PagingUtils {
             Pager pager = page.getPager();
             int limit = pager.getLimit();
             links.put("first", String.format(format, location, limit, 0));
-            links.put("last", String.format(format, location, limit, (page.getTotalCount() / limit) * limit));
-            if (pager.getOffset() < page.getTotalCount() - limit) {
-                links.put("next", String.format(format, location, limit, pager.getOffset() + limit));
+            if (limit == Pager.NO_LIMIT) {
+                links.put("last", String.format(format, location, limit, 0));
+            } else {
+                links.put("last", String.format(format, location, limit, (page.getTotalCount() / limit) * limit));
             }
-            if (pager.getOffset() > 0) {
-                links.put("prev", String.format(format, location, limit,
-                                                max(0,pager.getOffset() - limit)));
+            if (limit != Pager.NO_LIMIT) {
+                if (pager.getOffset() < page.getTotalCount() - limit) {
+                    links.put("next", String.format(format, location, limit, pager.getOffset() + limit));
+                }
+                if (pager.getOffset() > 0) {
+                    links.put("prev", String.format(format, location, limit,
+                            max(0,pager.getOffset() - limit)));
+                }
             }
         }
     }
