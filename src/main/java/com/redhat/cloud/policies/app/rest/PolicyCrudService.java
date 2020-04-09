@@ -24,6 +24,7 @@ import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
@@ -239,6 +240,104 @@ public class PolicyCrudService {
 
     return PagingUtils.responseBuilder(page).build();
   }
+
+  @Operation(summary = "Return all policy ids for a given account after applying the filters")
+  @GET
+  @Path("/ids")
+  @Parameters({
+          @Parameter(
+                  name = "filter[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the name depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the description depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+  })
+  @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
+  @APIResponse(responseCode = "404", description = "No policies found for customer")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "200", description = "PolicyIds found", content =
+                 @Content(schema = @Schema(implementation = List.class)),
+                 headers = @Header(name = "TotalCount", description = "Total number of items found",
+                                   schema = @Schema(type = SchemaType.INTEGER)))
+  public Response getPolicyIdsForCustomer() {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+    }
+
+    Pager pager = PagingUtils.extractPager(uriInfo);
+    Page<UUID> page;
+    try {
+      page = Policy.pagePolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+
+
+    } catch (IllegalArgumentException iae) {
+      return Response.status(400,iae.getLocalizedMessage()).build();
+    }
+
+    return PagingUtils.responseBuilder(page).build();
+  }
+
 
   @Operation(summary = "Validate (and possibly persist) a passed policy for the given account")
   @Parameter(name = "alsoStore",

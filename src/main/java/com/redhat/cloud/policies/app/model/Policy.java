@@ -178,18 +178,49 @@ public class Policy extends PanacheEntityBase {
     }
     List<Policy> results = q.getResultList();
 
-    qs = "SELECT count(p) FROM Policy p WHERE ";
-    qs = qs + filter.getQuery();
+    long count = getCount(em, customer, filter);
 
-    q = em.createQuery(qs);
+    return new Page<>(results,pager,count);
+  }
+
+  public static Page<UUID> pagePolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
+
+    pager.getFilter()
+            .getParameters()
+            .map()
+            .keySet()
+            .forEach(FilterableColumn::fromName);
+
+    Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
+
+    String qs = "SELECT p.id FROM Policy p WHERE " +  filter.getQuery() ;
+
+    Query q = em.createQuery(qs);
     // Always set the customer id - even if that may be part of parameters below
     q.setParameter("customerid",customer);
     for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
       q.setParameter(param.getKey(),param.getValue());
     }
-    long count = (long) q.getSingleResult();
+    List<UUID> results = q.getResultList();
 
-    return new Page<>(results,pager,count);
+    long count = getCount(em, customer, filter);
+
+    return new Page<UUID>(results,pager,count);
+  }
+
+  private static long getCount(EntityManager em, String customer, Filter filter) {
+    String qs;
+    Query q;
+    qs = "SELECT count(p) FROM Policy p WHERE ";
+    qs = qs + filter.getQuery();
+
+    q = em.createQuery(qs);
+    // Always set the customer id - even if that may be part of parameters below
+    q.setParameter("customerid", customer);
+    for (Map.Entry<String, Object> param : filter.getParameters().map().entrySet()) {
+      q.setParameter(param.getKey(), param.getValue());
+    }
+    return (long) q.getSingleResult();
   }
 
   public static Policy findById(String customer, UUID theId) {

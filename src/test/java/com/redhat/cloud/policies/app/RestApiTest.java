@@ -36,6 +36,8 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import io.restassured.response.Response;
 import org.junit.Assert;
@@ -56,6 +58,10 @@ class RestApiTest extends AbstractITest {
   void cleanUUID() {
     uuidHelper.clearUUID();
   }
+
+  @Inject
+  EntityManager entityManager;
+
 
   @Test
   void testFactsNoAuth() {
@@ -86,6 +92,9 @@ class RestApiTest extends AbstractITest {
 
   @Test
   void testGetPolicies() {
+
+    long numberOfPolicies = countPoliciesInDB();
+
     JsonPath jsonPath =
     given()
         .header(authHeader)
@@ -94,10 +103,27 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
         .extract().body().jsonPath();
 
-    Assert.assertEquals(10, jsonPath.getList("data").size());
+    Assert.assertEquals(numberOfPolicies, jsonPath.getList("data").size());
     Map<String,Object> data = (Map<String, Object>) jsonPath.getList("data").get(0);
     Assert.assertTrue(data.containsKey("lastEvaluation"));
   }
+
+  @Test
+  void testGetPolicyIds() {
+
+    long numberOfPolicies = countPoliciesInDB();
+
+    JsonPath jsonPath =
+    given()
+        .header(authHeader)
+        .when().get(API_BASE_V1_0 + "/policies/ids")
+        .then()
+        .statusCode(200)
+        .extract().body().jsonPath();
+
+    Assert.assertEquals(numberOfPolicies, jsonPath.getList("data").size());
+  }
+
 
   @Test
   void testGetPoliciesSort() {
@@ -168,6 +194,22 @@ class RestApiTest extends AbstractITest {
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,10);
     extractAndCheck(links,"last",5,10);
+  }
+
+  @Test
+  void testGetPolicyIdsPaged3() {
+
+    JsonPath jsonPath =
+    given()
+            .header(authHeader)
+          .when()
+            .get(API_BASE_V1_0 + "/policies/ids?limit=5&offset=5")
+          .then()
+            .statusCode(200)
+            .extract().body().jsonPath();
+
+    assert (Integer)jsonPath.get("meta.count") == 11;
+    Assert.assertEquals(11, jsonPath.getList("data").size());
   }
 
   @Test
@@ -255,6 +297,21 @@ class RestApiTest extends AbstractITest {
             .assertThat()
             .body("data.get(0).name", is("Detect Nice box"));
   }
+
+  @Test
+  void testGetPolicyIdsFilter() {
+    given()
+          .header(authHeader)
+        .when()
+          .get(API_BASE_V1_0 + "/policies/ids?filter[name]=Detect%&filter:op[name]=like")
+        .then()
+          .statusCode(200)
+        .assertThat()
+          .body("data.size()", is(1))
+        .assertThat()
+          .body("data.get(0)", is("f36aa564-ffc8-48c6-a27f-31ddd4c16c8b"));
+  }
+
 
   @Test
   void testGetPoliciesFilterILike() {
@@ -407,7 +464,7 @@ class RestApiTest extends AbstractITest {
     tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
 
-    given()
+    TestPolicy policy = given()
         .header(authHeader)
         .contentType(ContentType.JSON)
         .body(tp)
@@ -416,17 +473,19 @@ class RestApiTest extends AbstractITest {
         .post(API_BASE_V1_0 + "/policies")
       .then()
         .statusCode(201)
-        .extract();
+        .extract().body().as(TestPolicy.class);
+
+    deletePolicyById(policy.id.toString());
   }
 
   @Test
-  void storeNewPolicyEmptyActions() {
+  void storeNewPolicyEmptyActions1() {
     TestPolicy tp = new TestPolicy();
     tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
     tp.actions = "";
 
-    given()
+    TestPolicy policy = given()
         .header(authHeader)
         .contentType(ContentType.JSON)
         .body(tp)
@@ -435,11 +494,19 @@ class RestApiTest extends AbstractITest {
         .post(API_BASE_V1_0 + "/policies")
       .then()
         .statusCode(201)
-        .extract();
+        .extract().body().as(TestPolicy.class);
 
+    deletePolicyById(policy.id.toString());
+  }
+
+  @Test
+  void storeNewPolicyEmptyActions2() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
     tp.actions = "; ";
 
+    TestPolicy policy =
     given()
         .header(authHeader)
         .contentType(ContentType.JSON)
@@ -449,7 +516,9 @@ class RestApiTest extends AbstractITest {
         .post(API_BASE_V1_0 + "/policies")
       .then()
         .statusCode(201)
-        .extract();
+        .extract().body().as(TestPolicy.class);
+
+    deletePolicyById(policy.id.toString());
   }
 
   @Test
@@ -463,9 +532,9 @@ class RestApiTest extends AbstractITest {
         .header(authHeader)
         .contentType(ContentType.JSON)
         .body(tp)
-        .when()
+      .when()
         .post(API_BASE_V1_0 + "/policies")
-        .then()
+      .then()
         .statusCode(400);
   }
 
@@ -481,8 +550,9 @@ class RestApiTest extends AbstractITest {
         .contentType(ContentType.JSON)
         .body(tp)
         .queryParam("alsoStore", "true")
-        .when().post(API_BASE_V1_0 + "/policies")
-        .then()
+      .when()
+        .post(API_BASE_V1_0 + "/policies")
+      .then()
         .statusCode(403);
   }
 
@@ -762,19 +832,25 @@ class RestApiTest extends AbstractITest {
 
   @Test
   void deletePolicy() {
+    deletePolicyById("e3bdc9dd-18d4-4900-805d-7f59b3c736f7");
+  }
+
+  private void deletePolicyById(String id) {
 
     given()
         .header(authHeader)
-      .when().delete(API_BASE_V1_0 + "/policies/e3bdc9dd-18d4-4900-805d-7f59b3c736f7")
-        .then()
+      .when()
+        .delete(API_BASE_V1_0 + "/policies/" + id)
+      .then()
         .statusCode(200)
         ;
 
     // Now check that it is gone
     given()
         .header(authHeader)
-      .when().get(API_BASE_V1_0 + "/policies/e3bdc9dd-18d4-4900-805d-7f59b3c736f7")
-        .then()
+      .when()
+        .get(API_BASE_V1_0 + "/policies/" + id)
+      .then()
         .statusCode(404);
   }
 
@@ -820,5 +896,12 @@ class RestApiTest extends AbstractITest {
         .then()
         .statusCode(200)
         .contentType("application/json");
+  }
+
+  private long countPoliciesInDB() {
+    Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
+    q.setParameter("cid", "1234");
+    long count = (long) q.getSingleResult();
+    return count;
   }
 }

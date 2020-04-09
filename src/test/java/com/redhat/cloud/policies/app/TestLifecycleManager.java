@@ -20,6 +20,9 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+
+import java.sql.Connection;
+import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
