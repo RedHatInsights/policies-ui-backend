@@ -129,6 +129,19 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"msg\" : \"ok\" }")
         );
+    mockServerClient
+        .when(request()
+            // special case to simulate that the engine does not have the policy. CPOL-130
+            // must come before the more generic match below.
+                  .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94")
+                  .withMethod("DELETE")
+                  .withHeader("Hawkular-Tenant", "1234")
+        )
+        .respond(response()
+                     .withStatusCode(500)
+                     .withHeader("Content-Type", "application/json")
+                     .withBody("{ \"errorMessage\" : \"something went wrong\" }")
+        );
       mockServerClient
           .when(request()
               // special case to simulate that the engine does not have the policy. CPOL-130

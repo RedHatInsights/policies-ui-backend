@@ -48,7 +48,7 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
       case 404: re = new NotFoundException(msg.msg);
       break;
       default:
-        re = new WebApplicationException(status);
+        re = new WebApplicationException(status + " " + response.getStatusInfo().getReasonPhrase());
     }
     return re;
   }

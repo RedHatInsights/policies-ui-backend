@@ -24,6 +24,7 @@ import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -451,25 +452,66 @@ public class PolicyCrudService {
     }
     Policy policy = Policy.findById(user.getAccount(), policyId);
 
-    ResponseBuilder builder ;
+    ResponseBuilder builder = Response.ok();
     if (policy==null) {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
-      policy.delete(policy);
+      boolean deletedOnEngine = false;
       try {
         engine.deleteTrigger(policy.id, user.getAccount());
-        builder = Response.ok(policy);
+        deletedOnEngine = true;
       } catch (NotFoundException nfe) {
         // Engine does not have it - we can delete anyway
-        builder = Response.ok(policy);
+        deletedOnEngine = true;
       } catch (Exception e) {
-        e.printStackTrace();  // TODO: Customise this generated block
+        log.warning("Deletion on engine failed because of " + e.getMessage());
         builder = Response.serverError().entity(new Msg(e.getMessage()));
+      }
+      if (deletedOnEngine) {
+        policy.delete(policy);
+        builder = Response.ok(policy);
       }
     }
 
     return builder.build();
 
+  }
+
+  @DELETE
+  @Path("/ids")
+  @Transactional
+  public Response deletePolicies(List<UUID> uuids) {
+
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
+    }
+
+    List<UUID> deleted = new ArrayList<>(uuids.size());
+
+    for (UUID uuid : uuids) {
+      Policy policy = Policy.findById(user.getAccount(), uuid);
+      if (policy == null ) {
+        // Nothing to do for us
+        deleted.add(uuid);
+      } else {
+        boolean deletedOnEngine = false;
+        try {
+          engine.deleteTrigger(policy.id, user.getAccount());
+          deletedOnEngine = true;
+        } catch (NotFoundException nfe) {
+          // Engine does not have it - we can delete anyway
+          deletedOnEngine = true;
+        } catch (Exception e) {
+          log.warning("Deletion on engine failed because of " + e.getMessage());
+        }
+        if (deletedOnEngine) {
+          policy.delete();
+          deleted.add(uuid);
+        }
+      }
+    }
+
+    return Response.ok(deleted).build();
   }
 
   @Operation(summary = "Enable/disable a policy")

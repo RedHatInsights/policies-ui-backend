@@ -30,6 +30,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -863,6 +864,25 @@ class RestApiTest extends AbstractITest {
         .then()
         .statusCode(200)
     ;
+  }  @Test
+  void deletePolicyEngineProblem() {
+
+    given()
+        .header(authHeader)
+      .when()
+        .delete(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
+      .then()
+        .statusCode(500)
+    ;
+    // Engine had a problem, so we did not delete the policy. Check that it is still there
+    given()
+        .header(authHeader)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
+      .then()
+        .statusCode(200)
+    ;
+
   }
   @Test
   void deleteUnknownPolicy() {
@@ -884,7 +904,31 @@ class RestApiTest extends AbstractITest {
         .then()
         .statusCode(403)
     ;
+  }
 
+  @Test
+  void deletePolicies() {
+    List<UUID> uuids = new ArrayList<>();
+    uuids.add(UUID.randomUUID());
+    uuids.add(UUID.fromString("cd6cceb8-65dd-4988-a566-251fd20d7e2c")); // known one
+    uuids.add(UUID.randomUUID());
+    uuids.add(UUID.fromString("c49e92c4-dead-beef-9200-245b31933e94")); // simulate engine problem
+
+    JsonPath jsonPath =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(uuids)
+      .when()
+        .delete(API_BASE_V1_0 + "/policies/ids")
+      .then()
+        .statusCode(200)
+      .extract().body().jsonPath();
+
+    List<String> list = jsonPath.getList("");
+    Assert.assertEquals(3, list.size());
+    Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
+    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
   }
 
   @Test
