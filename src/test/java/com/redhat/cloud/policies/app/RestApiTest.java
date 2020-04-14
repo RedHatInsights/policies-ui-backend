@@ -935,7 +935,7 @@ class RestApiTest extends AbstractITest {
   void enablePolicies() {
     List<UUID> uuids = new ArrayList<>();
     uuids.add(UUID.randomUUID());
-    uuids.add(UUID.fromString("cd6cceb8-65dd-4988-a566-251fd20d7e2c")); // known one
+    uuids.add(UUID.fromString("9b3b4429-1393-4120-95da-54c17a512367")); // known one
     uuids.add(UUID.randomUUID());
     uuids.add(UUID.fromString("c49e92c4-dead-beef-9200-245b31933e94")); // simulate engine problem
 
@@ -953,7 +953,7 @@ class RestApiTest extends AbstractITest {
 
     List<String> list = jsonPath.getList("");
     Assert.assertEquals(1, list.size());
-    Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
+    Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
   }
 

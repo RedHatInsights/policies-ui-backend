@@ -10,12 +10,13 @@ insert into policy (id, customerId, name, description, is_enabled, conditions, a
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('f36aa564-ffc8-48c6-a27f-31ddd4c16c8b', '1234', 'Detect Nice box', 'Test for os and arch', true, '"os_version" == "7.5" AND "arch" == "x86_64"', 'email');
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('cd6cceb8-65dd-4988-a566-251fd20d7e2c', '1234', '4th policy', 'Test for account2', true, '"cores" > 4','email');
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('c49e92c4-dead-beef-9200-245b31933e94', '1234', '4th policy-2', 'Test for account2', true, '"cores" > 4','webhook');
+insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('9b3b4429-1393-4120-95da-54c17a512367', '1234', '5th policy', 'Test for account2', true, '"cores" > 4','email');
 -- end of test ones with specific id
 
 
 
 
-insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('9b3b4429-1393-4120-95da-54c17a512367', '1234', '5th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel');
+
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('46534b18-0b00-4090-afc1-fdf04fe195a7', '1234', '6th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel');
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('867ce882-7b6a-4795-bef2-9ec2d6746f69', '1234', '7th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel');
 insert into policy (id, customerId, name, description, is_enabled, conditions, actions) values ('841efb07-88c0-4515-8311-06fc356da20b', '1234', '8th policy', 'Test for account2', true, '"cores" > 4','SLACK slack://foo.slack-com/#channel');
