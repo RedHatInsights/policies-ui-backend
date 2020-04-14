@@ -407,6 +407,7 @@ public class PolicyCrudService {
           engine.disableTrigger(storedPolicy.id, user.getAccount());
         }
         storedPolicy.isEnabled = shouldBeEnabled;
+        storedPolicy.setMtimeToNow();
         storedPolicy.persist();
         builder = Response.ok();
       } catch (NotFoundException nfe) {
