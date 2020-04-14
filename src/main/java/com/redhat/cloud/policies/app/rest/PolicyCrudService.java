@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
@@ -51,7 +52,6 @@ import javax.ws.rs.core.UriInfo;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -78,9 +78,6 @@ public class PolicyCrudService {
 
   private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  @ConfigProperty(name = "engine.skip", defaultValue = "false")
-  boolean skipEngineCall;
-
   @Inject
   @RestClient
   PolicyEngine engine;
@@ -94,6 +91,9 @@ public class PolicyCrudService {
 
   @Inject
   EntityManager entityManager;
+
+  @Inject
+  UUIDHelperBean uuidHelper;
 
   @Operation(summary = "Return all policies for a given account")
   @GET
@@ -269,7 +269,8 @@ public class PolicyCrudService {
       return Response.status(500, "No policy passed").build();
     }
 
-    policy.id = null;
+    // We use the indirection, so that for testing we can produce known UUIDs
+    policy.id = uuidHelper.getUUID();
     policy.customerid = user.getAccount();
 
     Policy tmp = Policy.findByName(user.getAccount(), policy.name);
@@ -277,13 +278,11 @@ public class PolicyCrudService {
       return Response.status(409).entity(new Msg("Policy name is not unique")).build();
     }
 
-    if (!skipEngineCall) {
-      try {
-        FullTrigger trigger = new FullTrigger(policy,true);
-        engine.storeTrigger(trigger, true, user.getAccount());
-      } catch (Exception e) {
-        return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-      }
+    try {
+      FullTrigger trigger = new FullTrigger(policy,true);
+      engine.storeTrigger(trigger, true, user.getAccount());
+    } catch (Exception e) {
+      return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
     }
 
     if (!alsoStore) {
@@ -299,17 +298,14 @@ public class PolicyCrudService {
     // we need to check for that.
     UUID id;
     try {
-      id = policy.store(user.getAccount(), policy);
-      // We persisted locally, now tell the engine
-      if (!skipEngineCall) {
-        FullTrigger trigger = new FullTrigger(policy);
-        try {
-          engine.storeTrigger(trigger, false, user.getAccount());
-        } catch (Exception e) {
-          Msg engineExceptionMsg = getEngineExceptionMsg(e);
-          log.info("Storing policy in engine failed: " + engineExceptionMsg.msg);
-          return Response.status(400,e.getMessage()).entity(engineExceptionMsg).build();
-        }
+      FullTrigger trigger = new FullTrigger(policy);
+      try {
+        engine.storeTrigger(trigger, false, user.getAccount());
+        id = policy.store(user.getAccount(), policy);
+      } catch (Exception e) {
+        Msg engineExceptionMsg = getEngineExceptionMsg(e);
+        log.info("Storing policy in engine failed: " + engineExceptionMsg.msg);
+        return Response.status(400,e.getMessage()).entity(engineExceptionMsg).build();
       }
     } catch (Throwable t) {
       return getResponseSavingPolicyThrowable(t);
@@ -451,13 +447,11 @@ public class PolicyCrudService {
           return Response.status(409).entity(new Msg("Policy name is not unique")).build();
         }
 
-        if (!skipEngineCall) {
-          try {
-            FullTrigger trigger = new FullTrigger(policy);
-            engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-          } catch (Exception e) {
-            return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-          }
+        try {
+          FullTrigger trigger = new FullTrigger(policy);
+          engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+        } catch (Exception e) {
+          return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
 
         if (dryRun) {
@@ -469,16 +463,10 @@ public class PolicyCrudService {
         // so we need to first poll from it.
         try {
           FullTrigger existingTrigger;
-          if (!skipEngineCall) {
-            try {
-              existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
-            } catch (Exception e) {
-              return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-            }
-          }
-          else {
-            // To make the compiler happy
-            existingTrigger = new FullTrigger(storedPolicy);
+          try {
+            existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
+          } catch (Exception e) {
+            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
           }
 
           storedPolicy.populateFrom(policy);
@@ -486,13 +474,11 @@ public class PolicyCrudService {
           storedPolicy.setMtimeToNow();
 
           existingTrigger.updateFromPolicy(storedPolicy);
-          if (!skipEngineCall) {
-            try {
-              engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
-              Policy.persist(storedPolicy);
-            } catch (Exception e) {
-              return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-            }
+          try {
+            engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
+            Policy.persist(storedPolicy);
+          } catch (Exception e) {
+            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
           }
           Policy.persist(storedPolicy);
         } catch (Throwable t) {
@@ -526,17 +512,15 @@ public class PolicyCrudService {
 
     policy.customerid = user.getAccount();
 
-    if (!skipEngineCall) {
-      try {
-        FullTrigger trigger = new FullTrigger(policy, policy.id == null);
-        if (policy.id == null) {
-          engine.storeTrigger(trigger, true, user.getAccount());
-        } else {
-          engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-        }
-      } catch (Exception e) {
-        return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+    try {
+      FullTrigger trigger = new FullTrigger(policy, policy.id == null);
+      if (policy.id == null) {
+        engine.storeTrigger(trigger, true, user.getAccount());
+      } else {
+        engine.updateTrigger(policy.id, trigger, true, user.getAccount());
       }
+    } catch (Exception e) {
+      return Response.status(400,e.getMessage()).entity(getEngineExceptionMsg(e)).build();
     }
 
     return Response.status(200).entity(new Msg("Policy.condition validated")).build();
@@ -563,15 +547,13 @@ public class PolicyCrudService {
     if (policy==null) {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
-      if (!skipEngineCall) {
-        try {
-          FullTrigger ft = engine.fetchTrigger(policyId, user.getAccount());
-          if (ft.conditions != null && !ft.conditions.isEmpty()) {
-            policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
-          }
-        } catch (Exception e) {
-          policy.setLastEvaluation(0);
+      try {
+        FullTrigger ft = engine.fetchTrigger(policyId, user.getAccount());
+        if (ft.conditions != null && !ft.conditions.isEmpty()) {
+          policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
         }
+      } catch (Exception e) {
+        policy.setLastEvaluation(0);
       }
       builder = Response.ok(policy);
       EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));
