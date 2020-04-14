@@ -137,6 +137,12 @@
       <version>5.5.4</version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.reprezen.kaizen</groupId>
+      <artifactId>openapi-parser</artifactId>
+      <version>4.0.5-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

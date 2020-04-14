@@ -31,7 +31,7 @@ import javax.ws.rs.core.Response;
 @Path("/")
 public class BasePathFillerService {
 
-  @Operation(description = "Just a filler to have a defined return code for the base path")
+  @Operation(summary = "Just a filler to have a defined return code for the base path")
   @APIResponse(responseCode = "404", description = "There is no API functionality at this place")
   @GET
   @Consumes(MediaType.MEDIA_TYPE_WILDCARD)
