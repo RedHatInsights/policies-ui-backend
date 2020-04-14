@@ -86,6 +86,10 @@ public class OASModifier implements OASFilter {
   }
 
   private String mangleName(String key) {
+    // Base Filler - would report as empty otherwise
+    if (key.equals("/api/policies/v1.0")) {
+      return "/";
+    }
     return key.replace("/api/policies/v1.0","");
   }
 }

@@ -67,6 +67,11 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
     RoutingContext routingContext = request().getCurrent();
 
+    String normalisedPath = routingContext.normalisedPath();
+    if (normalisedPath.endsWith("openapi.json")) {
+      return;
+    }
+
     String xrhid_header = requestContext.getHeaderString("x-rh-identity");
 
     if (xrhid_header==null || xrhid_header.isEmpty()) {
