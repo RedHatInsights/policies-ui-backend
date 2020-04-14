@@ -33,7 +33,6 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Query;
 import javax.persistence.Transient;
@@ -41,7 +40,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.hibernate.annotations.GenericGenerator;
 
 /**
  * @author hrupp
@@ -49,11 +47,7 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 public class Policy extends PanacheEntityBase {
 
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(
-      name = "UUID",
-      strategy = "org.hibernate.id.UUIDGenerator"
-  )
+  // The ID will be created by code.
   @Id
   public
   UUID id;
@@ -68,6 +62,7 @@ public class Policy extends PanacheEntityBase {
 
   @Schema(description = "A short description of the policy.")
   public String description;
+
   @Column(name = "is_enabled")
   public boolean isEnabled;
 

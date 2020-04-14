@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpResponse;
+import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -100,6 +101,21 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
           .withMethod("DELETE")
         )
         .respond(response().withStatusCode(200));
+
+    // Simulate internal engine issue
+    mockServerClient
+        .when(request()
+                  .withPath("/hawkular/alerts/triggers/trigger")
+            .withBody(new RegexBody(".*-dead-beef-9200-.*"))
+                  .withHeader("Hawkular-Tenant", "1234")
+        )
+        .respond(response()
+                     .withStatusCode(500)
+                     .withHeader("Content-Type", "application/json")
+                     .withBody("{ \"msg\" : \"ok\" }")
+        );
+
+
     mockServerClient
         .when(request()
                   .withPath("/hawkular/alerts/triggers/trigger")

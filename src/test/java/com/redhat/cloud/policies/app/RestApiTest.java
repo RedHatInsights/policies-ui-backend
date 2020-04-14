@@ -32,11 +32,13 @@ import io.restassured.response.ExtractableResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 
 import io.restassured.response.Response;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,6 +48,13 @@ import org.junit.jupiter.api.Test;
 @QuarkusTestResource(TestLifecycleManager.class)
 class RestApiTest extends AbstractITest {
 
+  @Inject
+  TestUUIDHelperBean uuidHelper;
+
+  @AfterEach
+  void cleanUUID() {
+    uuidHelper.clearUUID();
+  }
 
   @Test
   void testFactsNoAuth() {
@@ -371,6 +380,27 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void storeNewPolicyEngineProblem() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL";
+    tp.conditions = "cores = 2";
+    tp.name = "test1";
+    // Use an explicit ID; that the mock server knows
+    String uuid = "c49e92c4-dead-beef-9200-245b31933e94";
+    uuidHelper.storeUUIDString(uuid);
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE_V1_0 + "/policies")
+      .then()
+        .statusCode(400);
+  }
+
+  @Test
   void storeNewPolicyNoActions() {
     TestPolicy tp = new TestPolicy();
     tp.conditions = "cores = 2";
@@ -462,6 +492,10 @@ class RestApiTest extends AbstractITest {
     tp.conditions = "cores = 2";
     tp.name = "test2";
 
+    String str = "00000000-0000-0000-0000-000000000001";
+    UUID testUUID = UUID.fromString(str);
+    uuidHelper.storeUUID(testUUID);
+
     Headers headers =
     given()
         .header(authHeader)
@@ -481,6 +515,7 @@ class RestApiTest extends AbstractITest {
     String location = locationHeader.getValue();
     // location is  a full url to the new resource.
     System.out.println(location);
+    Assert.assertTrue(location.endsWith(testUUID.toString()));
 
     String resp =
     given()

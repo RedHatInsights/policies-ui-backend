@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
@@ -94,6 +95,9 @@ public class PolicyCrudService {
 
   @Inject
   EntityManager entityManager;
+
+  @Inject
+  UUIDHelperBean uuidHelper;
 
   @Operation(summary = "Return all policies for a given account")
   @GET
@@ -269,7 +273,8 @@ public class PolicyCrudService {
       return Response.status(500, "No policy passed").build();
     }
 
-    policy.id = null;
+    // We use the indirection, so that for testing we can produce known UUIDs
+    policy.id = uuidHelper.getUUID();
     policy.customerid = user.getAccount();
 
     Policy tmp = Policy.findByName(user.getAccount(), policy.name);
@@ -297,14 +302,13 @@ public class PolicyCrudService {
     // Basic validation was successful, so try to persist.
     // This may still fail du to unique name violation, so
     // we need to check for that.
-    UUID id;
+    UUID id = null;
     try {
-      id = policy.store(user.getAccount(), policy);
-      // We persisted locally, now tell the engine
       if (!skipEngineCall) {
         FullTrigger trigger = new FullTrigger(policy);
         try {
           engine.storeTrigger(trigger, false, user.getAccount());
+          id = policy.store(user.getAccount(), policy);
         } catch (Exception e) {
           Msg engineExceptionMsg = getEngineExceptionMsg(e);
           log.info("Storing policy in engine failed: " + engineExceptionMsg.msg);
