@@ -29,6 +29,7 @@ import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -561,6 +562,9 @@ class RestApiTest extends AbstractITest {
         .extract().body().as(TestPolicy.class)
         ;
 
+    String mt = testPolicy.mtime;
+    Timestamp t1 = Timestamp.valueOf(mt);
+
     try {
       // Now enable
       given()
@@ -586,6 +590,10 @@ class RestApiTest extends AbstractITest {
       boolean isEnabled = jp.getBoolean("isEnabled");
       Assert.assertTrue(isEnabled);
 
+      String t = jp.getString("mtime");
+      Timestamp t2 = Timestamp.valueOf(t);
+      Assert.assertTrue(t2.after(t1));
+
       // Now disable
       given()
           .header(authHeader)
@@ -596,17 +604,18 @@ class RestApiTest extends AbstractITest {
           .statusCode(200);
 
       // check if good
-      isEnabled =
+      testPolicy =
           given()
               .header(authHeader)
-              .when().get(API_BASE_V1_0 + "/policies/" + testPolicy.id)
-              .then()
+            .when()
+              .get(API_BASE_V1_0 + "/policies/" + testPolicy.id)
+            .then()
               .statusCode(200)
-              .extract()
-              .body()
-              .jsonPath().get("isEnabled");
+              .extract().body().as(TestPolicy.class);
 
-      Assert.assertFalse(isEnabled);
+      Assert.assertFalse(testPolicy.isEnabled);
+      Timestamp t3 = Timestamp.valueOf(testPolicy.mtime);
+      Assert.assertTrue(t3.after(t2));
 
     }
     finally {
