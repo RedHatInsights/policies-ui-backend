@@ -477,6 +477,10 @@ public class PolicyCrudService {
 
   }
 
+  @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "200", description = "Policies deleted",
+      content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
   @DELETE
   @Path("/ids")
   @Transactional
@@ -524,7 +528,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Updating failed")
   @POST
-  @Path("/{id}/enabled")
+  @Path("/{id:[0-9a-fA-F-]+}/enabled")
   @Transactional
   public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
     if (!user.canWriteAll()) {
@@ -556,6 +560,48 @@ public class PolicyCrudService {
       }
     }
     return builder.build();
+  }
+
+  @Operation(summary = "Enable/disable policies identified by list of uuid in body")
+  @Parameter(name = "uuids", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
+  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @POST
+  @Path("/ids/enabled")
+  @Transactional
+  public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, List<UUID> uuids) {
+    if (!user.canWriteAll()) {
+        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+    }
+    List<UUID> changed = new ArrayList<>(uuids.size());
+    try {
+      for (UUID uuid : uuids) {
+        Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+        boolean wasChanged = false;
+        if (storedPolicy != null) {
+          try {
+            if (shouldBeEnabled) {
+              engine.enableTrigger(storedPolicy.id, user.getAccount());
+            } else {
+              engine.disableTrigger(storedPolicy.id, user.getAccount());
+            }
+            wasChanged = true;
+          } catch (Exception e) {
+            log.warning("Changing state in engine failed: " + e.getMessage());
+          }
+          if (wasChanged) {
+            storedPolicy.isEnabled = shouldBeEnabled;
+            storedPolicy.setMtimeToNow();
+            storedPolicy.persist();
+            changed.add(uuid);
+          }
+        }
+      }
+      return Response.ok(changed).build();
+    } catch (Throwable e) {
+      e.printStackTrace();  // TODO: Customise this generated block
+      return Response.serverError().build();
+    }
   }
 
   @Operation(summary = "Update a single policy for a customer by its id")

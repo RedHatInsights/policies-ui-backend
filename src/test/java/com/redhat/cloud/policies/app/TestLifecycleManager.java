@@ -21,8 +21,6 @@ import static org.mockserver.model.HttpResponse.response;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
-import java.sql.Connection;
-import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
@@ -92,6 +90,20 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
     mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
 
+    mockRbac();
+
+    mockServerClient
+        .when(request()
+            // special case to simulate that the engine has a general failure.
+            // must come before the more generic match below.
+                  .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94/enable")
+                  .withHeader("Hawkular-Tenant", "1234")
+        )
+        .respond(response()
+                     .withStatusCode(500).withReasonPhrase("Internal server error")
+                     .withHeader("Content-Type", "application/json")
+                     .withBody("{ \"errorMessage\" : \"something went wrong\" }")
+        );
     mockServerClient
         .when(request()
           .withPath("/hawkular/alerts/triggers/.*/enable")
@@ -131,10 +143,9 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         );
     mockServerClient
         .when(request()
-            // special case to simulate that the engine does not have the policy. CPOL-130
+            // special case to simulate that the engine has a general failure. CPOL-130
             // must come before the more generic match below.
                   .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94")
-                  .withMethod("DELETE")
                   .withHeader("Hawkular-Tenant", "1234")
         )
         .respond(response()
@@ -178,6 +189,36 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withBody("{ \"msg\" : \"ok\" }")
         );
 
+
+    // notifications service
+    mockNotifications();
+
+    props.put("engine/mp-rest/url", mockServerUrl);
+    props.put("rbac/mp-rest/url", mockServerUrl);
+    props.put("notifications/mp-rest/url", mockServerUrl);
+
+  }
+
+  private void mockNotifications() {
+    mockServerClient
+        .when(request()
+              .withPath("/endpoints/email/subscription/.*")
+              .withMethod("PUT")
+        )
+        .respond(response()
+                 .withStatusCode(204)
+        );
+    mockServerClient
+        .when(request()
+              .withPath("/endpoints/email/subscription/.*")
+              .withMethod("DELETE")
+        )
+        .respond(response()
+                 .withStatusCode(204)
+        );
+  }
+
+  private void mockRbac() {
     // RBac server
     String fullAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_full_access.json", false);
     String noAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_no_access.json", false);
@@ -204,29 +245,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody(noAccessRbac)
         );
-
-    // notifications service
-    mockServerClient
-        .when(request()
-              .withPath("/endpoints/email/subscription/.*")
-              .withMethod("PUT")
-        )
-        .respond(response()
-                 .withStatusCode(204)
-        );
-      mockServerClient
-          .when(request()
-                .withPath("/endpoints/email/subscription/.*")
-                .withMethod("DELETE")
-          )
-          .respond(response()
-                   .withStatusCode(204)
-          );
-
-    props.put("engine/mp-rest/url", mockServerUrl);
-    props.put("rbac/mp-rest/url", mockServerUrl);
-    props.put("notifications/mp-rest/url", mockServerUrl);
-
   }
 
 }

@@ -932,6 +932,33 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void enablePolicies() {
+    List<UUID> uuids = new ArrayList<>();
+    uuids.add(UUID.randomUUID());
+    uuids.add(UUID.fromString("cd6cceb8-65dd-4988-a566-251fd20d7e2c")); // known one
+    uuids.add(UUID.randomUUID());
+    uuids.add(UUID.fromString("c49e92c4-dead-beef-9200-245b31933e94")); // simulate engine problem
+
+    JsonPath jsonPath =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(uuids)
+      .when()
+        .queryParam("enabled",true)
+        .post(API_BASE_V1_0 + "/policies/ids/enabled")
+      .then()
+        .statusCode(200)
+      .extract().body().jsonPath();
+
+    List<String> list = jsonPath.getList("");
+    Assert.assertEquals(1, list.size());
+    Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
+    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+  }
+
+
+  @Test
   void testOpenApiEndpoint() {
     given()
         .header("Accept",ContentType.JSON)
