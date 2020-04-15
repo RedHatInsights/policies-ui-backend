@@ -149,7 +149,8 @@ class RestApiTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),3);
     extractAndCheck(links,"first",10,0);
@@ -168,7 +169,8 @@ class RestApiTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),3);
     extractAndCheck(links,"first",5,0);
@@ -188,7 +190,8 @@ class RestApiTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),4);
     extractAndCheck(links,"first",5,0);
@@ -209,8 +212,9 @@ class RestApiTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
-    Assert.assertEquals(11, jsonPath.getList("data").size());
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    Assert.assertEquals(policiesInDb, jsonPath.getList("data").size());
   }
 
   @Test
@@ -225,7 +229,8 @@ class RestApiTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),4);
     extractAndCheck(links,"first",5,0);
@@ -247,8 +252,10 @@ class RestApiTest extends AbstractITest {
 
     List<?> data = jsonPath.get("data");
 
-    Assert.assertEquals(11, data.size());
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+
+    Assert.assertEquals(policiesInDb, data.size());
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(), 2);
     extractAndCheck(links,"first",-1,0);
@@ -268,8 +275,10 @@ class RestApiTest extends AbstractITest {
 
     List<?> data = jsonPath.get("data");
 
-    Assert.assertEquals(11, data.size());
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+
+    Assert.assertEquals(policiesInDb, data.size());
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(), 2);
     extractAndCheck(links,"first",-1,0);
