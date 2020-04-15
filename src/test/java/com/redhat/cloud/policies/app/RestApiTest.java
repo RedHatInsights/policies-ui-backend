@@ -60,9 +60,6 @@ class RestApiTest extends AbstractITest {
     uuidHelper.clearUUID();
   }
 
-  @Inject
-  EntityManager entityManager;
-
 
   @Test
   void testFactsNoAuth() {
@@ -980,10 +977,4 @@ class RestApiTest extends AbstractITest {
         .contentType("application/json");
   }
 
-  private long countPoliciesInDB() {
-    Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
-    q.setParameter("cid", "1234");
-    long count = (long) q.getSingleResult();
-    return count;
-  }
 }
