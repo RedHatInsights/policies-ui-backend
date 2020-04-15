@@ -205,7 +205,7 @@ public class Policy extends PanacheEntityBase {
 
     long count = getCount(em, customer, filter);
 
-    return new Page<UUID>(results,pager,count);
+    return new Page<>(results,pager,count);
   }
 
   private static long getCount(EntityManager em, String customer, Filter filter) {

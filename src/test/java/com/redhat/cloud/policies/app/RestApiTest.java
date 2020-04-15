@@ -934,10 +934,11 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
       .extract().body().jsonPath();
 
-    List<String> list = jsonPath.getList("");
+    List<String> list = jsonPath.getList("data");
     Assert.assertEquals(3, list.size());
     Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+    Assert.assertEquals(3,jsonPath.getLong("meta.count"));
   }
 
   @Test
@@ -960,10 +961,11 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
       .extract().body().jsonPath();
 
-    List<String> list = jsonPath.getList("");
+    List<String> list = jsonPath.getList("data");
     Assert.assertEquals(1, list.size());
     Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+    Assert.assertEquals(1,jsonPath.getLong("meta.count"));
   }
 
 

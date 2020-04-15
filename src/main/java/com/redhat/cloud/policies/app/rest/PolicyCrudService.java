@@ -51,6 +51,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
@@ -479,8 +480,10 @@ public class PolicyCrudService {
 
   @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-  @APIResponse(responseCode = "200", description = "Policies deleted",
-      content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
+  @APIResponse(responseCode = "200", description = "UUIDs of Policies that were deleted", content =
+      @Content(schema = @Schema(implementation = PagingUtils.PagedResponse.class)),
+                   headers = @Header(name = "TotalCount", description = "Total number of policies updated",
+                                     schema = @Schema(type = SchemaType.INTEGER)))
   @DELETE
   @Path("/ids")
   @Transactional
@@ -514,8 +517,8 @@ public class PolicyCrudService {
         }
       }
     }
-
-    return Response.ok(deleted).build();
+    Page<UUID> page = new Page<>(deleted,new Pager(0,-1,new Filter(),null),deleted.size());
+         return PagingUtils.responseBuilder(page).build();
   }
 
   @Operation(summary = "Enable/disable a policy")
@@ -564,7 +567,10 @@ public class PolicyCrudService {
 
   @Operation(summary = "Enable/disable policies identified by list of uuid in body")
   @Parameter(name = "uuids", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
-  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "200", description = "List of Policies that were updated. ", content =
+    @Content(schema = @Schema(implementation = PagingUtils.PagedResponse.class)),
+             headers = @Header(name = "TotalCount", description = "Total number of policies updated",
+                               schema = @Schema(type = SchemaType.INTEGER)))
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @POST
   @Path("/ids/enabled")
@@ -597,7 +603,8 @@ public class PolicyCrudService {
           }
         }
       }
-      return Response.ok(changed).build();
+      Page<UUID> page = new Page<>(changed,new Pager(0,-1,new Filter(),null),changed.size());
+      return PagingUtils.responseBuilder(page).build();
     } catch (Throwable e) {
       e.printStackTrace();  // TODO: Customise this generated block
       return Response.serverError().build();
