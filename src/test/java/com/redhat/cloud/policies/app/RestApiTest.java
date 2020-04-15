@@ -119,7 +119,7 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
         .extract().body().jsonPath();
 
-    Assert.assertEquals(numberOfPolicies, jsonPath.getList("data").size());
+    Assert.assertEquals(numberOfPolicies, jsonPath.getList("").size());
   }
 
 
@@ -210,8 +210,7 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
-    Assert.assertEquals(policiesInDb, jsonPath.getList("data").size());
+    Assert.assertEquals(policiesInDb, jsonPath.getList("").size());
   }
 
   @Test
@@ -314,9 +313,9 @@ class RestApiTest extends AbstractITest {
         .then()
           .statusCode(200)
         .assertThat()
-          .body("data.size()", is(1))
+          .body("size()", is(1))
         .assertThat()
-          .body("data.get(0)", is("f36aa564-ffc8-48c6-a27f-31ddd4c16c8b"));
+          .body("get(0)", is("f36aa564-ffc8-48c6-a27f-31ddd4c16c8b"));
   }
 
 
@@ -931,11 +930,10 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
       .extract().body().jsonPath();
 
-    List<String> list = jsonPath.getList("data");
+    List<String> list = jsonPath.getList("");
     Assert.assertEquals(3, list.size());
     Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
-    Assert.assertEquals(3,jsonPath.getLong("meta.count"));
   }
 
   @Test
@@ -958,11 +956,10 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
       .extract().body().jsonPath();
 
-    List<String> list = jsonPath.getList("data");
+    List<String> list = jsonPath.getList("");
     Assert.assertEquals(1, list.size());
     Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
-    Assert.assertEquals(1,jsonPath.getLong("meta.count"));
   }
 
 

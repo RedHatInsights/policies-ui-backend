@@ -183,7 +183,7 @@ public class Policy extends PanacheEntityBase {
     return new Page<>(results,pager,count);
   }
 
-  public static Page<UUID> pagePolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
+  public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
 
     pager.getFilter()
             .getParameters()
@@ -203,9 +203,7 @@ public class Policy extends PanacheEntityBase {
     }
     List<UUID> results = q.getResultList();
 
-    long count = getCount(em, customer, filter);
-
-    return new Page<>(results,pager,count);
+    return results;
   }
 
   private static long getCount(EntityManager em, String customer, Filter filter) {
