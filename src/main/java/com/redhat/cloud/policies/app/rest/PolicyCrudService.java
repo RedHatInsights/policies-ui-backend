@@ -24,6 +24,8 @@ import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
@@ -240,6 +242,101 @@ public class PolicyCrudService {
     return PagingUtils.responseBuilder(page).build();
   }
 
+  @Operation(summary = "Return all policy ids for a given account after applying the filters")
+  @GET
+  @Path("/ids")
+  @Parameters({
+          @Parameter(
+                  name = "filter[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the name depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[name]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the description depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[description]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+          @Parameter(
+                  name = "filter[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
+                  schema = @Schema(type = SchemaType.STRING)
+          ),
+          @Parameter(
+                  name="filter:op[is_enabled]",
+                  in = ParameterIn.QUERY,
+                  description = "Operations used with the filter",
+                  schema = @Schema(
+                          type = SchemaType.STRING,
+                          enumeration = {
+                                  "equal",
+                                  "like",
+                                  "ilike",
+                                  "not_equal",
+                                  "boolean_is"
+                          },
+                          defaultValue = "equal"
+                  )
+          ),
+  })
+  @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
+  @APIResponse(responseCode = "404", description = "No policies found for customer")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "200", description = "PolicyIds found", content =
+                 @Content(schema = @Schema(implementation = List.class)))
+  public Response getPolicyIdsForCustomer() {
+
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+    }
+
+    Pager pager = PagingUtils.extractPager(uriInfo);
+    List<UUID> uuids;
+    try {
+      uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+
+    } catch (IllegalArgumentException iae) {
+      return Response.status(400,iae.getLocalizedMessage()).build();
+    }
+
+    return Response.ok(uuids).build();
+  }
+
+
   @Operation(summary = "Validate (and possibly persist) a passed policy for the given account")
   @Parameter(name = "alsoStore",
              description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
@@ -352,25 +449,70 @@ public class PolicyCrudService {
     }
     Policy policy = Policy.findById(user.getAccount(), policyId);
 
-    ResponseBuilder builder ;
+    ResponseBuilder builder = Response.ok();
     if (policy==null) {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
-      policy.delete(policy);
+      boolean deletedOnEngine = false;
       try {
         engine.deleteTrigger(policy.id, user.getAccount());
-        builder = Response.ok(policy);
+        deletedOnEngine = true;
       } catch (NotFoundException nfe) {
         // Engine does not have it - we can delete anyway
-        builder = Response.ok(policy);
+        deletedOnEngine = true;
       } catch (Exception e) {
-        e.printStackTrace();  // TODO: Customise this generated block
+        log.warning("Deletion on engine failed because of " + e.getMessage());
         builder = Response.serverError().entity(new Msg(e.getMessage()));
+      }
+      if (deletedOnEngine) {
+        policy.delete(policy);
+        builder = Response.ok(policy);
       }
     }
 
     return builder.build();
 
+  }
+
+  @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "200", description = "Policies deleted",
+      content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
+  @DELETE
+  @Path("/ids")
+  @Transactional
+  public Response deletePolicies(List<UUID> uuids) {
+
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
+    }
+
+    List<UUID> deleted = new ArrayList<>(uuids.size());
+
+    for (UUID uuid : uuids) {
+      Policy policy = Policy.findById(user.getAccount(), uuid);
+      if (policy == null ) {
+        // Nothing to do for us
+        deleted.add(uuid);
+      } else {
+        boolean deletedOnEngine = false;
+        try {
+          engine.deleteTrigger(policy.id, user.getAccount());
+          deletedOnEngine = true;
+        } catch (NotFoundException nfe) {
+          // Engine does not have it - we can delete anyway
+          deletedOnEngine = true;
+        } catch (Exception e) {
+          log.warning("Deletion on engine failed because of " + e.getMessage());
+        }
+        if (deletedOnEngine) {
+          policy.delete();
+          deleted.add(uuid);
+        }
+      }
+    }
+
+    return Response.ok(deleted).build();
   }
 
   @Operation(summary = "Enable/disable a policy")
@@ -383,7 +525,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Updating failed")
   @POST
-  @Path("/{id}/enabled")
+  @Path("/{id:[0-9a-fA-F-]+}/enabled")
   @Transactional
   public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
     if (!user.canWriteAll()) {
@@ -415,6 +557,48 @@ public class PolicyCrudService {
       }
     }
     return builder.build();
+  }
+
+  @Operation(summary = "Enable/disable policies identified by list of uuid in body")
+  @Parameter(name = "uuids", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
+  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @POST
+  @Path("/ids/enabled")
+  @Transactional
+  public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, List<UUID> uuids) {
+    if (!user.canWriteAll()) {
+        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+    }
+    List<UUID> changed = new ArrayList<>(uuids.size());
+    try {
+      for (UUID uuid : uuids) {
+        Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+        boolean wasChanged = false;
+        if (storedPolicy != null) {
+          try {
+            if (shouldBeEnabled) {
+              engine.enableTrigger(storedPolicy.id, user.getAccount());
+            } else {
+              engine.disableTrigger(storedPolicy.id, user.getAccount());
+            }
+            wasChanged = true;
+          } catch (Exception e) {
+            log.warning("Changing state in engine failed: " + e.getMessage());
+          }
+          if (wasChanged) {
+            storedPolicy.isEnabled = shouldBeEnabled;
+            storedPolicy.setMtimeToNow();
+            storedPolicy.persist();
+            changed.add(uuid);
+          }
+        }
+      }
+      return Response.ok(changed).build();
+    } catch (Throwable e) {
+      e.printStackTrace();  // TODO: Customise this generated block
+      return Response.serverError().build();
+    }
   }
 
   @Operation(summary = "Update a single policy for a customer by its id")

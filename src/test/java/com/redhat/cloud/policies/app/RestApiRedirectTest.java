@@ -104,13 +104,13 @@ public class RestApiRedirectTest extends AbstractITest {
             .statusCode(200)
             .extract().body().jsonPath();
 
-    assert (Integer)jsonPath.get("meta.count") == 11;
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),4);
     extractAndCheck(links,"first",5,0);
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,7);
-    extractAndCheck(links,"last",5,10);
   }
 
   @Test
