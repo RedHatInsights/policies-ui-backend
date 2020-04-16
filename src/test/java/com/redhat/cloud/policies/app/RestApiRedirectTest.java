@@ -111,7 +111,6 @@ public class RestApiRedirectTest extends AbstractITest {
     extractAndCheck(links,"first",5,0);
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,7);
-    extractAndCheck(links,"last",5,10);
   }
 
   @Test
