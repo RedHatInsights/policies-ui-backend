@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app.auth;
 
 import com.redhat.cloud.policies.app.RbacServer;
+import io.opentracing.Scope;
 import io.opentracing.Tracer;
 import io.quarkus.cache.CacheResult;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class RbacFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     RbacRaw result;
-    try {
+    try (Scope ignored = tracer.buildSpan("getRBac").startActive(true)){
       result = getRbacInfo(user.getRawRhIdHeader());
     } catch (Throwable e) {
       requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
