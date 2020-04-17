@@ -22,10 +22,14 @@ import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
+
+import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -57,6 +61,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
@@ -232,18 +237,36 @@ public class PolicyCrudService {
     try {
       Pager pager = PagingUtils.extractPager(uriInfo);
       page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
-      // TODO once the engine supports batching, rewrite this.
-      page.forEach(p -> {
-        try {
-          FullTrigger ft = engine.fetchTrigger(p.id, user.getAccount());
-          if (ft.conditions != null && !ft.conditions.isEmpty()) {
-            p.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
-          }
-        } catch (Exception e) {
-          p.setLastEvaluation(0);
-        }
-      });
 
+      // Get lastTriggeredTime and add it to the policies
+      String idsToFetch = page.stream().map(p -> p.id.toString()).collect(Collectors.joining(","));
+      try {
+        List<Trigger> list = engine.findTriggersById(idsToFetch,   user.getAccount());
+
+        // Put the lastTriggered time (= creation time ) of the alert in a triggerId-alert map
+        Map<String, Long> idTimeMap = new HashMap<>(page.size());
+        for (Trigger fullTrigger : list) {
+          String tid = fullTrigger.id;
+          boolean found = false;
+          for (Map<String, Object> map : fullTrigger.lifecycle) {
+            if (!found && map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
+              BigDecimal aTime = (BigDecimal) map.get("stime");
+              long tse =  aTime.longValue();
+              idTimeMap.put(tid,tse);
+              found = true;
+            }
+          }
+        }
+        // Now loop over the map and transfer the times to the policies
+        page.forEach(p -> {
+          if (idTimeMap.containsKey(p.id.toString())) {
+            long lastTriggerTime = idTimeMap.get(p.id.toString());
+            p.setLastTriggered(lastTriggerTime);
+          }
+        });
+      } catch (ProcessingException|NotFoundException pe ) {
+        log.warning("Getting lastTrigger time failed: " + pe.getMessage());
+      }
     } catch (IllegalArgumentException iae) {
       return Response.status(400,iae.getLocalizedMessage()).build();
     }
@@ -775,12 +798,21 @@ public class PolicyCrudService {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
       try {
-        FullTrigger ft = engine.fetchTrigger(policyId, user.getAccount());
-        if (ft.conditions != null && !ft.conditions.isEmpty()) {
-          policy.setLastEvaluation(ft.conditions.get(0).lastEvaluation);
+        List<Trigger> alerts = engine.findTriggersById(policyId.toString(), user.getAccount());
+        if (alerts != null && !alerts.isEmpty()) {
+          System.out.println(alerts.get(0).lifecycle);
+          boolean found = false;
+          for (Map<String, Object> map : alerts.get(0).lifecycle) {
+            if (!found && map.get("status").equals("ALERT_GENERATE")) {
+              BigDecimal aTime = (BigDecimal) map.get("stime");
+              long tse =  aTime.longValue();
+              policy.setLastTriggered(tse);
+              found = true;
+            }
+          }
         }
       } catch (Exception e) {
-        policy.setLastEvaluation(0);
+        log.warning("Retrieving lastTrigger time for [ " + policyId + "] failed: " + e.getMessage());
       }
       builder = Response.ok(policy);
       EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));

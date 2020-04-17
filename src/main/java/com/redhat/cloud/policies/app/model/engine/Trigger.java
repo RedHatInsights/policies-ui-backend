@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.policies.app.model.engine;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,6 +33,7 @@ public class Trigger {
     public boolean autoResolveAlerts;
     public String autoResolveMatch;
     public String firingMatch;
+    public List<Map<String,Object>> lifecycle;
 
     public Trigger() {
     }

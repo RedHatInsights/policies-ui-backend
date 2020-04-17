@@ -101,7 +101,7 @@ class RestApiTest extends AbstractITest {
 
     Assert.assertEquals(numberOfPolicies, jsonPath.getList("data").size());
     Map<String,Object> data = (Map<String, Object>) jsonPath.getList("data").get(0);
-    Assert.assertTrue(data.containsKey("lastEvaluation"));
+    Assert.assertTrue(data.containsKey("lastTriggered"));
   }
 
   @Test

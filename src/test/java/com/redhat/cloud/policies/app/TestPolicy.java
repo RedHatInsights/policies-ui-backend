@@ -39,6 +39,7 @@ public class TestPolicy {
   @Column(name = "mtime")
   public String mtime;
 
-  public String lastEvaluation;
   public String ctime;
+
+  public Long lastTriggered;
 }

@@ -36,7 +36,6 @@ public class FullTrigger {
   public Trigger trigger;
   public List<Condition> conditions;
 
-
   public FullTrigger() {
     trigger = new Trigger();
     conditions = new ArrayList<>();
