@@ -152,14 +152,14 @@
         <groupId>org.codehaus.mojo</groupId>
         <version>${exec-maven-plugin.version}</version>
         <executions>
-          <execution><!-- Run our version calculation script -->
+          <execution><!-- Run our version generation script -->
             <id>Provide-git-data</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${basedir}/scripts/calculate-version.sh</executable>
+              <executable>${basedir}/helpers/generate-version.sh</executable>
             </configuration>
           </execution>
         </executions>
