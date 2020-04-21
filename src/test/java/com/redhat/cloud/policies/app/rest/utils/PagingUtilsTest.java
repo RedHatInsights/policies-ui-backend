@@ -21,7 +21,7 @@ public class PagingUtilsTest {
     public void testExtractDefaultPager() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo"));
         Pager pager = PagingUtils.extractPager(info);
-        Assert.assertEquals(10, pager.getLimit());
+        Assert.assertEquals(50, pager.getLimit());
         Assert.assertEquals(0, pager.getOffset());
     }
 
