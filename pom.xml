@@ -17,6 +17,7 @@
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
     <version.testcontainers>1.12.3</version.testcontainers>
+    <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -146,6 +147,23 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <artifactId>exec-maven-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution><!-- Run our version calculation script -->
+            <id>Provide-git-data</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/scripts/calculate-version.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>

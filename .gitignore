@@ -6,3 +6,4 @@ target/
 app.iml
 
 .DS_Store
+/src/main/java/com/redhat/cloud/policies/app/Version.java

@@ -24,6 +24,8 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.logging.Logger;
+
 /**
  * Set the base path for the application
  * @author hrupp
@@ -32,12 +34,25 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationPath("/api/policies/v1.0")
 public class JaxRsApplication extends Application {
 
+  Logger log = Logger.getLogger("Policies UI-Backend");
+
   @ConfigProperty(name = "accesslog.filter.health", defaultValue = "true")
   boolean filterHealth;
 
-  // Produce access log
+  // Server init is done here, so we can do some more initialisation
+
   void observeRouter(@Observes Router router) {
+    //Produce access log
     Handler<RoutingContext> handler = new JsonAccessLoggerHandler(filterHealth);
     router.route().order(-1000).handler(handler);
+
+    // Produce build-info and log on startup
+    String info = String.format("\n    Build-date %s \n    on host [%s]\n    from branch [%s]\n    with id %s",
+        Version.COMPILE_TIME,
+        Version.BUILD_HOST,
+        Version.GIT_BRANCH,
+        Version.GIT_SHA);
+    log.info(info);
+
   }
 }
