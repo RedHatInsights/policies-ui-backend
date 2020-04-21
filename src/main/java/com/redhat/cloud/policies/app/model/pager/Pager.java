@@ -67,7 +67,7 @@ public class Pager {
 
         private PagerBuilder() {
             this.offset = 0;
-            this.limit = 10;
+            this.limit = 50;
             this.sort = Sort.by();
             this.filter = new Filter();
         }

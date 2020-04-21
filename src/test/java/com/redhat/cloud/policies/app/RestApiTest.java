@@ -141,7 +141,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
           .when()
-            .get(API_BASE_V1_0 + "/policies/")
+            .get(API_BASE_V1_0 + "/policies/?limit=10")
           .then()
             .statusCode(200)
             .extract().body().jsonPath();
@@ -149,7 +149,7 @@ class RestApiTest extends AbstractITest {
     long policiesInDb = countPoliciesInDB();
     Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(),3);
+    Assert.assertEquals(3, links.size());
     extractAndCheck(links,"first",10,0);
     extractAndCheck(links,"last",10,10);
     extractAndCheck(links,"next",10,10);
