@@ -20,10 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.microprofile.openapi.OASFilter;
+import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.media.Schema;
 
 /**
  * Modify the path in the openapi document to not
@@ -41,7 +43,9 @@ public class OASModifier implements OASFilter {
     for (String key : keySet) {
       PathItem p = paths.getPathItem(key);
       String mangledName = mangleName(key);
-      replacementItems.put(mangledName,p);
+      if (!mangledName.startsWith("/user-config")) { // POL-230 this is a private api, so don't show it.
+        replacementItems.put(mangledName, p);
+      }
 
       Map<PathItem.HttpMethod, Operation> operations = p.getOperations();
       for (Map.Entry<PathItem.HttpMethod,Operation> entry: operations.entrySet()) {
@@ -56,6 +60,10 @@ public class OASModifier implements OASFilter {
       }
     }
     paths.setPathItems(replacementItems);
+
+    Components components = openAPI.getComponents();
+    Map<String, Schema> schemas = components.getSchemas();
+    schemas.remove("SettingsValues");
   }
 
   private String toCamelCase(String mangledName) {
