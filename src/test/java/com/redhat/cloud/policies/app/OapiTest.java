@@ -19,6 +19,7 @@ package com.redhat.cloud.policies.app;
 import com.reprezen.kaizen.oasparser.OpenApi3Parser;
 import com.reprezen.kaizen.oasparser.model3.OpenApi3;
 import com.reprezen.kaizen.oasparser.model3.Path;
+import com.reprezen.kaizen.oasparser.model3.Schema;
 import com.reprezen.kaizen.oasparser.val.ValidationResults;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -55,8 +56,13 @@ public class OapiTest extends AbstractITest {
  		// Now that basic validation is done, we can add some of our own
 		//
 		Map<String, Path> paths = model.getPaths();
+		Map<String, Schema> schemas = model.getSchemas();
 
- 		// The base path filler. See also OASModifier.mangleName
+		// The base path filler. See also OASModifier.mangleName
  		Assert.assertTrue(paths.containsKey("/"));
+
+ 		// User config is private, so don't show it
+ 		Assert.assertFalse(paths.containsKey("/user-config"));
+ 		Assert.assertFalse(schemas.containsKey("SettingsValues"));
  	}
 }

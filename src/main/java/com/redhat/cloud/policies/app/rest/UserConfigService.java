@@ -33,8 +33,6 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.logging.Logger;
@@ -59,10 +57,6 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @Operation(summary = "Save or update settings from the settings UI")
-  @APIResponse(responseCode = "200", description = "Saving was ok")
-  @APIResponse(responseCode = "403", description = "User has no permission to change settings")
-  @APIResponse(responseCode = "500", description = "Saving of settings failed")
   @POST
   @Path("/email-preference")
   @Transactional
@@ -107,10 +101,6 @@ public class UserConfigService {
     return builder.build();
   }
 
-  @Operation(summary = "Get settings for the settings UI")
-  @APIResponse(responseCode = "200", description = "Reading was ok")
-  @APIResponse(responseCode = "403", description = "User has no permission to read settings")
-  @APIResponse(responseCode = "500", description = "Reading of settings failed")
   @GET
   @Path("/email-preference")
   public Response getSettingsSchema() {
