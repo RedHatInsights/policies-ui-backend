@@ -47,7 +47,7 @@ public class JaxRsApplication extends Application {
     router.route().order(-1000).handler(handler);
 
     // Produce build-info and log on startup
-    String info = String.format("\n    Build-date %s \n    on host [%s]\n    from branch [%s]\n    with id %s",
+    String info = String.format("\n    Build-date [%s] \n    on host [%s]\n    from branch [%s]\n    with git sha [%s]",
         Version.COMPILE_TIME,
         Version.BUILD_HOST,
         Version.GIT_BRANCH,
