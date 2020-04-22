@@ -24,6 +24,8 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.logging.Logger;
+
 /**
  * Set the base path for the application
  * @author hrupp
@@ -32,12 +34,36 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationPath("/api/policies/v1.0")
 public class JaxRsApplication extends Application {
 
+  Logger log = Logger.getLogger("Policies UI-Backend");
+
   @ConfigProperty(name = "accesslog.filter.health", defaultValue = "true")
   boolean filterHealth;
 
-  // Produce access log
+  // Server init is done here, so we can do some more initialisation
+
   void observeRouter(@Observes Router router) {
+    //Produce access log
     Handler<RoutingContext> handler = new JsonAccessLoggerHandler(filterHealth);
     router.route().order(-1000).handler(handler);
+    showVersionInfo();
+
+  }
+
+  private void showVersionInfo() {
+    // Produce build-info and log on startup
+
+    String commmitSha = System.getenv("OPENSHIFT_BUILD_COMMIT");
+    if (commmitSha != null ) {
+      String openshift_build_reference = System.getenv("OPENSHIFT_BUILD_REFERENCE");
+      String openshift_build_name = System.getenv("OPENSHIFT_BUILD_NAME");
+
+      String info = String.format("\n    s2i-build [%s]\n    from branch [%s]\n    with git sha [%s]",
+          openshift_build_name,
+          openshift_build_reference,
+          commmitSha);
+      log.info(info);
+    } else {
+      log.info("\n    Not built on OpenShift s2i, no version info available");
+    }
   }
 }
