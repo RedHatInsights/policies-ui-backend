@@ -45,14 +45,25 @@ public class JaxRsApplication extends Application {
     //Produce access log
     Handler<RoutingContext> handler = new JsonAccessLoggerHandler(filterHealth);
     router.route().order(-1000).handler(handler);
+    showVersionInfo();
 
+  }
+
+  private void showVersionInfo() {
     // Produce build-info and log on startup
-    String info = String.format("\n    Build-date [%s] \n    on host [%s]\n    from branch [%s]\n    with git sha [%s]",
-        Version.COMPILE_TIME,
-        Version.BUILD_HOST,
-        Version.GIT_BRANCH,
-        Version.GIT_SHA);
-    log.info(info);
 
+    String commmitSha = System.getenv("OPENSHIFT_BUILD_COMMIT");
+    if (commmitSha != null ) {
+      String openshift_build_reference = System.getenv("OPENSHIFT_BUILD_REFERENCE");
+      String openshift_build_name = System.getenv("OPENSHIFT_BUILD_NAME");
+
+      String info = String.format("\n    s2i-build [%s]\n    from branch [%s]\n    with git sha [%s]",
+          openshift_build_name,
+          openshift_build_reference,
+          commmitSha);
+      log.info(info);
+    } else {
+      log.info("\n    Not built on OpenShift s2i, no version info available");
+    }
   }
 }
