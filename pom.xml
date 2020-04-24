@@ -17,6 +17,7 @@
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
     <version.testcontainers>1.12.3</version.testcontainers>
+    <openapi-parser.version>4.0.4</openapi-parser.version>
   </properties>
 
   <dependencyManagement>
@@ -140,7 +141,7 @@
     <dependency>
       <groupId>com.reprezen.kaizen</groupId>
       <artifactId>openapi-parser</artifactId>
-      <version>4.0.5-SNAPSHOT</version>
+      <version>${openapi-parser.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
