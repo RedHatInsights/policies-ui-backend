@@ -47,6 +47,8 @@ public class JaxRsApplication extends Application {
     router.route().order(-1000).handler(handler);
     showVersionInfo();
 
+    // Generate a token
+    TokenHolder.getInstance();
   }
 
   private void showVersionInfo() {
