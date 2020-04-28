@@ -475,10 +475,11 @@ public class PolicyCrudService {
   }
 
   @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
+  @Parameter(name = "uuids", description = "Array of policies to be deleted", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "Policies deleted",
       content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
-  @DELETE
+  @POST
   @Path("/ids")
   @Transactional
   public Response deletePolicies(List<UUID> uuids) {

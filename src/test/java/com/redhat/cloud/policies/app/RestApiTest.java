@@ -925,7 +925,7 @@ class RestApiTest extends AbstractITest {
         .contentType(ContentType.JSON)
         .body(uuids)
       .when()
-        .delete(API_BASE_V1_0 + "/policies/ids")
+        .post(API_BASE_V1_0 + "/policies/ids")
       .then()
         .statusCode(200)
       .extract().body().jsonPath();
