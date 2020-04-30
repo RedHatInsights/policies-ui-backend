@@ -1002,6 +1002,74 @@ class RestApiTest extends AbstractITest {
     ;
   }
 
+  @Test
+  void validateNewPolicyNewName() {
+    TestPolicy tp = new TestPolicy();
+    tp.name = "Not repeated";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  void validateNewPolicyExistingName() {
+    TestPolicy tp = new TestPolicy();
+    tp.name = "1st policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(409);
+  }
+
+  @Test
+  void validateExistingPolicyNewName() {
+    TestPolicy tp = new TestPolicy();
+    tp.id = UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+    tp.name = "Not repeated";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  void validateExistingPolicyExistingName() {
+    TestPolicy tp = new TestPolicy();
+    tp.id = UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+    tp.name = "3rd policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(409);
+  }
+
+  @Test
+  void validateExistingPolicyUsingSameName() {
+    TestPolicy tp = new TestPolicy();
+    tp.id = UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+    tp.name = "1st policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(200);
+  }
+
 
   @Test
   void deletePolicy() {

@@ -368,9 +368,9 @@ public class PolicyCrudService {
     policy.id = uuidHelper.getUUID();
     policy.customerid = user.getAccount();
 
-    Policy tmp = Policy.findByName(user.getAccount(), policy.name);
-    if (tmp != null) {
-      return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+    Response invalidNameResponse = isNameValid(policy);
+    if (invalidNameResponse != null) {
+      return invalidNameResponse;
     }
 
     try {
@@ -625,9 +625,9 @@ public class PolicyCrudService {
         builder = Response.status(400, "Invalid policy");
       } else {
 
-        Policy tmp = Policy.findByName(user.getAccount(), policy.name);
-        if (tmp != null && !tmp.id.equals(policy.id)) {
-          return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+        Response invalidNameResponse = isNameValid(policy);
+        if (invalidNameResponse != null) {
+          return invalidNameResponse;
         }
 
         try {
@@ -706,6 +706,31 @@ public class PolicyCrudService {
 
   }
 
+  @Operation(summary = "Validates a Policy condition")
+  @POST
+  @Path("/validate-name")
+  @APIResponses({
+          @APIResponse(responseCode = "200", description = "Name validated"),
+          @APIResponse(responseCode = "400", description = "Name not valid"),
+          @APIResponse(responseCode = "500", description = "No policy provided or internal error")
+  })
+  public Response validateName(Policy policy) {
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+    }
+
+    if (policy == null) {
+      return Response.status(500, "No policy passed").build();
+    }
+
+    Response isNameValid = isNameValid(policy);
+    if (isNameValid != null) {
+      return isNameValid;
+    }
+
+    return Response.status(200).entity(new Msg("Policy.name validated")).build();
+  }
+
 
   @Operation(summary = "Retrieve a single policy for a customer by its id")
   @GET
@@ -740,6 +765,16 @@ public class PolicyCrudService {
     }
 
     return builder.build();
+  }
+
+  private Response isNameValid(Policy policy) {
+    Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+
+    if (tmp != null && !tmp.id.equals(policy.id)) {
+      return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+    }
+
+    return null;
   }
 
 }
