@@ -37,8 +37,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import io.restassured.response.Response;
 import org.junit.Assert;
@@ -107,6 +105,17 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void testGetPoliciesNoAuth() {
+
+    given()
+        .header(authRbacNoAccess)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/")
+      .then()
+        .statusCode(403);
+  }
+
+  @Test
   void testGetPolicyIds() {
 
     long numberOfPolicies = countPoliciesInDB();
@@ -122,16 +131,50 @@ class RestApiTest extends AbstractITest {
     Assert.assertEquals(numberOfPolicies, jsonPath.getList("").size());
   }
 
+  @Test
+  void testGetPolicyIdsBadAuth() {
+
+    given()
+        .header(authRbacNoAccess)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/ids")
+      .then()
+        .statusCode(403);
+  }
+
+  @Test
+  void testGetPolicyIdsBadFilter() {
+
+    given()
+        .header(authHeader)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/ids?limit=a")
+      .then()
+        .statusCode(400);
+  }
+
 
   @Test
   void testGetPoliciesSort() {
     given()
             .header(authHeader)
-            .when().get(API_BASE_V1_0 + "/policies/?sortColumn=description")
+      .when()
+        .get(API_BASE_V1_0 + "/policies/?sortColumn=description")
             .then()
             .statusCode(200)
             .assertThat()
             .body(" data.get(0).description", is("Another test"));
+  }
+
+  @Test
+  void testGetPoliciesBadPaged() {
+
+    given()
+        .header(authHeader)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/?limit=XX")
+      .then()
+        .statusCode(400);
   }
 
   @Test
@@ -386,6 +429,20 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void storeNewEmptyPolicy() {
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE_V1_0 + "/policies")
+      .then()
+        .statusCode(400)
+      ;
+  }
+
+  @Test
   void storeNewPolicy() {
     TestPolicy tp = new TestPolicy();
     tp.actions = "EMAIL";
@@ -610,14 +667,15 @@ class RestApiTest extends AbstractITest {
 
     Assert.assertNotNull(ret.ctime);
     Assert.assertNotNull(ret.mtime);
-    String storeTime = ret.mtime; // keep for below
-//    Assert.assertEquals(storeTime,ret.ctime);  TODO too brittle
+    String storeTime = ret.ctime; // keep for below
+    Timestamp ctime = Timestamp.valueOf(ret.ctime);
+    Timestamp mtime1 = Timestamp.valueOf(ret.mtime);
+    // ctime and mtime oftern differ a tiny bit, which makes the nanos differ. Let's compare with some slack
+    Assert.assertTrue("Ctime: " + ctime + ", mtime: " + mtime1 , Math.abs(mtime1.getTime()  - ctime.getTime()) < 2);
 
     try {
       // update
       ret.conditions = "cores = 3";
-/* TODO re-enable once we know how to persist data in the mock-server on POST/PUT and retrieve later again.
-       See https://github.com/mock-server/mockserver/issues/749
       given()
           .header(authHeader)
           .contentType(ContentType.JSON)
@@ -638,16 +696,17 @@ class RestApiTest extends AbstractITest {
 
       Assert.assertEquals(storeTime,jsonPath.getString("ctime"));
       Assert.assertNotEquals(storeTime,jsonPath.getString("mtime"));
-      Timestamp ctime = Timestamp.valueOf(jsonPath.getString("ctime"));
-      Timestamp mtime = Timestamp.valueOf(jsonPath.getString("mtime"));
-      Assert.assertTrue(ctime.before(mtime));
-*/
+      Timestamp mtime2 = Timestamp.valueOf(jsonPath.getString("mtime"));
+      Assert.assertTrue(ctime.before(mtime2));
+      Assert.assertTrue(mtime1.before(mtime2));
+
     }
     finally {
       // now delete it again
       given()
           .header(authHeader)
-          .when().delete(location)
+        .when()
+          .delete(location)
           .then()
           .statusCode(200);
     }
@@ -805,9 +864,54 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void updateNoAuth() {
+    TestPolicy tp = new TestPolicy();
+    tp.name = UUID.randomUUID().toString();
+    tp.conditions = "facts.arch";
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .body(tp)
+      .when()
+        .put(API_BASE_V1_0 + "/policies/aaaaaaaa-bbbb-cccc-dddd-245b31933e94")
+      .then()
+        .statusCode(403);
+  }
+
+  @Test
+  void updateEmptyPolicy() {
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+      .when()
+        .put(API_BASE_V1_0 + "/policies/aaaaaaaa-bbbb-cccc-dddd-245b31933e94")
+      .then()
+        .statusCode(400);
+  }
+
+  @Test
+  void updateUnknownPolicy() {
+    TestPolicy tp = new TestPolicy();
+    tp.name = UUID.randomUUID().toString();
+    tp.conditions = "facts.arch";
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+      .when()
+        .put(API_BASE_V1_0 + "/policies/aaaaaaaa-bbbb-cccc-dddd-245b31933e94")
+      .then()
+        .statusCode(404);
+  }
+
+  @Test
   void validateNewPolicy() {
     TestPolicy tp = new TestPolicy();
     tp.conditions = "cores = 2";
+    tp.name = UUID.randomUUID().toString();
 
     given()
             .header(authHeader)
@@ -820,9 +924,39 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void validateNewEmptyPolicy() {
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .post(API_BASE_V1_0 + "/policies/validate")
+      .then()
+        .statusCode(400)
+        ;
+  }
+
+  @Test
+  void validateNewPolicyBadAuth() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+    tp.name = UUID.randomUUID().toString();
+
+    given()
+        .header(authRbacNoAccess)
+        .body(tp)
+        .contentType(ContentType.JSON)
+      .when()
+        .post(API_BASE_V1_0 + "/policies/validate")
+      .then()
+        .statusCode(403)
+        ;
+  }
+
+  @Test
   void validateExistingPolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.id = UUID.randomUUID();
+    tp.name = UUID.randomUUID().toString();
     tp.conditions = "cores = 2";
 
     given()
@@ -937,7 +1071,46 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
-  void enablePolicies() {
+  void deletePoliciesNoAuth() {
+    List<UUID> uuids = new ArrayList<>();
+    uuids.add(UUID.randomUUID());
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .body(uuids)
+      .when()
+        .delete(API_BASE_V1_0 + "/policies/ids")
+      .then()
+        .statusCode(403);
+    }
+
+  @Test
+  void enableNonExistingPolicy() {
+    String tpId = "00000000-dead-beef-9200-245b31933e94";
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .queryParam("enabled",true)
+        .when().post(API_BASE_V1_0 + "/policies/" + tpId + "/enabled")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  void enableNoPermission() {
+    String tpId = "00000000-dead-beef-9200-245b31933e94";
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .queryParam("enabled",true)
+        .when().post(API_BASE_V1_0 + "/policies/" + tpId + "/enabled")
+        .then()
+        .statusCode(403);
+  }
+
+  @Test
+  void enableDisablePolicies() {
     List<UUID> uuids = new ArrayList<>();
     uuids.add(UUID.randomUUID());
     uuids.add(UUID.fromString("9b3b4429-1393-4120-95da-54c17a512367")); // known one
@@ -960,8 +1133,41 @@ class RestApiTest extends AbstractITest {
     Assert.assertEquals(1, list.size());
     Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
     Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+
+    jsonPath =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(uuids)
+      .when()
+        .queryParam("enabled",false)
+        .post(API_BASE_V1_0 + "/policies/ids/enabled")
+      .then()
+        .statusCode(200)
+      .extract().body().jsonPath();
+
+    list = jsonPath.getList("");
+    Assert.assertEquals(1, list.size());
+    Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
+    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+
   }
 
+  @Test
+  void enableDisablePoliciesNoAuth() {
+    List<UUID> uuids = new ArrayList<>();
+    uuids.add(UUID.randomUUID());
+
+    given()
+        .header(authRbacNoAccess)
+        .contentType(ContentType.JSON)
+        .body(uuids)
+      .when()
+        .queryParam("enabled", true)
+        .post(API_BASE_V1_0 + "/policies/ids/enabled")
+      .then()
+        .statusCode(403);
+  }
 
   @Test
   void testOpenApiEndpoint() {

@@ -34,6 +34,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -219,9 +220,9 @@ public class PolicyCrudService {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
     }
 
-    Pager pager = PagingUtils.extractPager(uriInfo);
     Page<Policy> page;
     try {
+      Pager pager = PagingUtils.extractPager(uriInfo);
       page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
       // TODO once the engine supports batching, rewrite this.
       page.forEach(p -> {
@@ -324,9 +325,9 @@ public class PolicyCrudService {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
     }
 
-    Pager pager = PagingUtils.extractPager(uriInfo);
     List<UUID> uuids;
     try {
+      Pager pager = PagingUtils.extractPager(uriInfo);
       uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
 
     } catch (IllegalArgumentException iae) {
@@ -341,8 +342,8 @@ public class PolicyCrudService {
   @Parameter(name = "alsoStore",
              description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
   @APIResponses({
-      @APIResponse(responseCode = "500", description = "No policy provided or internal error"),
-      @APIResponse(responseCode = "400", description = "Policy validation failed",
+      @APIResponse(responseCode = "500", description = "Internal error"),
+      @APIResponse(responseCode = "400", description = "No policy provided or policy validation failed",
                    content = @Content(schema =@Schema(implementation = Msg.class,
                                                                          description = "Reason for failure"))),
       @APIResponse(responseCode = "409", description = "Persisting failed",
@@ -356,14 +357,10 @@ public class PolicyCrudService {
   @POST
   @Path("/")
   @Transactional
-  public Response storePolicy(@QueryParam ("alsoStore") boolean alsoStore, @Valid Policy policy) {
+  public Response storePolicy(@QueryParam ("alsoStore") boolean alsoStore, @NotNull @Valid Policy policy) {
 
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
-    }
-
-    if (policy==null) {
-      return Response.status(500, "No policy passed").build();
     }
 
     // We use the indirection, so that for testing we can produce known UUIDs
@@ -605,12 +602,12 @@ public class PolicyCrudService {
   @PUT
   @Path("/{policyId}")
   @APIResponse(responseCode = "200", description = "Policy updated or policy validated")
-  @APIResponse(responseCode = "400", description = "Invalid policy provided")
+  @APIResponse(responseCode = "400", description = "Invalid or no policy provided")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-  @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it?")
+  @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it before?")
   @Transactional
   public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
-                               @Valid Policy policy) {
+                               @NotNull @Valid Policy policy) {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
@@ -681,17 +678,13 @@ public class PolicyCrudService {
   @Path("/validate")
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Condition validated"),
-          @APIResponse(responseCode = "400", description = "Condition not valid"),
-          @APIResponse(responseCode = "500", description = "No policy provided or internal error")
+          @APIResponse(responseCode = "400", description = "No policy provided or condition not valid"),
+          @APIResponse(responseCode = "500", description = "Internal error")
   })
-  public Response validateCondition(Policy policy) {
+  public Response validateCondition(@Valid @NotNull Policy policy) {
 
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
-    }
-
-    if (policy == null) {
-      return Response.status(500, "No policy passed").build();
     }
 
     policy.customerid = user.getAccount();

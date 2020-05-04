@@ -19,12 +19,14 @@ package com.redhat.cloud.policies.app;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpResponse;
+import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -60,8 +62,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
   @Override
   public void inject(Object testInstance) {
-    if (testInstance instanceof UserConfigServiceTest) {
-      UserConfigServiceTest test = (UserConfigServiceTest) testInstance;
+    if (testInstance instanceof AbstractITest) {
+      AbstractITest test = (AbstractITest) testInstance;
       test.mockServerClient = mockServerClient;
     }
   }
@@ -104,6 +106,22 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"errorMessage\" : \"something went wrong\" }")
         );
+
+    FullTrigger ft = new FullTrigger();
+    ft.trigger.id = "00000000-0000-0000-0000-000000000001";
+    JsonBody ftBody = JsonBody.json(ft);
+
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers/trigger/00000000-0000-0000-0000-000000000001")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(ftBody)
+        );
+
     mockServerClient
         .when(request()
           .withPath("/hawkular/alerts/triggers/.*/enable")

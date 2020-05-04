@@ -20,6 +20,7 @@ package com.redhat.cloud.policies.app;
 import io.restassured.http.Header;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
+import org.mockserver.client.MockServerClient;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -38,6 +39,7 @@ public abstract class AbstractITest {
 
   static final String API_BASE_V1_0 = "/api/policies/v1.0";
   static final String API_BASE_V1 = "/api/policies/v1";
+  public MockServerClient mockServerClient;
   @Inject
   EntityManager entityManager;
 
