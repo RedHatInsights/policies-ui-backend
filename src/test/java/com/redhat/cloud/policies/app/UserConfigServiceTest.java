@@ -28,7 +28,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpRequest;
 
 /**
@@ -40,7 +39,6 @@ import org.mockserver.model.HttpRequest;
 public class UserConfigServiceTest extends AbstractITest {
 
   private static final String PREFERENCE_URL = API_BASE_V1_0 + "/user-config/email-preference";
-  public MockServerClient mockServerClient;
 
   @BeforeAll
   static void setUpEnv() {

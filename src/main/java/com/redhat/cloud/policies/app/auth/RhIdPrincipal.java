@@ -61,10 +61,6 @@ public class RhIdPrincipal implements Principal {
     return canWriteAll;
   }
 
-  @Override
-  public boolean implies(Subject subject) {
-    return false;  // TODO: Customise this generated block
-  }
 
   public void setRawRhIdHeader(String rawRhId) {
     this.rawRhId = rawRhId;
