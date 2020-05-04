@@ -444,6 +444,37 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void storeNewPolicyWithLongName() {
+    TestPolicy tp = new TestPolicy();
+    tp.conditions = "cores = 2";
+    tp.name = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis pa";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .queryParam("alsoStore","false")
+            .when().post(API_BASE_V1_0 + "/policies")
+            .then()
+            .statusCode(400);
+  }
+
+  @Test
+  void editPolicyWithLongName() {
+    TestPolicy tp = new TestPolicy();
+    tp.id = UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+    tp.conditions = "cores = 2";
+    tp.name = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis pa";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(tp)
+            .queryParam("dry","true")
+            .when().put(API_BASE_V1_0 + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .then()
+            .statusCode(400);
+  }
+
+  @Test
   void storeNewPolicyEngineProblem() {
     TestPolicy tp = new TestPolicy();
     tp.actions = "EMAIL";
