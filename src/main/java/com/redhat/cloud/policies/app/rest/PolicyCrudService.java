@@ -424,7 +424,8 @@ public class PolicyCrudService {
 
   private Msg getEngineExceptionMsg(Exception e) {
     Msg msg;
-    if (e instanceof RuntimeException && e.getCause() instanceof ConnectException) {
+    if (e instanceof RuntimeException && e.getCause() instanceof ConnectException
+        || e instanceof ProcessingException) {
       msg = new Msg("Connection to backend-engine failed. Please retry later");
     } else {
       msg = new Msg(e.getMessage());
