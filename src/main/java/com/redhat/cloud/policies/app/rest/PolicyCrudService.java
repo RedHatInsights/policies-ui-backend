@@ -368,7 +368,7 @@ public class PolicyCrudService {
     policy.id = uuidHelper.getUUID();
     policy.customerid = user.getAccount();
 
-    Response invalidNameResponse = isNameValid(policy);
+    Response invalidNameResponse = isNameUnique(policy);
     if (invalidNameResponse != null) {
       return invalidNameResponse;
     }
@@ -607,6 +607,10 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "400", description = "Invalid or no policy provided")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it before?")
+  @APIResponse(responseCode = "409", description = "Persisting failed",
+          content = @Content(schema =@Schema(implementation = Msg.class,
+                  description = "Reason for failure"))
+  )
   @Transactional
   public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
                                @NotNull @Valid Policy policy) {
@@ -625,7 +629,7 @@ public class PolicyCrudService {
         builder = Response.status(400, "Invalid policy");
       } else {
 
-        Response invalidNameResponse = isNameValid(policy);
+        Response invalidNameResponse = isNameUnique(policy);
         if (invalidNameResponse != null) {
           return invalidNameResponse;
         }
@@ -711,19 +715,15 @@ public class PolicyCrudService {
   @Path("/validate-name")
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Name validated"),
-          @APIResponse(responseCode = "400", description = "Name not valid"),
-          @APIResponse(responseCode = "500", description = "No policy provided or internal error")
+          @APIResponse(responseCode = "409", description = "Name not valid"),
+          @APIResponse(responseCode = "500", description = "Internal error")
   })
-  public Response validateName(Policy policy) {
+  public Response validateName(@NotNull Policy policy) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
     }
 
-    if (policy == null) {
-      return Response.status(500, "No policy passed").build();
-    }
-
-    Response isNameValid = isNameValid(policy);
+    Response isNameValid = isNameUnique(policy);
     if (isNameValid != null) {
       return isNameValid;
     }
@@ -767,7 +767,7 @@ public class PolicyCrudService {
     return builder.build();
   }
 
-  private Response isNameValid(Policy policy) {
+  private Response isNameUnique(Policy policy) {
     Policy tmp = Policy.findByName(user.getAccount(), policy.name);
 
     if (tmp != null && !tmp.id.equals(policy.id)) {
