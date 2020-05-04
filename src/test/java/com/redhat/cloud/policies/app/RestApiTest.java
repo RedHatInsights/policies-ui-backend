@@ -456,6 +456,7 @@ class RestApiTest extends AbstractITest {
             .when().post(API_BASE_V1_0 + "/policies")
             .then()
             .statusCode(400);
+    Assert.assertTrue(tp.name.length() > 150);
   }
 
   @Test
@@ -472,6 +473,7 @@ class RestApiTest extends AbstractITest {
             .when().put(API_BASE_V1_0 + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(400);
+    Assert.assertTrue(tp.name.length() > 150);
   }
 
   @Test
