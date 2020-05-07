@@ -26,14 +26,18 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -98,6 +102,9 @@ public class PolicyCrudService {
 
   @Inject
   UUIDHelperBean uuidHelper;
+
+  @Inject
+  Validator validator;
 
   @Operation(summary = "Return all policies for a given account")
   @GET
@@ -710,17 +717,32 @@ public class PolicyCrudService {
 
   }
 
-  @Operation(summary = "Validates a Policy condition")
+  @Operation(summary = "Validates the Policy.name and verifies if it is unique.")
   @POST
   @Path("/validate-name")
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Name validated"),
-          @APIResponse(responseCode = "409", description = "Name not valid"),
+          @APIResponse(responseCode = "400", description = "Policy validation failed"),
+          @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
-  public Response validateName(@NotNull Policy policy) {
+  public Response validateName(@NotNull String policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+    }
+
+    Policy policy = new Policy();
+    policy.id = id;
+    policy.name = policyName;
+
+    Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
+
+    if (result.size() > 0) {
+      String error = String.join(
+              ";",
+              result.stream().map(policyConstraintViolation -> policyConstraintViolation.getMessage()).collect(Collectors.toSet())
+      );
+      return Response.status(400).entity(new Msg(error)).build();
     }
 
     Response isNameValid = isNameUnique(policy);
