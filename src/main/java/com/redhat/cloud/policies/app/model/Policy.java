@@ -38,6 +38,8 @@ import javax.persistence.Query;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -58,6 +60,7 @@ public class Policy extends PanacheEntityBase {
   @NotNull
   @NotEmpty
   @Schema(description = "Name of the rule. Must be unique per customer account.")
+  @Size(max = 150)
   public String name;
 
   @Schema(description = "A short description of the policy.")
