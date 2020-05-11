@@ -157,8 +157,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -179,8 +178,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -260,8 +258,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -282,8 +279,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )

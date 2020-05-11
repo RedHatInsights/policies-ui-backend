@@ -435,6 +435,16 @@ class RestApiTest extends AbstractITest {
             .statusCode(400);
   }
 
+  @Test
+  void testGetPoliciesInvalidFilter2() {
+    given()
+        .header(authHeader)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/?filter[name]=email&filter:op[name]=boolean_is")
+      .then()
+        .statusCode(400);
+  }
+
 
   @Test
   void testGetPoliciesForUnknownAccount() {

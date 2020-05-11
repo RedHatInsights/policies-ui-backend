@@ -129,6 +129,9 @@ public class PagingUtils {
                     String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
                     operator = Filter.Operator.EQUAL;
                     if (operatorString != null) {
+                        if (operatorString.equalsIgnoreCase(Filter.Operator.BOOLEAN_IS.name())) {
+                            throw new IllegalArgumentException("Invalid filter: Column [" + column + "] does not allow boolean_is");
+                        }
                         operator = Filter.Operator.fromName(operatorString);
                     }
                 }
