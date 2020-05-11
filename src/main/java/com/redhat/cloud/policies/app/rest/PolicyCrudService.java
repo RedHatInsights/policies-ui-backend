@@ -198,13 +198,9 @@ public class PolicyCrudService {
                   schema = @Schema(
                           type = SchemaType.STRING,
                           enumeration = {
-                                  "equal",
-                                  "like",
-                                  "ilike",
-                                  "not_equal",
                                   "boolean_is"
                           },
-                          defaultValue = "equal"
+                          defaultValue = "boolean_is"
                   )
           ),
   })
@@ -305,13 +301,9 @@ public class PolicyCrudService {
                   schema = @Schema(
                           type = SchemaType.STRING,
                           enumeration = {
-                                  "equal",
-                                  "like",
-                                  "ilike",
-                                  "not_equal",
                                   "boolean_is"
                           },
-                          defaultValue = "equal"
+                          defaultValue = "boolean_is"
                   )
           ),
   })

@@ -118,10 +118,19 @@ public class PagingUtils {
             if (filterMatcher.find()) {
                 String column = filterMatcher.group(1);
                 String value = queryParams.getFirst(key);
-                String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
-                Filter.Operator operator = Filter.Operator.EQUAL;
-                if (operatorString != null) {
-                    operator = Filter.Operator.fromName(operatorString);
+                Filter.Operator operator;
+                if (column.equals("is_enabled")) {
+                    operator = Filter.Operator.BOOLEAN_IS;
+                    if (value==null || value.isEmpty()) {
+                        value = "true";
+                    }
+                }
+                else {
+                    String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
+                    operator = Filter.Operator.EQUAL;
+                    if (operatorString != null) {
+                        operator = Filter.Operator.fromName(operatorString);
+                    }
                 }
                 pageBuilder.filter(column, operator, value);
             }
