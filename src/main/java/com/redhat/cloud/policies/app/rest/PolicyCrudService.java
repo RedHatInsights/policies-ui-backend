@@ -723,6 +723,7 @@ public class PolicyCrudService {
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Name validated"),
           @APIResponse(responseCode = "400", description = "Policy validation failed"),
+          @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
