@@ -1002,6 +1002,93 @@ class RestApiTest extends AbstractITest {
     ;
   }
 
+  @Test
+  void validateNewPolicyNewName() {
+    String name = "Not repeated";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  void validateNewPolicyExistingName() {
+    String name = "1st policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(409);
+  }
+
+  @Test
+  void validateNewPolicyLongName() {
+    String name = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis pa";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name")
+            .then()
+            .statusCode(400);
+    Assert.assertTrue(name.length() > 150);
+  }
+
+  @Test
+  void validateExistingPolicyNewName() {
+    String name = "Not repeated";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  void validateExistingPolicyExistingName() {
+    String name = "3rd policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .then()
+            .statusCode(409);
+  }
+
+  @Test
+  void validateExistingPolicyUsingSameName() {
+    String name = "1st policy";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  void validateExistingPolicyUsingLongName() {
+    String name = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis pa";
+    given()
+            .header(authHeader)
+            .contentType(ContentType.JSON)
+            .body(name)
+            .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .then()
+            .statusCode(400);
+    Assert.assertTrue(name.length() > 150);
+  }
+
+
 
   @Test
   void deletePolicy() {

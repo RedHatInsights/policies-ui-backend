@@ -26,14 +26,18 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -98,6 +102,9 @@ public class PolicyCrudService {
 
   @Inject
   UUIDHelperBean uuidHelper;
+
+  @Inject
+  Validator validator;
 
   @Operation(summary = "Return all policies for a given account")
   @GET
@@ -368,9 +375,9 @@ public class PolicyCrudService {
     policy.id = uuidHelper.getUUID();
     policy.customerid = user.getAccount();
 
-    Policy tmp = Policy.findByName(user.getAccount(), policy.name);
-    if (tmp != null) {
-      return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+    Response invalidNameResponse = isNameUnique(policy);
+    if (invalidNameResponse != null) {
+      return invalidNameResponse;
     }
 
     try {
@@ -607,6 +614,10 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "400", description = "Invalid or no policy provided")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it before?")
+  @APIResponse(responseCode = "409", description = "Persisting failed",
+          content = @Content(schema =@Schema(implementation = Msg.class,
+                  description = "Reason for failure"))
+  )
   @Transactional
   public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
                                @NotNull @Valid Policy policy) {
@@ -625,9 +636,9 @@ public class PolicyCrudService {
         builder = Response.status(400, "Invalid policy");
       } else {
 
-        Policy tmp = Policy.findByName(user.getAccount(), policy.name);
-        if (tmp != null && !tmp.id.equals(policy.id)) {
-          return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+        Response invalidNameResponse = isNameUnique(policy);
+        if (invalidNameResponse != null) {
+          return invalidNameResponse;
         }
 
         try {
@@ -706,6 +717,43 @@ public class PolicyCrudService {
 
   }
 
+  @Operation(summary = "Validates the Policy.name and verifies if it is unique.")
+  @POST
+  @Path("/validate-name")
+  @APIResponses({
+          @APIResponse(responseCode = "200", description = "Name validated"),
+          @APIResponse(responseCode = "400", description = "Policy validation failed"),
+          @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
+          @APIResponse(responseCode = "409", description = "Name not unique"),
+          @APIResponse(responseCode = "500", description = "Internal error")
+  })
+  public Response validateName(@NotNull String policyName, @QueryParam("id") UUID id) {
+    if (!user.canReadAll()) {
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+    }
+
+    Policy policy = new Policy();
+    policy.id = id;
+    policy.name = policyName;
+
+    Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
+
+    if (result.size() > 0) {
+      String error = String.join(
+              ";",
+              result.stream().map(policyConstraintViolation -> policyConstraintViolation.getMessage()).collect(Collectors.toSet())
+      );
+      return Response.status(400).entity(new Msg(error)).build();
+    }
+
+    Response isNameValid = isNameUnique(policy);
+    if (isNameValid != null) {
+      return isNameValid;
+    }
+
+    return Response.status(200).entity(new Msg("Policy.name validated")).build();
+  }
+
 
   @Operation(summary = "Retrieve a single policy for a customer by its id")
   @GET
@@ -740,6 +788,16 @@ public class PolicyCrudService {
     }
 
     return builder.build();
+  }
+
+  private Response isNameUnique(Policy policy) {
+    Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+
+    if (tmp != null && !tmp.id.equals(policy.id)) {
+      return Response.status(409).entity(new Msg("Policy name is not unique")).build();
+    }
+
+    return null;
   }
 
 }
