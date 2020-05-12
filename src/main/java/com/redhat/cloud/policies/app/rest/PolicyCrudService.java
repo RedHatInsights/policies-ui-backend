@@ -190,18 +190,6 @@ public class PolicyCrudService {
                   "Defaults to true if no operand is given.",
               schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
           ),
-          @Parameter(
-                  name="filter:op[is_enabled]",
-                  in = ParameterIn.QUERY,
-                  description = "Operations used with the filter",
-                  schema = @Schema(
-                          type = SchemaType.STRING,
-                          enumeration = {
-                                  "boolean_is"
-                          },
-                          defaultValue = "boolean_is"
-                  )
-          ),
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
   @APIResponse(responseCode = "404", description = "No policies found for customer")
@@ -291,18 +279,6 @@ public class PolicyCrudService {
                   description = "Filtering policies by the is_enabled field." +
                       "Defaults to true if no operand is given.",
                   schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
-          ),
-          @Parameter(
-                  name="filter:op[is_enabled]",
-                  in = ParameterIn.QUERY,
-                  description = "Operations used with the filter",
-                  schema = @Schema(
-                          type = SchemaType.STRING,
-                          enumeration = {
-                                  "boolean_is"
-                          },
-                          defaultValue = "boolean_is"
-                  )
           ),
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
