@@ -186,8 +186,9 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[is_enabled]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
-                  schema = @Schema(type = SchemaType.STRING)
+              description = "Filtering policies by the is_enabled field." +
+                  "Defaults to true if no operand is given.",
+              schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
           ),
           @Parameter(
                   name="filter:op[is_enabled]",
@@ -287,8 +288,9 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[is_enabled]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
-                  schema = @Schema(type = SchemaType.STRING)
+                  description = "Filtering policies by the is_enabled field." +
+                      "Defaults to true if no operand is given.",
+                  schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
           ),
           @Parameter(
                   name="filter:op[is_enabled]",
