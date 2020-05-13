@@ -68,6 +68,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -685,6 +686,7 @@ public class PolicyCrudService {
   @Operation(summary = "Validates the Policy.name and verifies if it is unique.")
   @POST
   @Path("/validate-name")
+  @RequestBody(content = { @Content( schema = @Schema( type = SchemaType.STRING )) })
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Name validated"),
           @APIResponse(responseCode = "400", description = "Policy validation failed"),
