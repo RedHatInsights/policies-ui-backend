@@ -96,10 +96,28 @@ public class PagingUtilsTest {
     }
 
     @Test
-    public void testExtractFilterBooleanOperator() throws URISyntaxException {
+    public void testExtractBadFilterBooleanOperator() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=boolean_is"));
+        try {
+            PagingUtils.extractPager(info);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        Assert.assertTrue("Should not reach this", false);
+    }
+
+    @Test
+    public void testExtractFilterBooleanOperator() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[is_enabled]=true&filter:op[is_enabled]=boolean_is"));
         Pager pager = PagingUtils.extractPager(info);
-        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("bar"));
+        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
+    }
+
+    @Test
+    public void testExtractFilterBooleanOperator2() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[is_enabled]=true"));
+        Pager pager = PagingUtils.extractPager(info);
+        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
     }
 
     @Test

@@ -348,6 +348,28 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void testGetPoliciesFilter2() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE_V1_0 + "/policies/?filter[is_enabled]=true")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body("data.size()", is(11));
+  }
+
+  @Test
+  void testGetPoliciesFilter3() {
+    given()
+            .header(authHeader)
+            .when().get(API_BASE_V1_0 + "/policies/?filter[is_enabled]")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body("data.size()", is(11));
+  }
+
+  @Test
   void testGetPolicyIdsFilter() {
     given()
           .header(authHeader)
@@ -359,6 +381,35 @@ class RestApiTest extends AbstractITest {
           .body("size()", is(1))
         .assertThat()
           .body("get(0)", is("f36aa564-ffc8-48c6-a27f-31ddd4c16c8b"));
+  }
+
+  @Test
+  void testGetPolicyIdsEnabledFilter1() {
+
+    int size =
+    given()
+          .header(authHeader)
+        .when()
+          .get(API_BASE_V1_0 + "/policies/ids?filter[is_enabled]=true")
+        .then()
+          .statusCode(200)
+        .extract().body().jsonPath().getInt("size()");
+
+    Assert.assertTrue(size >= 8);
+  }
+
+  @Test
+  void testGetPolicyIdsEnabledFilter2() {
+    int size =
+    given()
+          .header(authHeader)
+        .when()
+          .get(API_BASE_V1_0 + "/policies/ids?filter[is_enabled]=false")
+        .then()
+          .statusCode(200)
+        .extract().body().jsonPath().getInt("size()");
+
+    Assert.assertTrue(size <= 3);
   }
 
 
@@ -382,6 +433,16 @@ class RestApiTest extends AbstractITest {
             .when().get(API_BASE_V1_0 + "/policies/?filter[actions]=email&filter:op[name]=ilike")
             .then()
             .statusCode(400);
+  }
+
+  @Test
+  void testGetPoliciesInvalidFilter2() {
+    given()
+        .header(authHeader)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/?filter[name]=email&filter:op[name]=boolean_is")
+      .then()
+        .statusCode(400);
   }
 
 

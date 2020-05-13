@@ -162,8 +162,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -184,8 +183,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -193,24 +191,9 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[is_enabled]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
-                  schema = @Schema(type = SchemaType.STRING)
-          ),
-          @Parameter(
-                  name="filter:op[is_enabled]",
-                  in = ParameterIn.QUERY,
-                  description = "Operations used with the filter",
-                  schema = @Schema(
-                          type = SchemaType.STRING,
-                          enumeration = {
-                                  "equal",
-                                  "like",
-                                  "ilike",
-                                  "not_equal",
-                                  "boolean_is"
-                          },
-                          defaultValue = "equal"
-                  )
+              description = "Filtering policies by the is_enabled field." +
+                  "Defaults to true if no operand is given.",
+              schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
           ),
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
@@ -269,8 +252,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -291,8 +273,7 @@ public class PolicyCrudService {
                                   "equal",
                                   "like",
                                   "ilike",
-                                  "not_equal",
-                                  "boolean_is"
+                                  "not_equal"
                           },
                           defaultValue = "equal"
                   )
@@ -300,24 +281,9 @@ public class PolicyCrudService {
           @Parameter(
                   name = "filter[is_enabled]",
                   in = ParameterIn.QUERY,
-                  description = "Filtering policies by the is_enabled field, depending on the Filter operator used.",
-                  schema = @Schema(type = SchemaType.STRING)
-          ),
-          @Parameter(
-                  name="filter:op[is_enabled]",
-                  in = ParameterIn.QUERY,
-                  description = "Operations used with the filter",
-                  schema = @Schema(
-                          type = SchemaType.STRING,
-                          enumeration = {
-                                  "equal",
-                                  "like",
-                                  "ilike",
-                                  "not_equal",
-                                  "boolean_is"
-                          },
-                          defaultValue = "equal"
-                  )
+                  description = "Filtering policies by the is_enabled field." +
+                      "Defaults to true if no operand is given.",
+                  schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true","false"})
           ),
   })
   @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
