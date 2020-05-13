@@ -26,7 +26,11 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 /**
@@ -36,10 +40,11 @@ import java.util.Map;
 @QuarkusTest
 public class OapiTest extends AbstractITest {
 
-  private static final String OAPI_YAML = "openapi.json";
+  private static final String OAPI_JSON = "openapi.json";
+  private static final String TARGET_OPENAPI = "./target/openapi.json";
 
   // QuarkusTest will inject the host+port for us.
- 	@TestHTTPResource(API_BASE_V1_0 + "/" + OAPI_YAML)
+ 	@TestHTTPResource(API_BASE_V1_0 + "/" + OAPI_JSON)
 	URL url;
 
  	@Test
@@ -64,5 +69,8 @@ public class OapiTest extends AbstractITest {
  		// User config is private, so don't show it
  		Assert.assertFalse(paths.containsKey("/user-config"));
  		Assert.assertFalse(schemas.containsKey("SettingsValues"));
+
+		InputStream in = url.openStream();
+		Files.copy(in, Paths.get(TARGET_OPENAPI), StandardCopyOption.REPLACE_EXISTING);
  	}
 }
