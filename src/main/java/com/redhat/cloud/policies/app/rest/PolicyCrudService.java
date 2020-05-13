@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.PolicyEngine;
+import com.redhat.cloud.policies.app.TokenHolder;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -50,12 +52,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
@@ -798,6 +796,42 @@ public class PolicyCrudService {
     }
 
     return null;
+  }
+
+  @Path("/sync")
+  @POST
+  @Transactional
+  public Response syncToEngine(@QueryParam("token") String token) {
+
+    boolean validToken = TokenHolder.getInstance().compareToken(token);
+    if (!validToken) {
+      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission for this").build();
+    }
+
+    final int[] count = {0};
+    try (Stream<Policy> policies = Policy.streamAll()) {
+      policies.forEach(p -> {
+        FullTrigger fullTrigger;
+        try {
+          fullTrigger = engine.fetchTrigger(p.id, p.customerid);
+        }
+        catch (NotFoundException nfe) {
+          fullTrigger=null;
+        }
+        if (fullTrigger == null) { // Engine does not have the trigger
+          log.info("Trigger " + p.id + " not found, syncing");
+          FullTrigger ft = new FullTrigger(p);
+          engine.storeTrigger(ft, false, p.customerid);
+          log.info("   done");
+          count[0]++;
+        }
+        else {
+          log.info("Trigger " + p.id + " already in engine, skipping");
+        }
+      });
+    }
+    log.info("Stored " + count[0] + " triggers");
+    return Response.ok().build();
   }
 
 }
