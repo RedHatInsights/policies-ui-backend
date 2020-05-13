@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 
@@ -1069,7 +1070,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name")
             .then()
             .statusCode(200);
@@ -1081,7 +1082,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name")
             .then()
             .statusCode(409);
@@ -1093,7 +1094,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name")
             .then()
             .statusCode(400);
@@ -1106,7 +1107,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(200);
@@ -1118,7 +1119,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(409);
@@ -1130,7 +1131,7 @@ class RestApiTest extends AbstractITest {
     given()
             .header(authHeader)
             .contentType(ContentType.JSON)
-            .body(name)
+            .body(Json.createValue(name).toString())
             .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(200);

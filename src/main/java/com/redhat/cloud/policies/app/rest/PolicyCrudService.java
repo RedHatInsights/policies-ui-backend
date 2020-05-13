@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.json.JsonString;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -691,14 +692,14 @@ public class PolicyCrudService {
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
-  public Response validateName(@NotNull String policyName, @QueryParam("id") UUID id) {
+  public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
     }
 
     Policy policy = new Policy();
     policy.id = id;
-    policy.name = policyName;
+    policy.name = policyName.getString();
 
     Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
 
