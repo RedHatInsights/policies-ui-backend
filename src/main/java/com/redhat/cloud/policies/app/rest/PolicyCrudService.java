@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.json.JsonString;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -67,6 +68,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -684,6 +686,7 @@ public class PolicyCrudService {
   @Operation(summary = "Validates the Policy.name and verifies if it is unique.")
   @POST
   @Path("/validate-name")
+  @RequestBody(content = { @Content( schema = @Schema( type = SchemaType.STRING )) })
   @APIResponses({
           @APIResponse(responseCode = "200", description = "Name validated"),
           @APIResponse(responseCode = "400", description = "Policy validation failed"),
@@ -691,14 +694,14 @@ public class PolicyCrudService {
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
-  public Response validateName(@NotNull String policyName, @QueryParam("id") UUID id) {
+  public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
     }
 
     Policy policy = new Policy();
     policy.id = id;
-    policy.name = policyName;
+    policy.name = policyName.getString();
 
     Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
 
