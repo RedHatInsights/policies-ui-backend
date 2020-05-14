@@ -245,16 +245,9 @@ public class PolicyCrudService {
 
         // Put the lastTriggered time (= creation time ) of the alert in a triggerId-alert map
         Map<String, Long> idTimeMap = new HashMap<>(page.size());
-        for (Trigger fullTrigger : list) {
-          String tid = fullTrigger.id;
-          for (Map<String, Object> map : fullTrigger.lifecycle) {
-            if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
-              BigDecimal aTime = (BigDecimal) map.get("stime");
-              long tse =  aTime.longValue();
-              idTimeMap.put(tid,tse);
-              break;
-            }
-          }
+        for (Trigger trigger : list) {
+          long lastTriggered = getLastTriggeredFromTriggerLifecycle(trigger);
+          idTimeMap.put(trigger.id,lastTriggered);
         }
         // Now loop over the map and transfer the times to the policies
         page.forEach(p -> {
@@ -797,16 +790,10 @@ public class PolicyCrudService {
       builder = Response.status(Response.Status.NOT_FOUND);
     } else {
       try {
-        List<Trigger> alerts = engine.findTriggersById(policyId.toString(), user.getAccount());
-        if (alerts != null && !alerts.isEmpty()) {
-          for (Map<String, Object> map : alerts.get(0).lifecycle) {
-            if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
-              BigDecimal aTime = (BigDecimal) map.get("stime");
-              long tse =  aTime.longValue();
-              policy.setLastTriggered(tse);
-              break;
-            }
-          }
+        List<Trigger> triggers = engine.findTriggersById(policyId.toString(), user.getAccount());
+        if (triggers != null && !triggers.isEmpty()) {
+          long lastTriggered = getLastTriggeredFromTriggerLifecycle(triggers.get(0));
+          policy.setLastTriggered(lastTriggered);
         }
       } catch (Exception e) {
         log.warning("Retrieving lastTrigger time for [ " + policyId + "] failed: " + e.getMessage());
@@ -817,6 +804,21 @@ public class PolicyCrudService {
     }
 
     return builder.build();
+  }
+
+  /*
+   Return last triggered time from Trigger.lifecycle if it exists
+   Return 0 otherwise
+   */
+  private long getLastTriggeredFromTriggerLifecycle(Trigger trigger) {
+    for (Map<String, Object> map : trigger.lifecycle) {
+      if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
+        BigDecimal aTime = (BigDecimal) map.get("stime");
+        long tse =  aTime.longValue();
+        return tse;
+      }
+    }
+    return 0;
   }
 
   private Response isNameUnique(Policy policy) {
