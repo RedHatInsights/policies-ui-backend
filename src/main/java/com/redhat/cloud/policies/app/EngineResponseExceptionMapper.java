@@ -38,16 +38,14 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
   public RuntimeException toThrowable(Response response) {
     int status = response.getStatus();
 
-    // Get the body of the response as it may give additional info
-    Msg msg = getBody(response);
-
     RuntimeException re ;
     switch (status) {
-      case 400: re = new ValidationException("Validation failed: " + msg.msg);
+      case 400: re = new ValidationException("Validation failed: " + getBody(response).msg);
         break;
-      case 404: re = new NotFoundException(msg.msg);
+      case 404: re = new NotFoundException(getBody(response).msg);
       break;
       default:
+        // If this is a 500 error it is likely we get HTML
         re = new WebApplicationException(status + " " + response.getStatusInfo().getReasonPhrase());
     }
     return re;

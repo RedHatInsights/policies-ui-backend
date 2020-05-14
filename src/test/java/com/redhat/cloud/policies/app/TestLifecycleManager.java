@@ -20,9 +20,13 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
+import com.redhat.cloud.policies.app.model.engine.Trigger;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpResponse;
@@ -55,8 +59,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   public void stop() {
     postgreSQLContainer.stop();
     // Helper to debug mock server issues
-   //    System.err.println(mockServerClient.retrieveLogMessages(request()));
-   //    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
+//       System.err.println(mockServerClient.retrieveLogMessages(request()));
+//       System.err.println(mockServerClient.retrieveRecordedRequests(request()));
   }
 
 
@@ -93,6 +97,28 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
 
     mockRbac();
+    mockEngine();
+    mockNotifications();
+
+    props.put("engine/mp-rest/url", mockServerUrl);
+    props.put("rbac/mp-rest/url", mockServerUrl);
+    props.put("notifications/mp-rest/url", mockServerUrl);
+
+  }
+
+  private void mockEngine() {
+
+    mockServerClient
+        .when(request()
+          .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds",".*")
+            .withQueryStringParameter("thin","true")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[{\"eventType\":\"ALERT\",\"tenantId\":\"901578\",\"id\":\"eb3c84e2-55bf-4121-ad99-68a363981f04-1587136858088-f5fb4bcf-c0f0-4974-8ec2-61fb284270de\",\"ctime\":1587136858088,\"dataSource\":\"_none_\",\"dataId\":\"eb3c84e2-55bf-4121-ad99-68a363981f04\",\"category\":\"ALERT\",\"text\":\"test-2\",\"trigger\":{\"tenantId\":\"901578\",\"id\":\"eb3c84e2-55bf-4121-ad99-68a363981f04\",\"name\":\"test-2\",\"type\":\"STANDARD\",\"eventType\":\"ALERT\",\"eventCategory\":null,\"eventText\":null,\"severity\":\"MEDIUM\",\"actions\":[{\"tenantId\":\"901578\",\"actionPlugin\":\"email\",\"actionId\":\"_managed-instance-email-35e48b6487d9568e\"}],\"autoDisable\":false,\"autoEnable\":false,\"autoResolve\":false,\"autoResolveAlerts\":false,\"autoResolveMatch\":\"ALL\",\"enabled\":true,\"firingMatch\":\"ALL\",\"source\":\"_none_\"},\"severity\":\"MEDIUM\",\"status\":\"OPEN\",\"lifecycle\":[{\"status\":\"OPEN\",\"user\":\"system\",\"stime\":1587136858088}]},{\"eventType\":\"ALERT\",\"tenantId\":\"901578\",\"id\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27-1587136858091-5022c6c0-3e93-4f4b-bcf6-d3b1445f06cb\",\"ctime\":1587136858091,\"dataSource\":\"_none_\",\"dataId\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27\",\"category\":\"ALERT\",\"text\":\"test-3\",\"trigger\":{\"tenantId\":\"901578\",\"id\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27\",\"name\":\"test-3\",\"type\":\"STANDARD\",\"eventType\":\"ALERT\",\"eventCategory\":null,\"eventText\":null,\"severity\":\"MEDIUM\",\"actions\":[{\"tenantId\":\"901578\",\"actionPlugin\":\"email\",\"actionId\":\"_managed-instance-email-35e48b6487d9568e\"}],\"autoDisable\":false,\"autoEnable\":false,\"autoResolve\":false,\"autoResolveAlerts\":false,\"autoResolveMatch\":\"ALL\",\"enabled\":true,\"firingMatch\":\"ALL\",\"source\":\"_none_\"},\"severity\":\"MEDIUM\",\"status\":\"OPEN\",\"lifecycle\":[{\"status\":\"OPEN\",\"user\":\"system\",\"stime\":1587136858091}]}]")
+        );
 
     mockServerClient
         .when(request()
@@ -106,6 +132,32 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"errorMessage\" : \"something went wrong\" }")
         );
+
+    List<Trigger> triggers = new ArrayList<>();
+    Trigger trigger = new Trigger();
+    trigger.id = "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c";
+    trigger.lifecycle = new ArrayList<>();
+    Map<String,Object> ev = new HashMap<>();
+    Calendar cal = Calendar.getInstance();
+    cal.set(2020,04,14,10,00,00);
+    ev.put("status","ALERT_GENERATE");
+    ev.put("stime", cal.getTimeInMillis());
+    trigger.lifecycle.add(ev);
+    triggers.add(trigger);
+
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers")
+            .withQueryStringParameter("triggerIds","bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(JsonBody.json(triggers))
+        );
+
 
     FullTrigger ft = new FullTrigger();
     ft.trigger.id = "00000000-0000-0000-0000-000000000001";
@@ -171,30 +223,30 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"errorMessage\" : \"something went wrong\" }")
         );
-      mockServerClient
-          .when(request()
-              // special case to simulate that the engine does not have the policy. CPOL-130
-              // must come before the more generic match below.
-                    .withPath("/hawkular/alerts/triggers/c49e92c4-764c-4163-9200-245b31933e94")
-                    .withMethod("DELETE")
-                    .withHeader("Hawkular-Tenant", "1234")
-          )
-          .respond(response()
-                       .withStatusCode(404)
-                       .withHeader("Content-Type", "application/json")
-                       .withBody("{ \"errorMessage\" : \"does not exist\" }")
-          );
-      mockServerClient
+    mockServerClient
         .when(request()
-                  .withPath("/hawkular/alerts/triggers/.*")
+            // special case to simulate that the engine does not have the policy. CPOL-130
+            // must come before the more generic match below.
+                  .withPath("/hawkular/alerts/triggers/c49e92c4-764c-4163-9200-245b31933e94")
                   .withMethod("DELETE")
                   .withHeader("Hawkular-Tenant", "1234")
         )
         .respond(response()
-                     .withStatusCode(200)
+                     .withStatusCode(404)
                      .withHeader("Content-Type", "application/json")
-                     .withBody("{ \"msg\" : \"ok\" }")
+                     .withBody("{ \"errorMessage\" : \"does not exist\" }")
         );
+    mockServerClient
+      .when(request()
+                .withPath("/hawkular/alerts/triggers/.*")
+                .withMethod("DELETE")
+                .withHeader("Hawkular-Tenant", "1234")
+      )
+      .respond(response()
+                   .withStatusCode(200)
+                   .withHeader("Content-Type", "application/json")
+                   .withBody("{ \"msg\" : \"ok\" }")
+      );
     mockServerClient
         .when(request()
                   .withPath("/hawkular/alerts/triggers/trigger/.*")
@@ -206,15 +258,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"msg\" : \"ok\" }")
         );
-
-
-    // notifications service
-    mockNotifications();
-
-    props.put("engine/mp-rest/url", mockServerUrl);
-    props.put("rbac/mp-rest/url", mockServerUrl);
-    props.put("notifications/mp-rest/url", mockServerUrl);
-
   }
 
   private void mockNotifications() {

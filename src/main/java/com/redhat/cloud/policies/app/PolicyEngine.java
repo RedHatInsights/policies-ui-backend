@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app;
 
+import com.redhat.cloud.policies.app.model.engine.Alert;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import java.util.List;
@@ -30,6 +31,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+
+import com.redhat.cloud.policies.app.model.engine.Trigger;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
@@ -37,7 +40,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  * Interface to the backend engine
  * @author hrupp
  */
-@Path("/hawkular/alerts/triggers")
+@Path("/hawkular/alerts")
 @RegisterRestClient(configKey = "engine")
 @RegisterProvider(value = EngineResponseExceptionMapper.class,
                   priority = 50)
@@ -52,7 +55,7 @@ public interface PolicyEngine {
    * @return A message with verification/store results.
    */
   @POST
-  @Path("/trigger")
+  @Path("/triggers/trigger")
   @Consumes("application/json")
   @Produces("application/json")
   Msg storeTrigger(FullTrigger trigger,
@@ -70,7 +73,7 @@ public interface PolicyEngine {
   @PUT
   @Consumes("application/json")
   @Produces("application/json")
-  @Path("/trigger/{triggerId}")
+  @Path("/triggers/trigger/{triggerId}")
   Msg updateTrigger(@PathParam("triggerId") UUID triggerId,
                     FullTrigger trigger,
                     @QueryParam("dry") boolean isDryRun,
@@ -84,7 +87,7 @@ public interface PolicyEngine {
    */
   @DELETE
   @Consumes("application/json")
-  @Path("/{triggerId}")
+  @Path("/triggers/{triggerId}")
   void deleteTrigger(@PathParam("triggerId") UUID triggerId,
                      @HeaderParam("Hawkular-Tenant") String customerId);
 
@@ -96,23 +99,29 @@ public interface PolicyEngine {
    */
   @GET
   @Produces("application/json")
-  @Path("/trigger/{triggerId}")
+  @Path("/triggers/trigger/{triggerId}")
   FullTrigger fetchTrigger(@PathParam("triggerId") UUID triggerId,
                            @HeaderParam("Hawkular-Tenant") String customerId);
 
   @GET
+  @Path("/triggers")
   @Produces("application/json")
-  List<FullTrigger> findTriggersById(@QueryParam("triggerIds") String triggerIds,
-                                     @HeaderParam("Hawkular-Tenant" ) String customerId);
+  List<Trigger> findTriggersById(@QueryParam("triggerIds") String triggerIds,
+                                 @HeaderParam("Hawkular-Tenant" ) String customerId);
 
   @PUT
-  @Path("/{triggerId}/enable")
+  @Path("/triggers/{triggerId}/enable")
   void enableTrigger(@PathParam("triggerId") UUID triggerId,
                      @HeaderParam("Hawkular-Tenant" ) String customerId);
 
   @DELETE
-  @Path("/{triggerId}/enable")
+  @Path("/triggers/{triggerId}/enable")
   void disableTrigger(@PathParam("triggerId") UUID triggerId,
                       @HeaderParam("Hawkular-Tenant" ) String customerId);
 
+  @GET
+  @Consumes("application/json")
+  List<Alert> findLastTriggered(@QueryParam("triggerIds") String triggerIds,
+                                @QueryParam("thin") boolean thin,
+                                @HeaderParam("Hawkular-Tenant") String customerId);
 }
