@@ -31,6 +31,7 @@ import io.restassured.response.ExtractableResponse;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -408,6 +409,11 @@ class RestApiTest extends AbstractITest {
     Assert.assertEquals("Action does not match", "EMAIL roadrunner@acme.org", policy.actions);
     Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
     Assert.assertTrue("Policy is not enabled", policy.isEnabled);
+    Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(policy.lastTriggered);
+    Assert.assertEquals(2020,cal.get(Calendar.YEAR));
+    Assert.assertEquals(04, cal.get(Calendar.MONTH));
+    Assert.assertEquals(10, cal.get(Calendar.HOUR));
   }
 
   @Test

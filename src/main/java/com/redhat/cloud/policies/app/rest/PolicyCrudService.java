@@ -247,13 +247,12 @@ public class PolicyCrudService {
         Map<String, Long> idTimeMap = new HashMap<>(page.size());
         for (Trigger fullTrigger : list) {
           String tid = fullTrigger.id;
-          boolean found = false;
           for (Map<String, Object> map : fullTrigger.lifecycle) {
-            if (!found && map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
+            if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
               BigDecimal aTime = (BigDecimal) map.get("stime");
               long tse =  aTime.longValue();
               idTimeMap.put(tid,tse);
-              found = true;
+              break;
             }
           }
         }
@@ -800,14 +799,12 @@ public class PolicyCrudService {
       try {
         List<Trigger> alerts = engine.findTriggersById(policyId.toString(), user.getAccount());
         if (alerts != null && !alerts.isEmpty()) {
-          System.out.println(alerts.get(0).lifecycle);
-          boolean found = false;
           for (Map<String, Object> map : alerts.get(0).lifecycle) {
-            if (!found && map.get("status").equals("ALERT_GENERATE")) {
+            if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
               BigDecimal aTime = (BigDecimal) map.get("stime");
               long tse =  aTime.longValue();
               policy.setLastTriggered(tse);
-              found = true;
+              break;
             }
           }
         }

@@ -20,9 +20,13 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
+import com.redhat.cloud.policies.app.model.engine.Trigger;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpResponse;
@@ -55,8 +59,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   public void stop() {
     postgreSQLContainer.stop();
     // Helper to debug mock server issues
-   //    System.err.println(mockServerClient.retrieveLogMessages(request()));
-   //    System.err.println(mockServerClient.retrieveRecordedRequests(request()));
+       System.err.println(mockServerClient.retrieveLogMessages(request()));
+       System.err.println(mockServerClient.retrieveRecordedRequests(request()));
   }
 
 
@@ -128,6 +132,32 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"errorMessage\" : \"something went wrong\" }")
         );
+
+    List<Trigger> triggers = new ArrayList<>();
+    Trigger trigger = new Trigger();
+    trigger.id = "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c";
+    trigger.lifecycle = new ArrayList<>();
+    Map<String,Object> ev = new HashMap<>();
+    Calendar cal = Calendar.getInstance();
+    cal.set(2020,04,14,10,00,00);
+    ev.put("status","ALERT_GENERATE");
+    ev.put("stime", cal.getTimeInMillis());
+    trigger.lifecycle.add(ev);
+    triggers.add(trigger);
+
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers")
+            .withQueryStringParameter("triggerIds","bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(JsonBody.json(triggers))
+        );
+
 
     FullTrigger ft = new FullTrigger();
     ft.trigger.id = "00000000-0000-0000-0000-000000000001";
