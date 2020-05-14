@@ -70,6 +70,9 @@ public class OapiTest extends AbstractITest {
  		Assert.assertFalse(paths.containsKey("/user-config"));
  		Assert.assertFalse(schemas.containsKey("SettingsValues"));
 
+		// Now that the OpenAPI file has been validated, save a copy to the filesystem
+		// This file is going to be uploaded in a regular CI build to know the API state
+		// for a given build.
 		InputStream in = url.openStream();
 		Files.copy(in, Paths.get(TARGET_OPENAPI), StandardCopyOption.REPLACE_EXISTING);
  	}
