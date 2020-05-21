@@ -192,6 +192,7 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(10, jsonPath.getList("data").size());
     Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(3, links.size());
@@ -212,6 +213,7 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(5, jsonPath.getList("data").size());
     Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),3);
@@ -233,6 +235,7 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(5, jsonPath.getList("data").size());
     Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     Assert.assertEquals(links.size(),4);
@@ -278,6 +281,95 @@ class RestApiTest extends AbstractITest {
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,7);
     extractAndCheck(links,"last",5,10);
+  }
+
+  @Test
+  void testGetPoliciesPaged5() {
+
+    JsonPath jsonPath =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?limit=1&offset=0")
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(1, jsonPath.getList("data").size());
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(3, links.size());
+    extractAndCheck(links,"first",1,0);
+    extractAndCheck(links,"next",1,1);
+    extractAndCheck(links,"last",1,11);
+  }
+
+  @Test
+  void testGetPoliciesPaged6() {
+
+    JsonPath jsonPath =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?limit=6&offset=0")
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    int lastLimit = 6;
+    int lastOffset = 6;
+
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    Map<String, String> links = jsonPath.get("links");
+    Assert.assertEquals(links.size(),3);
+    extractAndCheck(links,"first",6,0);
+    extractAndCheck(links,"next",6,6);
+    extractAndCheck(links,"last", lastLimit, lastOffset);
+
+    JsonPath jsonPathLastPage =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?" + String.format("limit=%d&offset=%d",lastLimit,lastOffset))
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    Assert.assertTrue(jsonPathLastPage.getList("data").size() > 0);
+  }
+
+  @Test
+  void testGetPoliciesPaged7() {
+
+    JsonPath jsonPath =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?limit=1&offset=0")
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    int lastLimit = 1;
+    int lastOffset = 11;
+
+    long policiesInDb = countPoliciesInDB();
+    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    Map<String, String> links = jsonPath.get("links");
+    extractAndCheck(links,"last", lastLimit, lastOffset);
+
+    JsonPath jsonPathLastPage =
+            given()
+                    .header(authHeader)
+                    .when()
+                    .get(API_BASE_V1_0 + "/policies/?" + String.format("limit=%d&offset=%d",lastLimit,lastOffset))
+                    .then()
+                    .statusCode(200)
+                    .extract().body().jsonPath();
+
+    Assert.assertTrue(jsonPathLastPage.getList("data").size() > 0);
   }
 
   @Test

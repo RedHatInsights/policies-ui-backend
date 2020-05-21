@@ -187,7 +187,13 @@ public class PagingUtils {
             if (limit == Pager.NO_LIMIT) {
                 links.put("last", String.format(format, location, limit, 0));
             } else {
-                links.put("last", String.format(format, location, limit, (page.getTotalCount() / limit) * limit));
+                long offset;
+                if (page.getTotalCount() % limit == 0) {
+                    offset = page.getTotalCount() - pager.getLimit();
+                } else {
+                    offset = (page.getTotalCount() / limit) * limit;
+                }
+                links.put("last", String.format(format, location, limit, offset));
             }
             if (limit != Pager.NO_LIMIT) {
                 if (pager.getOffset() < page.getTotalCount() - limit) {
