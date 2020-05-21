@@ -21,6 +21,7 @@ import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.validation.ValidActionS;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 
 import java.sql.Timestamp;
@@ -143,38 +144,22 @@ public class Policy extends PanacheEntityBase {
             .forEach(FilterableColumn::fromName);
 
     Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-//  Todo: There is an oingoing discussion about quarkus supporting a "range" paging
-//  https://github.com/quarkusio/quarkus/issues/3870
-//  Should make below code easier to read.
-//
-//    PanacheQuery<Policy> panacheQuery = find(
-//            filter.getQuery(),
-//            pager.getSort(),
-//            filter.getParameters()
-//    ).page(io.quarkus.panache.common.Page.of(pager.getPage(), pager.getItemsPerPage()));
-//    return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
 
-    String qs = "SELECT p FROM Policy p WHERE ";
-    String cond =  filter.getQuery() + sortToOrderBy(pager.getSort());
-    qs = qs + cond;
+    PanacheQuery<Policy> panacheQuery = find(
+            filter.getQuery(),
+            pager.getSort(),
+            filter.getParameters()
+    );
 
-    Query q = em.createQuery(qs);
-    // Always set the customer id - even if that may be part of parameters below
-    q.setParameter("customerid",customer);
     if (pager.getLimit() != Pager.NO_LIMIT) {
-      q.setMaxResults(pager.getLimit());
-      q.setFirstResult(pager.getOffset());
-    } else {
-      q.setFirstResult(0);
+      panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
     }
-    for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
-      q.setParameter(param.getKey(),param.getValue());
-    }
-    List<Policy> results = q.getResultList();
 
-    long count = getCount(em, customer, filter);
-
-    return new Page<>(results,pager,count);
+    return new Page<>(
+            panacheQuery.list(),
+            pager,
+            panacheQuery.count()
+    );
   }
 
   public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
@@ -198,21 +183,6 @@ public class Policy extends PanacheEntityBase {
     List<UUID> results = q.getResultList();
 
     return results;
-  }
-
-  private static long getCount(EntityManager em, String customer, Filter filter) {
-    String qs;
-    Query q;
-    qs = "SELECT count(p) FROM Policy p WHERE ";
-    qs = qs + filter.getQuery();
-
-    q = em.createQuery(qs);
-    // Always set the customer id - even if that may be part of parameters below
-    q.setParameter("customerid", customer);
-    for (Map.Entry<String, Object> param : filter.getParameters().map().entrySet()) {
-      q.setParameter(param.getKey(), param.getValue());
-    }
-    return (long) q.getSingleResult();
   }
 
   public static Policy findById(String customer, UUID theId) {
