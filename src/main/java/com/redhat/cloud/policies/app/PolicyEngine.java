@@ -121,7 +121,7 @@ public interface PolicyEngine {
 
   @GET
   @Consumes("application/json")
-  List<Alert> findLastTriggered(@QueryParam("triggerIds") String triggerIds,
+  String findLastTriggered(@QueryParam("triggerIds") String triggerIds,
                                 @QueryParam("thin") boolean thin,
                                 @HeaderParam("Hawkular-Tenant") String customerId);
 }
