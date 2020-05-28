@@ -775,17 +775,24 @@ public class PolicyCrudService {
 
   /*
    Return last triggered time from Trigger.lifecycle if it exists
-   Return 0 otherwise
+   Return 0 otherwise.
+   We need to go through the lifecycle list, as this is sorted in
+   ascending order with potentially other events in-between.
    */
   private long getLastTriggeredFromTriggerLifecycle(Trigger trigger) {
+
+    long tTime = 0;
+
     for (Map<String, Object> map : trigger.lifecycle) {
       if (map.containsKey("status") && map.get("status").equals("ALERT_GENERATE")) {
         BigDecimal aTime = (BigDecimal) map.get("stime");
         long tse =  aTime.longValue();
-        return tse;
+        if (tse > tTime) {
+          tTime = tse;
       }
     }
-    return 0;
+    }
+    return tTime;
   }
 
   private Response isNameUnique(Policy policy) {
