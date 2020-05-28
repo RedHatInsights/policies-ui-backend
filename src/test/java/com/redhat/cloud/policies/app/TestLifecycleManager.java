@@ -139,7 +139,17 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     trigger.lifecycle = new ArrayList<>();
     Map<String,Object> ev = new HashMap<>();
     Calendar cal = Calendar.getInstance();
-    cal.set(2020,04,14,10,00,00);
+    cal.set(2020,04,8,10,00,00);
+    ev.put("status","ALERT_GENERATE");
+    ev.put("stime", cal.getTimeInMillis());
+    trigger.lifecycle.add(ev);
+    ev = new HashMap<>();
+    cal.set(2020,04,9,10,00,00);
+    ev.put("status","ALERT_GENERATE");
+    ev.put("stime", cal.getTimeInMillis());
+    trigger.lifecycle.add(ev);
+    ev = new HashMap<>();
+    cal.set(2020,04,10,10,00,00);
     ev.put("status","ALERT_GENERATE");
     ev.put("stime", cal.getTimeInMillis());
     trigger.lifecycle.add(ev);
