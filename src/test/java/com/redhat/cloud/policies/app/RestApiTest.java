@@ -475,6 +475,7 @@ class RestApiTest extends AbstractITest {
     cal.setTimeInMillis(policy.lastTriggered);
     Assert.assertEquals(2020,cal.get(Calendar.YEAR));
     Assert.assertEquals(04, cal.get(Calendar.MONTH));
+    Assert.assertEquals(10, cal.get(Calendar.DAY_OF_MONTH));
     Assert.assertEquals(10, cal.get(Calendar.HOUR));
   }
 
