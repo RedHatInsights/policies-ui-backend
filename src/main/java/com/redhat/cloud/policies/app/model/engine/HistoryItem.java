@@ -16,15 +16,23 @@
  */
 package com.redhat.cloud.policies.app.model.engine;
 
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  * A single trigger history item
  * @author hrupp
  */
 
+@Schema(description = "A single history item for a fired trigger on a host")
 public class HistoryItem {
 
+
+  @Schema(description = "Fire time (since the epoch)")
   public long ctime;
+  @Schema(description = "Host id")
   public String id;
+  @Schema(description = "Host name")
   public String hostName;
 
   public HistoryItem(long ctime, String id, String hostName) {
