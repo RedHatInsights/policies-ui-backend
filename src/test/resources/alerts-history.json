@@ -120,7 +120,7 @@
       "evalTrueSetting": 1,
       "evalTotalSetting": 1,
       "evalTimeSetting": 0,
-      "dampeningId": "901578-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
+      "dampeningId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
     },
     "evalSets": [
       [
@@ -139,7 +139,7 @@
             "type": "EVENT",
             "conditionSetSize": 1,
             "conditionSetIndex": 1,
-            "conditionId": "901578-8671900e-9d31-47bf-9249-8f45698ede72-FIRING-1-1",
+            "conditionId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING-1-1",
             "displayString": "platform.inventory.host-egress matches [facts.arch = \"x86_64\"]",
             "lastEvaluation": 1590506003998,
             "dataId": "platform.inventory.host-egress",
@@ -213,9 +213,9 @@
                     "198.51.100.42"
                   ],
                   "ipv6_addresses": [
-                    "2001:0db8:5b96:0000:0000:426f:8e17:642a"
+                    "2001:0db8:5b96:0000:0000:0000:8e17:0000"
                   ],
-                  "mac_address": "20:00:00:00:00:02",
+                  "mac_address": "20:00:00:00:00:00",
                   "mtu": 0,
                   "name": "eth0",
                   "state": "UP",
@@ -376,7 +376,7 @@
       "evalTrueSetting": 1,
       "evalTotalSetting": 1,
       "evalTimeSetting": 0,
-      "dampeningId": "901578-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
+      "dampeningId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
     },
     "evalSets": [
       [
@@ -395,7 +395,7 @@
             "type": "EVENT",
             "conditionSetSize": 1,
             "conditionSetIndex": 1,
-            "conditionId": "901578-8671900e-9d31-47bf-9249-8f45698ede72-FIRING-1-1",
+            "conditionId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING-1-1",
             "displayString": "platform.inventory.host-egress matches [facts.arch = \"x86_64\"]",
             "lastEvaluation": 1590506003998,
             "dataId": "platform.inventory.host-egress",

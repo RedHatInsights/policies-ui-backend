@@ -133,6 +133,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withBody("{ \"errorMessage\" : \"something went wrong\" }")
         );
 
+    // -------------------------------
+
     List<Trigger> triggers = new ArrayList<>();
     Trigger trigger = new Trigger();
     trigger.id = "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c";
@@ -168,6 +170,25 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
             .withBody(JsonBody.json(triggers))
         );
 
+    // -------------------------------
+
+    String alertsHistory = HeaderHelperTest.getStringFromFile("alerts-history.json",false);
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(JsonBody.json(alertsHistory))
+        );
+
+
+
+    // -------------------------------
 
     FullTrigger ft = new FullTrigger();
     ft.trigger.id = "00000000-0000-0000-0000-000000000001";

@@ -714,7 +714,7 @@ public class PolicyCrudService {
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
-  @Parameter(name = "id", description = "UUID of the policy", schema = @Schema(type = SchemaType.STRING))
+  @Parameter(name = "id", description = "UUID of the policy")
   public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
@@ -750,7 +750,7 @@ public class PolicyCrudService {
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-  @Parameter(name = "id", description = "UUID of the policy", schema = @Schema(type = SchemaType.STRING))
+  @Parameter(name = "id", description = "UUID of the policy")
   public Response getPolicy(@PathParam("id") UUID policyId) {
 
     if (!user.canReadAll()) {
@@ -786,7 +786,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Retrieval of History failed")
-  @Parameter(name = "id", description = "UUID of the policy", schema = @Schema(type = SchemaType.STRING))
+  @Parameter(name = "id", description = "UUID of the policy")
   @GET
   @Path("/{id}/history/trigger")
   public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {

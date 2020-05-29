@@ -498,6 +498,48 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void getOnePolicyHistory() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL";
+    tp.conditions = "cores = 2";
+    tp.name = "test1";
+    // Use an explicit ID; that the mock server knows
+    String uuid = "8671900e-9d31-47bf-9249-8f45698ede72";
+    uuidHelper.storeUUIDString(uuid);
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE_V1_0 + "/policies")
+      .then()
+        .statusCode(201);
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    List returnedBody = er.body().as(List.class);
+    try {
+      Assert.assertEquals(2, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM 22", map.get("hostName"));
+      Assert.assertEquals("d4039530-4e3c-dead-beef-44de55400c2b", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
   void storeNewEmptyPolicy() {
 
     given()
