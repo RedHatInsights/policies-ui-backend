@@ -432,7 +432,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "200", description = "Policy deleted")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-  @Parameter(name = "id", description = "UUID of the policy", schema = @Schema(type = SchemaType.STRING))
+  @Parameter(name = "id", description = "UUID of the policy")
   @Transactional
   public Response deletePolicy(@PathParam("id") UUID policyId) {
 
@@ -806,9 +806,6 @@ public class PolicyCrudService {
          List<HistoryItem> items = new ArrayList<>();
           DocumentContext jp = JsonPath.parse(alerts);
           List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
-//         jp.read("$.[*].evalSets..display_name");
-//         jp.read("$.[*].evalSets..value.ctime");
-//         jp.read("$.[*].evalSets[0][0].value.context.insights_id");
          for (Map<String,Object> value : list) {
            long ctime = (long) value.get("ctime");
            Map<String,Object> tmp = (Map<String, Object>) value.get("context");
