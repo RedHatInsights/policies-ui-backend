@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.TokenHolder;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -57,9 +59,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
@@ -239,7 +243,7 @@ public class PolicyCrudService {
             p.setLastTriggered(lastTriggerTime);
           }
         });
-      } catch (ProcessingException|NotFoundException pe ) {
+      } catch (ProcessingException| WebApplicationException pe ) {
         log.warning("Getting lastTrigger time failed: " + pe.getMessage());
       }
     } catch (IllegalArgumentException iae) {
@@ -387,7 +391,7 @@ public class PolicyCrudService {
         id = policy.store(user.getAccount(), policy);
       } catch (Exception e) {
         Msg engineExceptionMsg = getEngineExceptionMsg(e);
-        log.info("Storing policy in engine failed: " + engineExceptionMsg.msg);
+        log.warning("Storing policy in engine failed: " + engineExceptionMsg.msg);
         return Response.status(400,e.getMessage()).entity(engineExceptionMsg).build();
       }
     } catch (Throwable t) {
@@ -428,6 +432,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "200", description = "Policy deleted")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @Parameter(name = "id", description = "UUID of the policy", schema = @Schema(type = SchemaType.STRING))
   @Transactional
   public Response deletePolicy(@PathParam("id") UUID policyId) {
 
@@ -709,6 +714,7 @@ public class PolicyCrudService {
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
+  @Parameter(name = "id", description = "UUID of the policy")
   public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
@@ -744,6 +750,7 @@ public class PolicyCrudService {
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @Parameter(name = "id", description = "UUID of the policy")
   public Response getPolicy(@PathParam("id") UUID policyId) {
 
     if (!user.canReadAll()) {
@@ -771,6 +778,53 @@ public class PolicyCrudService {
     }
 
     return builder.build();
+  }
+
+  @Operation(summary = "Retrieve the trigger history of a single policy")
+  @APIResponse(responseCode = "200", description = "History could be retrieved",
+      content = @Content (schema = @Schema(type = SchemaType.ARRAY, implementation = HistoryItem.class)))
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "404", description = "Policy not found")
+  @APIResponse(responseCode = "500", description = "Retrieval of History failed")
+  @Parameter(name = "id", description = "UUID of the policy")
+  @GET
+  @Path("/{id}/history/trigger")
+  public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {
+    if (!user.canReadAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+     }
+
+     Policy policy = Policy.findById(user.getAccount(), policyId);
+
+     ResponseBuilder builder ;
+     if (policy==null) {
+       builder = Response.status(Response.Status.NOT_FOUND);
+     } else {
+       try {
+         String alerts = engine.findLastTriggered(policyId.toString(), false, user.getAccount());
+
+         List<HistoryItem> items = new ArrayList<>();
+          DocumentContext jp = JsonPath.parse(alerts);
+          List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
+//         jp.read("$.[*].evalSets..display_name");
+//         jp.read("$.[*].evalSets..value.ctime");
+//         jp.read("$.[*].evalSets[0][0].value.context.insights_id");
+         for (Map<String,Object> value : list) {
+           long ctime = (long) value.get("ctime");
+           Map<String,Object> tmp = (Map<String, Object>) value.get("context");
+           String insights_id = (String) tmp.get("insights_id");
+           tmp = (Map<String, Object>) value.get("tags");
+           String name = (String) tmp.get("display_name");
+           HistoryItem hi = new HistoryItem(ctime,insights_id,name);
+           items.add(hi);
+         }
+         builder = Response.ok(items);
+       } catch (Exception e) {
+         log.warning("Retrieval of history failed: " + e.getMessage());
+         builder = Response.serverError();
+       }
+     }
+     return builder.build();
   }
 
   /*
