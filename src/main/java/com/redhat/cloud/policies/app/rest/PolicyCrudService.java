@@ -808,9 +808,8 @@ public class PolicyCrudService {
           List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
          for (Map<String,Object> value : list) {
            long ctime = (long) value.get("ctime");
-           Map<String,Object> tmp = (Map<String, Object>) value.get("context");
-           String insights_id = (String) tmp.get("insights_id");
-           tmp = (Map<String, Object>) value.get("tags");
+           Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
+           String insights_id = (String) tmp.get("inventory_id");
            String name = (String) tmp.get("display_name");
            HistoryItem hi = new HistoryItem(ctime,insights_id,name);
            items.add(hi);

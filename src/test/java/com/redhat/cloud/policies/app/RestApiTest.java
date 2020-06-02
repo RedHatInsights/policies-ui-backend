@@ -532,7 +532,7 @@ class RestApiTest extends AbstractITest {
       Assert.assertEquals(2, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
       Assert.assertEquals("VM 22", map.get("hostName"));
-      Assert.assertEquals("d4039530-4e3c-dead-beef-44de55400c2b", map.get("id"));
+      Assert.assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
     }
     finally {
       deletePolicyById(uuid);
