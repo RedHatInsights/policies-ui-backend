@@ -123,5 +123,7 @@ public interface PolicyEngine {
   @Consumes("application/json")
   String findLastTriggered(@QueryParam("triggerIds") String triggerIds,
                                 @QueryParam("thin") boolean thin,
+                                @QueryParam("page") int page,
+                                @QueryParam("per_page") int per_page,
                                 @HeaderParam("Hawkular-Tenant") String customerId);
 }

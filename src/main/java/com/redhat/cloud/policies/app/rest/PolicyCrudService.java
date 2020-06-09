@@ -83,6 +83,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 
+import static java.lang.Integer.min;
+
 /**
  * @author hrupp
  */
@@ -128,7 +130,7 @@ public class PolicyCrudService {
           @Parameter(
                   name = "limit",
                   in = ParameterIn.QUERY,
-                  description = "Number of items per page, if not specified uses 10. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset" ,
+                  description = "Number of items per page, if not specified uses 50. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset" ,
                   schema = @Schema(type = SchemaType.INTEGER)
           ),
           @Parameter(
@@ -786,12 +788,26 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Retrieval of History failed")
-  @Parameter(name = "id", description = "UUID of the policy")
+  @Parameters({
+      @Parameter(
+          name = "offset",
+          in = ParameterIn.QUERY,
+          description = "Page number, starts 0, if not specified uses 0.",
+          schema = @Schema(type = SchemaType.INTEGER)
+      ),
+      @Parameter(
+          name = "limit",
+          in = ParameterIn.QUERY,
+          description = "Number of items per page, if not specified uses 50. Maximum value is 200.",
+          schema = @Schema(type = SchemaType.INTEGER)
+      ),
+      @Parameter(name = "id", description = "UUID of the policy")
+  })
   @GET
   @Path("/{id}/history/trigger")
   public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {
     if (!user.canReadAll()) {
-       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
      }
 
      Policy policy = Policy.findById(user.getAccount(), policyId);
@@ -800,8 +816,16 @@ public class PolicyCrudService {
      if (policy==null) {
        builder = Response.status(Response.Status.NOT_FOUND);
      } else {
+
        try {
-         String alerts = engine.findLastTriggered(policyId.toString(), false, user.getAccount());
+         Pager pager = PagingUtils.extractPager(uriInfo);
+
+         int limit = pager.getLimit();
+         limit = min(limit,200);
+         int pageNum = pager.getOffset() / limit;
+
+         String alerts = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
+             user.getAccount());
 
          List<HistoryItem> items = new ArrayList<>();
           DocumentContext jp = JsonPath.parse(alerts);
@@ -816,8 +840,9 @@ public class PolicyCrudService {
          }
          builder = Response.ok(items);
        } catch (Exception e) {
-         log.warning("Retrieval of history failed: " + e.getMessage());
-         builder = Response.serverError();
+         String msg = "Retrieval of history failed with: " + e.getMessage();
+         log.warning(msg);
+         builder = Response.serverError().entity(msg);
        }
      }
      return builder.build();
