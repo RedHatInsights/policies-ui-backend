@@ -169,12 +169,12 @@ public class PagingUtils {
      </pre>
      */
     public static class PagedResponse<T> {
-      public Map<String,Long> meta = new HashMap<>(1);
+      public Meta meta;
       public Map<String,String> links = new HashMap<>(3);
       public List<T> data = new ArrayList<>();
 
         public PagedResponse(Page<T> page) {
-            meta.put("count", page.getTotalCount());
+            meta = new Meta(page.getTotalCount());
             data.addAll(page);
 
 
@@ -198,6 +198,14 @@ public class PagingUtils {
                             max(0,pager.getOffset() - limit)));
                 }
             }
+        }
+    }
+
+    public static class Meta {
+        public long count;
+
+        public Meta(long count) {
+            this.count = count;
         }
     }
 }

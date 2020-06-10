@@ -784,7 +784,9 @@ public class PolicyCrudService {
 
   @Operation(summary = "Retrieve the trigger history of a single policy")
   @APIResponse(responseCode = "200", description = "History could be retrieved",
-      content = @Content (schema = @Schema(type = SchemaType.ARRAY, implementation = HistoryItem.class)))
+      content = @Content (schema = @Schema(implementation = PagingUtils.PagedResponse.class)),
+                   headers = @Header(name = "TotalCount", description = "Total number of items found",
+                                     schema = @Schema(type = SchemaType.INTEGER)))
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Retrieval of History failed")
@@ -810,9 +812,9 @@ public class PolicyCrudService {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
      }
 
-     Policy policy = Policy.findById(user.getAccount(), policyId);
+    ResponseBuilder builder ;
 
-     ResponseBuilder builder ;
+    Policy policy = Policy.findById(user.getAccount(), policyId);
      if (policy==null) {
        builder = Response.status(Response.Status.NOT_FOUND);
      } else {
@@ -821,7 +823,8 @@ public class PolicyCrudService {
          Pager pager = PagingUtils.extractPager(uriInfo);
 
          int limit = pager.getLimit();
-         limit = min(limit,200);
+         // We dont allow unlimited or values > 200
+         limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
          int pageNum = pager.getOffset() / limit;
 
          String alerts = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
@@ -838,7 +841,8 @@ public class PolicyCrudService {
            HistoryItem hi = new HistoryItem(ctime,insights_id,name);
            items.add(hi);
          }
-         builder = Response.ok(items);
+         Page<HistoryItem> itemsPage = new Page<>(items,pager,-1); // TODO -1 is wrong
+         builder = PagingUtils.responseBuilder(itemsPage);
        } catch (Exception e) {
          String msg = "Retrieval of history failed with: " + e.getMessage();
          log.warning(msg);
