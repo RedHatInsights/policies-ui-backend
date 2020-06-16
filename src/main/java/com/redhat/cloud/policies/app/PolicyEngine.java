@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import com.redhat.cloud.policies.app.model.engine.Trigger;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -121,7 +122,7 @@ public interface PolicyEngine {
 
   @GET
   @Consumes("application/json")
-  String findLastTriggered(@QueryParam("triggerIds") String triggerIds,
+  Response findLastTriggered(@QueryParam("triggerIds") String triggerIds,
                                 @QueryParam("thin") boolean thin,
                                 @QueryParam("page") int page,
                                 @QueryParam("per_page") int per_page,
