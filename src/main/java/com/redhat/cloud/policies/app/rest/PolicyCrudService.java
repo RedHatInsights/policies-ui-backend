@@ -860,9 +860,9 @@ public class PolicyCrudService {
          for (Map<String,Object> value : list) {
            long ctime = (long) value.get("ctime");
            Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
-           String insights_id = (String) tmp.get("inventory_id");
+           String inventory_id = (String) tmp.get("inventory_id");
            String name = (String) tmp.get("display_name");
-           HistoryItem hi = new HistoryItem(ctime,insights_id,name);
+           HistoryItem hi = new HistoryItem(ctime,inventory_id,name);
            items.add(hi);
          }
          Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
