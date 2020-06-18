@@ -83,6 +83,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 
+import static java.lang.Integer.min;
+
 /**
  * @author hrupp
  */
@@ -93,7 +95,7 @@ import org.hibernate.exception.ConstraintViolationException;
 @RequestScoped
 public class PolicyCrudService {
 
-  private Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @Inject
   @RestClient
@@ -115,6 +117,16 @@ public class PolicyCrudService {
   @Inject
   Validator validator;
 
+  // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
+  // This class is used only for swagger return type
+  private static class PagedResponseOfPolicy extends PagingUtils.PagedResponse<Policy> {
+    @SuppressWarnings("unused")
+    private List<Policy> data;
+    private PagedResponseOfPolicy(Page<Policy> page) {
+      super(page);
+    }
+  }
+
   @Operation(summary = "Return all policies for a given account")
   @GET
   @Path("/")
@@ -128,7 +140,7 @@ public class PolicyCrudService {
           @Parameter(
                   name = "limit",
                   in = ParameterIn.QUERY,
-                  description = "Number of items per page, if not specified uses 10. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset" ,
+                  description = "Number of items per page, if not specified uses 50. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset" ,
                   schema = @Schema(type = SchemaType.INTEGER)
           ),
           @Parameter(
@@ -211,7 +223,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "Policies found", content =
-                 @Content(schema = @Schema(implementation = PagingUtils.PagedResponse.class)),
+                 @Content(schema = @Schema(implementation = PagedResponseOfPolicy.class)),
                  headers = @Header(name = "TotalCount", description = "Total number of items found",
                                    schema = @Schema(type = SchemaType.INTEGER)))
   public Response getPoliciesForCustomer() {
@@ -729,7 +741,7 @@ public class PolicyCrudService {
     if (result.size() > 0) {
       String error = String.join(
               ";",
-              result.stream().map(policyConstraintViolation -> policyConstraintViolation.getMessage()).collect(Collectors.toSet())
+              result.stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet())
       );
       return Response.status(400).entity(new Msg(error)).build();
     }
@@ -780,44 +792,85 @@ public class PolicyCrudService {
     return builder.build();
   }
 
+  // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
+    // This class is used only for swagger return type
+    private static class PagedResponseOfHistoryItem extends PagingUtils.PagedResponse<HistoryItem> {
+      @SuppressWarnings("unused")
+      private List<HistoryItem> data;
+      private PagedResponseOfHistoryItem(Page<HistoryItem> page) {
+        super(page);
+      }
+    }
+
   @Operation(summary = "Retrieve the trigger history of a single policy")
   @APIResponse(responseCode = "200", description = "History could be retrieved",
-      content = @Content (schema = @Schema(type = SchemaType.ARRAY, implementation = HistoryItem.class)))
+      content = @Content (schema = @Schema(implementation = PagedResponseOfHistoryItem.class)),
+                   headers = @Header(name = "TotalCount", description = "Total number of items found",
+                                     schema = @Schema(type = SchemaType.INTEGER)))
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Retrieval of History failed")
-  @Parameter(name = "id", description = "UUID of the policy")
+  @Parameters({
+      @Parameter(
+          name = "offset",
+          in = ParameterIn.QUERY,
+          description = "Page number, starts 0, if not specified uses 0.",
+          schema = @Schema(type = SchemaType.INTEGER)
+      ),
+      @Parameter(
+          name = "limit",
+          in = ParameterIn.QUERY,
+          description = "Number of items per page, if not specified uses 50. Maximum value is 200.",
+          schema = @Schema(type = SchemaType.INTEGER)
+      ),
+      @Parameter(name = "id", description = "UUID of the policy")
+  })
   @GET
   @Path("/{id}/history/trigger")
   public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {
     if (!user.canReadAll()) {
-       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
      }
 
-     Policy policy = Policy.findById(user.getAccount(), policyId);
+    ResponseBuilder builder ;
 
-     ResponseBuilder builder ;
+    Policy policy = Policy.findById(user.getAccount(), policyId);
      if (policy==null) {
        builder = Response.status(Response.Status.NOT_FOUND);
      } else {
+
        try {
-         String alerts = engine.findLastTriggered(policyId.toString(), false, user.getAccount());
+         Pager pager = PagingUtils.extractPager(uriInfo);
+
+         int limit = pager.getLimit();
+         // We dont allow unlimited or values > 200
+         limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
+         int pageNum = pager.getOffset() / limit;
+
+         Response response = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
+             user.getAccount());
+         String countHeader = response.getHeaderString("X-Total-Count");
+         long totalCount = Long.parseLong(countHeader);
+
+         String alerts = response.readEntity(String.class);
 
          List<HistoryItem> items = new ArrayList<>();
-          DocumentContext jp = JsonPath.parse(alerts);
-          List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
+         DocumentContext jp = JsonPath.parse(alerts);
+         List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
          for (Map<String,Object> value : list) {
            long ctime = (long) value.get("ctime");
            Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
-           String insights_id = (String) tmp.get("inventory_id");
+           String inventory_id = (String) tmp.get("inventory_id");
            String name = (String) tmp.get("display_name");
-           HistoryItem hi = new HistoryItem(ctime,insights_id,name);
+           HistoryItem hi = new HistoryItem(ctime,inventory_id,name);
            items.add(hi);
          }
-         builder = Response.ok(items);
+         Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
+         builder = PagingUtils.responseBuilder(itemsPage);
        } catch (Exception e) {
-         log.warning("Retrieval of history failed: " + e.getMessage());
-         builder = Response.serverError();
+         String msg = "Retrieval of history failed with: " + e.getMessage();
+         log.warning(msg);
+         builder = Response.serverError().entity(msg);
        }
      }
      return builder.build();

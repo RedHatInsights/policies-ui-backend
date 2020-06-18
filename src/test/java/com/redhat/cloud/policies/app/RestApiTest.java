@@ -527,7 +527,10 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
       .extract();
 
-    List returnedBody = er.body().as(List.class);
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(2,totalCount);
+    List returnedBody = jsonPath.getList("data");
     try {
       Assert.assertEquals(2, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);

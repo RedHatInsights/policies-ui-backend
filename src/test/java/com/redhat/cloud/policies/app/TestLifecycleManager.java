@@ -183,6 +183,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         .respond(response()
             .withStatusCode(200)
             .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","2")
             .withBody(JsonBody.json(alertsHistory))
         );
 
