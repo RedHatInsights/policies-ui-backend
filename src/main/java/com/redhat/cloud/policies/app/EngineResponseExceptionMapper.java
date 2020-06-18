@@ -17,7 +17,6 @@
 package com.redhat.cloud.policies.app;
 
 import com.redhat.cloud.policies.app.model.Msg;
-import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Priority;
@@ -52,11 +51,9 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
   }
 
   private Msg getBody(Response response) {
-    ByteArrayInputStream is = (ByteArrayInputStream) response.getEntity();
-    if (is != null ) {
-      byte[] bytes = new byte[is.available()];
-      is.read(bytes, 0, is.available());
-      Map<String,String> errorMap  = JsonbBuilder.create().fromJson(new String(bytes), HashMap.class);
+    String msg = response.readEntity(String.class);
+    if (msg != null && !msg.isEmpty()) {
+      Map<String,String> errorMap  = JsonbBuilder.create().fromJson(msg, HashMap.class);
       return new Msg(errorMap.get("errorMsg"));
     } else {
       return new Msg("-- no body received, status code is " + response.getStatus());
