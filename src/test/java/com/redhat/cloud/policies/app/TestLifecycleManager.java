@@ -16,6 +16,9 @@
  */
 package com.redhat.cloud.policies.app;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.mockserver.model.Header.header;
+import static org.mockserver.model.HttpClassCallback.callback;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -29,7 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.mock.action.ExpectationResponseCallback;
+import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
+import org.mockserver.model.HttpStatusCode;
 import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.MockServerContainer;
@@ -59,8 +65,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   public void stop() {
     postgreSQLContainer.stop();
     // Helper to debug mock server issues
-//       System.err.println(mockServerClient.retrieveLogMessages(request()));
-//       System.err.println(mockServerClient.retrieveRecordedRequests(request()));
+       System.err.println(mockServerClient.retrieveLogMessages(request()));
+       System.err.println(mockServerClient.retrieveRecordedRequests(request()));
   }
 
 
@@ -171,6 +177,35 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         );
 
     // -------------------------------
+
+    String alertsHistory2 = HeaderHelperTest.getStringFromFile("alerts-history2.json",false);
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withQueryStringParameter("tagQuery","name=VM")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","2")
+            .withBody(JsonBody.json(alertsHistory2))
+        );
+    mockServerClient
+        .when(request() // test data has upper case VM, so vm should not match
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withQueryStringParameter("tagQuery","name=vm")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","0")
+        );
 
     String alertsHistory = HeaderHelperTest.getStringFromFile("alerts-history.json",false);
     mockServerClient

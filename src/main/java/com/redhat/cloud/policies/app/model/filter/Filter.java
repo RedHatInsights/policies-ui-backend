@@ -2,15 +2,19 @@ package com.redhat.cloud.policies.app.model.filter;
 
 import io.quarkus.panache.common.Parameters;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 
 public class Filter implements Cloneable {
 
-    private Parameters parameters = new Parameters();
+    private final Parameters parameters = new Parameters();
     private StringBuilder query = new StringBuilder();
+    private List<FilterItem> items = new ArrayList<>();
 
     public Filter() {
 
@@ -27,6 +31,11 @@ public class Filter implements Cloneable {
         return this.query.toString();
     }
 
+    public List<FilterItem> getItems()
+    {
+        return this.items;
+    }
+
     public Parameters getParameters() {
         return this.parameters;
     }
@@ -40,6 +49,9 @@ public class Filter implements Cloneable {
     }
 
     private Filter add(String field, Operator operator, String type, Object value) {
+
+        items.add(new FilterItem(field,operator,type,value));
+
         if (operator.equals(Operator.ILIKE) && value instanceof String) {
             value = ((String) value).toLowerCase();
         }
@@ -69,7 +81,9 @@ public class Filter implements Cloneable {
 
     @Override
     public Object clone() {
-        return new Filter(this.parameters.map(), new StringBuilder(this.query));
+        Filter filter = new Filter(this.parameters.map(), new StringBuilder(this.query));
+        filter.items = this.getItems();
+        return filter;
     }
 
     public enum Operator {
@@ -102,4 +116,17 @@ public class Filter implements Cloneable {
 
     }
 
+    public class FilterItem {
+        public String field;
+        public Operator operator;
+        public String type;
+        public Object value;
+
+        public FilterItem(String field, Operator operator, String type, Object value) {
+            this.field = field;
+            this.operator = operator;
+            this.type = type;
+            this.value = value;
+        }
+    }
 }

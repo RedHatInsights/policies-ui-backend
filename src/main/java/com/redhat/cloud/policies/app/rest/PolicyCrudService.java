@@ -65,6 +65,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.engine.Trigger;
+import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
@@ -823,6 +824,48 @@ public class PolicyCrudService {
           description = "Number of items per page, if not specified uses 50. Maximum value is 200.",
           schema = @Schema(type = SchemaType.INTEGER)
       ),
+      @Parameter(
+              name = "filter[name]",
+              in = ParameterIn.QUERY,
+              description = "Filtering history entries by the host name depending on the Filter operator used.",
+              schema = @Schema(type = SchemaType.STRING)
+      ),
+      @Parameter(
+              name="filter:op[name]",
+              in = ParameterIn.QUERY,
+              description = "Operations used with the name filter",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "equal",
+                              "like",
+                              "ilike",
+                              "not_equal"
+                      },
+                      defaultValue = "equal"
+              )
+      ),
+      @Parameter(
+              name = "filter[id]",
+              in = ParameterIn.QUERY,
+              description = "Filtering history entries by the id depending on the Filter operator used.",
+              schema = @Schema(type = SchemaType.STRING)
+      ),
+      @Parameter(
+              name="filter:op[id]",
+              in = ParameterIn.QUERY,
+              description = "Operations used with the name filter",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "equal",
+                              "like",
+                              "ilike",
+                              "not_equal"
+                      },
+                      defaultValue = "equal"
+              )
+      ),
       @Parameter(name = "id", description = "UUID of the policy")
   })
   @GET
@@ -847,7 +890,11 @@ public class PolicyCrudService {
          limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
          int pageNum = pager.getOffset() / limit;
 
+         String tagQuery = getTagsFilterFromPager(pager);
+
+
          Response response = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
+             tagQuery,
              user.getAccount());
          String countHeader = response.getHeaderString("X-Total-Count");
          long totalCount = Long.parseLong(countHeader);
@@ -874,6 +921,34 @@ public class PolicyCrudService {
        }
      }
      return builder.build();
+  }
+
+  private String getTagsFilterFromPager(Pager pager) {
+    StringBuilder sb = new StringBuilder();
+    Filter filter = pager.getFilter();
+    List<Filter.FilterItem> items = filter.getItems();
+    for (Filter.FilterItem item : items) {
+      switch(item.field) {
+        case "name": sb.append("display_name"); break;
+        case "id": sb.append("inventory_id"); break;
+        default:
+          log.severe("=X= Unknown name: " + item.field);
+          sb.append("display_name");
+      }
+      sb.append(' ');
+      switch (item.operator) {
+        case EQUAL: sb.append("=");break;
+        case NOT_EQUAL: sb.append("!="); break;
+        default:
+          log.severe("==XX== unknown operator: " + item.operator.toString());
+          sb.append("=X=");
+      }
+      sb.append(" '");
+      sb.append(item.value);
+      sb.append("' ");
+    }
+
+    return sb.toString();
   }
 
   /*
