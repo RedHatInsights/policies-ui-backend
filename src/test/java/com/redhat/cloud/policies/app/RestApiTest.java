@@ -118,6 +118,17 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void testGetPoliciesRhIdNoAccount() {
+
+    given()
+        .header(authHeaderNoAccount)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/")
+      .then()
+        .statusCode(401);
+  }
+
+  @Test
   void testGetPolicyIds() {
 
     long numberOfPolicies = countPoliciesInDB();

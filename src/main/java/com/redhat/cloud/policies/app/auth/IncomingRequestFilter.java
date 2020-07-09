@@ -20,6 +20,8 @@ import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
 import io.vertx.ext.web.RoutingContext;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -57,6 +59,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class IncomingRequestFilter implements ContainerRequestFilter {
 
+  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private final boolean logFine = log.isLoggable(Level.FINE);
+
+
   @Inject
   RhIdPrincipalProducer producer;
 
@@ -76,14 +82,30 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
     if (xrhid_header==null || xrhid_header.isEmpty()) {
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      if (logFine) {
+        log.fine("No x-rh-identity header passed");
+      }
       return;
     }
 
     // Now that we are sure that there is a header, we can use it.
     Optional<XRhIdentity> xrhid = HeaderHelper.getRhIdFromString(xrhid_header);
     if (xrhid.isPresent()) {
-      // header was good, so now create the security context
+      // Basic sanity check
       XRhIdentity rhIdentity = xrhid.get();
+      if (rhIdentity.getUsername() == null || rhIdentity.getUsername().isEmpty() ||
+          rhIdentity.identity.accountNumber == null || rhIdentity.identity.accountNumber.isEmpty()
+          )
+      {
+        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+        if (logFine) {
+          log.fine("X-rh-identity header has no user or account");
+        }
+
+        return;
+      }
+      // header was good, so now create the security context
+
       RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
       rhPrincipal.setRawRhIdHeader(xrhid_header);
 
@@ -95,7 +117,10 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
       // And make the principal available for injection
       producer.setPrincipal(rhPrincipal);
     } else {
-      // Header was present, but not correct
+      // Header was present, but not parsable
+      if (logFine) {
+        log.fine("X-rh-identity header could not be parsed");
+      }
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
     }
   }

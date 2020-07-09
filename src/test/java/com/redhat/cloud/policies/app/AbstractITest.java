@@ -36,6 +36,7 @@ public abstract class AbstractITest {
 
   static Header authHeader;       // User with access rights
   static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
+  static Header authHeaderNoAccount; // Account number is empty
 
   static final String API_BASE_V1_0 = "/api/policies/v1.0";
   static final String API_BASE_V1 = "/api/policies/v1";
@@ -50,6 +51,8 @@ public abstract class AbstractITest {
     authHeader = new Header("x-rh-identity", rhid);
     rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt",false);
     authRbacNoAccess = new Header("x-rh-identity", rhid);
+    rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt",false);
+    authHeaderNoAccount = new Header("x-rh-identity", rhid);
   }
 
   protected void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
