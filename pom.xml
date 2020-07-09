@@ -13,10 +13,10 @@
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <java.release>11</java.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.version>1.5.1.Final</quarkus.version>
+    <quarkus.version>1.6.0.CR1</quarkus.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
-    <version.testcontainers>1.12.3</version.testcontainers>
+    <version.testcontainers>1.14.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
   </properties>
 

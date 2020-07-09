@@ -62,9 +62,12 @@ public class OASModifier implements OASFilter {
     }
     paths.setPathItems(replacementItems);
 
+    // Settings values should not be shown in openapi export
     Components components = openAPI.getComponents();
-    Map<String, Schema> schemas = components.getSchemas();
-    schemas.remove("SettingsValues");
+    Map<String, Schema> existingSchemas = components.getSchemas();
+    Map<String, Schema> modifiedSchemas = new HashMap<>(existingSchemas);
+    modifiedSchemas.remove("SettingsValues");
+    components.setSchemas(modifiedSchemas);
   }
 
   private String toCamelCase(String mangledName) {
