@@ -70,6 +70,9 @@ public class OapiTest extends AbstractITest {
  		Assert.assertFalse(paths.containsKey("/user-config"));
  		Assert.assertFalse(schemas.containsKey("SettingsValues"));
 
+ 		// Check that openapi does not (again) collapse parameters
+		Assert.assertEquals(9, paths.get("/policies").getOperation("get").getParameters().size());
+
 		// Now that the OpenAPI file has been validated, save a copy to the filesystem
 		// This file is going to be uploaded in a regular CI build to know the API state
 		// for a given build.
