@@ -26,7 +26,6 @@ import io.quarkus.panache.common.Sort;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -42,7 +41,7 @@ public class PagingUtils {
 
     }
 
-    public static Pager extractPager(@NotNull UriInfo uriInfo) {
+    public static Pager extractPager(UriInfo uriInfo) {
         Pager.PagerBuilder pageBuilder = Pager.builder();
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
