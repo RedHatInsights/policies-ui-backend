@@ -34,6 +34,7 @@ import java.util.Scanner;
  * VmStk:       136 kB
  * VmLib:     24416 kB
  * VmData:  3529900 kB
+ * VmSize:  13529900 kB
  *
  * @author hrupp
  */
