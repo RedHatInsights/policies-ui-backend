@@ -65,7 +65,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.engine.Trigger;
-import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
@@ -84,7 +83,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 
-import static com.redhat.cloud.policies.app.model.filter.Filter.Operator.LIKE;
+import static com.redhat.cloud.policies.app.model.filter.PolicyHistoryTagFilterHelper.getTagsFilterFromPager;
 import static java.lang.Integer.min;
 
 /**
@@ -928,45 +927,6 @@ public class PolicyCrudService {
      return builder.build();
   }
 
-  private String getTagsFilterFromPager(Pager pager) {
-    StringBuilder sb = new StringBuilder();
-    Filter filter = pager.getFilter();
-    List<Filter.FilterItem> items = filter.getItems();
-    for (Filter.FilterItem item : items) {
-      switch(item.field) {
-        case "name": sb.append("display_name"); break;
-        case "id": sb.append("inventory_id"); break;
-        default:
-          log.severe("=X= Unknown name: " + item.field);
-          sb.append("display_name");
-      }
-      sb.append(' ');
-      switch (item.operator) {
-        case EQUAL: sb.append("=");break;
-        case NOT_EQUAL: sb.append("!="); break;
-        case LIKE:
-          if (item.field.equals("id")) {
-            throw new IllegalArgumentException("Field id does not support like filters");
-          } else {
-            sb.append("=");
-          }
-          break;
-        default:
-          throw new IllegalArgumentException("==XX== unknown operator: " + item.operator.toString());
-      }
-      sb.append(" '");
-      if (item.operator.equals(LIKE)) {
-        sb.append(".*");
-      }
-      sb.append(item.value);
-      if (item.operator.equals(LIKE)) {
-        sb.append(".*");
-      }
-      sb.append("'");
-    }
-
-    return sb.toString();
-  }
 
   /*
    Return last triggered time from Trigger.lifecycle if it exists
