@@ -631,7 +631,7 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
-  void getOnePolicyHistoryFilter() {
+  void getOnePolicyHistoryFilterByName() {
     String uuid = setupPolicyForHistory();
 
     ExtractableResponse<Response> er =
@@ -640,7 +640,7 @@ class RestApiTest extends AbstractITest {
         .contentType(ContentType.JSON)
       .when()
         .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
-            "?filter[name]=vm")
+            "?filter[name]=VM22")
       .then()
         .statusCode(200)
       .extract();
@@ -650,7 +650,7 @@ class RestApiTest extends AbstractITest {
     Assert.assertEquals(1,totalCount);
     List returnedBody = jsonPath.getList("data");
     try {
-      Assert.assertEquals(2, returnedBody.size());
+      Assert.assertEquals(1, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
       Assert.assertEquals("VM", map.get("hostName"));
       Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
@@ -659,6 +659,86 @@ class RestApiTest extends AbstractITest {
       deletePolicyById(uuid);
     }
   }
+
+  @Test
+  void getOnePolicyHistoryFilterByNameNotEqual() {
+    String uuid = setupPolicyForHistory();
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+            "?filter[name]=VM&filter:op[name]=not_equal")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(1,totalCount);
+    List returnedBody = jsonPath.getList("data");
+    try {
+      Assert.assertEquals(1, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM22", map.get("hostName"));
+      Assert.assertEquals("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterById() {
+    String uuid = setupPolicyForHistory();
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+            "?filter[id]=dce4760b-0000-48f0-0000-7a07a6a45d1d")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(1,totalCount);
+    List returnedBody = jsonPath.getList("data");
+    try {
+      Assert.assertEquals(1, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM", map.get("hostName"));
+      Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterByIdLike() {
+    String uuid = setupPolicyForHistory();
+
+    try {
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+        .when()
+          .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+              "?filter[id]=dce4760b-0000-48f0-0000-7a07a6a45d1d&filter:op[id]=like")
+        .then()
+          .statusCode(400);
+    }
+    finally {
+          deletePolicyById(uuid);
+        }
+  }
+
 
   @NotNull
   private String setupPolicyForHistory() {

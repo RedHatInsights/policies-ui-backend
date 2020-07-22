@@ -4,7 +4,6 @@ import io.quarkus.panache.common.Parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +49,7 @@ public class Filter implements Cloneable {
 
     private Filter add(String field, Operator operator, String type, Object value) {
 
-        items.add(new FilterItem(field,operator,type,value));
+        items.add(new FilterItem(field, operator, type, value));
 
         if (operator.equals(Operator.ILIKE) && value instanceof String) {
             value = ((String) value).toLowerCase();
@@ -116,7 +115,7 @@ public class Filter implements Cloneable {
 
     }
 
-    public class FilterItem {
+    public static class FilterItem {
         public String field;
         public Operator operator;
         public String type;
