@@ -173,6 +173,51 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     // -------------------------------
 
     String alertsHistory = HeaderHelperTest.getStringFromFile("alerts-history.json",false);
+    String alertsHistory2 = HeaderHelperTest.getStringFromFile("alerts-history2.json",false);
+    String alertsHistory3 = HeaderHelperTest.getStringFromFile("alerts-history3.json",false);
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withQueryStringParameter("tagQuery","display_name != 'vm'")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","1")
+            .withBody(JsonBody.json(alertsHistory3))
+        );
+    mockServerClient
+        .when(request() // test data has upper case VM, so vm should not match
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withQueryStringParameter("tagQuery","display_name = 'VM22'")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","1")
+            .withBody(JsonBody.json(alertsHistory2))
+        );
+    mockServerClient
+        .when(request() // test data has upper case VM, so vm should not match
+            .withPath("/hawkular/alerts")
+            .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
+            .withQueryStringParameter("tagQuery","inventory_id = 'dce4760b-0000-48f0-0000-7a07a6a45d1d'")
+            .withHeader("Hawkular-Tenant","1234")
+            .withMethod("GET")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withHeader("X-Total-Count","1")
+            .withBody(JsonBody.json(alertsHistory2))
+        );
+
     mockServerClient
         .when(request()
             .withPath("/hawkular/alerts")

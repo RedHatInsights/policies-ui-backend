@@ -39,6 +39,7 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
 import org.junit.Assert;
@@ -602,23 +603,7 @@ class RestApiTest extends AbstractITest {
 
   @Test
   void getOnePolicyHistory() {
-    TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
-    tp.conditions = "cores = 2";
-    tp.name = "test1";
-    // Use an explicit ID; that the mock server knows
-    String uuid = "8671900e-9d31-47bf-9249-8f45698ede72";
-    uuidHelper.storeUUIDString(uuid);
-
-    given()
-        .header(authHeader)
-        .contentType(ContentType.JSON)
-        .body(tp)
-        .queryParam("alsoStore", "true")
-      .when()
-        .post(API_BASE_V1_0 + "/policies")
-      .then()
-        .statusCode(201);
+    String uuid = setupPolicyForHistory();
 
     ExtractableResponse<Response> er =
     given()
@@ -643,6 +628,138 @@ class RestApiTest extends AbstractITest {
     finally {
       deletePolicyById(uuid);
     }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterByName() {
+    String uuid = setupPolicyForHistory();
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+            "?filter[name]=VM22")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(1,totalCount);
+    List returnedBody = jsonPath.getList("data");
+    try {
+      Assert.assertEquals(1, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM", map.get("hostName"));
+      Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterByNameNotEqual() {
+    String uuid = setupPolicyForHistory();
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+            "?filter[name]=VM&filter:op[name]=not_equal")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(1,totalCount);
+    List returnedBody = jsonPath.getList("data");
+    try {
+      Assert.assertEquals(1, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM22", map.get("hostName"));
+      Assert.assertEquals("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterById() {
+    String uuid = setupPolicyForHistory();
+
+    ExtractableResponse<Response> er =
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+      .when()
+        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+            "?filter[id]=dce4760b-0000-48f0-0000-7a07a6a45d1d")
+      .then()
+        .statusCode(200)
+      .extract();
+
+    JsonPath jsonPath = er.body().jsonPath();
+    int totalCount = jsonPath.getInt("meta.count");
+    Assert.assertEquals(1,totalCount);
+    List returnedBody = jsonPath.getList("data");
+    try {
+      Assert.assertEquals(1, returnedBody.size());
+      Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+      Assert.assertEquals("VM", map.get("hostName"));
+      Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
+
+  @Test
+  void getOnePolicyHistoryFilterByIdLike() {
+    String uuid = setupPolicyForHistory();
+
+    try {
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+        .when()
+          .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
+              "?filter[id]=dce4760b-0000-48f0-0000-7a07a6a45d1d&filter:op[id]=like")
+        .then()
+          .statusCode(400);
+    }
+    finally {
+          deletePolicyById(uuid);
+        }
+  }
+
+
+  @NotNull
+  private String setupPolicyForHistory() {
+    TestPolicy tp = new TestPolicy();
+    tp.actions = "EMAIL";
+    tp.conditions = "cores = 2";
+    tp.name = "test1";
+    // Use an explicit ID; that the mock server knows
+    String uuid = "8671900e-9d31-47bf-9249-8f45698ede72";
+    uuidHelper.storeUUIDString(uuid);
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(tp)
+        .queryParam("alsoStore", "true")
+      .when()
+        .post(API_BASE_V1_0 + "/policies")
+      .then()
+        .statusCode(201);
+    return uuid;
   }
 
   @Test

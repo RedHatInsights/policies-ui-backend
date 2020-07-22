@@ -83,6 +83,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 
+import static com.redhat.cloud.policies.app.model.filter.PolicyHistoryTagFilterHelper.getTagsFilterFromPager;
 import static java.lang.Integer.min;
 
 /**
@@ -807,6 +808,7 @@ public class PolicyCrudService {
       content = @Content (schema = @Schema(implementation = PagedResponseOfHistoryItem.class)),
                    headers = @Header(name = "TotalCount", description = "Total number of items found",
                                      schema = @Schema(type = SchemaType.INTEGER)))
+  @APIResponse(responseCode = "400", description = "Bad parameters passed")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy not found")
   @APIResponse(responseCode = "500", description = "Retrieval of History failed")
@@ -822,6 +824,45 @@ public class PolicyCrudService {
           in = ParameterIn.QUERY,
           description = "Number of items per page, if not specified uses 50. Maximum value is 200.",
           schema = @Schema(type = SchemaType.INTEGER)
+      ),
+      @Parameter(
+              name = "filter[name]",
+              in = ParameterIn.QUERY,
+              description = "Filtering history entries by the host name depending on the Filter operator used.",
+              schema = @Schema(type = SchemaType.STRING)
+      ),
+      @Parameter(
+              name="filter:op[name]",
+              in = ParameterIn.QUERY,
+              description = "Operations used with the name filter",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "equal",
+                              "like",
+                              "not_equal"
+                      },
+                      defaultValue = "equal"
+              )
+      ),
+      @Parameter(
+              name = "filter[id]",
+              in = ParameterIn.QUERY,
+              description = "Filtering history entries by the id depending on the Filter operator used.",
+              schema = @Schema(type = SchemaType.STRING)
+      ),
+      @Parameter(
+              name="filter:op[id]",
+              in = ParameterIn.QUERY,
+              description = "Operations used with the name filter",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "equal",
+                              "not_equal"
+                      },
+                      defaultValue = "equal"
+              )
       ),
       @Parameter(name = "id", description = "UUID of the policy")
   })
@@ -844,29 +885,39 @@ public class PolicyCrudService {
 
          int limit = pager.getLimit();
          // We dont allow unlimited or values > 200
-         limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
+         limit = limit == Pager.NO_LIMIT ? 50 : min(limit, 200);
          int pageNum = pager.getOffset() / limit;
 
+         String tagQuery = getTagsFilterFromPager(pager);
+
          Response response = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
+             tagQuery,
              user.getAccount());
          String countHeader = response.getHeaderString("X-Total-Count");
          long totalCount = Long.parseLong(countHeader);
 
          String alerts = response.readEntity(String.class);
+         response.close();
 
          List<HistoryItem> items = new ArrayList<>();
-         DocumentContext jp = JsonPath.parse(alerts);
-         List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
-         for (Map<String,Object> value : list) {
-           long ctime = (long) value.get("ctime");
-           Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
-           String inventory_id = (String) tmp.get("inventory_id");
-           String name = (String) tmp.get("display_name");
-           HistoryItem hi = new HistoryItem(ctime,inventory_id,name);
-           items.add(hi);
+
+         // The engine may not return data to us
+         if (totalCount > 0) {
+           DocumentContext jp = JsonPath.parse(alerts);
+           List<Map<String, Object>> list = jp.read("$.[*].evalSets..value");
+           for (Map<String, Object> value : list) {
+             long ctime = (long) value.get("ctime");
+             Map<String, Object> tmp = (Map<String, Object>) value.get("tags");
+             String inventory_id = (String) tmp.get("inventory_id");
+             String name = (String) tmp.get("display_name");
+             HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
+             items.add(hi);
+           }
          }
-         Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
+         Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
          builder = PagingUtils.responseBuilder(itemsPage);
+       } catch (IllegalArgumentException iae) {
+         builder = Response.status(400,iae.getMessage());
        } catch (Exception e) {
          String msg = "Retrieval of history failed with: " + e.getMessage();
          log.warning(msg);
@@ -875,6 +926,7 @@ public class PolicyCrudService {
      }
      return builder.build();
   }
+
 
   /*
    Return last triggered time from Trigger.lifecycle if it exists

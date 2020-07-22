@@ -159,7 +159,7 @@
             },
             "tags": {
               "display_name": "VM 22",
-              "inventory_id": "dce4760b-d796-48f0-a7b9-7a07a6a45d1d",
+              "inventory_id": "dce4760b-d796-48f0-a7b9-7a07a6a45d1d"
             },
             "facts": {
               "arch": "x86_64",
@@ -415,8 +415,8 @@
               "insights_id": "d4039530-4e3c-dead-beef-44de55400c2b"
             },
             "tags": {
-              "display_name": "VM 22",
-              "inventory_id": "dce4760b-d796-48f0-a7b9-7a07a6a45d1d"
+              "display_name": "VM",
+              "inventory_id": "dce4760b-0000-48f0-0000-7a07a6a45d1d"
             },
             "facts": {
               "arch": "x86_64",

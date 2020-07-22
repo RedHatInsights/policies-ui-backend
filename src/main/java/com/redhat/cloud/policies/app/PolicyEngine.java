@@ -126,5 +126,6 @@ public interface PolicyEngine {
                                 @QueryParam("thin") boolean thin,
                                 @QueryParam("page") int page,
                                 @QueryParam("per_page") int per_page,
+                                @QueryParam("tagQuery") String tagQuery,
                                 @HeaderParam("Hawkular-Tenant") String customerId);
 }
