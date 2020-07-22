@@ -39,9 +39,9 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
