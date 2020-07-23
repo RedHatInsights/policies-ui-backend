@@ -9,6 +9,8 @@ For some functionality it relies on the Engine part.
 To get started (locally) you can
 run Docker-Compose, which starts Postgres and a local Kafka instance for use with the Engine.
 
+This is not supposed to be merged!
+
 [source,shell]
 ----
 cd helpers
