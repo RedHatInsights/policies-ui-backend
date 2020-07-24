@@ -63,7 +63,7 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter[id]=123"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("(display_name = 'VM') AND (inventory_id = '123')", query);
+    assertEquals("display_name = 'VM' AND inventory_id = '123'", query);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class TagsFilterTest {
         new URI("https://foo?filter[name]=VM&filter[id]=123&filter:op[name]=not_equal"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("(display_name != 'VM') AND (inventory_id = '123')", query);
+    assertEquals("display_name != 'VM' AND inventory_id = '123'", query);
   }
 
   @Test

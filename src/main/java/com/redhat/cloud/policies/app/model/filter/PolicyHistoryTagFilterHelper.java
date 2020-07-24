@@ -33,13 +33,8 @@ public class PolicyHistoryTagFilterHelper {
     Filter filter = pager.getFilter();
     List<Filter.FilterItem> items = filter.getItems();
     Iterator<Filter.FilterItem> iterator = items.iterator();
-    boolean isMulti = items.size() > 1;
     while(iterator.hasNext()) {
       Filter.FilterItem item = iterator.next();
-
-      if (isMulti) {
-        sb.append("(");
-      }
 
       switch (item.field) {
         case "name":
@@ -78,9 +73,6 @@ public class PolicyHistoryTagFilterHelper {
         sb.append(".*");
       }
       sb.append("'");
-      if (isMulti) {
-        sb.append(")");
-      }
       if (iterator.hasNext()) {
         sb.append(" AND ");
       }
