@@ -18,6 +18,8 @@ package com.redhat.cloud.policies.app.model.filter;
 
 import com.redhat.cloud.policies.app.model.pager.Pager;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,7 +80,7 @@ public class PolicyHistoryTagFilterHelper {
       }
     }
 
-    return sb.toString();
+    return sb.length() == 0 ? null : sb.toString();
   }
 
 }
