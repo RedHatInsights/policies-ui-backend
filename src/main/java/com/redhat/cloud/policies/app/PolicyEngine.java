@@ -126,6 +126,12 @@ public interface PolicyEngine {
                                 @QueryParam("thin") boolean thin,
                                 @QueryParam("page") int page,
                                 @QueryParam("per_page") int per_page,
+                                // Once MP-RestClient 2.0 is avaliable, we can turn the next lines
+                                // into String[] and set the query param style accordingly.
+                                @QueryParam("sort") String sort1,
+                                @QueryParam("sort") String sort2,
+                                @QueryParam("order") String order1,
+                                @QueryParam("order") String order2,
                                 @QueryParam("tagQuery") String tagQuery,
                                 @HeaderParam("Hawkular-Tenant") String customerId);
 }

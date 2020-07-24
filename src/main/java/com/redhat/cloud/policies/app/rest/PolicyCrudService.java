@@ -68,6 +68,7 @@ import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
+import io.quarkus.panache.common.Sort;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -864,6 +865,31 @@ public class PolicyCrudService {
                       defaultValue = "equal"
               )
       ),
+      @Parameter(
+              name = "sortColumn",
+              in = ParameterIn.QUERY,
+              description = "Column to sort the results by",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "hostName",
+                              "id",
+                              "ctime"
+                      }
+              )
+      ),
+      @Parameter(
+              name = "sortDirection",
+              in = ParameterIn.QUERY,
+              description = "Sort direction used",
+              schema = @Schema(
+                      type = SchemaType.STRING,
+                      enumeration = {
+                              "asc",
+                              "desc"
+                      }
+              )
+      ),
       @Parameter(name = "id", description = "UUID of the policy")
   })
   @GET
@@ -885,12 +911,34 @@ public class PolicyCrudService {
 
          int limit = pager.getLimit();
          // We dont allow unlimited or values > 200
-         limit = limit == Pager.NO_LIMIT ? 50 : min(limit, 200);
+         limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
          int pageNum = pager.getOffset() / limit;
+
+         // Once Quarkus supports MP rest client 2.0 we can use
+         // String[] here and use some special query-param style to
+         // support this
+         String sort1=null;
+         String sort2 = null;
+         String order1 = null;
+         String order2= null;
+
+         if (pager.getSort()!= null) {
+           List<Sort.Column> columns = pager.getSort().getColumns();
+           if (columns.size() > 0) {
+             sort1 = getSortFromPageColumn(columns.get(0));
+             order1 = getOrderFromPageColumn(columns.get(0));
+           }
+           if (columns.size() > 1) {
+             sort2 = getSortFromPageColumn(columns.get(1));
+             order2 = getOrderFromPageColumn(columns.get(1));
+           }
+         }
 
          String tagQuery = getTagsFilterFromPager(pager);
 
-         Response response = engine.findLastTriggered(policyId.toString(), false, pageNum, limit,
+         Response response = engine.findLastTriggered(policyId.toString(),
+             false, pageNum, limit,
+             sort1, sort2, order1, order2, // See Comment in engine def
              tagQuery,
              user.getAccount());
          String countHeader = response.getHeaderString("X-Total-Count");
@@ -904,17 +952,17 @@ public class PolicyCrudService {
          // The engine may not return data to us
          if (totalCount > 0) {
            DocumentContext jp = JsonPath.parse(alerts);
-           List<Map<String, Object>> list = jp.read("$.[*].evalSets..value");
-           for (Map<String, Object> value : list) {
+           List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
+           for (Map<String,Object> value : list) {
              long ctime = (long) value.get("ctime");
-             Map<String, Object> tmp = (Map<String, Object>) value.get("tags");
+             Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
              String inventory_id = (String) tmp.get("inventory_id");
              String name = (String) tmp.get("display_name");
-             HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
+             HistoryItem hi = new HistoryItem(ctime,inventory_id,name);
              items.add(hi);
            }
          }
-         Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
+         Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
          builder = PagingUtils.responseBuilder(itemsPage);
        } catch (IllegalArgumentException iae) {
          builder = Response.status(400,iae.getMessage());
@@ -927,6 +975,23 @@ public class PolicyCrudService {
      return builder.build();
   }
 
+  private String getSortFromPageColumn(Sort.Column column) {
+    String sort = column.getName();
+    switch (sort) {
+      case "id":
+        sort = "tags.inventory_id"; break;
+      case "name":
+        sort = "tags.display_name"; break;
+      default:
+        sort = "ctime";
+    }
+    return sort;
+  }
+
+  private String getOrderFromPageColumn(Sort.Column column) {
+    String order = column.getDirection().equals(Sort.Direction.Ascending) ? "asc" : "desc";
+    return order;
+  }
 
   /*
    Return last triggered time from Trigger.lifecycle if it exists
