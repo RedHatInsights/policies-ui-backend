@@ -732,7 +732,7 @@ class RestApiTest extends AbstractITest {
           .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger" +
               "?filter[id]=dce4760b-0000-48f0-0000-7a07a6a45d1d&filter:op[id]=like")
         .then()
-          .statusCode(400);
+          .statusCode(200);
     }
     finally {
           deletePolicyById(uuid);

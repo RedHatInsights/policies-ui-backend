@@ -77,15 +77,10 @@ public class TagsFilterTest {
 
   @Test
   void filter5() throws URISyntaxException {
-    UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[id]=VM&filter:op[id]=like"));
+    UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[id]=123-45&filter:op[id]=like"));
     Pager pager = PagingUtils.extractPager(info);
-    try {
-      PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-      Assert.fail();
-    }
-    catch (IllegalArgumentException expected) {
-    }
-
+    String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
+    assertEquals("inventory_id = '.*123-45.*'", query);
   }
 
   @Test
