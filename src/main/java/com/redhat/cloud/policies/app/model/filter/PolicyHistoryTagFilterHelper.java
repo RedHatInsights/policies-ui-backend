@@ -18,8 +18,6 @@ package com.redhat.cloud.policies.app.model.filter;
 
 import com.redhat.cloud.policies.app.model.pager.Pager;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,17 +49,11 @@ public class PolicyHistoryTagFilterHelper {
       sb.append(' ');
       switch (item.operator) {
         case EQUAL:
+        case LIKE:
           sb.append("=");
           break;
         case NOT_EQUAL:
           sb.append("!=");
-          break;
-        case LIKE:
-          if (item.field.equals("id")) {
-            throw new IllegalArgumentException("Field id does not support 'like' filters");
-          } else {
-            sb.append("=");
-          }
           break;
         default:
           throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());

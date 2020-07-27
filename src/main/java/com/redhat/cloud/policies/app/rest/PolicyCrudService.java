@@ -860,7 +860,8 @@ public class PolicyCrudService {
                       type = SchemaType.STRING,
                       enumeration = {
                               "equal",
-                              "not_equal"
+                              "not_equal",
+                              "like"
                       },
                       defaultValue = "equal"
               )
