@@ -1,4 +1,5 @@
 /*
+ *
  * Requires: https://github.com/RedHatInsights/insights-pipeline-lib
  */
 
