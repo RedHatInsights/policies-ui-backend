@@ -93,23 +93,22 @@ public class PagingUtils {
                 String column = columns.get(i);
                 Sort.Direction direction = Sort.Direction.Ascending;
                 if (directions != null && i < directions.size()) {
-                    switch(directions.get(i).toLowerCase()) {
-                        case "asc":
-                            direction = Sort.Direction.Ascending;
-                            break;
-                        case "desc":
-                            direction = Sort.Direction.Descending;
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unexpected sort order found: [" + columns.get(i) + "]");
-                    }
+                    String dir = directions.get(i);
+                    direction = getDirection(columns.get(i), dir);
                 }
                 pageBuilder.addSort(column, direction);
             }
         }
         else {
             // default sort is by mtime descending, so that newest end up on top
-            pageBuilder.addSort("mtime",Sort.Direction.Descending);
+            Sort.Direction direction = Sort.Direction.Descending;
+
+            // check if the user specified a sort order (but no column, so ctime is meant)
+            if (directions!=null && directions.size()>0) {
+                direction = getDirection("ctime", directions.get(0));
+            }
+
+            pageBuilder.addSort("mtime",direction);
         }
 
         for (String key: queryParams.keySet()) {
@@ -139,6 +138,21 @@ public class PagingUtils {
         }
 
         return pageBuilder.build();
+    }
+
+    private static Sort.Direction getDirection(String column, String dir) {
+        Sort.Direction direction;
+        switch(dir.toLowerCase()) {
+            case "asc":
+                direction = Sort.Direction.Ascending;
+                break;
+            case "desc":
+                direction = Sort.Direction.Descending;
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected sort order found: [" + column + "]");
+        }
+        return direction;
     }
 
     public static <T>ResponseBuilder responseBuilder(Page<T> page) {
