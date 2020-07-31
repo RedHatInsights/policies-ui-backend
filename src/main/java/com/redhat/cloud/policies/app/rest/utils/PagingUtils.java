@@ -94,7 +94,7 @@ public class PagingUtils {
                 Sort.Direction direction = Sort.Direction.Ascending;
                 if (directions != null && i < directions.size()) {
                     String dir = directions.get(i);
-                    direction = getDirection(columns.get(i), dir);
+                    direction = getDirection(dir, columns.get(i));
                 }
                 pageBuilder.addSort(column, direction);
             }
@@ -103,9 +103,9 @@ public class PagingUtils {
             // default sort is by mtime descending, so that newest end up on top
             Sort.Direction direction = Sort.Direction.Descending;
 
-            // check if the user specified a sort order (but no column, so ctime is meant)
+            // check if the user specified a sort order (but no column, so mtime is meant)
             if (directions!=null && directions.size()>0) {
-                direction = getDirection("ctime", directions.get(0));
+                direction = getDirection(directions.get(0), "mtime");
             }
 
             pageBuilder.addSort("mtime",direction);
@@ -140,13 +140,21 @@ public class PagingUtils {
         return pageBuilder.build();
     }
 
-    private static Sort.Direction getDirection(String column, String dir) {
+    /**
+     * Obtain the direction from the passed direction string. This string is
+     * case insensitive and only the first 3 chars count. So 'asc' and 'ascending'
+     * and 'Ascending' (or 'des*' will be ok)
+     * @param directionString Incoming direction string.
+     * @param column Column name for display purposes in case the passed direction is not valid
+     * @return Direction
+     */
+    static Sort.Direction getDirection(String directionString, String column) {
         Sort.Direction direction;
-        switch(dir.toLowerCase()) {
+        switch(directionString.toLowerCase().substring(0,3)) {
             case "asc":
                 direction = Sort.Direction.Ascending;
                 break;
-            case "desc":
+            case "des":
                 direction = Sort.Direction.Descending;
                 break;
             default:
