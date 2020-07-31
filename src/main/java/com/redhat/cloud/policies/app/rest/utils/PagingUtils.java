@@ -93,23 +93,22 @@ public class PagingUtils {
                 String column = columns.get(i);
                 Sort.Direction direction = Sort.Direction.Ascending;
                 if (directions != null && i < directions.size()) {
-                    switch(directions.get(i).toLowerCase()) {
-                        case "asc":
-                            direction = Sort.Direction.Ascending;
-                            break;
-                        case "desc":
-                            direction = Sort.Direction.Descending;
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unexpected sort order found: [" + columns.get(i) + "]");
-                    }
+                    String dir = directions.get(i);
+                    direction = getDirection(dir, columns.get(i));
                 }
                 pageBuilder.addSort(column, direction);
             }
         }
         else {
             // default sort is by mtime descending, so that newest end up on top
-            pageBuilder.addSort("mtime",Sort.Direction.Descending);
+            Sort.Direction direction = Sort.Direction.Descending;
+
+            // check if the user specified a sort order (but no column, so mtime is meant)
+            if (directions!=null && directions.size()>0) {
+                direction = getDirection(directions.get(0), "mtime");
+            }
+
+            pageBuilder.addSort("mtime",direction);
         }
 
         for (String key: queryParams.keySet()) {
@@ -139,6 +138,29 @@ public class PagingUtils {
         }
 
         return pageBuilder.build();
+    }
+
+    /**
+     * Obtain the direction from the passed direction string. This string is
+     * case insensitive and only the first 3 chars count. So 'asc' and 'ascending'
+     * and 'Ascending' (or 'des*' will be ok)
+     * @param directionString Incoming direction string.
+     * @param column Column name for display purposes in case the passed direction is not valid
+     * @return Direction
+     */
+    static Sort.Direction getDirection(String directionString, String column) {
+        Sort.Direction direction;
+        switch(directionString.toLowerCase().substring(0,3)) {
+            case "asc":
+                direction = Sort.Direction.Ascending;
+                break;
+            case "des":
+                direction = Sort.Direction.Descending;
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected sort order found: [" + column + "]");
+        }
+        return direction;
     }
 
     public static <T>ResponseBuilder responseBuilder(Page<T> page) {

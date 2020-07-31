@@ -23,6 +23,7 @@ public class Condition {
   public String conditionId;
   public String triggerMode = "FIRING";
   public String type = "EVENT";
+  // The dataId must stay as is, and be the same as in Receiver.java in the engine
   public String dataId = "platform.inventory.host-egress";
   public String expression;
   public long lastEvaluation;

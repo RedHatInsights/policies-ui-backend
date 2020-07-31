@@ -181,6 +181,19 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void testGetPoliciesSort2() {
+    given()
+            .header(authHeader)
+      .when()
+        // Default sort is on ctime desc, if no column is given
+        .get(API_BASE_V1_0 + "/policies/?sortOrder=asc")
+            .then()
+            .statusCode(200)
+            .assertThat()
+            .body(" data.get(0).description", is("Just a test"));
+  }
+
+  @Test
   void testGetPoliciesBadPaged() {
 
     given()
