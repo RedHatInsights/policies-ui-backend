@@ -23,6 +23,7 @@ import org.eclipse.microprofile.metrics.annotation.Gauge;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 
 /**
@@ -41,8 +42,11 @@ import java.util.Scanner;
 @ApplicationScoped
 public class ProcSelfStatusExporter {
 
+  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+
   private static final String PATHNAME = "/proc/self/status";
-//  private static final String PATHNAME = "/tmp/foo";
+
+  private boolean hasWarned = false;
 
   long vmHwm;
   long vmRss;
@@ -59,7 +63,10 @@ public class ProcSelfStatusExporter {
 
     File status = new File(PATHNAME);
     if (!status.exists() || !status.canRead()) {
-      System.out.println("Can't read " + PATHNAME);
+      if (!hasWarned) {
+        log.warning("Can't read " + PATHNAME);
+        hasWarned = true;
+      }
       return;
     }
 
