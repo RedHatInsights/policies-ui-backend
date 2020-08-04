@@ -1,325 +1,190 @@
-
-The following files have been resolved:
-   io.quarkus:quarkus-resteasy:jar:1.6.0.Final:compile[36m -- module quarkus.resteasy[0;1;33m (auto)[m
-   io.quarkus:quarkus-vertx-http:jar:1.6.0.Final:compile[36m -- module quarkus.vertx.http[0;1;33m (auto)[m
-   io.quarkus:quarkus-development-mode-spi:jar:1.6.0.Final:compile[36m -- module quarkus.development.mode.spi[0;1;33m (auto)[m
-   io.quarkus:quarkus-vertx-core:jar:1.6.0.Final:compile[36m -- module quarkus.vertx.core[0;1;33m (auto)[m
-   io.vertx:vertx-core:jar:3.9.1:compile[36m -- module vertx.core[0;1;33m (auto)[m
-   io.netty:netty-codec-http2:jar:4.1.49.Final:compile[36m -- module io.netty.codec.http2[0;1m [auto][m
-   io.netty:netty-resolver-dns:jar:4.1.49.Final:compile[36m -- module io.netty.resolver.dns[0;1m [auto][m
-   io.netty:netty-codec-dns:jar:4.1.49.Final:compile[36m -- module io.netty.codec.dns[0;1m [auto][m
-   io.vertx:vertx-web:jar:3.9.1:compile[36m -- module vertx.web[0;1;33m (auto)[m
-   io.vertx:vertx-web-common:jar:3.9.1:compile[36m -- module vertx.web.common[0;1;33m (auto)[m
-   io.vertx:vertx-auth-common:jar:3.9.1:compile[36m -- module vertx.auth.common[0;1;33m (auto)[m
-   io.vertx:vertx-bridge-common:jar:3.9.1:compile[36m -- module vertx.bridge.common[0;1;33m (auto)[m
-   io.quarkus:quarkus-resteasy-server-common:jar:1.6.0.Final:compile[36m -- module quarkus.resteasy.server.common[0;1;33m (auto)[m
-   jakarta.validation:jakarta.validation-api:jar:2.0.2:compile[36m -- module java.validation[0;1m [auto][m
-   io.quarkus:quarkus-resteasy-jsonb:jar:1.6.0.Final:compile[36m -- module quarkus.resteasy.jsonb[0;1;33m (auto)[m
-   io.quarkus:quarkus-jsonb:jar:1.6.0.Final:compile[36m -- module quarkus.jsonb[0;1;33m (auto)[m
-   org.eclipse:yasson:jar:1.0.7:compile[36m -- module org.eclipse.yasson[m
-   org.jboss.resteasy:resteasy-json-binding-provider:jar:4.5.5.Final:compile[36m -- module resteasy.json.binding.provider[0;1;33m (auto)[m
-   org.glassfish:jakarta.json:jar:1.1.6:compile[36m -- module java.json[0;1m [auto][m
-   jakarta.json.bind:jakarta.json.bind-api:jar:1.0.2:compile[36m -- module java.json.bind[m
-   org.jboss.resteasy:resteasy-json-p-provider:jar:4.5.5.Final:compile[36m -- module resteasy.json.p.provider[0;1;33m (auto)[m
-   commons-io:commons-io:jar:2.6:compile[36m -- module org.apache.commons.io[0;1m [auto][m
-   io.quarkus:quarkus-rest-client:jar:1.6.0.Final:compile[36m -- module quarkus.rest.client[0;1;33m (auto)[m
-   io.quarkus:quarkus-core:jar:1.6.0.Final:compile[36m -- module quarkus.core[0;1;33m (auto)[m
-   jakarta.annotation:jakarta.annotation-api:jar:1.3.5:compile[36m -- module java.annotation[0;1m [auto][m
-   io.quarkus:quarkus-ide-launcher:jar:1.6.0.Final:compile[36m -- module quarkus.ide.launcher[0;1;33m (auto)[m
-   io.smallrye.config:smallrye-config:jar:1.8.1:compile[36m -- module smallrye.config[0;1;33m (auto)[m
-   io.smallrye.common:smallrye-common-annotation:jar:1.0.2:compile[36m -- module smallrye.common.annotation[0;1;33m (auto)[m
-   io.smallrye.config:smallrye-config-common:jar:1.8.1:compile[36m -- module smallrye.config.common[0;1;33m (auto)[m
-   io.smallrye.common:smallrye-common-expression:jar:1.0.2:compile[36m -- module smallrye.common.expression[0;1;33m (auto)[m
-   io.smallrye.common:smallrye-common-function:jar:1.0.2:compile[36m -- module smallrye.common.function[0;1;33m (auto)[m
-   io.smallrye.common:smallrye-common-constraint:jar:1.0.2:compile[36m -- module smallrye.common.constraint[0;1;33m (auto)[m
-   org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.4:compile[36m -- module jboss.logmanager.embedded[0;1;33m (auto)[m
-   org.jboss.logging:jboss-logging-annotations:jar:2.1.0.Final:compile[36m -- module jboss.logging.annotations[0;1;33m (auto)[m
-   org.jboss.threads:jboss-threads:jar:3.1.1.Final:compile[36m -- module jboss.threads[0;1;33m (auto)[m
-   org.jboss.slf4j:slf4j-jboss-logging:jar:1.2.0.Final:compile[36m -- module slf4j.jboss.logging[0;1;33m (auto)[m
-   org.graalvm.sdk:graal-sdk:jar:20.1.0:compile[36m -- module org.graalvm.sdk[m
-   org.wildfly.common:wildfly-common:jar:1.5.4.Final-format-001:compile[36m -- module wildfly.common[0;1;33m (auto)[m
-   io.quarkus:quarkus-bootstrap-runner:jar:1.6.0.Final:compile[36m -- module quarkus.bootstrap.runner[0;1;33m (auto)[m
-   io.quarkus:quarkus-arc:jar:1.6.0.Final:compile[36m -- module quarkus.arc[0;1;33m (auto)[m
-   io.quarkus.arc:arc:jar:1.6.0.Final:compile[36m -- module arc[0;1;33m (auto)[m
-   io.quarkus:quarkus-resteasy-common:jar:1.6.0.Final:compile[36m -- module quarkus.resteasy.common[0;1;33m (auto)[m
-   com.sun.activation:jakarta.activation:jar:1.2.1:compile[36m -- module jakarta.activation[0;1m [auto][m
-   org.jboss.resteasy:resteasy-client-microprofile:jar:4.5.5.Final:compile[36m -- module resteasy.client.microprofile[0;1;33m (auto)[m
-   org.eclipse.microprofile.rest.client:microprofile-rest-client-api:jar:1.4.1:compile[36m -- module microprofile.rest.client.api[0;1;33m (auto)[m
-   jakarta.interceptor:jakarta.interceptor-api:jar:1.2.5:compile[36m -- module jakarta.interceptor.api[0;1;33m (auto)[m
-   org.apache.httpcomponents:httpasyncclient:jar:4.1.4:compile[36m -- module org.apache.httpcomponents.httpasyncclient[0;1m [auto][m
-   org.apache.httpcomponents:httpcore:jar:4.4.13:compile[36m -- module org.apache.httpcomponents.httpcore[0;1m [auto][m
-   org.apache.httpcomponents:httpcore-nio:jar:4.4.13:compile[36m -- module org.apache.httpcomponents.httpcore.nio[0;1m [auto][m
-   org.jboss.logging:commons-logging-jboss-logging:jar:1.0.0.Final:compile[36m -- module commons.logging.jboss.logging[0;1;33m (auto)[m
-   io.quarkus:quarkus-hibernate-orm-panache:jar:1.6.0.Final:compile[36m -- module quarkus.hibernate.orm.panache[0;1;33m (auto)[m
-   io.quarkus:quarkus-hibernate-orm:jar:1.6.0.Final:compile[36m -- module quarkus.hibernate.orm[0;1;33m (auto)[m
-   org.hibernate:hibernate-core:jar:5.4.18.Final:compile[36m -- module org.hibernate.orm.core[0;1m [auto][m
-   net.bytebuddy:byte-buddy:jar:1.10.10:compile[36m -- module net.bytebuddy[m
-   antlr:antlr:jar:2.7.7:compile[36m -- module antlr[0;1;33m (auto)[m
-   org.dom4j:dom4j:jar:2.1.3:compile[36m -- module dom4j[0;1;33m (auto)[m
-   org.hibernate.common:hibernate-commons-annotations:jar:5.1.0.Final:compile[36m -- module org.hibernate.commons.annotations[0;1m [auto][m
-   org.hibernate:hibernate-graalvm:jar:5.4.18.Final:compile[36m -- module org.hibernate.orm.graalvm[0;1m [auto][m
-   org.glassfish.jaxb:jaxb-runtime:jar:2.3.3-b02:compile[36m -- module org.glassfish.jaxb.runtime[m
-   org.glassfish.jaxb:txw2:jar:2.3.3-b02:compile[36m -- module com.sun.xml.txw2[m
-   com.sun.istack:istack-commons-runtime:jar:3.0.10:compile[36m -- module com.sun.istack.runtime[m
-   org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final:compile[36m -- module java.xml.bind[0;1m [auto][m
-   jakarta.persistence:jakarta.persistence-api:jar:2.2.3:compile[36m -- module java.persistence[0;1m [auto][m
-   jakarta.transaction:jakarta.transaction-api:jar:1.3.3:compile[36m -- module java.transaction[0;1m [auto][m
-   org.hibernate:quarkus-local-cache:jar:0.1.0:compile[36m -- module quarkus.local.cache[0;1;33m (auto)[m
-   io.quarkus:quarkus-hibernate-orm-panache-common:jar:1.6.0.Final:compile[36m -- module quarkus.hibernate.orm.panache.common[0;1;33m (auto)[m
-   io.quarkus:quarkus-panache-common:jar:1.6.0.Final:compile[36m -- module quarkus.panache.common[0;1;33m (auto)[m
-   io.quarkus:quarkus-smallrye-health:jar:1.6.0.Final:compile[36m -- module quarkus.smallrye.health[0;1;33m (auto)[m
-   io.smallrye:smallrye-health:jar:2.2.1:compile[36m -- module smallrye.health[0;1;33m (auto)[m
-   org.eclipse.microprofile.health:microprofile-health-api:jar:2.2:compile[36m -- module microprofile.health.api[0;1;33m (auto)[m
-   io.smallrye:smallrye-health-extension-api:jar:2.2.1:compile[36m -- module smallrye.health.extension.api[0;1;33m (auto)[m
-   io.quarkus:quarkus-jsonp:jar:1.6.0.Final:compile[36m -- module quarkus.jsonp[0;1;33m (auto)[m
-   io.quarkus:quarkus-smallrye-metrics:jar:1.6.0.Final:compile[36m -- module quarkus.smallrye.metrics[0;1;33m (auto)[m
-   io.smallrye:smallrye-metrics:jar:2.4.2:compile[36m -- module smallrye.metrics[0;1;33m (auto)[m
-   org.eclipse.microprofile.metrics:microprofile-metrics-api:jar:2.3:compile[36m -- module microprofile.metrics.api[0;1;33m (auto)[m
-   io.quarkus:quarkus-smallrye-opentracing:jar:1.6.0.Final:compile[36m -- module quarkus.smallrye.opentracing[0;1;33m (auto)[m
-   org.eclipse.microprofile.config:microprofile-config-api:jar:1.4:compile[36m -- module microprofile.config.api[0;1;33m (auto)[m
-   org.eclipse.microprofile.opentracing:microprofile-opentracing-api:jar:1.3.3:compile[36m -- module microprofile.opentracing.api[0;1;33m (auto)[m
-   io.smallrye:smallrye-opentracing:jar:1.3.4:compile[36m -- module smallrye.opentracing[0;1;33m (auto)[m
-   io.opentracing:opentracing-api:jar:0.31.0:compile[36m -- module opentracing.api[0;1;33m (auto)[m
-   io.opentracing.contrib:opentracing-jaxrs2:jar:0.4.1:compile[36m -- module opentracing.jaxrs2[0;1;33m (auto)[m
-   io.opentracing.contrib:opentracing-web-servlet-filter:jar:0.2.3:compile[36m -- module opentracing.web.servlet.filter[0;1;33m (auto)[m
-   io.opentracing.contrib:opentracing-concurrent:jar:0.2.0:compile[36m -- module opentracing.concurrent[0;1;33m (auto)[m
-   io.opentracing.contrib:opentracing-interceptors:jar:0.0.4:compile[36m -- module opentracing.interceptors[0;1;33m (auto)[m
-   io.opentracing.contrib:opentracing-tracerresolver:jar:0.1.8:runtime[36m -- module io.opentracing.contrib.tracerresolver[0;1m [auto][m
-   io.smallrye:smallrye-fault-tolerance-tracing-propagation:jar:4.3.0:compile[36m -- module smallrye.fault.tolerance.tracing.propagation[0;1;33m (auto)[m
-   jakarta.inject:jakarta.inject-api:jar:1.0:compile[36m -- module jakarta.inject.api[0;1;33m (auto)[m
-   io.quarkus:quarkus-jaeger:jar:1.6.0.Final:compile[36m -- module quarkus.jaeger[0;1;33m (auto)[m
-   io.jaegertracing:jaeger-core:jar:0.34.0:compile[36m -- module jaeger.core[0;1;33m (auto)[m
-   io.jaegertracing:jaeger-thrift:jar:0.34.0:compile[36m -- module jaeger.thrift[0;1;33m (auto)[m
-   org.apache.thrift:libthrift:jar:0.12.0:compile[36m -- module libthrift[0;1;33m (auto)[m
-   com.squareup.okhttp3:okhttp:jar:3.14.6:compile[36m -- module okhttp3[0;1m [auto][m
-   com.squareup.okio:okio:jar:1.17.2:compile[36m -- module okio[0;1m [auto][m
-   jakarta.servlet:jakarta.servlet-api:jar:4.0.3:compile[36m -- module java.servlet[0;1m [auto][m
-   io.opentracing.contrib:opentracing-jdbc:jar:0.0.12:compile[36m -- module opentracing.jdbc[0;1;33m (auto)[m
-   io.opentracing:opentracing-util:jar:0.31.0:compile[36m -- module opentracing.util[0;1;33m (auto)[m
-   io.opentracing:opentracing-noop:jar:0.31.0:compile[36m -- module opentracing.noop[0;1;33m (auto)[m
-   io.quarkus:quarkus-hibernate-validator:jar:1.6.0.Final:compile[36m -- module quarkus.hibernate.validator[0;1;33m (auto)[m
-   org.hibernate.validator:hibernate-validator:jar:6.1.5.Final:compile[36m -- module org.hibernate.validator[0;1m [auto][m
-   com.fasterxml:classmate:jar:1.3.4:compile[36m -- module com.fasterxml.classmate[0;1m [auto][m
-   org.glassfish:jakarta.el:jar:3.0.3:compile[36m -- module jakarta.el[0;1;33m (auto)[m
-   io.quarkus:quarkus-smallrye-openapi:jar:1.6.0.Final:compile[36m -- module quarkus.smallrye.openapi[0;1;33m (auto)[m
-   io.smallrye:smallrye-open-api-core:jar:2.0.2:compile[36m -- module smallrye.open.api.core[0;1;33m (auto)[m
-   org.eclipse.microprofile.openapi:microprofile-openapi-api:jar:1.1.2:compile[36m -- module microprofile.openapi.api[0;1;33m (auto)[m
-   com.fasterxml.jackson.core:jackson-core:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.core[m
-   org.jboss:jandex:jar:2.1.3.Final:compile[36m -- module org.jboss.jandex[0;1m [auto][m
-   io.quarkus:quarkus-swagger-ui:jar:1.6.0.Final:compile[36m -- module quarkus.swagger.ui[0;1;33m (auto)[m
-   io.quarkus:quarkus-flyway:jar:1.6.0.Final:compile[36m -- module quarkus.flyway[0;1;33m (auto)[m
-   org.flywaydb:flyway-core:jar:6.4.4:compile[36m -- module org.flywaydb.core[0;1m [auto][m
-   io.quarkus:quarkus-agroal:jar:1.6.0.Final:compile[36m -- module quarkus.agroal[0;1;33m (auto)[m
-   io.quarkus:quarkus-datasource:jar:1.6.0.Final:compile[36m -- module quarkus.datasource[0;1;33m (auto)[m
-   io.quarkus:quarkus-datasource-common:jar:1.6.0.Final:compile[36m -- module quarkus.datasource.common[0;1;33m (auto)[m
-   org.jboss.narayana.jta:narayana-jta:jar:5.10.5.Final:compile[36m -- module narayana.jta[0;1;33m (auto)[m
-   org.jboss:jboss-transaction-spi:jar:7.6.0.Final:compile[36m -- module jboss.transaction.spi[0;1;33m (auto)[m
-   org.jboss.spec.javax.resource:jboss-connector-api_1.7_spec:jar:1.0.0.Final:compile
-   org.jboss.narayana.jts:narayana-jts-integration:jar:5.10.5.Final:compile[36m -- module narayana.jts.integration[0;1;33m (auto)[m
-   io.agroal:agroal-api:jar:1.8:compile[36m -- module agroal.api[0;1;33m (auto)[m
-   io.agroal:agroal-narayana:jar:1.8:compile[36m -- module agroal.narayana[0;1;33m (auto)[m
-   io.agroal:agroal-pool:jar:1.8:compile[36m -- module agroal.pool[0;1;33m (auto)[m
-   io.quarkus:quarkus-credentials:jar:1.6.0.Final:compile[36m -- module quarkus.credentials[0;1;33m (auto)[m
-   io.quarkus:quarkus-narayana-jta:jar:1.6.0.Final:compile[36m -- module quarkus.narayana.jta[0;1;33m (auto)[m
-   io.quarkus:quarkus-mutiny:jar:1.6.0.Final:compile[36m -- module quarkus.mutiny[0;1;33m (auto)[m
-   io.quarkus:quarkus-smallrye-context-propagation:jar:1.6.0.Final:compile[36m -- module quarkus.smallrye.context.propagation[0;1;33m (auto)[m
-   io.smallrye:smallrye-context-propagation:jar:1.0.13:compile[36m -- module smallrye.context.propagation[0;1;33m (auto)[m
-   io.smallrye:smallrye-context-propagation-api:jar:1.0.13:compile[36m -- module smallrye.context.propagation.api[0;1;33m (auto)[m
-   io.smallrye.reactive:mutiny-context-propagation:jar:0.5.4:compile[36m -- module mutiny.context.propagation[0;1;33m (auto)[m
-   io.smallrye:smallrye-context-propagation-jta:jar:1.0.13:compile[36m -- module smallrye.context.propagation.jta[0;1;33m (auto)[m
-   io.smallrye.reactive:smallrye-reactive-converter-api:jar:1.0.13:compile[36m -- module smallrye.reactive.converter.api[0;1;33m (auto)[m
-   org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-api:jar:1.0.1:compile[36m -- module microprofile.reactive.streams.operators.api[0;1;33m (auto)[m
-   org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:jar:1.0.1:compile[36m -- module microprofile.reactive.streams.operators.core[0;1;33m (auto)[m
-   io.smallrye.reactive:smallrye-reactive-converter-mutiny:jar:1.0.13:compile[36m -- module smallrye.reactive.converter.mutiny[0;1;33m (auto)[m
-   io.quarkus:quarkus-jdbc-postgresql:jar:1.6.0.Final:compile[36m -- module quarkus.jdbc.postgresql[0;1;33m (auto)[m
-   org.postgresql:postgresql:jar:42.2.14:compile[36m -- module org.postgresql.jdbc[0;1m [auto][m
-   io.quarkus:quarkus-vertx-web:jar:1.6.0.Final:compile[36m -- module quarkus.vertx.web[0;1;33m (auto)[m
-   io.quarkus:quarkus-vertx:jar:1.6.0.Final:compile[36m -- module quarkus.vertx[0;1;33m (auto)[m
-   io.quarkus:quarkus-netty:jar:1.6.0.Final:compile[36m -- module quarkus.netty[0;1;33m (auto)[m
-   io.quarkus:quarkus-jackson:jar:1.6.0.Final:compile[36m -- module quarkus.jackson[0;1;33m (auto)[m
-   com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.datatype.jsr310[m
-   com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.datatype.jdk8[m
-   com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.module.paramnames[m
-   io.smallrye.reactive:smallrye-axle-generator:jar:0.1.1:compile[36m -- module smallrye.axle.generator[0;1;33m (auto)[m
-   io.smallrye.reactive:mutiny-reactive-streams-operators:jar:0.5.4:compile[36m -- module mutiny.reactive.streams.operators[0;1;33m (auto)[m
-   io.smallrye.reactive:smallrye-axle-core:jar:0.1.1:compile[36m -- module smallrye.axle.core[0;1;33m (auto)[m
-   io.vertx:vertx-rx-java2:jar:3.9.1:compile[36m -- module vertx.rx.java2[0;1;33m (auto)[m
-   io.reactivex.rxjava2:rxjava:jar:2.2.19:compile[36m -- module io.reactivex.rxjava2[0;1m [auto][m
-   io.vertx:vertx-rx-gen:jar:3.9.1:compile[36m -- module vertx.rx.gen[0;1;33m (auto)[m
-   io.vertx:vertx-codegen:jar:3.9.1:compile[36m -- module vertx.codegen[0;1;33m (auto)[m
-   org.mvel:mvel2:jar:2.3.1.Final:compile[36m -- module mvel2[0;1;33m (auto)[m
-   io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:0.1.1:compile[36m -- module smallrye.mutiny.vertx.core[0;1;33m (auto)[m
-   io.smallrye.reactive:smallrye-mutiny-vertx-runtime:jar:0.1.1:compile[36m -- module smallrye.mutiny.vertx.runtime[0;1;33m (auto)[m
-   io.smallrye.reactive:vertx-mutiny-generator:jar:0.1.1:compile[36m -- module vertx.mutiny.generator[0;1;33m (auto)[m
-   io.quarkus.security:quarkus-security:jar:1.1.2.Final:compile[36m -- module quarkus.security[0;1;33m (auto)[m
-   io.smallrye.reactive:mutiny:jar:0.5.4:compile[36m -- module mutiny[0;1;33m (auto)[m
-   jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile[36m -- module jakarta.enterprise.cdi.api[0;1;33m (auto)[m
-   jakarta.el:jakarta.el-api:jar:3.0.3:compile[36m -- module jakarta.el.api[0;1;33m (auto)[m
-   io.quarkus:quarkus-cache:jar:1.6.0.Final:compile[36m -- module quarkus.cache[0;1;33m (auto)[m
-   io.quarkus:quarkus-caffeine:jar:1.6.0.Final:compile[36m -- module quarkus.caffeine[0;1;33m (auto)[m
-   com.github.ben-manes.caffeine:caffeine:jar:2.8.4:compile[36m -- module com.github.benmanes.caffeine[0;1m [auto][m
-   org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.0.1:compile[36m -- module microprofile.context.propagation.api[0;1;33m (auto)[m
-   io.quarkus:quarkus-scheduler:jar:1.6.0.Final:compile[36m -- module quarkus.scheduler[0;1;33m (auto)[m
-   com.cronutils:cron-utils:jar:9.0.2:compile[36m -- module cron.utils[0;1;33m (auto)[m
-   com.jayway.jsonpath:json-path:jar:2.4.0:compile[36m -- module json.path[0;1;33m (auto)[m
-   net.minidev:json-smart:jar:2.3:compile[36m -- module json.smart[0;1;33m (auto)[m
-   net.minidev:accessors-smart:jar:1.2:compile[36m -- module accessors.smart[0;1;33m (auto)[m
-   org.ow2.asm:asm:jar:8.0.1:compile[36m -- module org.objectweb.asm[m
-   org.slf4j:slf4j-api:jar:1.7.30:compile[36m -- module org.slf4j[0;1m [auto][m
-   io.quarkus:quarkus-logging-sentry:jar:1.6.0.Final:compile[36m -- module quarkus.logging.sentry[0;1;33m (auto)[m
-   io.sentry:sentry:jar:1.7.30:compile[36m -- module io.sentry[0;1m [auto][m
-   io.quarkus:quarkus-junit5:jar:1.6.0.Final:test[36m -- module quarkus.junit5[0;1;33m (auto)[m
-   io.quarkus:quarkus-bootstrap-core:jar:1.6.0.Final:test[36m -- module quarkus.bootstrap.core[0;1;33m (auto)[m
-   io.quarkus:quarkus-bootstrap-app-model:jar:1.6.0.Final:test[36m -- module quarkus.bootstrap.app.model[0;1;33m (auto)[m
-   io.quarkus:quarkus-bootstrap-maven-resolver:jar:1.6.0.Final:test[36m -- module quarkus.bootstrap.maven.resolver[0;1;33m (auto)[m
-   org.apache.maven:maven-embedder:jar:3.6.3:test[36m -- module maven.embedder[0;1;33m (auto)[m
-   org.apache.maven:maven-settings:jar:3.6.3:test[36m -- module maven.settings[0;1;33m (auto)[m
-   org.apache.maven:maven-core:jar:3.6.3:test[36m -- module maven.core[0;1;33m (auto)[m
-   org.apache.maven:maven-artifact:jar:3.6.3:test[36m -- module maven.artifact[0;1;33m (auto)[m
-   org.codehaus.plexus:plexus-component-annotations:jar:2.1.0:test[36m -- module plexus.component.annotations[0;1;33m (auto)[m
-   org.apache.maven:maven-plugin-api:jar:3.6.3:test[36m -- module maven.plugin.api[0;1;33m (auto)[m
-   org.apache.maven:maven-model:jar:3.6.3:test[36m -- module maven.model[0;1;33m (auto)[m
-   org.apache.maven:maven-model-builder:jar:3.6.3:test[36m -- module maven.model.builder[0;1;33m (auto)[m
-   org.apache.maven:maven-builder-support:jar:3.6.3:test[36m -- module maven.builder.support[0;1;33m (auto)[m
-   org.apache.maven.resolver:maven-resolver-api:jar:1.4.1:test[36m -- module org.apache.maven.resolver[0;1m [auto][m
-   org.apache.maven.resolver:maven-resolver-util:jar:1.4.1:test[36m -- module org.apache.maven.resolver.util[0;1m [auto][m
-   org.apache.maven.shared:maven-shared-utils:jar:3.2.1:test[36m -- module maven.shared.utils[0;1;33m (auto)[m
-   com.google.inject:guice:jar:no_aop:4.2.1:test[36m -- module com.google.guice[0;1m [auto][m
-   org.codehaus.plexus:plexus-utils:jar:3.2.1:test[36m -- module plexus.utils[0;1;33m (auto)[m
-   org.codehaus.plexus:plexus-classworlds:jar:2.6.0:test[36m -- module plexus.classworlds[0;1;33m (auto)[m
-   commons-cli:commons-cli:jar:1.4:test[36m -- module commons.cli[0;1;33m (auto)[m
-   org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.4:test[36m -- module org.eclipse.sisu.plexus[0;1;33m (auto)[m
-   org.apache.maven:maven-settings-builder:jar:3.6.3:test[36m -- module maven.settings.builder[0;1;33m (auto)[m
-   org.codehaus.plexus:plexus-interpolation:jar:1.25:test[36m -- module plexus.interpolation[0;1;33m (auto)[m
-   org.sonatype.plexus:plexus-sec-dispatcher:jar:1.4:test[36m -- module plexus.sec.dispatcher[0;1;33m (auto)[m
-   org.sonatype.plexus:plexus-cipher:jar:1.4:test[36m -- module plexus.cipher[0;1;33m (auto)[m
-   org.apache.maven:maven-resolver-provider:jar:3.6.3:test[36m -- module maven.resolver.provider[0;1;33m (auto)[m
-   org.apache.maven:maven-repository-metadata:jar:3.6.3:test[36m -- module maven.repository.metadata[0;1;33m (auto)[m
-   org.apache.maven.resolver:maven-resolver-spi:jar:1.4.1:test[36m -- module org.apache.maven.resolver.spi[0;1m [auto][m
-   org.apache.maven.resolver:maven-resolver-impl:jar:1.4.1:test[36m -- module org.apache.maven.resolver.impl[0;1m [auto][m
-   org.apache.maven.resolver:maven-resolver-connector-basic:jar:1.4.1:test[36m -- module org.apache.maven.resolver.connector.basic[0;1m [auto][m
-   org.apache.maven.resolver:maven-resolver-transport-wagon:jar:1.4.1:test[36m -- module org.apache.maven.resolver.transport.wagon[0;1m [auto][m
-   org.apache.maven.wagon:wagon-http:jar:3.3.4:test[36m -- module wagon.http[0;1;33m (auto)[m
-   org.apache.maven.wagon:wagon-http-shared:jar:3.3.4:test[36m -- module wagon.http.shared[0;1;33m (auto)[m
-   org.jsoup:jsoup:jar:1.12.1:test[36m -- module org.jsoup[0;1m [auto][m
-   org.apache.maven.wagon:wagon-provider-api:jar:3.3.4:test[36m -- module wagon.provider.api[0;1;33m (auto)[m
-   org.apache.maven.wagon:wagon-file:jar:3.3.4:test[36m -- module wagon.file[0;1;33m (auto)[m
-   org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.3.4:test[36m -- module org.eclipse.sisu.inject[0;1;33m (auto)[m
-   io.quarkus:quarkus-test-common:jar:1.6.0.Final:test[36m -- module quarkus.test.common[0;1;33m (auto)[m
-   io.quarkus:quarkus-core-deployment:jar:1.6.0.Final:test[36m -- module quarkus.core.deployment[0;1;33m (auto)[m
-   io.quarkus.gizmo:gizmo:jar:1.0.3.Final:test[36m -- module gizmo[0;1;33m (auto)[m
-   org.ow2.asm:asm-util:jar:8.0.1:test[36m -- module org.objectweb.asm.util[m
-   org.ow2.asm:asm-tree:jar:8.0.1:test[36m -- module org.objectweb.asm.tree[m
-   org.ow2.asm:asm-analysis:jar:8.0.1:test[36m -- module org.objectweb.asm.tree.analysis[m
-   io.quarkus:quarkus-devtools-utilities:jar:1.6.0.Final:test[36m -- module quarkus.devtools.utilities[0;1;33m (auto)[m
-   io.quarkus:quarkus-builder:jar:1.6.0.Final:test[36m -- module quarkus.builder[0;1;33m (auto)[m
-   io.quarkus:quarkus-jsonp-deployment:jar:1.6.0.Final:test[36m -- module quarkus.jsonp.deployment[0;1;33m (auto)[m
-   org.junit.jupiter:junit-jupiter:jar:5.6.2:test[36m -- module org.junit.jupiter[m
-   org.junit.jupiter:junit-jupiter-params:jar:5.6.2:test[36m -- module org.junit.jupiter.params[m
-   org.junit.jupiter:junit-jupiter-engine:jar:5.6.2:test[36m -- module org.junit.jupiter.engine[m
-   org.junit.platform:junit-platform-engine:jar:1.6.2:test[36m -- module org.junit.platform.engine[m
-   com.thoughtworks.xstream:xstream:jar:1.4.11.1:test[36m -- module xstream[0;1;33m (auto)[m
-   xmlpull:xmlpull:jar:1.1.3.1:test[36m -- module xmlpull[0;1;33m (auto)[m
-   xpp3:xpp3_min:jar:1.1.4c:test
-   org.jboss.resteasy:resteasy-client:jar:4.5.5.Final:test[36m -- module resteasy.client[0;1;33m (auto)[m
-   org.jboss.resteasy:resteasy-client-api:jar:4.5.5.Final:test[36m -- module resteasy.client.api[0;1;33m (auto)[m
-   org.jboss.resteasy:resteasy-core-spi:jar:4.5.5.Final:compile[36m -- module resteasy.core.spi[0;1;33m (auto)[m
-   org.reactivestreams:reactive-streams:jar:1.0.3:compile[36m -- module org.reactivestreams[0;1m [auto][m
-   org.jboss.resteasy:resteasy-core:jar:4.5.5.Final:compile[36m -- module resteasy.core[0;1;33m (auto)[m
-   com.ibm.async:asyncutil:jar:0.1.0:compile[36m -- module asyncutil[0;1;33m (auto)[m
-   org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile[36m -- module org.jboss.logging[0;1m [auto][m
-   org.apache.httpcomponents:httpclient:jar:4.5.12:compile[36m -- module org.apache.httpcomponents.httpclient[0;1m [auto][m
-   commons-logging:commons-logging:jar:1.2:compile[36m -- module commons.logging[0;1;33m (auto)[m
-   commons-codec:commons-codec:jar:1.14:compile[36m -- module org.apache.commons.codec[0;1m [auto][m
-   org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:jar:2.0.1.Final:compile[36m -- module java.ws.rs[m
-   io.rest-assured:rest-assured:jar:4.3.0:test[36m -- module rest.assured[0;1;33m (auto)[m
-   org.codehaus.groovy:groovy:jar:3.0.2:test[36m -- module org.codehaus.groovy[0;1m [auto][m
-   org.codehaus.groovy:groovy-xml:jar:3.0.2:test[36m -- module org.codehaus.groovy.xml[0;1m [auto][m
-   org.apache.httpcomponents:httpmime:jar:4.5.3:test[36m -- module httpmime[0;1;33m (auto)[m
-   org.hamcrest:hamcrest:jar:2.1:test[36m -- module org.hamcrest[0;1m [auto][m
-   org.ccil.cowan.tagsoup:tagsoup:jar:1.2.1:test[36m -- module tagsoup[0;1;33m (auto)[m
-   io.rest-assured:json-path:jar:4.3.0:test[36m -- module json.path[0;1;33m (auto)[m
-   org.codehaus.groovy:groovy-json:jar:3.0.2:test[36m -- module org.codehaus.groovy.json[0;1m [auto][m
-   io.rest-assured:rest-assured-common:jar:4.3.0:test[36m -- module rest.assured.common[0;1;33m (auto)[m
-   io.rest-assured:xml-path:jar:4.3.0:test[36m -- module xml.path[0;1;33m (auto)[m
-   jakarta.xml.bind:jakarta.xml.bind-api:jar:2.3.2:test[36m -- module java.xml.bind[m
-   jakarta.activation:jakarta.activation-api:jar:1.2.1:test[36m -- module jakarta.activation[0;1m [auto][m
-   org.apache.sling:org.apache.sling.javax.activation:jar:0.1.0:test[36m -- module org.apache.sling.javax.activation[0;1;33m (auto)[m
-   com.google.code.gson:gson:jar:2.8.5:test[36m -- module gson[0;1;33m (auto)[m
-   org.awaitility:awaitility:jar:4.0.3:test[36m -- module awaitility[0;1;33m (auto)[m
-   org.testcontainers:postgresql:jar:1.14.3:test[36m -- module postgresql[0;1;33m (auto)[m
-   org.testcontainers:jdbc:jar:1.14.3:test[36m -- module jdbc[0;1;33m (auto)[m
-   org.testcontainers:database-commons:jar:1.14.3:test[36m -- module database.commons[0;1;33m (auto)[m
-   org.testcontainers:junit-jupiter:jar:1.14.3:test[36m -- module junit.jupiter[0;1;33m (auto)[m
-   org.testcontainers:testcontainers:jar:1.14.3:test
-   junit:junit:jar:4.12:test[36m -- module junit[0;1;33m (auto)[m
-   org.hamcrest:hamcrest-core:jar:1.3:test[36m -- module hamcrest.core[0;1;33m (auto)[m
-   org.jetbrains:annotations:jar:19.0.0:test[36m -- module org.jetbrains.annotations[0;1m [auto][m
-   org.apache.commons:commons-compress:jar:1.20:test[36m -- module org.apache.commons.compress[0;1m [auto][m
-   org.rnorth.duct-tape:duct-tape:jar:1.0.8:test[36m -- module duct.tape[0;1;33m (auto)[m
-   org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test[36m -- module visible.assertions[0;1;33m (auto)[m
-   org.rnorth:tcp-unix-socket-proxy:jar:1.0.2:test[36m -- module tcp.unix.socket.proxy[0;1;33m (auto)[m
-   com.kohlschutter.junixsocket:junixsocket-native-common:jar:2.0.4:test
-   org.scijava:native-lib-loader:jar:2.0.2:test
-   com.kohlschutter.junixsocket:junixsocket-common:jar:2.0.4:test[36m -- module junixsocket.common[0;1;33m (auto)[m
-   net.java.dev.jna:jna-platform:jar:5.5.0:test[36m -- module com.sun.jna.platform[0;1m [auto][m
-   net.java.dev.jna:jna:jar:5.3.1:test[36m -- module com.sun.jna[0;1m [auto][m
-   org.junit.jupiter:junit-jupiter-api:jar:5.6.2:test[36m -- module org.junit.jupiter.api[m
-   org.apiguardian:apiguardian-api:jar:1.1.0:test[36m -- module org.apiguardian.api[m
-   org.opentest4j:opentest4j:jar:1.2.0:test[36m -- module org.opentest4j[m
-   org.junit.platform:junit-platform-commons:jar:1.6.2:test[36m -- module org.junit.platform.commons[m
-   org.testcontainers:mockserver:jar:1.14.3:test[36m -- module mockserver[0;1;33m (auto)[m
-   org.mock-server:mockserver-client-java:jar:5.5.4:test[36m -- module mockserver.client.java[0;1;33m (auto)[m
-   org.mock-server:mockserver-core:jar:5.5.4:test[36m -- module mockserver.core[0;1;33m (auto)[m
-   javax.servlet:javax.servlet-api:jar:3.1.0:test[36m -- module javax.servlet.api[0;1;33m (auto)[m
-   io.netty:netty-buffer:jar:4.1.49.Final:compile[36m -- module io.netty.buffer[0;1m [auto][m
-   io.netty:netty-common:jar:4.1.49.Final:compile[36m -- module io.netty.common[0;1m [auto][m
-   io.netty:netty-codec:jar:4.1.49.Final:compile[36m -- module io.netty.codec[0;1m [auto][m
-   io.netty:netty-codec-http:jar:4.1.49.Final:compile[36m -- module io.netty.codec.http[0;1m [auto][m
-   io.netty:netty-codec-socks:jar:4.1.49.Final:compile[36m -- module io.netty.codec.socks[0;1m [auto][m
-   io.netty:netty-handler:jar:4.1.49.Final:compile[36m -- module io.netty.handler[0;1m [auto][m
-   io.netty:netty-resolver:jar:4.1.49.Final:compile[36m -- module io.netty.resolver[0;1m [auto][m
-   io.netty:netty-handler-proxy:jar:4.1.49.Final:compile[36m -- module io.netty.handler.proxy[0;1m [auto][m
-   io.netty:netty-transport:jar:4.1.49.Final:compile[36m -- module io.netty.transport[0;1m [auto][m
-   com.jcraft:jzlib:jar:1.1.1:test[36m -- module jzlib[0;1;33m (auto)[m
-   org.bouncycastle:bcprov-jdk15on:jar:1.60:test[36m -- module org.bouncycastle.provider[0;1m [auto][m
-   org.bouncycastle:bcpkix-jdk15on:jar:1.60:test[36m -- module org.bouncycastle.pkix[0;1m [auto][m
-   org.apache.velocity:velocity-engine-scripting:jar:2.0:test[36m -- module velocity.engine.scripting[0;1;33m (auto)[m
-   org.apache.velocity:velocity-engine-core:jar:2.0:test[36m -- module velocity.engine.core[0;1;33m (auto)[m
-   com.fasterxml.jackson.core:jackson-annotations:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.annotation[m
-   org.skyscreamer:jsonassert:jar:1.5.0:test[36m -- module jsonassert[0;1;33m (auto)[m
-   com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test[36m -- module android.json[0;1;33m (auto)[m
-   com.github.java-json-tools:json-schema-validator:jar:2.2.10:test[36m -- module json.schema.validator[0;1;33m (auto)[m
-   com.github.java-json-tools:json-schema-core:jar:1.2.10:test[36m -- module json.schema.core[0;1;33m (auto)[m
-   com.github.java-json-tools:jackson-coreutils:jar:1.9:test[36m -- module jackson.coreutils[0;1;33m (auto)[m
-   com.github.fge:msg-simple:jar:1.1:test[36m -- module msg.simple[0;1;33m (auto)[m
-   com.github.fge:btf:jar:1.2:test[36m -- module btf[0;1;33m (auto)[m
-   com.github.fge:uri-template:jar:0.9:test[36m -- module uri.template[0;1;33m (auto)[m
-   org.mozilla:rhino:jar:1.7.7.1:test[36m -- module rhino[0;1;33m (auto)[m
-   javax.mail:mailapi:jar:1.4.3:test[36m -- module mailapi[0;1;33m (auto)[m
-   joda-time:joda-time:jar:2.9.7:test[36m -- module joda.time[0;1;33m (auto)[m
-   com.googlecode.libphonenumber:libphonenumber:jar:8.0.0:test[36m -- module libphonenumber[0;1;33m (auto)[m
-   net.sf.jopt-simple:jopt-simple:jar:5.0.3:test[36m -- module jopt.simple[0;1;33m (auto)[m
-   javax.xml.bind:jaxb-api:jar:2.3.1:test[36m -- module java.xml.bind[m
-   javax.activation:javax.activation-api:jar:1.2.0:test[36m -- module java.activation[0;1m [auto][m
-   org.xmlunit:xmlunit-core:jar:2.6.2:test[36m -- module org.xmlunit[0;1m [auto][m
-   org.apache.commons:commons-text:jar:1.3:test[36m -- module org.apache.commons.text[0;1m [auto][m
-   org.apache.commons:commons-collections4:jar:4.2:test[36m -- module org.apache.commons.collections4[0;1m [auto][m
-   org.apache.commons:commons-lang3:jar:3.9:test[36m -- module org.apache.commons.lang3[0;1m [auto][m
-   com.google.guava:guava:jar:27.0.1-jre:test[36m -- module com.google.common[0;1m [auto][m
-   com.google.guava:failureaccess:jar:1.0.1:test[36m -- module failureaccess[0;1;33m (auto)[m
-   com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:test[36m -- module listenablefuture[0;1;33m (auto)[m
-   com.google.code.findbugs:jsr305:jar:3.0.2:test[36m -- module jsr305[0;1;33m (auto)[m
-   org.checkerframework:checker-qual:jar:2.5.2:test[36m -- module checker.qual[0;1;33m (auto)[m
-   com.google.errorprone:error_prone_annotations:jar:2.2.0:compile[36m -- module error.prone.annotations[0;1;33m (auto)[m
-   com.google.j2objc:j2objc-annotations:jar:1.1:test[36m -- module j2objc.annotations[0;1;33m (auto)[m
-   org.codehaus.mojo:animal-sniffer-annotations:jar:1.17:test[36m -- module animal.sniffer.annotations[0;1;33m (auto)[m
-   com.reprezen.kaizen:openapi-parser:jar:4.0.4:test[36m -- module openapi.parser[0;1;33m (auto)[m
-   com.reprezen.jsonoverlay:jsonoverlay:jar:4.0.4:test[36m -- module jsonoverlay[0;1;33m (auto)[m
-   com.fasterxml.jackson.core:jackson-databind:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.databind[m
-   com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.10.4:compile[36m -- module com.fasterxml.jackson.dataformat.yaml[m
-   org.yaml:snakeyaml:jar:1.26:compile[36m -- module org.yaml.snakeyaml[0;1m [auto][m
-   javax.mail:javax.mail-api:jar:1.6.1:test[36m -- module javax.mail.api[0;1;33m (auto)[m
-   javax.activation:activation:jar:1.1:test[36m -- module activation[0;1;33m (auto)[m
-   com.sun.mail:javax.mail:jar:1.6.1:test[36m -- module java.mail[0;1m [auto][m
-
+service-policies/ui-backend:io.quarkus:quarkus-datasource:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-caffeine:jar:1.6.0.Final
+service-policies/ui-backend:io.opentracing.contrib:opentracing-interceptors:jar:0.0.4
+service-policies/ui-backend:org.jboss:jandex:jar:2.1.3.Final
+service-policies/ui-backend:io.netty:netty-handler:jar:4.1.49.Final
+service-policies/ui-backend:org.jboss.threads:jboss-threads:jar:3.1.1.Final
+service-policies/ui-backend:jakarta.servlet:jakarta.servlet-api:jar:4.0.3
+service-policies/ui-backend:org.apache.httpcomponents:httpasyncclient:jar:4.1.4
+service-policies/ui-backend:io.smallrye.reactive:smallrye-axle-core:jar:0.1.1
+service-policies/ui-backend:io.quarkus:quarkus-resteasy-server-common:jar:1.6.0.Final
+service-policies/ui-backend:org.hibernate:hibernate-core:jar:5.4.18.Final
+service-policies/ui-backend:com.sun.activation:jakarta.activation:jar:1.2.1
+service-policies/ui-backend:com.fasterxml:classmate:jar:1.3.4
+service-policies/ui-backend:org.jboss.spec.javax.resource:jboss-connector-api_1.7_spec:jar:1.0.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-mutiny:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye.common:smallrye-common-constraint:jar:1.0.2
+service-policies/ui-backend:io.opentracing.contrib:opentracing-jdbc:jar:0.0.12
+service-policies/ui-backend:io.quarkus:quarkus-narayana-jta:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.resteasy:resteasy-client-microprofile:jar:4.5.5.Final
+service-policies/ui-backend:com.google.errorprone:error_prone_annotations:jar:2.2.0
+service-policies/ui-backend:org.ow2.asm:asm:jar:8.0.1
+service-policies/ui-backend:org.eclipse.microprofile.health:microprofile-health-api:jar:2.2
+service-policies/ui-backend:org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final
+service-policies/ui-backend:io.smallrye.common:smallrye-common-expression:jar:1.0.2
+service-policies/ui-backend:io.quarkus:quarkus-hibernate-orm:jar:1.6.0.Final
+service-policies/ui-backend:org.apache.thrift:libthrift:jar:0.12.0
+service-policies/ui-backend:io.quarkus:quarkus-smallrye-metrics:jar:1.6.0.Final
+service-policies/ui-backend:com.ibm.async:asyncutil:jar:0.1.0
+service-policies/ui-backend:io.netty:netty-resolver:jar:4.1.49.Final
+service-policies/ui-backend:com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.10.4
+service-policies/ui-backend:io.agroal:agroal-narayana:jar:1.8
+service-policies/ui-backend:io.smallrye:smallrye-opentracing:jar:1.3.4
+service-policies/ui-backend:jakarta.validation:jakarta.validation-api:jar:2.0.2
+service-policies/ui-backend:io.quarkus:quarkus-flyway:jar:1.6.0.Final
+service-policies/ui-backend:io.netty:netty-codec-dns:jar:4.1.49.Final
+service-policies/ui-backend:org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.0.1
+service-policies/ui-backend:com.fasterxml.jackson.core:jackson-core:jar:2.10.4
+service-policies/ui-backend:org.eclipse.microprofile.opentracing:microprofile-opentracing-api:jar:1.3.3
+service-policies/ui-backend:jakarta.json.bind:jakarta.json.bind-api:jar:1.0.2
+service-policies/ui-backend:io.quarkus:quarkus-hibernate-validator:jar:1.6.0.Final
+service-policies/ui-backend:net.minidev:json-smart:jar:2.3
+service-policies/ui-backend:org.hibernate.validator:hibernate-validator:jar:6.1.5.Final
+service-policies/ui-backend:org.jboss.narayana.jta:narayana-jta:jar:5.10.5.Final
+service-policies/ui-backend:io.quarkus:quarkus-credentials:jar:1.6.0.Final
+service-policies/ui-backend:jakarta.el:jakarta.el-api:jar:3.0.3
+service-policies/ui-backend:org.reactivestreams:reactive-streams:jar:1.0.3
+service-policies/ui-backend:org.jboss.narayana.jts:narayana-jts-integration:jar:5.10.5.Final
+service-policies/ui-backend:io.vertx:vertx-rx-java2:jar:3.9.1
+service-policies/ui-backend:antlr:antlr:jar:2.7.7
+service-policies/ui-backend:io.quarkus:quarkus-resteasy-common:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye:smallrye-health-extension-api:jar:2.2.1
+service-policies/ui-backend:io.opentracing:opentracing-noop:jar:0.31.0
+service-policies/ui-backend:io.smallrye.reactive:mutiny-reactive-streams-operators:jar:0.5.4
+service-policies/ui-backend:io.vertx:vertx-auth-common:jar:3.9.1
+service-policies/ui-backend:io.jaegertracing:jaeger-core:jar:0.34.0
+service-policies/ui-backend:jakarta.interceptor:jakarta.interceptor-api:jar:1.2.5
+service-policies/ui-backend:org.dom4j:dom4j:jar:2.1.3
+service-policies/ui-backend:org.hibernate:quarkus-local-cache:jar:0.1.0
+service-policies/ui-backend:org.eclipse.microprofile.rest.client:microprofile-rest-client-api:jar:1.4.1
+service-policies/ui-backend:org.jboss.resteasy:resteasy-core-spi:jar:4.5.5.Final
+service-policies/ui-backend:io.smallrye.reactive:smallrye-reactive-converter-api:jar:1.0.13
+service-policies/ui-backend:io.netty:netty-codec-http:jar:4.1.49.Final
+service-policies/ui-backend:io.quarkus:quarkus-vertx-web:jar:1.6.0.Final
+service-policies/ui-backend:org.slf4j:slf4j-api:jar:1.7.30
+service-policies/ui-backend:io.quarkus:quarkus-swagger-ui:jar:1.6.0.Final
+service-policies/ui-backend:io.agroal:agroal-api:jar:1.8
+service-policies/ui-backend:io.vertx:vertx-web:jar:3.9.1
+service-policies/ui-backend:io.quarkus:quarkus-smallrye-health:jar:1.6.0.Final
+service-policies/ui-backend:io.netty:netty-buffer:jar:4.1.49.Final
+service-policies/ui-backend:com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.10.4
+service-policies/ui-backend:commons-codec:commons-codec:jar:1.14
+service-policies/ui-backend:io.reactivex.rxjava2:rxjava:jar:2.2.19
+service-policies/ui-backend:io.quarkus:quarkus-hibernate-orm-panache-common:jar:1.6.0.Final
+service-policies/ui-backend:org.eclipse.microprofile.config:microprofile-config-api:jar:1.4
+service-policies/ui-backend:io.smallrye:smallrye-metrics:jar:2.4.2
+service-policies/ui-backend:io.netty:netty-codec-http2:jar:4.1.49.Final
+service-policies/ui-backend:com.fasterxml.jackson.core:jackson-databind:jar:2.10.4
+service-policies/ui-backend:io.vertx:vertx-codegen:jar:3.9.1
+service-policies/ui-backend:io.quarkus:quarkus-rest-client:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.slf4j:slf4j-jboss-logging:jar:1.2.0.Final
+service-policies/ui-backend:org.jboss.resteasy:resteasy-json-p-provider:jar:4.5.5.Final
+service-policies/ui-backend:io.quarkus:quarkus-resteasy-jsonb:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.4
+service-policies/ui-backend:io.opentracing.contrib:opentracing-web-servlet-filter:jar:0.2.3
+service-policies/ui-backend:org.jboss:jboss-transaction-spi:jar:7.6.0.Final
+service-policies/ui-backend:io.smallrye.common:smallrye-common-annotation:jar:1.0.2
+service-policies/ui-backend:io.smallrye.reactive:smallrye-axle-generator:jar:0.1.1
+service-policies/ui-backend:io.smallrye.reactive:mutiny-context-propagation:jar:0.5.4
+service-policies/ui-backend:io.quarkus:quarkus-vertx:jar:1.6.0.Final
+service-policies/ui-backend:org.mvel:mvel2:jar:2.3.1.Final
+service-policies/ui-backend:io.smallrye:smallrye-open-api-core:jar:2.0.2
+service-policies/ui-backend:io.sentry:sentry:jar:1.7.30
+service-policies/ui-backend:io.vertx:vertx-bridge-common:jar:3.9.1
+service-policies/ui-backend:io.opentracing:opentracing-util:jar:0.31.0
+service-policies/ui-backend:org.jboss.resteasy:resteasy-core:jar:4.5.5.Final
+service-policies/ui-backend:io.quarkus:quarkus-netty:jar:1.6.0.Final
+service-policies/ui-backend:org.glassfish.jaxb:txw2:jar:2.3.3-b02
+service-policies/ui-backend:io.quarkus:quarkus-jaeger:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye:smallrye-health:jar:2.2.1
+service-policies/ui-backend:org.graalvm.sdk:graal-sdk:jar:20.1.0
+service-policies/ui-backend:io.quarkus.arc:arc:jar:1.6.0.Final
+service-policies/ui-backend:jakarta.persistence:jakarta.persistence-api:jar:2.2.3
+service-policies/ui-backend:io.quarkus:quarkus-smallrye-context-propagation:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.logging:commons-logging-jboss-logging:jar:1.0.0.Final
+service-policies/ui-backend:io.netty:netty-resolver-dns:jar:4.1.49.Final
+service-policies/ui-backend:org.hibernate.common:hibernate-commons-annotations:jar:5.1.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-vertx-core:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-logging-sentry:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.logging:jboss-logging:jar:3.3.2.Final
+service-policies/ui-backend:io.opentracing.contrib:opentracing-jaxrs2:jar:0.4.1
+service-policies/ui-backend:org.eclipse:yasson:jar:1.0.7
+service-policies/ui-backend:io.quarkus:quarkus-resteasy:jar:1.6.0.Final
+service-policies/ui-backend:com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.10.4
+service-policies/ui-backend:commons-logging:commons-logging:jar:1.2
+service-policies/ui-backend:org.glassfish.jaxb:jaxb-runtime:jar:2.3.3-b02
+service-policies/ui-backend:org.apache.httpcomponents:httpcore:jar:4.4.13
+service-policies/ui-backend:io.smallrye:smallrye-fault-tolerance-tracing-propagation:jar:4.3.0
+service-policies/ui-backend:io.quarkus:quarkus-bootstrap-runner:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.logging:jboss-logging-annotations:jar:2.1.0.Final
+service-policies/ui-backend:org.yaml:snakeyaml:jar:1.26
+service-policies/ui-backend:io.quarkus:quarkus-jsonb:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-smallrye-openapi:jar:1.6.0.Final
+service-policies/ui-backend:org.jboss.resteasy:resteasy-json-binding-provider:jar:4.5.5.Final
+service-policies/ui-backend:io.quarkus:quarkus-jsonp:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye.reactive:smallrye-mutiny-vertx-runtime:jar:0.1.1
+service-policies/ui-backend:io.opentracing:opentracing-api:jar:0.31.0
+service-policies/ui-backend:io.netty:netty-handler-proxy:jar:4.1.49.Final
+service-policies/ui-backend:org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:jar:1.0.1
+service-policies/ui-backend:org.eclipse.microprofile.metrics:microprofile-metrics-api:jar:2.3
+service-policies/ui-backend:com.squareup.okhttp3:okhttp:jar:3.14.6
+service-policies/ui-backend:io.netty:netty-codec-socks:jar:4.1.49.Final
+service-policies/ui-backend:io.smallrye.reactive:smallrye-reactive-converter-mutiny:jar:1.0.13
+service-policies/ui-backend:io.quarkus:quarkus-arc:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye:smallrye-context-propagation:jar:1.0.13
+service-policies/ui-backend:org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:jar:2.0.1.Final
+service-policies/ui-backend:io.smallrye:smallrye-context-propagation-api:jar:1.0.13
+service-policies/ui-backend:jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2
+service-policies/ui-backend:com.jayway.jsonpath:json-path:jar:2.4.0
+service-policies/ui-backend:com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.10.4
+service-policies/ui-backend:com.sun.istack:istack-commons-runtime:jar:3.0.10
+service-policies/ui-backend:io.quarkus:quarkus-datasource-common:jar:1.6.0.Final
+service-policies/ui-backend:io.agroal:agroal-pool:jar:1.8
+service-policies/ui-backend:org.apache.httpcomponents:httpcore-nio:jar:4.4.13
+service-policies/ui-backend:org.glassfish:jakarta.el:jar:3.0.3
+service-policies/ui-backend:io.quarkus:quarkus-development-mode-spi:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-panache-common:jar:1.6.0.Final
+service-policies/ui-backend:org.flywaydb:flyway-core:jar:6.4.4
+service-policies/ui-backend:io.quarkus:quarkus-jdbc-postgresql:jar:1.6.0.Final
+service-policies/ui-backend:net.minidev:accessors-smart:jar:1.2
+service-policies/ui-backend:io.netty:netty-codec:jar:4.1.49.Final
+service-policies/ui-backend:commons-io:commons-io:jar:2.6
+service-policies/ui-backend:jakarta.annotation:jakarta.annotation-api:jar:1.3.5
+service-policies/ui-backend:org.postgresql:postgresql:jar:42.2.14
+service-policies/ui-backend:org.eclipse.microprofile.openapi:microprofile-openapi-api:jar:1.1.2
+service-policies/ui-backend:org.apache.httpcomponents:httpclient:jar:4.5.12
+service-policies/ui-backend:io.quarkus:quarkus-core:jar:1.6.0.Final
+service-policies/ui-backend:com.squareup.okio:okio:jar:1.17.2
+service-policies/ui-backend:net.bytebuddy:byte-buddy:jar:1.10.10
+service-policies/ui-backend:io.vertx:vertx-rx-gen:jar:3.9.1
+service-policies/ui-backend:io.vertx:vertx-web-common:jar:3.9.1
+service-policies/ui-backend:io.quarkus:quarkus-vertx-http:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye:smallrye-context-propagation-jta:jar:1.0.13
+service-policies/ui-backend:io.smallrye.reactive:mutiny:jar:0.5.4
+service-policies/ui-backend:jakarta.inject:jakarta.inject-api:jar:1.0
+service-policies/ui-backend:com.cronutils:cron-utils:jar:9.0.2
+service-policies/ui-backend:com.github.ben-manes.caffeine:caffeine:jar:2.8.4
+service-policies/ui-backend:io.quarkus:quarkus-ide-launcher:jar:1.6.0.Final
+service-policies/ui-backend:io.vertx:vertx-core:jar:3.9.1
+service-policies/ui-backend:org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-api:jar:1.0.1
+service-policies/ui-backend:jakarta.transaction:jakarta.transaction-api:jar:1.3.3
+service-policies/ui-backend:io.opentracing.contrib:opentracing-concurrent:jar:0.2.0
+service-policies/ui-backend:io.quarkus:quarkus-cache:jar:1.6.0.Final
+service-policies/ui-backend:io.smallrye.reactive:vertx-mutiny-generator:jar:0.1.1
+service-policies/ui-backend:io.smallrye.common:smallrye-common-function:jar:1.0.2
+service-policies/ui-backend:org.hibernate:hibernate-graalvm:jar:5.4.18.Final
+service-policies/ui-backend:io.jaegertracing:jaeger-thrift:jar:0.34.0
+service-policies/ui-backend:io.quarkus:quarkus-agroal:jar:1.6.0.Final
+service-policies/ui-backend:org.wildfly.common:wildfly-common:jar:1.5.4.Final-format-001
+service-policies/ui-backend:io.smallrye.config:smallrye-config-common:jar:1.8.1
+service-policies/ui-backend:io.quarkus:quarkus-scheduler:jar:1.6.0.Final
+service-policies/ui-backend:com.fasterxml.jackson.core:jackson-annotations:jar:2.10.4
+service-policies/ui-backend:io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:0.1.1
+service-policies/ui-backend:io.quarkus:quarkus-hibernate-orm-panache:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus:quarkus-jackson:jar:1.6.0.Final
+service-policies/ui-backend:io.quarkus.security:quarkus-security:jar:1.1.2.Final
+service-policies/ui-backend:io.quarkus:quarkus-smallrye-opentracing:jar:1.6.0.Final
+service-policies/ui-backend:io.netty:netty-transport:jar:4.1.49.Final
+service-policies/ui-backend:io.netty:netty-common:jar:4.1.49.Final
+service-policies/ui-backend:io.smallrye.config:smallrye-config:jar:1.8.1
+service-policies/ui-backend:org.glassfish:jakarta.json:jar:1.1.6
