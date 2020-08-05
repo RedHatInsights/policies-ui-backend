@@ -114,6 +114,7 @@ service-policies/ui-backend:com.fasterxml.jackson.module:jackson-module-paramete
 service-policies/ui-backend:commons-logging:commons-logging:jar:1.2
 service-policies/ui-backend:org.glassfish.jaxb:jaxb-runtime:jar:2.3.3-b02
 service-policies/ui-backend:org.apache.httpcomponents:httpcore:jar:4.4.13
+service-policies/ui-backend:io.opentracing.contrib:opentracing-tracerresolver:jar:0.1.8:runtime
 service-policies/ui-backend:io.smallrye:smallrye-fault-tolerance-tracing-propagation:jar:4.3.0
 service-policies/ui-backend:io.quarkus:quarkus-bootstrap-runner:jar:1.6.0.Final
 service-policies/ui-backend:org.jboss.logging:jboss-logging-annotations:jar:2.1.0.Final
