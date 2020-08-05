@@ -27,8 +27,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provide a /status endpoint, that returns a 200 if all is cool
@@ -52,26 +52,26 @@ public class StatusEndpoint {
   @Produces("text/plain")
   public Response getStatus() {
 
-    List<String> issues = new ArrayList<>();
+    Map<String,String> issues = new HashMap<>();
 
     try {
       Policy.findByName("dummy", "-dummy-");
     }
     catch (Exception e) {
-      issues.add(e.getMessage());
+      issues.put("backend-db", e.getMessage());
     }
 
     try {
       engine.findTriggersById("dummy", "dummy");
     }
     catch (Exception e) {
-      issues.add(e.getMessage());
+      issues.put("engine", e.getMessage());
     }
 
     try {
-      notifications.removeNotification("dummy","dummy");
+      notifications.getApps();
     } catch (Exception e) {
-      issues.add(e.getMessage());
+      issues.put("notifications", e.getMessage());
     }
 
     if (!issues.isEmpty()) {
