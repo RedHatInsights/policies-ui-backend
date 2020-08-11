@@ -16,12 +16,13 @@
  */
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.auth.RbacRaw;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+
+import com.redhat.cloud.common.auth.RbacRaw;
 import org.junit.jupiter.api.Test;
 
 /**

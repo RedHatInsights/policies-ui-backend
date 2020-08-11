@@ -16,8 +16,8 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.common.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.NotificationSystem;
-import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.SettingsValues;
 import javax.enterprise.context.RequestScoped;
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class UserConfigService {
 
-  private Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
   @Inject

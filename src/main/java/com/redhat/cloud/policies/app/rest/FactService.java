@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.common.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Fact;
 import com.redhat.cloud.policies.app.model.Msg;
 import javax.enterprise.context.RequestScoped;

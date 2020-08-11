@@ -16,8 +16,6 @@
  */
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.auth.HeaderHelper;
-import com.redhat.cloud.policies.app.auth.XRhIdentity;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +25,9 @@ import java.util.Optional;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+
+import com.redhat.cloud.common.auth.HeaderHelper;
+import com.redhat.cloud.common.auth.XRhIdentity;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;

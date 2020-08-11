@@ -18,9 +18,9 @@ package com.redhat.cloud.policies.app.rest;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.redhat.cloud.common.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.TokenHolder;
-import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
