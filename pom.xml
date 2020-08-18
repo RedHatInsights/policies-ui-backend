@@ -103,13 +103,9 @@
       <artifactId>quarkus-logging-sentry</artifactId>
     </dependency>
     <dependency>
-      <!-- This builds
       <groupId>com.redhat.cloud.common</groupId>
       <artifactId>java</artifactId>
-      -->
-      <version>184c3df8c6</version>
-      <groupId>com.github.RedHatInsights</groupId>
-      <artifactId>insights-common-java</artifactId>
+      <version>0.1.2</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -272,9 +268,8 @@
 
   <repositories>
     <repository>
-      <!-- on the fly build for other repos that are on GH only -->
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
+      <id>JBoss Public</id>
+      <url>https://repository.jboss.org/nexus/content/groups/public</url>
     </repository>
   </repositories>
 

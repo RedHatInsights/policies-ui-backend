@@ -40,7 +40,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
 
-  PostgreSQLContainer postgreSQLContainer ;
+  PostgreSQLContainer<?> postgreSQLContainer ;
   MockServerContainer mockEngineServer;
   MockServerClient mockServerClient;
 
@@ -74,7 +74,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
   void setupPostgres(Map<String, String> props) {
     postgreSQLContainer =
-         new PostgreSQLContainer("postgres");
+         new PostgreSQLContainer<>("postgres");
     postgreSQLContainer.start();
     // Now that postgres is started, we need to get its URL and tell Quarkus
     // quarkus.datasource.driver=io.opentracing.contrib.jdbc.TracingDriver
@@ -141,17 +141,17 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     trigger.lifecycle = new ArrayList<>();
     Map<String,Object> ev = new HashMap<>();
     Calendar cal = Calendar.getInstance();
-    cal.set(2020,04,8,10,00,00);
+    cal.set(2020,4,8,10,0,0);
     ev.put("status","ALERT_GENERATE");
     ev.put("stime", cal.getTimeInMillis());
     trigger.lifecycle.add(ev);
     ev = new HashMap<>();
-    cal.set(2020,04,9,10,00,00);
+    cal.set(2020,4,9,10,0,0);
     ev.put("status","ALERT_GENERATE");
     ev.put("stime", cal.getTimeInMillis());
     trigger.lifecycle.add(ev);
     ev = new HashMap<>();
-    cal.set(2020,04,10,10,00,00);
+    cal.set(2020,4,10,10,0,0);
     ev.put("status","ALERT_GENERATE");
     ev.put("stime", cal.getTimeInMillis());
     trigger.lifecycle.add(ev);
