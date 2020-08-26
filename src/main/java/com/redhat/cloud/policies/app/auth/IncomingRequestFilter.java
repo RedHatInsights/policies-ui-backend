@@ -74,7 +74,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     RoutingContext routingContext = request().getCurrent();
 
     String normalisedPath = routingContext.normalisedPath();
-    if (normalisedPath.endsWith("openapi.json")) {
+    if (normalisedPath.endsWith("openapi.json") || normalisedPath.equals("/api/policies/v1.0/status")) {
       return;
     }
 

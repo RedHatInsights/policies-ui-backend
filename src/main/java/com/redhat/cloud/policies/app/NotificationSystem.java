@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -26,20 +27,25 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 /**
  * @author hrupp
  */
-@Path("/endpoints/email/subscription/")
+@Path("/")
 @RegisterRestClient(configKey = "notifications")
 public interface NotificationSystem {
 
 
+
   @PUT
-  @Path("/{event}")
+  @Path("/endpoints/email/subscription/{event}")
   void addNotification(
       @PathParam("event") String event,
       @HeaderParam("x-rh-identity") String rhIdentity);
 
   @DELETE
-  @Path("/{event}")
+  @Path("/endpoints/email/subscription/{event}")
   void removeNotification(
       @PathParam("event") String event,
       @HeaderParam("x-rh-identity") String rhIdentity);
+
+  @GET
+  @Path("/apps")
+  void getApps() ;
 }
