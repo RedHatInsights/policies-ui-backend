@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  * VmLib:     24416 kB
  * VmData:  3529900 kB
  * VmSize:  13529900 kB
+ * Threads: 23
  *
  * @author hrupp
  */
@@ -56,6 +57,7 @@ public class ProcSelfStatusExporter {
   long vmLib;
   long vmData;
   long vmSize;
+  int threads;
 
 
   @Scheduled(every = "10s")
@@ -100,6 +102,8 @@ public class ProcSelfStatusExporter {
           case "VmSize:":
             vmSize = Long.parseLong(parts[1]) ;
             break;
+          case "Threads:":
+            threads = Integer.parseInt(parts[1]) ;
         }
       }
     }
@@ -148,6 +152,11 @@ public class ProcSelfStatusExporter {
     return vmSize;
   }
 
+  @Gauge(name="status.threads", absolute = true, unit = MetricUnits.NONE, tags = "type=proc")
+  public long getThreads() {
+    return threads;
+  }
+
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
@@ -159,6 +168,7 @@ public class ProcSelfStatusExporter {
     sb.append(", vmLib=").append(vmLib / 1024);
     sb.append(", vmData=").append(vmData / 1024);
     sb.append(", vmSize=").append(vmSize / 1024);
+    sb.append(", threads=").append(threads);
     sb.append('}');
     return sb.toString();
   }
