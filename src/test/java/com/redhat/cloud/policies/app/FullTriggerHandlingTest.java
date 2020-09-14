@@ -69,7 +69,7 @@ public class FullTriggerHandlingTest {
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("hooks",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals("webhook",ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class FullTriggerHandlingTest {
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(2,ft.trigger.actions.size());
-        int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("hooks")).count();
+        int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("webhook")).count();
         Assert.assertEquals(2,i);
     }
 
@@ -97,7 +97,7 @@ public class FullTriggerHandlingTest {
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("hooks",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals("webhook",ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
