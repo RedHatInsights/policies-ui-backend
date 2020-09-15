@@ -267,6 +267,11 @@ public class PolicyCrudService {
     return PagingUtils.responseBuilder(page).build();
   }
 
+  private static class ResponseListOfUUIDS {
+    List<UUID> uuids;
+    private ResponseListOfUUIDS(List<UUID> uuids) { this.uuids=uuids;}
+  }
+
   @Operation(summary = "Return all policy ids for a given account after applying the filters")
   @GET
   @Path("/ids")
@@ -325,7 +330,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "PolicyIds found", content =
-                 @Content(schema = @Schema(implementation = List.class)))
+                 @Content(schema = @Schema(implementation = ResponseListOfUUIDS.class)))
   public Response getPolicyIdsForCustomer() {
 
     if (!user.canReadAll()) {
