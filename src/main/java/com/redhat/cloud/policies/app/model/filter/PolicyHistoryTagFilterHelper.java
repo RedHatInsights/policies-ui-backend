@@ -38,10 +38,10 @@ public class PolicyHistoryTagFilterHelper {
 
       switch (item.field) {
         case "name":
-          sb.append("display_name");
+          sb.append("tags.display_name");
           break;
         case "id":
-          sb.append("inventory_id");
+          sb.append("tags.inventory_id");
           break;
         default:
           throw new IllegalArgumentException("Unknown filter field: " + item.field);
@@ -50,7 +50,7 @@ public class PolicyHistoryTagFilterHelper {
       switch (item.operator) {
         case EQUAL:
         case LIKE:
-          sb.append("=");
+          sb.append("MATCHES");
           break;
         case NOT_EQUAL:
           sb.append("!=");
@@ -60,11 +60,11 @@ public class PolicyHistoryTagFilterHelper {
       }
       sb.append(" '");
       if (item.operator.equals(LIKE)) {
-        sb.append(".*");
+        sb.append("*");
       }
       sb.append(item.value);
       if (item.operator.equals(LIKE)) {
-        sb.append(".*");
+        sb.append("*");
       }
       sb.append("'");
       if (iterator.hasNext()) {
