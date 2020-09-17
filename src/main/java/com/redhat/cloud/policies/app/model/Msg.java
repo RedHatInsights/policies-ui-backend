@@ -16,9 +16,12 @@
  */
 package com.redhat.cloud.policies.app.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  * @author hrupp
  */
+@Schema(description = "Reason for failure")
 public class Msg {
   public String msg;
 
