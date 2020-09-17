@@ -362,11 +362,9 @@ public class PolicyCrudService {
   @APIResponses({
       @APIResponse(responseCode = "500", description = "Internal error"),
       @APIResponse(responseCode = "400", description = "No policy provided or policy validation failed",
-                   content = @Content(schema =@Schema(implementation = Msg.class,
-                                                                         description = "Reason for failure"))),
+                   content = @Content(schema = @Schema(implementation = Msg.class ))),
       @APIResponse(responseCode = "409", description = "Persisting failed",
-                   content = @Content(schema =@Schema(implementation = Msg.class,
-                                                      description = "Reason for failure"))),
+                   content = @Content(schema = @Schema(implementation = Msg.class))),
       @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
       @APIResponse(responseCode = "201", description = "Policy persisted",
                    content = @Content(schema = @Schema(implementation = Policy.class))),
@@ -621,13 +619,14 @@ public class PolicyCrudService {
   @Operation(summary = "Update a single policy for a customer by its id")
   @PUT
   @Path("/{policyId}")
-  @APIResponse(responseCode = "200", description = "Policy updated or policy validated")
+  @APIResponse(responseCode = "200", description = "Policy updated or policy validated",
+          content = @Content(schema = @Schema(implementation = Policy.class))
+  )
   @APIResponse(responseCode = "400", description = "Invalid or no policy provided")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it before?")
   @APIResponse(responseCode = "409", description = "Persisting failed",
-          content = @Content(schema =@Schema(implementation = Msg.class,
-                  description = "Reason for failure"))
+          content = @Content(schema = @Schema(implementation = Msg.class))
   )
   @Transactional
   public Response updatePolicy(@QueryParam ("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
