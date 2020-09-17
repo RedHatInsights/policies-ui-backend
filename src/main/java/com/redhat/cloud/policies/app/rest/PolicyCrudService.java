@@ -68,6 +68,9 @@ import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -118,6 +121,9 @@ public class PolicyCrudService {
 
   @Inject
   Validator validator;
+
+  @Inject
+  Tracer tracer;
 
   // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
   // This class is used only for swagger return type
@@ -937,37 +943,56 @@ public class PolicyCrudService {
 
          String tagQuery = getTagsFilterFromPager(pager);
 
-         Response response = engine.findLastTriggered(policyId.toString(),
-             false, pageNum, limit,
-             sort1, sort2, order1, order2, // See Comment in engine def
-             tagQuery,
-             user.getAccount());
-         String countHeader = response.getHeaderString("X-Total-Count");
-         long totalCount = Long.parseLong(countHeader);
-
-         String alerts = response.readEntity(String.class);
-         response.close();
+         long totalCount;
+         Response response = null;
+         String alerts;
+         Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
+         try (Scope ignored = tracer.scopeManager().activate(span,true)){
+           response = engine.findLastTriggered(policyId.toString(),
+               false, pageNum, limit,
+               sort1, sort2, order1, order2, // See Comment in engine def
+               tagQuery,
+               user.getAccount());
+           String countHeader = response.getHeaderString("X-Total-Count");
+           totalCount = Long.parseLong(countHeader);
+           alerts = response.readEntity(String.class);
+         }
+         catch (Exception e) {
+           String msg = "Retrieval of history failed with: " + e.getMessage();
+           span.log(msg);
+           span.setTag("error",true);
+           log.warning(msg);
+           return Response.serverError().entity(msg).build();
+         }
+         finally{
+           response.close();
+         }
 
          List<HistoryItem> items = new ArrayList<>();
 
          // The engine may not return data to us
          if (totalCount > 0) {
-           DocumentContext jp = JsonPath.parse(alerts);
-           List<Map<String,Object>> list = jp.read("$.[*].evalSets..value");
-           for (Map<String,Object> value : list) {
-             long ctime = (long) value.get("ctime");
-             Map<String,Object> tmp = (Map<String, Object>) value.get("tags");
-             String inventory_id = (String) tmp.get("inventory_id");
-             String name = (String) tmp.get("display_name");
-             HistoryItem hi = new HistoryItem(ctime,inventory_id,name);
-             items.add(hi);
+           span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
+           try (Scope ignored = tracer.scopeManager().activate(span,true)) {
+             DocumentContext jp = JsonPath.parse(alerts);
+             List<Map<String, Object>> list = jp.read("$.[*].evalSets..value");
+             for (Map<String, Object> value : list) {
+               long ctime = (long) value.get("ctime");
+               Map<String, Object> tmp = (Map<String, Object>) value.get("tags");
+               String inventory_id = (String) tmp.get("inventory_id");
+               String name = (String) tmp.get("display_name");
+               HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
+               items.add(hi);
+             }
            }
          }
          Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
          builder = PagingUtils.responseBuilder(itemsPage);
        } catch (IllegalArgumentException iae) {
+         tracer.activeSpan().setTag("error",true);
          builder = Response.status(400,iae.getMessage());
        } catch (Exception e) {
+         tracer.activeSpan().setTag("error",true);
          String msg = "Retrieval of history failed with: " + e.getMessage();
          log.warning(msg);
          builder = Response.serverError().entity(msg);
