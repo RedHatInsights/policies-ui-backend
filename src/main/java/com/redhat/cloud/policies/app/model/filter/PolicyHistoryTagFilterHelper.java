@@ -49,6 +49,8 @@ public class PolicyHistoryTagFilterHelper {
       sb.append(' ');
       switch (item.operator) {
         case EQUAL:
+          sb.append('=');
+          break;
         case LIKE:
           sb.append("MATCHES");
           break;

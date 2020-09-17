@@ -179,7 +179,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         .when(request()
             .withPath("/hawkular/alerts")
             .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
-            .withQueryStringParameter("tagQuery","display_name != 'vm'")
+            .withQueryStringParameter("tagQuery","tags.display_name != 'vm'")
             .withHeader("Hawkular-Tenant","1234")
             .withMethod("GET")
         )
@@ -193,7 +193,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         .when(request() // test data has upper case VM, so vm should not match
             .withPath("/hawkular/alerts")
             .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
-            .withQueryStringParameter("tagQuery","display_name = 'VM22'")
+            .withQueryStringParameter("tagQuery","tags.display_name = 'VM22'")
             .withHeader("Hawkular-Tenant","1234")
             .withMethod("GET")
         )
@@ -207,7 +207,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         .when(request() // test data has upper case VM, so vm should not match
             .withPath("/hawkular/alerts")
             .withQueryStringParameter("triggerIds","8671900e-9d31-47bf-9249-8f45698ede72")
-            .withQueryStringParameter("tagQuery","inventory_id = 'dce4760b-0000-48f0-0000-7a07a6a45d1d'")
+            .withQueryStringParameter("tagQuery","tags.inventory_id = 'dce4760b-0000-48f0-0000-7a07a6a45d1d'")
             .withHeader("Hawkular-Tenant","1234")
             .withMethod("GET")
         )
