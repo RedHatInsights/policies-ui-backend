@@ -16,8 +16,9 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.TokenHolder;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -101,6 +102,7 @@ import static java.lang.Integer.min;
 public class PolicyCrudService {
 
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private static final ObjectMapper OM = new ObjectMapper();
 
   @Inject
   @RestClient
@@ -953,7 +955,8 @@ public class PolicyCrudService {
          Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
          try (Scope ignored = tracer.scopeManager().activate(span,true)){
            response = engine.findLastTriggered(policyId.toString(),
-               false, pageNum, limit,
+               true, // thin
+               pageNum, limit,
                sort1, sort2, order1, order2, // See Comment in engine def
                tagQuery,
                user.getAccount());
@@ -962,32 +965,25 @@ public class PolicyCrudService {
            alerts = response.readEntity(String.class);
          }
          catch (Exception e) {
-           String msg = "Retrieval of history failed with: " + e.getMessage();
+           String msg = "Retrieval of history from engine failed with: " + e.getMessage();
            span.log(msg);
            span.setTag("error",true);
            log.warning(msg);
            return Response.serverError().entity(msg).build();
          }
          finally{
-           response.close();
+           if (response!=null) {
+             response.close();
+           }
          }
 
          List<HistoryItem> items = new ArrayList<>();
 
-         // The engine may not return data to us
+         // The engine may not have returned data to us
          if (totalCount > 0) {
            span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
            try (Scope ignored = tracer.scopeManager().activate(span,true)) {
-             DocumentContext jp = JsonPath.parse(alerts);
-             List<Map<String, Object>> list = jp.read("$.[*].evalSets..value");
-             for (Map<String, Object> value : list) {
-               long ctime = (long) value.get("ctime");
-               Map<String, Object> tmp = (Map<String, Object>) value.get("tags");
-               String inventory_id = (String) tmp.get("inventory_id");
-               String name = (String) tmp.get("display_name");
-               HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
-               items.add(hi);
-             }
+             parseHistoryFromEngine(alerts, items);
            }
          }
          Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
@@ -1003,6 +999,19 @@ public class PolicyCrudService {
        }
      }
      return builder.build();
+  }
+
+  public static void parseHistoryFromEngine(String alerts, List<HistoryItem> items) throws JsonProcessingException {
+
+    List<Map<String,Object>> data = OM.readValue(alerts, new TypeReference<>() {});
+    for (Map<String,Object> value :data) {
+      Long ctime = (Long) value.get("ctime");
+      Map<String, String> tags = (Map<String, String>) value.get("tags");
+      String inventory_id = tags.get("inventory_id");
+      String name = tags.get("display_name");
+      HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
+      items.add(hi);
+    }
   }
 
   private String getSortFromPageColumn(Sort.Column column) {

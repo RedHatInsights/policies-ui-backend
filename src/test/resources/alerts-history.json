@@ -122,6 +122,10 @@
       "evalTimeSetting": 0,
       "dampeningId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
     },
+    "tags": {
+      "display_name": "VM 22",
+      "inventory_id": "dce4760b-d796-48f0-a7b9-7a07a6a45d1d"
+    },
     "evalSets": [
       [
         {
@@ -378,6 +382,10 @@
       "evalTotalSetting": 1,
       "evalTimeSetting": 0,
       "dampeningId": "1234-8671900e-9d31-47bf-9249-8f45698ede72-FIRING"
+    },
+    "tags": {
+      "display_name": "VM",
+      "inventory_id": "dce4760b-0000-48f0-0000-7a07a6a45d1d"
     },
     "evalSets": [
       [

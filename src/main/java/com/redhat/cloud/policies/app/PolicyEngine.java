@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.model.engine.Alert;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import java.util.List;
@@ -126,7 +125,7 @@ public interface PolicyEngine {
                                 @QueryParam("thin") boolean thin,
                                 @QueryParam("page") int page,
                                 @QueryParam("per_page") int per_page,
-                                // Once MP-RestClient 2.0 is avaliable, we can turn the next lines
+                                // Once MP-RestClient 2.0 is available, we can turn the next lines
                                 // into String[] and set the query param style accordingly.
                                 @QueryParam("sort") String sort1,
                                 @QueryParam("sort") String sort2,
