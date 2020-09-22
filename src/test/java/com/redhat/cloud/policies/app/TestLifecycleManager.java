@@ -110,18 +110,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
     mockServerClient
         .when(request()
-          .withPath("/hawkular/alerts")
-            .withQueryStringParameter("triggerIds",".*")
-            .withQueryStringParameter("thin","true")
-        )
-        .respond(response()
-            .withStatusCode(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody("[{\"eventType\":\"ALERT\",\"tenantId\":\"901578\",\"id\":\"eb3c84e2-55bf-4121-ad99-68a363981f04-1587136858088-f5fb4bcf-c0f0-4974-8ec2-61fb284270de\",\"ctime\":1587136858088,\"dataSource\":\"_none_\",\"dataId\":\"eb3c84e2-55bf-4121-ad99-68a363981f04\",\"category\":\"ALERT\",\"text\":\"test-2\",\"trigger\":{\"tenantId\":\"901578\",\"id\":\"eb3c84e2-55bf-4121-ad99-68a363981f04\",\"name\":\"test-2\",\"type\":\"STANDARD\",\"eventType\":\"ALERT\",\"eventCategory\":null,\"eventText\":null,\"severity\":\"MEDIUM\",\"actions\":[{\"tenantId\":\"901578\",\"actionPlugin\":\"email\",\"actionId\":\"_managed-instance-email-35e48b6487d9568e\"}],\"autoDisable\":false,\"autoEnable\":false,\"autoResolve\":false,\"autoResolveAlerts\":false,\"autoResolveMatch\":\"ALL\",\"enabled\":true,\"firingMatch\":\"ALL\",\"source\":\"_none_\"},\"severity\":\"MEDIUM\",\"status\":\"OPEN\",\"lifecycle\":[{\"status\":\"OPEN\",\"user\":\"system\",\"stime\":1587136858088}]},{\"eventType\":\"ALERT\",\"tenantId\":\"901578\",\"id\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27-1587136858091-5022c6c0-3e93-4f4b-bcf6-d3b1445f06cb\",\"ctime\":1587136858091,\"dataSource\":\"_none_\",\"dataId\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27\",\"category\":\"ALERT\",\"text\":\"test-3\",\"trigger\":{\"tenantId\":\"901578\",\"id\":\"0bf486f4-cbe7-42b3-8036-36d3031a0a27\",\"name\":\"test-3\",\"type\":\"STANDARD\",\"eventType\":\"ALERT\",\"eventCategory\":null,\"eventText\":null,\"severity\":\"MEDIUM\",\"actions\":[{\"tenantId\":\"901578\",\"actionPlugin\":\"email\",\"actionId\":\"_managed-instance-email-35e48b6487d9568e\"}],\"autoDisable\":false,\"autoEnable\":false,\"autoResolve\":false,\"autoResolveAlerts\":false,\"autoResolveMatch\":\"ALL\",\"enabled\":true,\"firingMatch\":\"ALL\",\"source\":\"_none_\"},\"severity\":\"MEDIUM\",\"status\":\"OPEN\",\"lifecycle\":[{\"status\":\"OPEN\",\"user\":\"system\",\"stime\":1587136858091}]}]")
-        );
-
-    mockServerClient
-        .when(request()
             // special case to simulate that the engine has a general failure.
             // must come before the more generic match below.
                   .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94/enable")

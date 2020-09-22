@@ -19,6 +19,8 @@ package com.redhat.cloud.policies.app.model.engine;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.util.Objects;
+
 /**
  * A single trigger history item
  * @author hrupp
@@ -27,6 +29,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Schema(description = "A single history item for a fired trigger on a host")
 public class HistoryItem {
 
+  public HistoryItem() {
+  }
 
   @Schema(description = "Fire time (since the epoch)")
   public long ctime;
@@ -40,4 +44,30 @@ public class HistoryItem {
     this.id = id;
     this.hostName = hostName;
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("HistoryItem{");
+    sb.append("ctime=").append(ctime);
+    sb.append(", id='").append(id).append('\'');
+    sb.append(", hostName='").append(hostName).append('\'');
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    HistoryItem that = (HistoryItem) o;
+    return ctime == that.ctime &&
+        id.equals(that.id) &&
+        hostName.equals(that.hostName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(ctime, id, hostName);
+  }
+
 }
