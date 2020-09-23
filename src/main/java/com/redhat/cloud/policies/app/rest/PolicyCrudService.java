@@ -953,7 +953,8 @@ public class PolicyCrudService {
          Response response = null;
          String alerts;
          Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
-         try (Scope ignored = tracer.scopeManager().activate(span,true)){
+         Scope scope = tracer.scopeManager().activate(span,false);
+         try {
            response = engine.findLastTriggered(policyId.toString(),
                true, // thin
                pageNum, limit,
@@ -974,6 +975,12 @@ public class PolicyCrudService {
          finally{
            if (response!=null) {
              response.close();
+           }
+           if (span!=null) {
+             span.finish();
+           }
+           if (scope!=null) {
+             scope.close();
            }
          }
 
@@ -1006,9 +1013,20 @@ public class PolicyCrudService {
     List<Map<String,Object>> data = OM.readValue(alerts, new TypeReference<>() {});
     for (Map<String,Object> value :data) {
       Long ctime = (Long) value.get("ctime");
-      Map<String, String> tags = (Map<String, String>) value.get("tags");
-      String inventory_id = tags.get("inventory_id");
-      String name = tags.get("display_name");
+      List<Map<String, String>> tags = (List<Map<String, String>>) value.get("tags");
+      String inventory_id = null;
+      String name = null;
+      for (Map<String,String> tag: tags) {
+        if (tag.containsKey("inventory_id")) {
+          inventory_id = tag.get("inventory_id");
+        }
+        if (tag.containsKey("display_name")) {
+          name = tag.get("display_name");
+        }
+      }
+      if (name==null||inventory_id==null) {
+        throw new IllegalStateException("Name or inventory_id not found in tags");
+      }
       HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
       items.add(hi);
     }
