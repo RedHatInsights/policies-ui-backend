@@ -275,11 +275,6 @@ public class PolicyCrudService {
     return PagingUtils.responseBuilder(page).build();
   }
 
-  private static class ResponseListOfUUIDS {
-    List<UUID> uuids;
-    private ResponseListOfUUIDS(List<UUID> uuids) { this.uuids=uuids;}
-  }
-
   @Operation(summary = "Return all policy ids for a given account after applying the filters")
   @GET
   @Path("/ids")
@@ -338,7 +333,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "404", description = "No policies found for customer")
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @APIResponse(responseCode = "200", description = "PolicyIds found", content =
-                 @Content(schema = @Schema(implementation = ResponseListOfUUIDS.class)))
+                 @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
   public Response getPolicyIdsForCustomer() {
 
     if (!user.canReadAll()) {
@@ -578,7 +573,12 @@ public class PolicyCrudService {
 
   @Operation(summary = "Enable/disable policies identified by list of uuid in body")
   @Parameter(name = "uuids", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
-  @APIResponse(responseCode = "200", description = "Policy updated")
+  @APIResponse(responseCode = "200", description = "Policy updated", content = @Content(
+          schema = @Schema(
+                  type = SchemaType.ARRAY,
+                  implementation = UUID.class
+          )
+  ))
   @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
   @POST
   @Path("/ids/enabled")
@@ -702,8 +702,8 @@ public class PolicyCrudService {
   @POST
   @Path("/validate")
   @APIResponses({
-          @APIResponse(responseCode = "200", description = "Condition validated"),
-          @APIResponse(responseCode = "400", description = "No policy provided or condition not valid"),
+          @APIResponse(responseCode = "200", description = "Condition validated", content = @Content( schema = @Schema (implementation = Msg.class))),
+          @APIResponse(responseCode = "400", description = "No policy provided or condition not valid", content = @Content( schema = @Schema (implementation = Msg.class))),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
   public Response validateCondition(@Valid @NotNull Policy policy) {
@@ -734,9 +734,9 @@ public class PolicyCrudService {
   @Path("/validate-name")
   @RequestBody(content = { @Content( schema = @Schema( type = SchemaType.STRING )) })
   @APIResponses({
-          @APIResponse(responseCode = "200", description = "Name validated"),
-          @APIResponse(responseCode = "400", description = "Policy validation failed"),
-          @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
+          @APIResponse(responseCode = "200", description = "Name validated", content = @Content( schema = @Schema (implementation = Msg.class))),
+          @APIResponse(responseCode = "400", description = "Policy validation failed", content = @Content( schema = @Schema (implementation = Msg.class))),
+          @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action", content = @Content( schema = @Schema (implementation = Msg.class))),
           @APIResponse(responseCode = "409", description = "Name not unique"),
           @APIResponse(responseCode = "500", description = "Internal error")
   })
@@ -775,7 +775,7 @@ public class PolicyCrudService {
   @APIResponse(responseCode = "200", description = "Policy found", content =
                  @Content(schema = @Schema(implementation = Policy.class)))
   @APIResponse(responseCode = "404", description = "Policy not found")
-  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
+  @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action", content = @Content( schema = @Schema (implementation = Msg.class)))
   @Parameter(name = "id", description = "UUID of the policy")
   public Response getPolicy(@PathParam("id") UUID policyId) {
 

@@ -75,7 +75,7 @@ public class OapiTest extends AbstractITest {
 
 		// Check that all properties are present ( https://github.com/smallrye/smallrye-open-api/issues/437 )
 		Map<String, Schema> policyProperties = schemas.get("Policy").getProperties();
-		Assert.assertEquals(11, policyProperties.size());
+		Assert.assertEquals(9, policyProperties.size());
 		Assert.assertTrue(policyProperties.containsKey("ctime"));
 		Assert.assertTrue(policyProperties.containsKey("mtime"));
 
