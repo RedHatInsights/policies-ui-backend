@@ -1034,10 +1034,16 @@ public class PolicyCrudService {
 
   private String getSortFromPageColumn(Sort.Column column) {
     String sort = column.getName();
-    if ("name".equals(sort)) {
-      sort = "tags.display_name";
-    } else {
-      sort = "ctime";
+    switch (sort) {
+      case "name":
+        sort = "tags.display_name";
+        break;
+      case "ctime":
+      case "mtime":
+        sort = "ctime";
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown sort column: " + sort);
     }
     return sort;
   }
