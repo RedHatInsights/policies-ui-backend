@@ -642,6 +642,23 @@ class RestApiTest extends AbstractITest {
       deletePolicyById(uuid);
     }
   }
+  @Test
+  void getOnePolicyHistoryBadSort() {
+    String uuid = setupPolicyForHistory();
+
+    try {
+      given()
+          .header(authHeader)
+          .contentType(ContentType.JSON)
+          .when()
+          .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger?sortColumn=id")
+          .then()
+          .statusCode(400);
+    }
+    finally {
+      deletePolicyById(uuid);
+    }
+  }
 
   @Test
   void getOnePolicyHistoryFilterByName() {

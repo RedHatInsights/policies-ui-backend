@@ -886,9 +886,9 @@ public class PolicyCrudService {
                       type = SchemaType.STRING,
                       enumeration = {
                               "hostName",
-                              "id",
                               "ctime"
-                      }
+                      },
+                      defaultValue = "ctime"
               )
       ),
       @Parameter(
@@ -923,7 +923,7 @@ public class PolicyCrudService {
          Pager pager = PagingUtils.extractPager(uriInfo);
 
          int limit = pager.getLimit();
-         // We dont allow unlimited or values > 200
+         // We don't allow unlimited or values > 200
          limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
          int pageNum = pager.getOffset() / limit;
 
@@ -1035,12 +1035,15 @@ public class PolicyCrudService {
   private String getSortFromPageColumn(Sort.Column column) {
     String sort = column.getName();
     switch (sort) {
-      case "id":
-        sort = "tags.inventory_id"; break;
       case "name":
-        sort = "tags.display_name"; break;
-      default:
+        sort = "tags.display_name";
+        break;
+      case "ctime":
+      case "mtime":
         sort = "ctime";
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown sort column: " + sort);
     }
     return sort;
   }
