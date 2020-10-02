@@ -38,7 +38,7 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name = 'VM'", query);
+    assertEquals("tags.display_name = 'vm'", query);
   }
 
   @Test
@@ -46,7 +46,7 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter:op[name]=not_equal"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name != 'VM'", query);
+    assertEquals("tags.display_name != 'vm'", query);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter:op[name]=like"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name MATCHES '*VM*'", query);
+    assertEquals("tags.display_name MATCHES '*vm*'", query);
   }
 
 
@@ -63,7 +63,7 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter[id]=123"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name = 'VM' AND tags.inventory_id = '123'", query);
+    assertEquals("tags.display_name = 'vm' AND tags.inventory_id = '123'", query);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class TagsFilterTest {
         new URI("https://foo?filter[name]=VM&filter[id]=123&filter:op[name]=not_equal"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name != 'VM' AND tags.inventory_id = '123'", query);
+    assertEquals("tags.display_name != 'vm' AND tags.inventory_id = '123'", query);
   }
 
   @Test
@@ -88,7 +88,15 @@ public class TagsFilterTest {
     UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter:op[id]=not_equal"));
     Pager pager = PagingUtils.extractPager(info);
     String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
-    assertEquals("tags.display_name = 'VM'", query);
+    assertEquals("tags.display_name = 'vm'", query);
+  }
+
+  @Test
+  void filter7() throws URISyntaxException {
+    UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=toLowerCaseString&filter:op[name]=like"));
+    Pager pager = PagingUtils.extractPager(info);
+    String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
+    assertEquals("tags.display_name MATCHES '*tolowercasestring*'", query);
   }
 
 }
