@@ -64,7 +64,7 @@ public class PolicyHistoryTagFilterHelper {
       if (item.operator.equals(LIKE)) {
         sb.append("*");
       }
-      sb.append(item.value);
+      sb.append(item.value.toString().toLowerCase());
       if (item.operator.equals(LIKE)) {
         sb.append("*");
       }
