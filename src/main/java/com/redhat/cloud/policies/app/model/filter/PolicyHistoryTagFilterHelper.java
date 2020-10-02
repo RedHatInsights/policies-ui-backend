@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.model.filter;
 
 import com.redhat.cloud.policies.app.model.pager.Pager;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,42 +34,77 @@ public class PolicyHistoryTagFilterHelper {
     Filter filter = pager.getFilter();
     List<Filter.FilterItem> items = filter.getItems();
     Iterator<Filter.FilterItem> iterator = items.iterator();
+
     while(iterator.hasNext()) {
       Filter.FilterItem item = iterator.next();
 
-      switch (item.field) {
-        case "name":
-          sb.append("tags.display_name");
-          break;
-        case "id":
-          sb.append("tags.inventory_id");
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown filter field: " + item.field);
+      boolean isLike = item.operator.equals(LIKE);
+
+      List<String> values;
+      if (isLike) {
+        values = Arrays.asList(item.value.toString().split("\\s+"));
+      } else {
+        values = Arrays.asList(item.value.toString());
       }
-      sb.append(' ');
-      switch (item.operator) {
-        case EQUAL:
-          sb.append('=');
-          break;
-        case LIKE:
-          sb.append("MATCHES");
-          break;
-        case NOT_EQUAL:
-          sb.append("!=");
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
+
+      if (isLike) {
+        sb.append(" ( ");
       }
-      sb.append(" '");
-      if (item.operator.equals(LIKE)) {
-        sb.append("*");
+
+      Iterator<String> valuesIterator = values.iterator();
+      while (valuesIterator.hasNext()) {
+        String value = valuesIterator.next();
+        if (isLike) {
+          value = value.toLowerCase();
+        }
+
+        switch (item.field) {
+          case "name":
+            sb.append("tags.display_name");
+            break;
+          case "id":
+            sb.append("tags.inventory_id");
+            break;
+          default:
+            throw new IllegalArgumentException("Unknown filter field: " + item.field);
+        }
+
+        sb.append(' ');
+        switch (item.operator) {
+          case EQUAL:
+            sb.append('=');
+            break;
+          case LIKE:
+            sb.append("MATCHES");
+            break;
+          case NOT_EQUAL:
+            sb.append("!=");
+            break;
+          default:
+            throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
+        }
+
+        sb.append(" '");
+        if (isLike) {
+          sb.append("*");
+        }
+        sb.append(value);
+        if (isLike) {
+          sb.append("*");
+        }
+
+        sb.append("'");
+
+        if (valuesIterator.hasNext()) {
+          sb.append(" AND ");
+        }
+
       }
-      sb.append(item.value);
-      if (item.operator.equals(LIKE)) {
-        sb.append("*");
+
+      if (isLike) {
+        sb.append(" ) ");
       }
-      sb.append("'");
+
       if (iterator.hasNext()) {
         sb.append(" AND ");
       }
