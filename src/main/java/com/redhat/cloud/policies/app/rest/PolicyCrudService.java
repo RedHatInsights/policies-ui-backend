@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.TokenHolder;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.policies.app.model.JsonPatch;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
@@ -53,6 +54,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -87,6 +89,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jboss.resteasy.annotations.Query;
 
 import static com.redhat.cloud.policies.app.model.filter.PolicyHistoryTagFilterHelper.getTagsFilterFromPager;
 import static java.lang.Integer.min;
@@ -493,7 +496,7 @@ public class PolicyCrudService {
   @DELETE
   @Path("/ids")
   @Transactional
-  public Response deletePolicies(List<UUID> uuids) {
+  public Response deletePolicies(@QueryParam("uuids") List<UUID> uuids) {
 
     if (!user.canWriteAll()) {
        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
@@ -525,6 +528,54 @@ public class PolicyCrudService {
     }
 
     return Response.ok(deleted).build();
+  }
+
+  @Transactional
+  @PATCH
+  @Path("/")
+  @Consumes("application/json-patch+json")
+  public Response deletePoliciesViaPatch(JsonPatch patch) {
+
+    if (!user.canWriteAll()) {
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policies")).build();
+    }
+
+    if (patch==null) {
+      return Response.status(Response.Status.BAD_REQUEST).entity(
+          new Msg("No patch data passed")
+      ).build();
+    }
+
+    System.out.println(patch);
+
+    for (JsonPatch.JsonPatchOp op : patch.operations) {
+      if (!op.op.equals(JsonPatch.Operation.remove)) {
+        return Response.status(Response.Status.BAD_REQUEST).entity(
+            new Msg("Only 'remove' operations are allowed here")
+        ).build();
+      }
+
+      String path = op.path;
+      if (path.startsWith("/")) {
+        path = path.substring(1);
+      }
+      if (path.endsWith("/")) {
+        path = path.substring(0,path.length()-1);
+      }
+
+      UUID uuid = UUID.fromString(path);
+      Policy policy = Policy.findById(user.getAccount(), uuid);
+      if (policy == null ) {
+        return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new Msg("Policy with id " + uuid + " was not present on server")
+                ).build();
+
+      }
+      // We have it, now what? The RFC says the patch must be atomic
+      // but the engine can only delete one trigger at a time
+      // TODO implement
+    }
+    return Response.ok().build();
   }
 
   @Operation(summary = "Enable/disable a policy")
