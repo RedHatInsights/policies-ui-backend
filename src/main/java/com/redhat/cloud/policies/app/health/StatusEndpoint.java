@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.health;
 
 import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.PolicyEngine;
+import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -54,6 +55,14 @@ public class StatusEndpoint {
 
     Map<String,String> issues = new HashMap<>();
 
+    // Admin has used the endpoint to signal degraded status
+    boolean degraded = StuffHolder.getInstance().isDegraded();
+    if (degraded) {
+      issues.put("admin-degraded", "true");
+    }
+
+
+    // Now the normal checks
     try {
       Policy.findByName("dummy", "-dummy-");
     }

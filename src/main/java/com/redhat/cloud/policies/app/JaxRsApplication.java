@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * @author hrupp
  *
  */
-@ApplicationPath("/api/policies/v1.0")
+@ApplicationPath("/")
 public class JaxRsApplication extends Application {
 
   Logger log = Logger.getLogger("Policies UI-Backend");
@@ -48,7 +48,7 @@ public class JaxRsApplication extends Application {
     showVersionInfo();
 
     // Generate a token
-    TokenHolder.getInstance();
+    StuffHolder.getInstance();
   }
 
   private void showVersionInfo() {

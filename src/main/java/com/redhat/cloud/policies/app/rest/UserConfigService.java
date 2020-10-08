@@ -40,14 +40,14 @@ import java.util.logging.Logger;
 /**
  * @author hrupp
  */
-@Path("/user-config")
+@Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
 @SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
 
-  private Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
   @Inject

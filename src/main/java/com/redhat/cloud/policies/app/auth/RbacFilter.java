@@ -62,7 +62,7 @@ public class RbacFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) throws IOException {
     RbacRaw result;
 
-    if (requestContext.getUriInfo().getPath(true).equals("/status")) {
+    if (requestContext.getUriInfo().getPath(true).startsWith("/admin")) {
       return;
     }
 

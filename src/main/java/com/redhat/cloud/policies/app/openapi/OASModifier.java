@@ -44,7 +44,10 @@ public class OASModifier implements OASFilter {
       PathItem p = paths.getPathItem(key);
       String mangledName = mangleName(key);
       if (!mangledName.startsWith("/user-config") && // POL-230 this is a private api, so don't show it.
-          !mangledName.startsWith("/policies/sync")) { // POL-277 private api
+          !mangledName.startsWith("/policies/sync") &&
+          !mangledName.startsWith("/admin") &&
+          !mangledName.startsWith("/status")
+      ) { // POL-277 private api
         replacementItems.put(mangledName, p);
       }
 
