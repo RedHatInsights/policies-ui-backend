@@ -37,7 +37,7 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
 
   Jsonb jsonb;
   JsonObjectBuilder jsonObjectBuilder;
-  private boolean filterHealthCalls;
+  private final boolean filterHealthCalls;
 
 
   public JsonAccessLoggerHandler(boolean filterHealthCalls) {
@@ -53,7 +53,10 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
     int status = request.response().getStatusCode();
     // By default omit requests for metrics and health check if they return a 200
     if (filterHealthCalls) {
-      if (status==200 && (uri.startsWith("/health") || uri.startsWith("/metrics"))) {
+      if (status==200 && (uri.startsWith("/health") ||
+                          uri.startsWith("/metrics") ||
+                          uri.equals("/api/policies/v1.0/status")
+      )) {
         return;
       }
     }
