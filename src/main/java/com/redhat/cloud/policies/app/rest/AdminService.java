@@ -25,14 +25,19 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -51,6 +56,9 @@ public class AdminService {
   @Inject
   @RestClient
   PolicyEngine engine;
+
+  @Inject
+  EntityManager entityManager;
 
   /**
    * Signal health to outside world. Allowed values for state
@@ -127,4 +135,18 @@ public class AdminService {
     return Response.ok().build();
   }
 
+  @Path("/stats")
+  @GET
+  public Response getStats() {
+    long totalCount = Policy.count();
+    BigInteger cCount = (BigInteger) entityManager.createNativeQuery(
+        "select count(X) from ( select distinct p.customerId from policy p )  as X")
+        .getSingleResult();
+
+    Map<String,Long> result = new HashMap<>();
+    result.put("policiesCount",totalCount);
+    result.put("customerCount",cCount.longValue());
+
+    return Response.ok().entity(result).build();
+  }
 }
