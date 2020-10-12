@@ -16,24 +16,28 @@
  */
 package com.redhat.cloud.policies.app.health;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.eclipse.microprofile.health.HealthCheck;
+import com.redhat.cloud.policies.app.StuffHolder;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
-import org.eclipse.microprofile.health.Readiness;
 
 /**
- * Health check that determines if we should receive requests.
  * @author hrupp
  */
-@ApplicationScoped
-@Readiness
-public class ReadinessProbe extends AbstractHealthCheck implements HealthCheck {
-  @Override
-  public HealthCheckResponse call() {
+public abstract class AbstractHealthCheck {
 
-    HealthCheckResponseBuilder builder = getBuilder("ready");
 
-    return builder.build();
+  HealthCheckResponseBuilder getBuilder(String name) {
+    boolean degraded = StuffHolder.getInstance().isAdminDown();
+
+    HealthCheckResponseBuilder builder = HealthCheckResponse.named(name);
+
+    if (degraded) {
+      builder.withData("status","admin-down");
+      builder.down();
+    }
+    else {
+      builder.up();
+    }
+    return builder;
   }
 }

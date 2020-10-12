@@ -37,7 +37,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 /**
  * @author hrupp
  */
-@Path("/facts")
+@Path("/api/policies/v1.0/facts")
 @Produces("application/json")
 @Consumes("application/json")
 @RequestScoped

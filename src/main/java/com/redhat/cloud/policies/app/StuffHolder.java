@@ -21,14 +21,17 @@ import java.util.UUID;
 /**
  * @author hrupp
  */
-public class TokenHolder {
+public class StuffHolder {
 
-  private static TokenHolder tokenHolder;
+  private static StuffHolder tokenHolder;
 
-  private String token;
+  private final String token;
+  private boolean adminDown;
+  private boolean degraded;
 
-  private TokenHolder() {
+  private StuffHolder() {
     token = UUID.randomUUID().toString();
+    adminDown = false;
     System.out.println("Token: " + token);
   }
 
@@ -36,10 +39,26 @@ public class TokenHolder {
     return token.equals(input);
   }
 
-  public static TokenHolder getInstance() {
+  public static StuffHolder getInstance() {
     if (tokenHolder==null) {
-      tokenHolder = new TokenHolder();
+      tokenHolder = new StuffHolder();
     }
     return tokenHolder;
+  }
+
+  public boolean isAdminDown() {
+    return adminDown;
+  }
+
+  public void setAdminDown(boolean status) {
+    this.adminDown = status;
+  }
+
+  public boolean isDegraded() {
+    return degraded;
+  }
+
+  public void setDegraded(boolean degraded) {
+    this.degraded = degraded;
   }
 }

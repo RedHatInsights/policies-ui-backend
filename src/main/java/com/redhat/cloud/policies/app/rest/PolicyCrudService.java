@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.PolicyEngine;
-import com.redhat.cloud.policies.app.TokenHolder;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
@@ -38,7 +37,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.json.JsonString;
@@ -94,7 +92,7 @@ import static java.lang.Integer.min;
 /**
  * @author hrupp
  */
-@Path("/policies")
+@Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
 @SimplyTimed(absolute = true, name="PolicySvc")
@@ -1085,40 +1083,5 @@ public class PolicyCrudService {
     return null;
   }
 
-  @Path("/sync")
-  @POST
-  @Transactional
-  public Response syncToEngine(@QueryParam("token") String token) {
-
-    boolean validToken = TokenHolder.getInstance().compareToken(token);
-    if (!validToken) {
-      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission for this").build();
-    }
-
-    final int[] count = {0};
-    try (Stream<Policy> policies = Policy.streamAll()) {
-      policies.forEach(p -> {
-        FullTrigger fullTrigger;
-        try {
-          fullTrigger = engine.fetchTrigger(p.id, p.customerid);
-        }
-        catch (NotFoundException nfe) {
-          fullTrigger=null;
-        }
-        if (fullTrigger == null) { // Engine does not have the trigger
-          log.info("Trigger " + p.id + " not found, syncing");
-          FullTrigger ft = new FullTrigger(p);
-          engine.storeTrigger(ft, false, p.customerid);
-          log.info("   done");
-          count[0]++;
-        }
-        else {
-          log.info("Trigger " + p.id + " already in engine, skipping");
-        }
-      });
-    }
-    log.info("Stored " + count[0] + " triggers");
-    return Response.ok().build();
-  }
 
 }

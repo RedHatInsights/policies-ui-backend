@@ -74,8 +74,13 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     RoutingContext routingContext = request().getCurrent();
 
     String normalisedPath = routingContext.normalisedPath();
-    if (normalisedPath.endsWith("openapi.json") || normalisedPath.equals("/api/policies/v1.0/status")) {
-      return;
+
+    // The following are available to everyone
+    if (normalisedPath.endsWith("openapi.json") ||
+        normalisedPath.equals("/api/policies/v1.0/status") ||
+        normalisedPath.startsWith("/admin")
+    ) {
+      return; // We are done here
     }
 
     String xrhid_header = requestContext.getHeaderString("x-rh-identity");

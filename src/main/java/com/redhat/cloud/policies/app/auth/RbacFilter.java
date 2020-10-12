@@ -31,10 +31,8 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import io.quarkus.resteasy.runtime.standalone.VertxHttpRequest;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.resteasy.core.interception.jaxrs.PostMatchContainerRequestContext;
 
 /**
  * @author hrupp
@@ -62,7 +60,8 @@ public class RbacFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) throws IOException {
     RbacRaw result;
 
-    if (requestContext.getUriInfo().getPath(true).equals("/status")) {
+    String path = requestContext.getUriInfo().getPath(true);
+    if (path.startsWith("/admin") || path.equals("/api/policies/v1.0/status")) {
       return;
     }
 

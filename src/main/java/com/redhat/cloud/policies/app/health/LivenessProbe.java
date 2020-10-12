@@ -16,24 +16,27 @@
  */
 package com.redhat.cloud.policies.app.health;
 
-import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
-import org.eclipse.microprofile.health.Readiness;
+import org.eclipse.microprofile.health.Liveness;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
- * Health check that determines if we should receive requests.
+ * Health check that defines if we are up or having issues.
  * @author hrupp
  */
 @ApplicationScoped
-@Readiness
-public class ReadinessProbe extends AbstractHealthCheck implements HealthCheck {
+@Liveness
+public class LivenessProbe extends AbstractHealthCheck implements HealthCheck {
+
+
+
   @Override
   public HealthCheckResponse call() {
 
-    HealthCheckResponseBuilder builder = getBuilder("ready");
-
+    HealthCheckResponseBuilder builder = getBuilder("live");
     return builder.build();
   }
 }
