@@ -77,7 +77,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
     // The following are available to everyone
     if (normalisedPath.endsWith("openapi.json") ||
-        normalisedPath.startsWith("/status") ||
+        normalisedPath.equals("/api/policies/v1.0/status") ||
         normalisedPath.startsWith("/admin")
     ) {
       return; // We are done here

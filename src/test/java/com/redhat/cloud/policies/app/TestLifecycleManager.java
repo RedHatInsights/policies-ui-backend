@@ -265,6 +265,30 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withBody("{ \"msg\" : \"ok\" }")
         );
 
+    // ------------ status page
+    mockServerClient
+        .when(request()
+            .withPath("/hawkular/alerts/triggers")
+            .withQueryStringParameter("triggerIds","dummy")
+            .withHeader("Hawkular-Tenant","dummy")
+        )
+        .respond(response()
+            .withStatusCode(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[]")
+        );
+
+    mockServerClient
+        .when(request()
+            .withPath("/apps")
+        )
+        .respond(response()
+            .withBody("[]")
+            .withHeader("Content-Type", "application/json")
+            .withStatusCode(200)
+        );
+
+    // ------------
 
     mockServerClient
         .when(request()

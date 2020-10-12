@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @author hrupp
  */
-@Path("/status")
+@Path("/api/policies/v1.0/status")
 @RequestScoped
 public class StatusEndpoint {
 
@@ -50,7 +50,7 @@ public class StatusEndpoint {
   NotificationSystem notifications;
 
   @GET
-  @Produces("text/plain")
+  @Produces("application/json")
   public Response getStatus() {
 
     Map<String,String> issues = new HashMap<>();
