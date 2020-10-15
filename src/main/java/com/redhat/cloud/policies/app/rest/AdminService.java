@@ -21,6 +21,7 @@ import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
+import com.redhat.cloud.policies.app.model.engine.Trigger;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.RequestScoped;
@@ -36,10 +37,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -131,8 +136,53 @@ public class AdminService {
         }
       });
     }
-    log.info("Stored " + count[0] + " triggers");
-    return Response.ok().build();
+    String s = "Stored " + count[0] + " triggers";
+    log.info(s);
+    return Response.ok().entity(new Msg(s)).build();
+  }
+
+  @GET
+  @Path("/verify")
+  public Response findOrphans() {
+
+    Map<String,List<TTT>> orphanedPolicies = new HashMap<>();
+    List<TTT> orphanedInDB = new ArrayList<>();
+    List<TTT> orphanedInEngine = new ArrayList<>();
+
+    // Find active policies that do not have a trigger in engine
+    try (Stream<Policy> policies = Policy.streamAll()) {
+      policies
+          .forEach(p -> {
+            try {
+              engine.fetchTrigger(p.id, p.customerid);
+            }
+            catch (NotFoundException nfe) {
+              orphanedInDB.add(new TTT(p.customerid,p.id));
+            }
+          });
+    }
+    orphanedPolicies.put("orphanedInDB",orphanedInDB);
+
+    // Find triggers in engine for accounts and check if
+    // they have an active trigger in the DB
+    List<String> customersInDb;
+    try (Stream<Policy> policies = Policy.streamAll()) {
+      customersInDb = policies.map(p -> p.customerid)
+          .distinct().collect(Collectors.toList());
+    }
+    customersInDb
+        .forEach(cid-> {
+          List<Trigger> triggers = engine.findTriggersForCustomer(cid);
+          triggers.forEach(t -> {
+            Policy pol = Policy.findById(cid, UUID.fromString(t.id));
+            if (pol == null) {
+              orphanedInEngine.add(new TTT(cid,t.id));
+            }
+          });
+        });
+    orphanedPolicies.put("orphanedInEngine",orphanedInEngine);
+
+    return Response.ok().entity(orphanedPolicies).build();
   }
 
   @Path("/stats")
@@ -148,5 +198,37 @@ public class AdminService {
     result.put("customerCount",cCount.longValue());
 
     return Response.ok().entity(result).build();
+  }
+
+  // Trigger Tenant Tupple
+  public static class TTT {
+    String cid; // Tenant
+    String tid; // TriggerId
+
+    public TTT(String customerId, String id) {
+      this.cid = customerId;
+      this.tid = id;
+    }
+
+    public TTT(String customerid, UUID id) {
+      this(customerid,id.toString());
+    }
+
+    public String getCid() {
+      return cid;
+    }
+
+    public String getTid() {
+      return tid;
+    }
+
+    @Override
+    public String toString() {
+      final StringBuilder sb = new StringBuilder("TTT{");
+      sb.append("cId='").append(cid).append('\'');
+      sb.append(", tId='").append(tid).append('\'');
+      sb.append('}');
+      return sb.toString();
+    }
   }
 }
