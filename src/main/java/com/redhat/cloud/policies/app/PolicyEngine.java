@@ -63,6 +63,11 @@ public interface PolicyEngine {
                    @HeaderParam("Hawkular-Tenant") String customerId
   );
 
+  @GET
+  @Path("/triggers")
+  @Produces("application/json")
+  List<Trigger> findTriggersForCustomer(@HeaderParam("Hawkular-Tenant") String customerId);
+
   /**
    * Update a trigger
    *
