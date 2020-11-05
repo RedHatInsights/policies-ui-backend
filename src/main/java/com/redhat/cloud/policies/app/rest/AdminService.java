@@ -22,8 +22,10 @@ import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.engine.Trigger;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -38,10 +40,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -64,6 +69,24 @@ public class AdminService {
 
   @Inject
   EntityManager entityManager;
+
+  @ConfigProperty(name = "stats.filter.cid")
+  Optional<String> filterIdsString;
+
+  Set<String> filterIds = new HashSet<>();
+
+  private static final String[] BUCKETS = {"1","2","3","4","5-10","10+"};
+
+  @PostConstruct
+  private void postConstruct() {
+
+    if (filterIdsString.isPresent()) {
+      String s = filterIdsString.get();
+      String[] ids = s.split(",");
+      filterIds.addAll(Arrays.asList(ids));
+    }
+
+  }
 
   /**
    * Signal health to outside world. Allowed values for state
@@ -189,18 +212,64 @@ public class AdminService {
   @GET
   public Response getStats() {
     long totalCount = Policy.count();
-    BigInteger cCount = (BigInteger) entityManager.createNativeQuery(
-        "select count(X) from ( select distinct p.customerId from policy p )  as X")
-        .getSingleResult();
+    Map<String,Integer> buckets = populateBuckets();
 
-    Map<String,Long> result = new HashMap<>();
-    result.put("policiesCount",totalCount);
-    result.put("customerCount",cCount.longValue());
+    List<Object[]> list = entityManager.createNativeQuery("select p.customerId,count (p) from policy p group by p.customerId")
+        .getResultList();
+    System.out.println(list.size());
+    long cCount = list.size();
+
+    Map<String, Object> idsMap = new HashMap<>();
+    idsMap.put("ids",filterIds);
+    long fcount = Policy.count("customerId in (:ids)",idsMap);
+
+    final long[] filteredIdsCount = {0};
+    list.forEach(i -> {
+      String cid = (String) i[0];
+
+      if (filterIds.contains(cid)) {
+        filteredIdsCount[0]++;
+      }
+      int count = ((BigInteger)i[1]).intValue();
+      putToBucket(buckets,count);
+    });
+
+
+    Map<String,Object> result = new HashMap<>();
+    result.put("totalPoliciesCount",totalCount);
+    result.put("filteredPoliciesCount",fcount);
+    result.put("customerPoliciesCount",totalCount-fcount);
+    result.put("totalCount",cCount);
+    result.put("filteredIdsCount", filteredIdsCount[0]);
+    result.put("customerIdsCount", cCount-filteredIdsCount[0]);
+    result.put("buckets", buckets);
 
     return Response.ok().entity(result).build();
   }
 
-  // Trigger Tenant Tupple
+  private Map<String, Integer> populateBuckets() {
+    Map<String,Integer> map = new HashMap<>();
+    Arrays.stream(BUCKETS).sequential().forEach(b -> map.put(b,0));
+    return map;
+  }
+
+  private void putToBucket(Map<String,Integer> buckets, int count) {
+    String bucket;
+
+    if (count<5) {
+      bucket = String.valueOf(count);
+    }
+    else if (count < 10) {
+      bucket = "5-10";
+
+    } else {
+      bucket = "10+";
+    }
+    buckets.computeIfPresent(bucket, (b,c) -> buckets.get(b) + 1);
+    buckets.putIfAbsent(bucket, 1);
+  }
+
+  // Trigger Tenant Tuple
   public static class TTT {
     String cid; // Tenant
     String tid; // TriggerId
