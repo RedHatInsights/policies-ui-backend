@@ -78,7 +78,7 @@ public class AdminService {
   private static final String[] BUCKETS = {"1","2","3","4","5-10","10+"};
 
   @PostConstruct
-  private void postConstruct() {
+  void postConstruct() {
 
     if (filterIdsString.isPresent()) {
       String s = filterIdsString.get();

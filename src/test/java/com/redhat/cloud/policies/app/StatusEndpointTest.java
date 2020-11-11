@@ -17,6 +17,9 @@
 package com.redhat.cloud.policies.app;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.when;
@@ -51,12 +54,22 @@ public class StatusEndpointTest extends AbstractITest {
         .statusCode(200);
 
     try {
-
       when()
           .get("/api/policies/v1.0/status")
           .then()
           .body("admin-degraded", is("true"))
           .statusCode(500);
+
+      String body =
+      when()
+          .get("/metrics/application/status_isDegraded")
+        .then()
+          .statusCode(200)
+          .extract()
+            .body().asString();
+
+      Assertions.assertTrue(body.contains("application_status_isDegraded 2.0"));
+
     }
     finally {
       with()
