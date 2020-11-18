@@ -17,9 +17,8 @@
 package com.redhat.cloud.policies.app;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.response.Response;
-import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.when;
@@ -32,6 +31,7 @@ import static org.hamcrest.core.Is.is;
 @QuarkusTest
 public class StatusEndpointTest extends AbstractITest {
 
+  @Order(1)
   @Test
   void getStatusSimple() {
 
@@ -39,8 +39,15 @@ public class StatusEndpointTest extends AbstractITest {
         .get("/api/policies/v1.0/status")
       .then()
         .statusCode(200);
+
+    // Run twice
+    String body = getMetric();
+    Assertions.assertTrue(body.contains("application_status_isDegraded 0.0"));
+    body = getMetric();
+    Assertions.assertTrue(body.contains("application_status_isDegraded 0.0"));
   }
 
+  @Order(2)
   @Test
   void getStatusDegraded() {
 
@@ -60,15 +67,11 @@ public class StatusEndpointTest extends AbstractITest {
           .body("admin-degraded", is("true"))
           .statusCode(500);
 
-      String body =
-      when()
-          .get("/metrics/application/status_isDegraded")
-        .then()
-          .statusCode(200)
-          .extract()
-            .body().asString();
+      String body = getMetric();
+      Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
 
-      Assertions.assertTrue(body.contains("application_status_isDegraded 2.0"));
+      body = getMetric();
+      Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
 
     }
     finally {
@@ -81,5 +84,15 @@ public class StatusEndpointTest extends AbstractITest {
         .then()
           .statusCode(200);
     }
+  }
+
+  private String getMetric() {
+    return when()
+        .get("/metrics/application/status_isDegraded")
+      .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .asString();
   }
 }

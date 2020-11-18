@@ -30,7 +30,7 @@ import javax.enterprise.inject.Produces;
 @RequestScoped
 public class RhIdPrincipalProducer {
 
-private RhIdPrincipal principal;
+  private RhIdPrincipal principal;
 
   public void setPrincipal(RhIdPrincipal principal) {
     this.principal = principal;

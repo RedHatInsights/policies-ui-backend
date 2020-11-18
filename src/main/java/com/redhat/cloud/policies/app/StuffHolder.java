@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.policies.app;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -28,11 +30,13 @@ public class StuffHolder {
   private final String token;
   private boolean adminDown;
   private boolean degraded;
+  private Map<String,String> statusInfo;
 
   private StuffHolder() {
     token = UUID.randomUUID().toString();
     adminDown = false;
     System.out.println("Token: " + token);
+    statusInfo = new HashMap<>();
   }
 
   public boolean compareToken(String input) {
@@ -60,5 +64,13 @@ public class StuffHolder {
 
   public void setDegraded(boolean degraded) {
     this.degraded = degraded;
+  }
+
+  public Map<String, String> getStatusInfo() {
+    return statusInfo;
+  }
+
+  public void setStatusInfo(Map<String, String> statusInfo) {
+    this.statusInfo = statusInfo;
   }
 }
