@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
+import com.redhat.cloud.policies.app.health.ScheduledStatusProducer;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
@@ -69,6 +70,9 @@ public class AdminService {
 
   @Inject
   EntityManager entityManager;
+
+  @Inject
+  ScheduledStatusProducer statusProducer;
 
   @ConfigProperty(name = "stats.filter.cid")
   Optional<String> filterIdsString;
@@ -123,6 +127,8 @@ public class AdminService {
         builder = Response.status(Response.Status.BAD_REQUEST)
             .entity(new Msg("Unknown status passed"));
     }
+
+    statusProducer.update();
 
     return builder.build();
   }

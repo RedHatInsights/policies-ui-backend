@@ -48,75 +48,20 @@ public class StatusEndpoint {
 
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  @Inject
-  @RestClient
-  PolicyEngine engine;
-
-  @Inject
-  @RestClient
-  NotificationSystem notifications;
-
-  // Quarkus only activates this after the first REST-call to any method in this class
-  @Gauge(name="status_isDegraded", unit = MetricUnits.NONE, absolute = true,
-      description = "Returns 0 if good, value > 0 for number of entries in the status message")
-  int isDegraded() {
-    Map<String,String> issues;
-    issues = getStatusInternal();
-
-    return issues.size();
-  }
-
   @GET
   @Produces("application/json")
   public Response getStatus() {
 
-    Map<String,String> issues;
-    issues = getStatusInternal();
+    Map<String,String> issues = StuffHolder.getInstance().getStatusInfo();
 
     if (!issues.isEmpty()) {
+      log.severe("Status reports: " + makeReadable(issues));
       return Response.serverError().entity(issues).build();
     }
 
     return Response.ok().build();
   }
 
-  private Map<String, String> getStatusInternal() {
-    Map<String, String> issues;
-    issues = new HashMap<>();
-
-    // Admin has used the endpoint to signal degraded status
-    boolean degraded = StuffHolder.getInstance().isDegraded();
-    if (degraded) {
-      issues.put("admin-degraded", "true");
-    }
-
-    // Now the normal checks
-    try {
-      Policy.findByName("dummy", "-dummy-");
-    }
-    catch (Exception e) {
-      issues.put("backend-db", e.getMessage());
-    }
-
-    try {
-      engine.findTriggersById("dummy", "dummy");
-    }
-    catch (Exception e) {
-      issues.put("engine", e.getMessage());
-    }
-
-    try {
-      notifications.getApps();
-    } catch (Exception e) {
-      issues.put("notifications", e.getMessage());
-    }
-
-    if (!issues.isEmpty()) {
-      log.severe("Status reports: " + makeReadable(issues));
-    }
-
-    return issues;
-  }
 
   private String makeReadable(Map<String, String> issues) {
     return issues.entrySet()
