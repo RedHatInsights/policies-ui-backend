@@ -1001,7 +1001,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeNewPolicyNoRbac() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL;webhook";
+    tp.actions = "EMAIL;notification";
     tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
 
@@ -1200,7 +1200,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeAndUpdatePolicyNoUpdateAccess() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "webhook";
+    tp.actions = "notification";
     tp.conditions = "cores = 2";
     tp.name = "test2";
 

@@ -31,7 +31,7 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
 
    public void initialize(ValidActionS constraint) {
       validActions.add("email");
-      validActions.add("webhook");
+      validActions.add("notification");
    }
 
    public boolean isValid(String input, ConstraintValidatorContext context) {
