@@ -117,7 +117,7 @@ public class UserConfigServiceTest extends AbstractITest {
 
     mockServerClient.clear(HttpRequest.request()
                  .withMethod("PUT")
-                 .withPath("/endpoints/email/subscription/.*")
+                 .withPath(".*/endpoints/email/subscription/.*")
     );
 
     String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
