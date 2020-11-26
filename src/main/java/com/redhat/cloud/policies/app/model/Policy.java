@@ -77,7 +77,7 @@ public class Policy extends PanacheEntityBase {
   public String conditions;
 
   @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true." +
-      "Allowed values are 'email' and 'webhook'")
+      "Allowed values are 'email' and 'notification'")
   @ValidActionS
   public String actions;
 

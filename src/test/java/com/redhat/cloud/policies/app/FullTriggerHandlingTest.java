@@ -65,11 +65,11 @@ public class FullTriggerHandlingTest {
 
         FullTrigger ft = new FullTrigger(p);
 
-        p.actions = "webhook";
+        p.actions = "notification";
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("webhook",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
@@ -78,32 +78,32 @@ public class FullTriggerHandlingTest {
 
         FullTrigger ft = new FullTrigger(p);
 
-        p.actions = "webhook;email";
+        p.actions = "notification;email";
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(2,ft.trigger.actions.size());
-        int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("webhook")).count();
+        int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("notification")).count();
         Assert.assertEquals(2,i);
     }
 
     @Test
     void testActionUpdate3() {
         Policy p = createPolicy();
-        p.actions = "webhook;email";
+        p.actions = "notification;email";
 
         FullTrigger ft = new FullTrigger(p);
 
-        p.actions = "webhook;";
+        p.actions = "notification;";
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("webhook",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
     void testActionUpdate4() {
         Policy p = createPolicy();
-        p.actions = "webhook";
+        p.actions = "notification";
 
         FullTrigger ft = new FullTrigger(p);
 

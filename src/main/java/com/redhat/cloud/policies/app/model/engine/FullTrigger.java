@@ -41,7 +41,7 @@ public class FullTrigger {
     conditions = new ArrayList<>();
     trigger.actions = new HashSet<>();
     actionToTriggerActionMap = new HashMap<>();
-    actionToTriggerActionMap.put("webhook","webhook");
+    actionToTriggerActionMap.put("notification","notification");
     actionToTriggerActionMap.put("email","email");
   }
 
