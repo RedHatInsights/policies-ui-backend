@@ -86,14 +86,14 @@ public class UserConfigService {
       // Also send to notification service
       if (values.immediateEmail) {
         notifications.addNotification("policies-instant-mail", user.getRawRhIdHeader());
-          notificationsBackendAddNotification("instant", user.getRawRhIdHeader());
+        notificationsBackendAddNotification("instant", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-instant-mail", user.getRawRhIdHeader());
-          notificationsBackendRemoveNotification("instant", user.getRawRhIdHeader());
+        notificationsBackendRemoveNotification("instant", user.getRawRhIdHeader());
       }
       if (values.dailyEmail) {
         notifications.addNotification("policies-daily-mail", user.getRawRhIdHeader());
-          notificationsBackendAddNotification("daily", user.getRawRhIdHeader());
+        notificationsBackendAddNotification("daily", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-daily-mail", user.getRawRhIdHeader());
         notificationsBackendRemoveNotification("daily", user.getRawRhIdHeader());
