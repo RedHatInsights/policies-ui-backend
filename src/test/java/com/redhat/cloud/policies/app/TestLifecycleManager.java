@@ -99,7 +99,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     mockRbac();
     mockEngine();
     mockNotifications();
-    mockNotificationsBackend();
 
     props.put("engine/mp-rest/url", mockServerUrl);
     props.put("rbac/mp-rest/url", mockServerUrl);
@@ -354,7 +353,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
   private void mockNotifications() {
     mockServerClient
         .when(request()
-              .withPath("/endpoints/email/subscription/.*")
+              .withPath(".*/endpoints/email/subscription/.*")
               .withMethod("PUT")
         )
         .respond(response()
@@ -362,31 +361,12 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         );
     mockServerClient
         .when(request()
-              .withPath("/endpoints/email/subscription/.*")
+              .withPath(".*/endpoints/email/subscription/.*")
               .withMethod("DELETE")
         )
         .respond(response()
                  .withStatusCode(204)
         );
-  }
-
-  private void mockNotificationsBackend() {
-      mockServerClient
-              .when(request()
-                      .withPath("/api/integrations/v1.0/endpoints/email/subscription/.*")
-                      .withMethod("PUT")
-              )
-              .respond(response()
-                      .withStatusCode(204)
-              );
-      mockServerClient
-              .when(request()
-                      .withPath("/api/integrations/v1.0/endpoints/email/subscription/.*")
-                      .withMethod("DELETE")
-              )
-              .respond(response()
-                      .withStatusCode(204)
-              );
   }
 
   private void mockRbac() {
