@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.NotificationBackendSystem;
 import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
@@ -58,10 +57,6 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @Inject
-  @RestClient
-  NotificationBackendSystem notificationsBackend;
-
   @POST
   @Path("/email-preference")
   @Transactional
@@ -81,17 +76,13 @@ public class UserConfigService {
       // Also send to notification service
       if (values.immediateEmail) {
         notifications.addNotification("policies-instant-mail", user.getRawRhIdHeader());
-        notificationsBackend.addNotification("instant", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-instant-mail", user.getRawRhIdHeader());
-        notificationsBackend.removeNotification("instant", user.getRawRhIdHeader());
       }
       if (values.dailyEmail) {
         notifications.addNotification("policies-daily-mail", user.getRawRhIdHeader());
-        notificationsBackend.addNotification("daily", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-daily-mail", user.getRawRhIdHeader());
-        notificationsBackend.removeNotification("daily", user.getRawRhIdHeader());
       }
       if (tmp != null) {
         tmp.immediateEmail = values.immediateEmail;
