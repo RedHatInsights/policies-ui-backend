@@ -16,13 +16,11 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.NotificationBackendSystem;
 import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.SettingsValues;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -34,7 +32,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -60,13 +57,6 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @Inject
-  @RestClient
-  NotificationBackendSystem notificationsBackend;
-
-  @ConfigProperty(name = "notifications-backend.disable", defaultValue = "false")
-  Instance<Boolean> disableNotificationBackendCall;
-
   @POST
   @Path("/email-preference")
   @Transactional
@@ -86,17 +76,13 @@ public class UserConfigService {
       // Also send to notification service
       if (values.immediateEmail) {
         notifications.addNotification("policies-instant-mail", user.getRawRhIdHeader());
-        notificationsBackendAddNotification("instant", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-instant-mail", user.getRawRhIdHeader());
-        notificationsBackendRemoveNotification("instant", user.getRawRhIdHeader());
       }
       if (values.dailyEmail) {
         notifications.addNotification("policies-daily-mail", user.getRawRhIdHeader());
-        notificationsBackendAddNotification("daily", user.getRawRhIdHeader());
       } else {
         notifications.removeNotification("policies-daily-mail", user.getRawRhIdHeader());
-        notificationsBackendRemoveNotification("daily", user.getRawRhIdHeader());
       }
       if (tmp != null) {
         tmp.immediateEmail = values.immediateEmail;
@@ -113,18 +99,6 @@ public class UserConfigService {
     }
 
     return builder.build();
-  }
-
-  private void notificationsBackendAddNotification(String event, String header) {
-      if (!disableNotificationBackendCall.get()) {
-          notificationsBackend.addNotification(event, header);
-      }
-  }
-
-  private void notificationsBackendRemoveNotification(String event, String header) {
-      if (!disableNotificationBackendCall.get()) {
-          notificationsBackend.removeNotification(event, header);
-      }
   }
 
   @GET

@@ -107,36 +107,17 @@ public class UserConfigServiceTest extends AbstractITest {
     getJsonPath(authRbacNoAccess,403);
   }
 
-  @Test()
-  @Order(1999)
-  public void turnOffNotificationBackend() {
-    mockServerClient.clear(HttpRequest.request()
-            .withPath("/api/integrations/v1.0/endpoints/email/subscription/.*")
-    );
-
-    String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
-    sendPayload(payload, authHeader, 500);
-  }
-
-  @Test()
-  @Order(2000)
-  public void disableNotificationBackend() {
-    System.setProperty("notifications-backend.disable", "true");
-    String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
-    sendPayload(payload, authHeader, 200);
-  }
-
   // This needs to run as last test in here, as it clears out
   // the route to the (mocked) notification pod, so that the
   // value can not be set.
   // See also TestLifecycleManager.invoke()
-  // Assumes notifications-backend url is already disconnected
   @Test()
   @Order(2999)
   public void setAndFail() {
 
     mockServerClient.clear(HttpRequest.request()
-                 .withPath("/endpoints/email/subscription/.*")
+                 .withMethod("PUT")
+                 .withPath(".*/endpoints/email/subscription/.*")
     );
 
     String payload = "{  \"immediateEmail\": true, \"dailyEmail\": false }";
