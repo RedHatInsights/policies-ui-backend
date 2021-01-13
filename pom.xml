@@ -274,7 +274,35 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>sonar-scan</id>
+      <activation>
+        <property><name>sonar-scan</name></property>
+      </activation>
+      <properties>
+        <sonar.host.url>https://sonarqube.corp.redhat.com</sonar.host.url>
+        <sonar.projectKey>cloud.redhat.com:policies-ui-backend</sonar.projectKey>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>3.7.0.1746</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sonar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
 
+
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
 
