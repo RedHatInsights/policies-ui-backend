@@ -27,20 +27,20 @@ import io.quarkus.panache.common.Sort;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
-import javax.persistence.Query;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -172,17 +172,13 @@ public class Policy extends PanacheEntityBase {
 
     Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 
-    String qs = "SELECT p.id FROM Policy p WHERE " +  filter.getQuery() ;
 
-    Query q = em.createQuery(qs);
-    // Always set the customer id - even if that may be part of parameters below
-    q.setParameter("customerid",customer);
-    for (Map.Entry<String,Object> param : filter.getParameters().map().entrySet()) {
-      q.setParameter(param.getKey(),param.getValue());
-    }
-    List<UUID> results = q.getResultList();
+    PanacheQuery<Policy> panacheQuery = find(
+            filter.getQuery(),
+            filter.getParameters()
+    );
 
-    return results;
+    return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
   }
 
   public static Policy findById(String customer, UUID theId) {
@@ -292,4 +288,13 @@ public class Policy extends PanacheEntityBase {
         }
         return sb.toString();
     }
+}
+
+@RegisterForReflection
+class PolicyId {
+  public final UUID id;
+
+  PolicyId(UUID id) {
+    this.id = id;
+  }
 }
