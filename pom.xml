@@ -184,6 +184,9 @@
         <version>${compiler-plugin.version}</version>
         <configuration>
           <release>${java.release}</release>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

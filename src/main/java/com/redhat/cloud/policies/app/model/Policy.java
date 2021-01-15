@@ -294,7 +294,7 @@ public class Policy extends PanacheEntityBase {
 class PolicyId {
   public final UUID id;
 
-  PolicyId(UUID id) {
+  public PolicyId(UUID id) {
     this.id = id;
   }
 }
