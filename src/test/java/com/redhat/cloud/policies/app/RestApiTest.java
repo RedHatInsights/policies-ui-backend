@@ -20,6 +20,9 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -42,8 +45,8 @@ import javax.json.bind.JsonbBuilder;
 import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -102,9 +105,9 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
         .extract().body().jsonPath();
 
-    Assert.assertEquals(numberOfPolicies, jsonPath.getList("data").size());
+    assertEquals(numberOfPolicies, jsonPath.getList("data").size());
     Map<String,Object> data = (Map<String, Object>) jsonPath.getList("data").get(0);
-    Assert.assertTrue(data.containsKey("lastTriggered"));
+    assertTrue(data.containsKey("lastTriggered"));
   }
 
   @Test
@@ -142,7 +145,7 @@ class RestApiTest extends AbstractITest {
         .statusCode(200)
         .extract().body().jsonPath();
 
-    Assert.assertEquals(numberOfPolicies, jsonPath.getList("").size());
+    assertEquals(numberOfPolicies, jsonPath.getList("").size());
   }
 
   @Test
@@ -217,10 +220,10 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(10, jsonPath.getList("data").size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(10, jsonPath.getList("data").size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(3, links.size());
+    assertEquals(3, links.size());
     extractAndCheck(links,"first",10,0);
     extractAndCheck(links,"last",10,10);
     extractAndCheck(links,"next",10,10);
@@ -238,10 +241,10 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(5, jsonPath.getList("data").size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(5, jsonPath.getList("data").size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(),3);
+    assertEquals(links.size(),3);
     extractAndCheck(links,"first",5,0);
     extractAndCheck(links,"last",5,10);
     extractAndCheck(links,"next",5,5);
@@ -260,10 +263,10 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(5, jsonPath.getList("data").size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(5, jsonPath.getList("data").size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(),4);
+    assertEquals(links.size(),4);
     extractAndCheck(links,"first",5,0);
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,10);
@@ -283,7 +286,7 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(policiesInDb, jsonPath.getList("").size());
+    assertEquals(policiesInDb, jsonPath.getList("").size());
   }
 
   @Test
@@ -299,9 +302,9 @@ class RestApiTest extends AbstractITest {
             .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(),4);
+    assertEquals(links.size(),4);
     extractAndCheck(links,"first",5,0);
     extractAndCheck(links,"prev",5,0);
     extractAndCheck(links,"next",5,7);
@@ -321,10 +324,10 @@ class RestApiTest extends AbstractITest {
                     .extract().body().jsonPath();
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(1, jsonPath.getList("data").size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(1, jsonPath.getList("data").size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(3, links.size());
+    assertEquals(3, links.size());
     extractAndCheck(links,"first",1,0);
     extractAndCheck(links,"next",1,1);
     extractAndCheck(links,"last",1,11);
@@ -346,9 +349,9 @@ class RestApiTest extends AbstractITest {
     int lastOffset = 6;
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(),3);
+    assertEquals(links.size(),3);
     extractAndCheck(links,"first",6,0);
     extractAndCheck(links,"next",6,6);
     extractAndCheck(links,"last", lastLimit, lastOffset);
@@ -362,7 +365,7 @@ class RestApiTest extends AbstractITest {
                     .statusCode(200)
                     .extract().body().jsonPath();
 
-    Assert.assertTrue(jsonPathLastPage.getList("data").size() > 0);
+    assertTrue(jsonPathLastPage.getList("data").size() > 0);
   }
 
   @Test
@@ -381,7 +384,7 @@ class RestApiTest extends AbstractITest {
     int lastOffset = 11;
 
     long policiesInDb = countPoliciesInDB();
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
     extractAndCheck(links,"last", lastLimit, lastOffset);
 
@@ -394,7 +397,7 @@ class RestApiTest extends AbstractITest {
                     .statusCode(200)
                     .extract().body().jsonPath();
 
-    Assert.assertTrue(jsonPathLastPage.getList("data").size() > 0);
+    assertTrue(jsonPathLastPage.getList("data").size() > 0);
   }
 
   @Test
@@ -412,10 +415,10 @@ class RestApiTest extends AbstractITest {
 
     long policiesInDb = countPoliciesInDB();
 
-    Assert.assertEquals(policiesInDb, data.size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(policiesInDb, data.size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(), 2);
+    assertEquals(links.size(), 2);
     extractAndCheck(links,"first",-1,0);
     extractAndCheck(links,"last",-1,0);
   }
@@ -435,10 +438,10 @@ class RestApiTest extends AbstractITest {
 
     long policiesInDb = countPoliciesInDB();
 
-    Assert.assertEquals(policiesInDb, data.size());
-    Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+    assertEquals(policiesInDb, data.size());
+    assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
     Map<String, String> links = jsonPath.get("links");
-    Assert.assertEquals(links.size(), 2);
+    assertEquals(links.size(), 2);
     extractAndCheck(links,"first",-1,0);
     extractAndCheck(links,"last",-1,0);
   }
@@ -514,7 +517,7 @@ class RestApiTest extends AbstractITest {
           .statusCode(200)
         .extract().body().jsonPath().getInt("size()");
 
-    Assert.assertTrue(size >= 8);
+    assertTrue(size >= 8);
   }
 
   @Test
@@ -528,7 +531,7 @@ class RestApiTest extends AbstractITest {
           .statusCode(200)
         .extract().body().jsonPath().getInt("size()");
 
-    Assert.assertTrue(size <= 3);
+    assertTrue(size <= 3);
   }
 
 
@@ -585,15 +588,15 @@ class RestApiTest extends AbstractITest {
         .extract().jsonPath();
 
     TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
-    Assert.assertEquals("Action does not match", "EMAIL roadrunner@acme.org", policy.actions);
-    Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
-    Assert.assertTrue("Policy is not enabled", policy.isEnabled);
+    assertEquals("EMAIL roadrunner@acme.org", policy.actions, "Action does not match");
+    assertEquals("\"cores\" == 1", policy.conditions, "Conditions do not match");
+    assertTrue(policy.isEnabled, "Policy is not enabled");
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(policy.lastTriggered);
-    Assert.assertEquals(2020,cal.get(Calendar.YEAR));
-    Assert.assertEquals(4, cal.get(Calendar.MONTH));
-    Assert.assertEquals(10, cal.get(Calendar.DAY_OF_MONTH));
-    Assert.assertEquals(10, cal.get(Calendar.HOUR));
+    assertEquals(2020,cal.get(Calendar.YEAR));
+    assertEquals(4, cal.get(Calendar.MONTH));
+    assertEquals(10, cal.get(Calendar.DAY_OF_MONTH));
+    assertEquals(10, cal.get(Calendar.HOUR));
   }
 
   @Test
@@ -630,13 +633,13 @@ class RestApiTest extends AbstractITest {
 
     JsonPath jsonPath = er.body().jsonPath();
     int totalCount = jsonPath.getInt("meta.count");
-    Assert.assertEquals(2,totalCount);
+    assertEquals(2,totalCount);
     List returnedBody = jsonPath.getList("data");
     try {
-      Assert.assertEquals(2, returnedBody.size());
+      assertEquals(2, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
-      Assert.assertEquals("VM 22", map.get("hostName"));
-      Assert.assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
+      assertEquals("VM 22", map.get("hostName"));
+      assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
     }
     finally {
       deletePolicyById(uuid);
@@ -677,13 +680,13 @@ class RestApiTest extends AbstractITest {
 
     JsonPath jsonPath = er.body().jsonPath();
     int totalCount = jsonPath.getInt("meta.count");
-    Assert.assertEquals(1,totalCount);
+    assertEquals(1,totalCount);
     List returnedBody = jsonPath.getList("data");
     try {
-      Assert.assertEquals(1, returnedBody.size());
+      assertEquals(1, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
-      Assert.assertEquals("VM", map.get("hostName"));
-      Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
+      assertEquals("VM", map.get("hostName"));
+      assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
     }
     finally {
       deletePolicyById(uuid);
@@ -707,13 +710,13 @@ class RestApiTest extends AbstractITest {
 
     JsonPath jsonPath = er.body().jsonPath();
     int totalCount = jsonPath.getInt("meta.count");
-    Assert.assertEquals(1,totalCount);
+    assertEquals(1,totalCount);
     List returnedBody = jsonPath.getList("data");
     try {
-      Assert.assertEquals(1, returnedBody.size());
+      assertEquals(1, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
-      Assert.assertEquals("VM22", map.get("hostName"));
-      Assert.assertEquals("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", map.get("id"));
+      assertEquals("VM22", map.get("hostName"));
+      assertEquals("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", map.get("id"));
     }
     finally {
       deletePolicyById(uuid);
@@ -737,13 +740,13 @@ class RestApiTest extends AbstractITest {
 
     JsonPath jsonPath = er.body().jsonPath();
     int totalCount = jsonPath.getInt("meta.count");
-    Assert.assertEquals(1,totalCount);
+    assertEquals(1,totalCount);
     List returnedBody = jsonPath.getList("data");
     try {
-      Assert.assertEquals(1, returnedBody.size());
+      assertEquals(1, returnedBody.size());
       Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
-      Assert.assertEquals("VM", map.get("hostName"));
-      Assert.assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
+      assertEquals("VM", map.get("hostName"));
+      assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
     }
     finally {
       deletePolicyById(uuid);
@@ -827,7 +830,7 @@ class RestApiTest extends AbstractITest {
 
   Headers headers = er.headers();
 
-  assert headers.hasHeaderWithName("Location");
+  assertTrue(headers.hasHeaderWithName("Location"));
   // Extract location and then check in subsequent call
   // that the policy is stored
   Header locationHeader = headers.get("Location");
@@ -837,9 +840,9 @@ class RestApiTest extends AbstractITest {
 
     try {
       TestPolicy returnedBody = er.body().as(TestPolicy.class);
-      Assert.assertNotNull(returnedBody);
-      Assert.assertEquals("cores = 2", returnedBody.conditions);
-      Assert.assertEquals("test1", returnedBody.name);
+      assertNotNull(returnedBody);
+      assertEquals("cores = 2", returnedBody.conditions);
+      assertEquals("test1", returnedBody.name);
 
       JsonPath body =
           given()
@@ -851,9 +854,9 @@ class RestApiTest extends AbstractITest {
               .extract().body()
               .jsonPath();
 
-      assert body.get("conditions").equals("cores = 2");
-      assert body.get("name").equals("test1");
-      Assert.assertEquals(body.get("id").toString(), returnedBody.id.toString());
+      assertTrue(body.get("conditions").equals("cores = 2"));
+      assertTrue(body.get("name").equals("test1"));
+      assertEquals(body.get("id").toString(), returnedBody.id.toString());
     } finally {
       // now delete it again
       given()
@@ -877,7 +880,7 @@ class RestApiTest extends AbstractITest {
             .when().post(API_BASE_V1_0 + "/policies")
             .then()
             .statusCode(400);
-    Assert.assertTrue(tp.name.length() > 150);
+    assertTrue(tp.name.length() > 150);
   }
 
   @Test
@@ -894,7 +897,7 @@ class RestApiTest extends AbstractITest {
             .when().put(API_BASE_V1_0 + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(400);
-    Assert.assertTrue(tp.name.length() > 150);
+    assertTrue(tp.name.length() > 150);
   }
 
   @Test
@@ -1039,14 +1042,14 @@ class RestApiTest extends AbstractITest {
         .extract().headers()
         ;
 
-    assert headers.hasHeaderWithName("Location");
+    assertTrue(headers.hasHeaderWithName("Location"));
     // Extract location and then check in subsequent call
     // that the policy is stored
     Header locationHeader = headers.get("Location");
     String location = locationHeader.getValue();
     // location is  a full url to the new resource.
     System.out.println(location);
-    Assert.assertTrue(location.endsWith(testUUID.toString()));
+    assertTrue(location.endsWith(testUUID.toString()));
 
     String resp =
     given()
@@ -1060,15 +1063,15 @@ class RestApiTest extends AbstractITest {
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
-    Assert.assertEquals(tp.conditions,ret.conditions);
+    assertEquals(tp.conditions,ret.conditions);
 
-    Assert.assertNotNull(ret.ctime);
-    Assert.assertNotNull(ret.mtime);
+    assertNotNull(ret.ctime);
+    assertNotNull(ret.mtime);
     String storeTime = ret.ctime; // keep for below
     Timestamp ctime = Timestamp.valueOf(ret.ctime);
     Timestamp mtime1 = Timestamp.valueOf(ret.mtime);
     // ctime and mtime oftern differ a tiny bit, which makes the nanos differ. Let's compare with some slack
-    Assert.assertTrue("Ctime: " + ctime + ", mtime: " + mtime1 , Math.abs(mtime1.getTime()  - ctime.getTime()) < 2);
+    assertTrue(Math.abs(mtime1.getTime()  - ctime.getTime()) < 2, "Ctime: " + ctime + ", mtime: " + mtime1);
 
     try {
       // update
@@ -1089,13 +1092,13 @@ class RestApiTest extends AbstractITest {
               .statusCode(200)
               .extract().body().jsonPath();
       String content = jsonPath.getString("conditions");
-      assert content.equalsIgnoreCase("cores = 3");
+      assertTrue(content.equalsIgnoreCase("cores = 3"));
 
-      Assert.assertEquals(storeTime,jsonPath.getString("ctime"));
-      Assert.assertNotEquals(storeTime,jsonPath.getString("mtime"));
+      assertEquals(storeTime,jsonPath.getString("ctime"));
+      Assertions.assertNotEquals(storeTime,jsonPath.getString("mtime"));
       Timestamp mtime2 = Timestamp.valueOf(jsonPath.getString("mtime"));
-      Assert.assertTrue(ctime.before(mtime2));
-      Assert.assertTrue(mtime1.before(mtime2));
+      assertTrue(ctime.before(mtime2));
+      assertTrue(mtime1.before(mtime2));
 
     }
     finally {
@@ -1155,11 +1158,11 @@ class RestApiTest extends AbstractITest {
               .jsonPath();
 
       boolean isEnabled = jp.getBoolean("isEnabled");
-      Assert.assertTrue(isEnabled);
+      assertTrue(isEnabled);
 
       String t = jp.getString("mtime");
       Timestamp t2 = Timestamp.valueOf(t);
-      Assert.assertTrue(t2.after(t1));
+      assertTrue(t2.after(t1));
 
       // Now disable
       given()
@@ -1180,9 +1183,9 @@ class RestApiTest extends AbstractITest {
               .statusCode(200)
               .extract().body().as(TestPolicy.class);
 
-      Assert.assertFalse(testPolicy.isEnabled);
+      Assertions.assertFalse(testPolicy.isEnabled);
       Timestamp t3 = Timestamp.valueOf(testPolicy.mtime);
-      Assert.assertTrue(t3.after(t2));
+      assertTrue(t3.after(t2));
 
     }
     finally {
@@ -1216,7 +1219,7 @@ class RestApiTest extends AbstractITest {
         .extract().headers()
         ;
 
-    assert headers.hasHeaderWithName("Location");
+    assertTrue(headers.hasHeaderWithName("Location"));
     // Extract location and then check in subsequent call
     // that the policy is stored
     Header locationHeader = headers.get("Location");
@@ -1236,7 +1239,7 @@ class RestApiTest extends AbstractITest {
 
     Jsonb jsonb = JsonbBuilder.create();
     TestPolicy ret = jsonb.fromJson(resp,TestPolicy.class);
-    assert tp.conditions.equals(ret.conditions);
+    assertTrue(tp.conditions.equals(ret.conditions));
 
     try {
       // update
@@ -1400,7 +1403,7 @@ class RestApiTest extends AbstractITest {
             .when().post(API_BASE_V1_0 + "/policies/validate-name")
             .then()
             .statusCode(400);
-    Assert.assertTrue(name.length() > 150);
+    assertTrue(name.length() > 150);
   }
 
   @Test
@@ -1449,7 +1452,7 @@ class RestApiTest extends AbstractITest {
             .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
             .then()
             .statusCode(400);
-    Assert.assertTrue(name.length() > 150);
+    assertTrue(name.length() > 150);
   }
 
 
@@ -1549,9 +1552,9 @@ class RestApiTest extends AbstractITest {
       .extract().body().jsonPath();
 
     List<String> list = jsonPath.getList("");
-    Assert.assertEquals(3, list.size());
-    Assert.assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
-    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+    assertEquals(3, list.size());
+    assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
+    Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
   }
 
   @Test
@@ -1614,9 +1617,9 @@ class RestApiTest extends AbstractITest {
       .extract().body().jsonPath();
 
     List<String> list = jsonPath.getList("");
-    Assert.assertEquals(1, list.size());
-    Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
-    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+    assertEquals(1, list.size());
+    assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
+    Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
 
     jsonPath =
     given()
@@ -1631,9 +1634,9 @@ class RestApiTest extends AbstractITest {
       .extract().body().jsonPath();
 
     list = jsonPath.getList("");
-    Assert.assertEquals(1, list.size());
-    Assert.assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
-    Assert.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
+    assertEquals(1, list.size());
+    assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
+    Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
 
   }
 

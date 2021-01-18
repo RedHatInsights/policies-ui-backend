@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 
 
-public class Filter implements Cloneable {
+public class Filter {
 
     private final Parameters parameters = new Parameters();
     private StringBuilder query = new StringBuilder();
-    private List<FilterItem> items = new ArrayList<>();
+    private final List<FilterItem> items = new ArrayList<>();
 
     public Filter() {
 
@@ -24,6 +24,14 @@ public class Filter implements Cloneable {
             this.parameters.and(key, map.get(key));
         }
         this.query = query;
+    }
+
+    public Filter(Filter in) {
+        for (String key : in.parameters.map().keySet()) {
+            this.parameters.and(key, in.parameters.map().get(key));
+        }
+        this.query.append(in.query);
+        this.items.addAll(in.items);
     }
 
     public String getQuery() {
@@ -76,13 +84,6 @@ public class Filter implements Cloneable {
         query.append(field);
 
         return this;
-    }
-
-    @Override
-    public Object clone() {
-        Filter filter = new Filter(this.parameters.map(), new StringBuilder(this.query));
-        filter.items = this.getItems();
-        return filter;
     }
 
     public enum Operator {

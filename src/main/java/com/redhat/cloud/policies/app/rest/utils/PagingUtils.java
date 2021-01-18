@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest.utils;
 
-import static java.lang.Long.max;
+import static java.lang.Integer.max;
 
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;

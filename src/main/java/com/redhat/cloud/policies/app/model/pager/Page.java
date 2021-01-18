@@ -24,9 +24,12 @@ import java.util.ListIterator;
 
 public class Page<T> implements List<T> {
 
-    private List<T> wrapped;
-    private Pager pager;
-    private long totalCount;
+    public static final String C_REMOVE = "remove";
+    public static final String C_ADD_ALL = "addAll";
+    public static final String C_ADD = "add";
+    private final List<T> wrapped;
+    private final Pager pager;
+    private final long totalCount;
 
     public Page(List<T> wrapped, Pager pager, long totalCount) {
         this.wrapped = wrapped;
@@ -89,12 +92,12 @@ public class Page<T> implements List<T> {
 
     @Override
     public boolean add(T t) {
-        throw new UnsupportedOperationException("add");
+        throw new UnsupportedOperationException(C_ADD);
     }
 
     @Override
     public boolean remove(Object o) {
-        throw new UnsupportedOperationException("remove");
+        throw new UnsupportedOperationException(C_REMOVE);
     }
 
     @Override
@@ -105,12 +108,12 @@ public class Page<T> implements List<T> {
 
     @Override
     public boolean addAll(Collection<? extends T> collection) {
-        throw new UnsupportedOperationException("addAll");
+        throw new UnsupportedOperationException(C_ADD_ALL);
     }
 
     @Override
     public boolean addAll(int i, Collection<? extends T> collection) {
-        throw new UnsupportedOperationException("addAll");
+        throw new UnsupportedOperationException(C_ADD_ALL);
     }
 
     @Override
@@ -140,12 +143,12 @@ public class Page<T> implements List<T> {
 
     @Override
     public void add(int i, T t) {
-        throw new UnsupportedOperationException("add");
+        throw new UnsupportedOperationException(C_ADD);
     }
 
     @Override
     public T remove(int i) {
-        throw new UnsupportedOperationException("remove");
+        throw new UnsupportedOperationException(C_REMOVE);
     }
 
     @Override
@@ -178,7 +181,7 @@ public class Page<T> implements List<T> {
 
     class WrapperListIterator<T> implements ListIterator<T> {
 
-        private ListIterator<T> wrapped;
+        private final ListIterator<T> wrapped;
 
         private WrapperListIterator(ListIterator<T> wrapped) {
             this.wrapped = wrapped;
@@ -216,7 +219,7 @@ public class Page<T> implements List<T> {
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("remove");
+            throw new UnsupportedOperationException(C_REMOVE);
         }
 
         @Override
@@ -226,7 +229,7 @@ public class Page<T> implements List<T> {
 
         @Override
         public void add(T t) {
-            throw new UnsupportedOperationException("add");
+            throw new UnsupportedOperationException(C_ADD);
         }
     }
 

@@ -104,11 +104,14 @@ public class ProcSelfStatusExporter {
             break;
           case "Threads:":
             threads = Integer.parseInt(parts[1]) ;
+            break;
+          default:
+            // That file has more entries, but which we don't care about
         }
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
+      log.warning("Reading failed: " + e.getMessage());
     }
   }
 

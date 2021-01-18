@@ -29,5 +29,6 @@ public class Condition {
   public long lastEvaluation;
 
   public Condition() {
+    // needed for (de)serialization purposes
   }
 }
