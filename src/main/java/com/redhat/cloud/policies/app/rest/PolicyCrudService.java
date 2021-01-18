@@ -42,6 +42,8 @@ import javax.inject.Inject;
 import javax.json.JsonString;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -120,6 +122,9 @@ public class PolicyCrudService {
 
   @Inject
   EntityManager entityManager;
+
+  @Inject
+  TransactionManager transactionManager;
 
   @Inject
   UUIDHelperBean uuidHelper;
@@ -683,12 +688,17 @@ public class PolicyCrudService {
           existingTrigger.updateFromPolicy(storedPolicy);
           try {
             engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
-            Policy.persist(storedPolicy);
           } catch (Exception e) {
+            transactionManager.setRollbackOnly();
             return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
           }
-          Policy.persist(storedPolicy);
         } catch (Throwable t) {
+          try {
+            transactionManager.setRollbackOnly();
+          } catch (SystemException ex) {
+            throw new RuntimeException(ex);
+          }
+
           return getResponseSavingPolicyThrowable(t);
         }
 
