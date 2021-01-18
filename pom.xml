@@ -12,6 +12,7 @@
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <java.release>11</java.release>
+    <java.source>11</java.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <quarkus.version>1.9.1.Final</quarkus.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
@@ -184,6 +185,7 @@
         <version>${compiler-plugin.version}</version>
         <configuration>
           <release>${java.release}</release>
+          <source>${java.source}}</source>
         </configuration>
       </plugin>
       <plugin>
