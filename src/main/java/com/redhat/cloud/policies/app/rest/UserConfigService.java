@@ -30,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
@@ -47,6 +48,8 @@ import java.util.logging.Logger;
 @RequestScoped
 public class UserConfigService {
 
+  public static final String FALSE = "false";
+  public static final String TRUE = "true";
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
@@ -65,7 +68,7 @@ public class UserConfigService {
     Response.ResponseBuilder builder;
 
     if (!user.canWriteAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type("text/plain").build();
+      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type(MediaType.TEXT_PLAIN_TYPE).build();
     }
 
     values.username = user.getName();
@@ -94,7 +97,7 @@ public class UserConfigService {
     }
     catch (Exception e) {
       builder = Response.serverError().entity("Storing of settings in notification service failed.");
-      builder.type("text/plain");
+      builder.type(MediaType.TEXT_PLAIN_TYPE);
       log.warning("Storing settings failed: " + e.getMessage());
     }
 
@@ -106,7 +109,7 @@ public class UserConfigService {
   public Response getSettingsSchema() {
 
     if (!user.canReadAll()) {
-       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type("text/plain").build();
+       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type(MediaType.TEXT_PLAIN_TYPE).build();
      }
 
     String response ;
@@ -117,13 +120,13 @@ public class UserConfigService {
       // Now we need to find the user record and populate the reply accordingly
       SettingsValues values = SettingsValues.findById(user.getName());
       if (values != null) {
-        response = response.replace("%1", values.immediateEmail ? "true" : "false");
-        response = response.replace("%2", values.dailyEmail ? "true" : "false");
+        response = response.replace("%1", values.immediateEmail ? TRUE : FALSE);
+        response = response.replace("%2", values.dailyEmail ? TRUE : FALSE);
       }
       else {
         // User's record does not yet exist, so use defaults
-        response = response.replace("%1", "false");
-        response = response.replace("%2", "false");
+        response = response.replace("%1", FALSE);
+        response = response.replace("%2", FALSE);
       }
       builder = Response.ok(response);
       EntityTag etag = new EntityTag(String.valueOf(response.hashCode()));

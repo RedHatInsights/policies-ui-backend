@@ -20,6 +20,7 @@ import com.redhat.cloud.policies.app.model.Msg;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Priority;
+import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.validation.ValidationException;
 import javax.ws.rs.NotFoundException;
@@ -53,8 +54,13 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
   private Msg getBody(Response response) {
     String msg = response.readEntity(String.class);
     if (msg != null && !msg.isEmpty()) {
-      Map<String,String> errorMap  = JsonbBuilder.create().fromJson(msg, HashMap.class);
-      return new Msg(errorMap.get("errorMsg"));
+      try (Jsonb jsonb = JsonbBuilder.create()) {
+        Map<String, String> errorMap = jsonb.fromJson(msg, HashMap.class);
+        return new Msg(errorMap.get("errorMsg"));
+      }
+      catch (Exception e) {
+        return new Msg("Parsing of response failed. Status code was " + response.getStatus());
+      }
     } else {
       return new Msg("-- no body received, status code is " + response.getStatus());
     }

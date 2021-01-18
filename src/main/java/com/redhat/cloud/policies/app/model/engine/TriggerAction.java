@@ -28,6 +28,6 @@ public class TriggerAction {
   public Map<String, Object> properties = new HashMap<>();
 
   public TriggerAction() {
-//    actionId = UUID.randomUUID().toString();
+    // needed for (de)serialization purposes
   }
 }

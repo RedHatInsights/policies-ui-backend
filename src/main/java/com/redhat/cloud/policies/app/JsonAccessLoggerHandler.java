@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app;
 
+import com.redhat.cloud.policies.app.auth.IncomingRequestFilter;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -35,6 +36,7 @@ import javax.json.bind.JsonbBuilder;
  */
 public class JsonAccessLoggerHandler implements LoggerHandler {
 
+  public static final String REFERRER = "referrer";
   Jsonb jsonb;
   JsonObjectBuilder jsonObjectBuilder;
   private final boolean filterHealthCalls;
@@ -66,9 +68,13 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
     jsonObjectBuilder.add("uri",uri);
 
     // See IncomingRequestFilter on how this is populated
-    String acctId = (String) context.data().get("x-rh-account");
+    String acctId = (String) context.data().get(IncomingRequestFilter.X_RH_ACCOUNT);
     if (acctId!=null) {
       jsonObjectBuilder.add("acct", acctId);
+    }
+    String user = (String) context.data().get(IncomingRequestFilter.X_RH_USER);
+    if (user!=null) {
+      jsonObjectBuilder.add("user", user);
     }
 
     String versionFormatted ;
@@ -95,11 +101,11 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
     jsonObjectBuilder.add("duration", System.currentTimeMillis()-timestamp);
 
     final MultiMap headers = request.headers();
-    String referrer = headers.contains("referrer") ? headers.get("referrer") : headers.get("referer");
+    String referrer = headers.contains(REFERRER) ? headers.get(REFERRER) : headers.get("referer");
     String userAgent = request.headers().get("user-agent");
 
     if (referrer != null) {
-      jsonObjectBuilder.add("referrer", referrer);
+      jsonObjectBuilder.add(REFERRER, referrer);
     }
     if (userAgent != null) {
       jsonObjectBuilder.add("user_agent", userAgent);

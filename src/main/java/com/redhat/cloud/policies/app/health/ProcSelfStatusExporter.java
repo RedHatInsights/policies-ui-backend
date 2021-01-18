@@ -108,7 +108,7 @@ public class ProcSelfStatusExporter {
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
+      log.warning("Reading failed: " + e.getMessage());
     }
   }
 

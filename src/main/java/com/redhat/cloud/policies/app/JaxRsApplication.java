@@ -56,16 +56,16 @@ public class JaxRsApplication extends Application {
 
     String commmitSha = System.getenv("OPENSHIFT_BUILD_COMMIT");
     if (commmitSha != null ) {
-      String openshift_build_reference = System.getenv("OPENSHIFT_BUILD_REFERENCE");
-      String openshift_build_name = System.getenv("OPENSHIFT_BUILD_NAME");
+      String openshiftBuildReference = System.getenv("OPENSHIFT_BUILD_REFERENCE");
+      String openshiftBuildName = System.getenv("OPENSHIFT_BUILD_NAME");
 
-      String info = String.format("\n    s2i-build [%s]\n    from branch [%s]\n    with git sha [%s]",
-          openshift_build_name,
-          openshift_build_reference,
+      String info = String.format("%n    s2i-build [%s]%n    from branch [%s]%n    with git sha [%s]",
+          openshiftBuildName,
+          openshiftBuildReference,
           commmitSha);
       log.info(info);
     } else {
-      log.info("\n    Not built on OpenShift s2i, no version info available");
+      log.info("%n    Not built on OpenShift s2i, no version info available");
     }
   }
 }

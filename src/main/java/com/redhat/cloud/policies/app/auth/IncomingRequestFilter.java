@@ -59,6 +59,9 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class IncomingRequestFilter implements ContainerRequestFilter {
 
+  public static final String X_RH_ACCOUNT = "x-rh-account";
+  public static final String X_RH_USER = "x-rh-user";
+
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
   private final boolean logFine = log.isLoggable(Level.FINE);
 
@@ -66,7 +69,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
   @Inject
   RhIdPrincipalProducer producer;
 
-  volatile CurrentVertxRequest currentVertxRequest;
+  CurrentVertxRequest currentVertxRequest;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -114,8 +117,9 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
       RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
       rhPrincipal.setRawRhIdHeader(xrhid_header);
 
-      // Attach account id to the context so we can log it later
-      routingContext.put("x-rh-account",rhIdentity.identity.accountNumber);
+      // Attach account id and user to the context so we can log it later
+      routingContext.put(X_RH_ACCOUNT,rhIdentity.identity.accountNumber);
+      routingContext.put(X_RH_USER,rhIdentity.getUsername());
 
       SecurityContext sctx = new RhIdSecurityContext(rhIdentity,rhPrincipal);
       requestContext.setSecurityContext(sctx);

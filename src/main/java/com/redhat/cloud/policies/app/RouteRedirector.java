@@ -46,11 +46,13 @@ public class RouteRedirector {
   void myRedirector(RoutingContext rc) {
     String uri = rc.request().uri();
     if (log.isLoggable(Level.FINER)) {
+      uri = uri.replaceAll("[\n|\r|\t]", "_");
       log.finer("Incoming uri: " + uri);
     }
     if (uri.startsWith(API_POLICIES_V_1)) {
       String remain = uri.substring(API_POLICIES_V_1.length());
       if (log.isLoggable(Level.FINER)) {
+        remain = remain.replaceAll("[\n|\r|\t]", "_");
         log.finer("Rerouting to :" + API_POLICIES_V_1_0 +remain);
       }
 

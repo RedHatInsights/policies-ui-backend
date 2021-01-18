@@ -29,7 +29,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * We gather the Status of ourselves and remotes.
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
 @ApplicationScoped
 public class ScheduledStatusProducer {
 
-  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+  public static final String DUMMY = "dummy";
 
   @Inject
   @RestClient
@@ -72,14 +71,14 @@ public class ScheduledStatusProducer {
 
       // Now the normal checks
       try {
-        Policy.findByName("dummy", "-dummy-");
+        Policy.findByName(DUMMY, "-dummy-");
       }
       catch (Exception e) {
         issues.put("backend-db", e.getMessage());
       }
 
       try {
-        engine.findTriggersById("dummy", "dummy");
+        engine.findTriggersById(DUMMY, DUMMY);
       }
       catch (Exception e) {
         issues.put("engine", e.getMessage());

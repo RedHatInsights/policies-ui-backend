@@ -428,7 +428,7 @@ public class PolicyCrudService {
     if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
       return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
     } else {
-      t.printStackTrace();
+      log.warning("Getting response failed: " + t.getMessage());
       return Response.status(500, t.getMessage()).build();
     }
   }
@@ -611,7 +611,7 @@ public class PolicyCrudService {
       }
       return Response.ok(changed).build();
     } catch (Throwable e) {
-      e.printStackTrace();  // TODO: Customise this generated block
+      log.severe("Enabling failed: " + e.getMessage());
       return Response.serverError().build();
     }
   }
