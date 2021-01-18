@@ -22,7 +22,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author hrupp
@@ -34,12 +39,12 @@ public class RbacParsingTest {
     File file = new File("src/test/resources/rbac_example.json");
     Jsonb jb = JsonbBuilder.create();
     RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
-    assert rbac.data.size()==2;
+    assertEquals(rbac.data.size(), 2);
 
-    assert rbac.canWrite("resname");
-    assert !rbac.canRead("resname");
-    assert !rbac.canWriteAll();
-    assert !rbac.canWrite("no-perm");
+    assertTrue(rbac.canWrite("resname"));
+    assertFalse(rbac.canRead("resname"));
+    assertFalse(rbac.canWriteAll());
+    assertFalse(rbac.canWrite("no-perm"));
 
   }
 
@@ -49,8 +54,8 @@ public class RbacParsingTest {
     Jsonb jb = JsonbBuilder.create();
     RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assert !rbac.canReadAll();
-    assert !rbac.canWriteAll();
+    assertFalse(rbac.canReadAll());
+    assertFalse(rbac.canWriteAll());
   }
 
   @Test
@@ -59,10 +64,10 @@ public class RbacParsingTest {
     Jsonb jb = JsonbBuilder.create();
     RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assert rbac.canRead("*");
-    assert rbac.canReadAll();
-    assert rbac.canWrite("*");
-    assert rbac.canWriteAll();
+    assertTrue(rbac.canRead("*"));
+    assertTrue(rbac.canReadAll());
+    assertTrue(rbac.canWrite("*"));
+    assertTrue(rbac.canWriteAll());
   }
 
   @Test
@@ -71,8 +76,8 @@ public class RbacParsingTest {
     Jsonb jb = JsonbBuilder.create();
     RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assert rbac.canReadAll();
-    assert !rbac.canWriteAll();
-    assert rbac.canDo("*","execute");
+    assertTrue(rbac.canReadAll());
+    assertFalse(rbac.canWriteAll());
+    assertTrue(rbac.canDo("*","execute"));
   }
 }

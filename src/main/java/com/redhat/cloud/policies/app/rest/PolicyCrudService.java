@@ -99,6 +99,11 @@ import static java.lang.Integer.min;
 @RequestScoped
 public class PolicyCrudService {
 
+  public static final String MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES = "Missing permissions to retrieve policies";
+  public static final String MISSING_PERMISSIONS_TO_VERIFY_POLICY = "Missing permissions to verify policy";
+  public static final String MISSING_PERMISSIONS_TO_UPDATE_POLICY = "Missing permissions to update policy";
+  public static final String ERROR_STRING = "error";
+  public static final String CTIME_STRING = "ctime";
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
   private static final ObjectMapper OM = new ObjectMapper();
 
@@ -128,8 +133,6 @@ public class PolicyCrudService {
   // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
   // This class is used only for swagger return type
   private static class PagedResponseOfPolicy extends PagingUtils.PagedResponse<Policy> {
-    @SuppressWarnings("unused")
-    private List<Policy> data;
     private PagedResponseOfPolicy(Page<Policy> page) {
       super(page);
     }
@@ -237,7 +240,7 @@ public class PolicyCrudService {
   public Response getPoliciesForCustomer() {
 
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
     }
 
     Page<Policy> page;
@@ -335,7 +338,7 @@ public class PolicyCrudService {
   public Response getPolicyIdsForCustomer() {
 
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
     }
 
     List<UUID> uuids;
@@ -371,7 +374,7 @@ public class PolicyCrudService {
   public Response storePolicy(@QueryParam ("alsoStore") boolean alsoStore, @NotNull @Valid Policy policy) {
 
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
     }
 
     // We use the indirection, so that for testing we can produce known UUIDs
@@ -539,7 +542,7 @@ public class PolicyCrudService {
   @Transactional
   public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
     if (!user.canWriteAll()) {
-       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
      }
 
     Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
@@ -583,7 +586,7 @@ public class PolicyCrudService {
   @Transactional
   public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, List<UUID> uuids) {
     if (!user.canWriteAll()) {
-        return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+        return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
     }
     List<UUID> changed = new ArrayList<>(uuids.size());
     try {
@@ -633,7 +636,7 @@ public class PolicyCrudService {
                                @NotNull @Valid Policy policy) {
 
     if (!user.canWriteAll()) {
-       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to update policy")).build();
+       return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
      }
 
     Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
@@ -707,7 +710,7 @@ public class PolicyCrudService {
   public Response validateCondition(@Valid @NotNull Policy policy) {
 
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
     }
 
     policy.customerid = user.getAccount();
@@ -741,7 +744,7 @@ public class PolicyCrudService {
   @Parameter(name = "id", description = "UUID of the policy")
   public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to verify policy")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
     }
 
     Policy policy = new Policy();
@@ -778,7 +781,7 @@ public class PolicyCrudService {
   public Response getPolicy(@PathParam("id") UUID policyId) {
 
     if (!user.canReadAll()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve policies")).build();
+      return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
     }
 
     Policy policy = Policy.findById(user.getAccount(), policyId);
@@ -807,8 +810,6 @@ public class PolicyCrudService {
   // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
     private static class PagedResponseOfHistoryItem extends PagingUtils.PagedResponse<HistoryItem> {
-      @SuppressWarnings("unused")
-      private List<HistoryItem> data;
       private PagedResponseOfHistoryItem(Page<HistoryItem> page) {
         super(page);
       }
@@ -884,9 +885,9 @@ public class PolicyCrudService {
                       type = SchemaType.STRING,
                       enumeration = {
                               "hostName",
-                              "ctime"
+                              CTIME_STRING
                       },
-                      defaultValue = "ctime"
+                      defaultValue = CTIME_STRING
               )
       ),
       @Parameter(
@@ -966,7 +967,7 @@ public class PolicyCrudService {
          catch (Exception e) {
            String msg = "Retrieval of history from engine failed with: " + e.getMessage();
            span.log(msg);
-           span.setTag("error",true);
+           span.setTag(ERROR_STRING,true);
            log.warning(msg);
            return Response.serverError().entity(msg).build();
          }
@@ -994,10 +995,10 @@ public class PolicyCrudService {
          Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
          builder = PagingUtils.responseBuilder(itemsPage);
        } catch (IllegalArgumentException iae) {
-         tracer.activeSpan().setTag("error",true);
+         tracer.activeSpan().setTag(ERROR_STRING,true);
          builder = Response.status(400,iae.getMessage());
        } catch (Exception e) {
-         tracer.activeSpan().setTag("error",true);
+         tracer.activeSpan().setTag(ERROR_STRING,true);
          String msg = "Retrieval of history failed with: " + e.getMessage();
          log.warning(msg);
          builder = Response.serverError().entity(msg);
@@ -1010,7 +1011,7 @@ public class PolicyCrudService {
 
     List<Map<String,Object>> data = OM.readValue(alerts, new TypeReference<>() {});
     for (Map<String,Object> value :data) {
-      Long ctime = (Long) value.get("ctime");
+      Long ctime = (Long) value.get(CTIME_STRING);
       List<Map<String, String>> tags = (List<Map<String, String>>) value.get("tags");
       String inventory_id = null;
       String name = null;
@@ -1036,9 +1037,9 @@ public class PolicyCrudService {
       case "name":
         sort = "tags.display_name";
         break;
-      case "ctime":
+      case CTIME_STRING:
       case "mtime":
-        sort = "ctime";
+        sort = CTIME_STRING;
         break;
       default:
         throw new IllegalArgumentException("Unknown sort column: " + sort);

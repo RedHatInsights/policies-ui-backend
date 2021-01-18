@@ -47,7 +47,7 @@ public class Pager {
     }
 
     public Filter getFilter() {
-        return (Filter) filter.clone();
+        return new Filter(filter);
     }
 
     public Sort getSort() {
@@ -62,8 +62,8 @@ public class Pager {
 
         private int offset;
         private int limit;
-        private Sort sort;
-        private Filter filter;
+        private final Sort sort;
+        private final Filter filter;
 
         private PagerBuilder() {
             this.offset = 0;
@@ -98,7 +98,8 @@ public class Pager {
         }
 
         public Pager build() {
-            return new Pager(this.offset, this.limit, (Filter) this.filter.clone(), this.sort);
+            Filter filter = new Filter(this.filter);
+            return new Pager(this.offset, this.limit, filter, this.sort);
         }
 
     }

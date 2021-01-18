@@ -36,5 +36,6 @@ public class Trigger {
     public List<Map<String,Object>> lifecycle;
 
     public Trigger() {
+        // Needed for (de)Serialization purposes
     }
 }
