@@ -17,7 +17,6 @@
 package com.redhat.cloud.policies.app.auth;
 
 import java.security.Principal;
-import javax.security.auth.Subject;
 
 /**
  * Simple implementation of {@link Principal}
@@ -27,8 +26,8 @@ public class RhIdPrincipal implements Principal {
 
   private String name;
   private String account;
-  private boolean canReadAll;
-  private boolean canWriteAll;
+  private boolean canReadPolicies;
+  private boolean canWritePolicies;
   private String rawRhId;
 
   public RhIdPrincipal() {
@@ -39,10 +38,10 @@ public class RhIdPrincipal implements Principal {
     this.account = account;
   }
 
-  void setRbac(boolean canReadAll, boolean canWriteAll) {
+  void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
 
-    this.canReadAll = canReadAll;
-    this.canWriteAll = canWriteAll;
+    this.canReadPolicies = canReadPolicies;
+    this.canWritePolicies = canWritePolicies;
   }
   @Override
   public String getName() {
@@ -53,12 +52,12 @@ public class RhIdPrincipal implements Principal {
     return account;
   }
 
-  public boolean canReadAll() {
-    return canReadAll;
+  public boolean canReadPolicies() {
+    return canReadPolicies;
   }
 
-  public boolean canWriteAll() {
-    return canWriteAll;
+  public boolean canWritePolicies() {
+    return canWritePolicies;
   }
 
 

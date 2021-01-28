@@ -67,7 +67,7 @@ public class UserConfigService {
 
     Response.ResponseBuilder builder;
 
-    if (!user.canWriteAll()) {
+    if (!user.canWritePolicies()) {
       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type(MediaType.TEXT_PLAIN_TYPE).build();
     }
 
@@ -108,7 +108,7 @@ public class UserConfigService {
   @Path("/email-preference")
   public Response getSettingsSchema() {
 
-    if (!user.canReadAll()) {
+    if (!user.canReadPolicies()) {
        return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type(MediaType.TEXT_PLAIN_TYPE).build();
      }
 
