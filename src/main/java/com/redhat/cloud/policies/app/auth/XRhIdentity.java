@@ -29,6 +29,9 @@ public class XRhIdentity {
   public Identity identity;
 
   public String getUsername() {
+    if (identity==null || identity.user==null) {
+      return null;
+    }
     return identity.user.username;
   }
 
