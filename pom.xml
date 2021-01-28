@@ -14,9 +14,9 @@
     <java.release>11</java.release>
     <java.source>11</java.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.version>1.11.0.Final</quarkus.version>
+    <quarkus.version>1.11.1.Final</quarkus.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
-    <jacoco.version>0.8.5</jacoco.version>
+    <jacoco.version>0.8.6</jacoco.version>
 
     <version.testcontainers>1.14.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
@@ -389,6 +389,7 @@
         <!-- next are needed because Sonar has issues recognizing the Java 9 -release flag -->
         <sonar.java.source>11</sonar.java.source>
         <sonar.java.target>11</sonar.java.target>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
       </properties>
       <build>
         <plugins>
