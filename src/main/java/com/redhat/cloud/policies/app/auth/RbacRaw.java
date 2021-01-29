@@ -58,7 +58,7 @@ public class RbacRaw {
 
     for (Map<String, Object> permissionEntry : data) {
       String[] fields = getPermissionFields(permissionEntry);
-      if (fields[1].equals(path)) {
+      if (fields[1].equals(path) || fields[1].equals("*")) {
          if (fields[2].equals(what) || fields[2].equals("*")) {
            return true;
          }

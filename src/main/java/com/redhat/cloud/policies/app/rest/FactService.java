@@ -53,7 +53,7 @@ public class FactService {
                @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
   public Response listFacts() {
 
-    if (!user.canReadAll()) {
+    if (!user.canReadPolicies()) {
       return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts")).build();
     }
 

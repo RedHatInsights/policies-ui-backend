@@ -42,7 +42,8 @@ public class RbacParsingTest {
     assertEquals(rbac.data.size(), 2);
 
     assertTrue(rbac.canWrite("resname"));
-    assertFalse(rbac.canRead("resname"));
+    // We don't have explicit read permission for "resname" but we have bar:*:read.
+    assertTrue(rbac.canRead("resname"));
     assertFalse(rbac.canWriteAll());
     assertFalse(rbac.canWrite("no-perm"));
 
@@ -56,6 +57,8 @@ public class RbacParsingTest {
 
     assertFalse(rbac.canReadAll());
     assertFalse(rbac.canWriteAll());
+    assertFalse(rbac.canWrite("foobar"));
+    assertFalse(rbac.canRead("1337"));
   }
 
   @Test
@@ -65,8 +68,10 @@ public class RbacParsingTest {
     RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
     assertTrue(rbac.canRead("*"));
+    assertTrue(rbac.canRead("anything"));
     assertTrue(rbac.canReadAll());
     assertTrue(rbac.canWrite("*"));
+    assertTrue(rbac.canWrite("anything"));
     assertTrue(rbac.canWriteAll());
   }
 
@@ -79,5 +84,6 @@ public class RbacParsingTest {
     assertTrue(rbac.canReadAll());
     assertFalse(rbac.canWriteAll());
     assertTrue(rbac.canDo("*","execute"));
+    assertTrue(rbac.canDo("foobar","execute"));
   }
 }

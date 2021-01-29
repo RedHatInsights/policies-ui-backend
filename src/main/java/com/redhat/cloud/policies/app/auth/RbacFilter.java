@@ -78,9 +78,11 @@ public class RbacFilter implements ContainerRequestFilter {
       }
     }
 
-    user.setRbac(result.canReadAll(),result.canWriteAll());
+    final String policiesPath = "policies";
+
+    user.setRbac(result.canRead(policiesPath),result.canWrite(policiesPath));
     RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
-    userPrincipal.setRbac(result.canReadAll(),result.canWriteAll());
+    userPrincipal.setRbac(result.canRead(policiesPath),result.canWrite(policiesPath));
   }
 
   /*
