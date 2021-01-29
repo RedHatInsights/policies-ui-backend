@@ -53,10 +53,18 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
 
     HttpServerRequest request = context.request();
     int status = request.response().getStatusCode();
+
+    if (status == 301 || status == 302) {
+      // Those are redirects, that we skip
+      return;
+    }
+
     // By default omit requests for metrics and health check if they return a 200
     if (filterHealthCalls) {
       if (status==200 && (uri.startsWith("/health") ||
                           uri.startsWith("/metrics") ||
+                          uri.startsWith("/q/metrics") ||  // New metric path with micrometer
+                          uri.startsWith("/q/health") ||   // New health path with micrometer
                           uri.equals("/api/policies/v1.0/status")
       )) {
         return;
