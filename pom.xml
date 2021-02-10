@@ -18,7 +18,7 @@
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
     <jacoco.version>0.8.6</jacoco.version>
 
-    <version.testcontainers>1.14.3</version.testcontainers>
+    <version.testcontainers>1.15.1</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-client-java.version>5.5.4</mockserver-client-java.version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
   </properties>
