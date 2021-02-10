@@ -14,11 +14,11 @@
     <java.release>11</java.release>
     <java.source>11</java.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.version>1.11.1.Final</quarkus.version>
+    <quarkus.version>1.11.2.Final</quarkus.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
     <jacoco.version>0.8.6</jacoco.version>
 
-    <version.testcontainers>1.14.3</version.testcontainers>
+    <version.testcontainers>1.15.1</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-client-java.version>5.5.4</mockserver-client-java.version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
   </properties>
@@ -163,6 +163,12 @@
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>19.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
