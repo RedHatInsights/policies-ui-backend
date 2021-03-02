@@ -19,7 +19,7 @@ The UI backend is written in Java and can be compiled via
 
 [source,shell]
 ----
-mvn package
+./mvnw package
 ----
 
 Which also runs some Rest-API tests (under the hood it starts a postgres instance in a container).
@@ -28,7 +28,7 @@ When developing you can use Quarkus hot-reload
 
 [source,shell]
 ----
-mvn compile quarkus:dev
+./mvnw compile quarkus:dev
 ----
 
 == Talking to the endpoint
