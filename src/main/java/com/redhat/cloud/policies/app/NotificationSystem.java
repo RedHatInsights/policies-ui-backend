@@ -31,21 +31,16 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @RegisterRestClient(configKey = "notifications")
 public interface NotificationSystem {
 
-
-
-  @PUT
-  @Path("/endpoints/email/subscription/{event}")
-  void addNotification(
-      @PathParam("event") String event,
-      @HeaderParam("x-rh-identity") String rhIdentity);
-
-  @DELETE
-  @Path("/endpoints/email/subscription/{event}")
-  void removeNotification(
-      @PathParam("event") String event,
-      @HeaderParam("x-rh-identity") String rhIdentity);
+  class UserPreferences {
+    public Boolean instantEmail;
+    public Boolean dailyEmail;
+  }
 
   @GET
-  @Path("/apps")
-  void getApps() ;
+  @Path("/api/notifications/v1.0/user-config/notification-preference/{bundleName}/{applicationName}")
+  UserPreferences getUserPreferences(
+      @PathParam("bundleName") String bundleName,
+      @PathParam("applicationName") String applicationName,
+      @HeaderParam("x-rh-identity") String rhIdentity);
+
 }

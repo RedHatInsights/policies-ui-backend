@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.NotificationSystem;
+import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.SettingsValues;
@@ -25,14 +26,17 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -41,15 +45,13 @@ import java.util.logging.Logger;
 /**
  * @author hrupp
  */
-@Path("/api/policies/v1.0/preferences")
+@Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
 @SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
-public class UserPreferencesService {
+public class UserConfigService {
 
-  public static final String FALSE = "false";
-  public static final String TRUE = "true";
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
@@ -60,40 +62,26 @@ public class UserPreferencesService {
   @RestClient
   NotificationSystem notifications;
 
+  @ConfigProperty(name = "notifications.bundle", defaultValue = "insights")
+  private String bundle;
+
+  @ConfigProperty(name = "notifications.application", defaultValue = "policies")
+  private String application;
+
   @GET
   @Path("/preferences")
-  public Response getSettingsSchema() {
+  public UserPreferences getSettingsSchema() {
 
     if (!user.canReadPolicies()) {
-       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type(MediaType.TEXT_PLAIN_TYPE).build();
-     }
+      throw  new ForbiddenException("You don't have permission to read settings");
+    }
 
-    String response ;
-    Response.ResponseBuilder builder;
     try {
-      response = settingsString;
-
-      // Now we need to find the user record and populate the reply accordingly
-      SettingsValues values = SettingsValues.findById(user.getName());
-      if (values != null) {
-        response = response.replace("%1", values.immediateEmail ? TRUE : FALSE);
-        response = response.replace("%2", values.dailyEmail ? TRUE : FALSE);
-      }
-      else {
-        // User's record does not yet exist, so use defaults
-        response = response.replace("%1", FALSE);
-        response = response.replace("%2", FALSE);
-      }
-      builder = Response.ok(response);
-      EntityTag etag = new EntityTag(String.valueOf(response.hashCode()));
-      builder.header("ETag",etag);
+      return notifications.getUserPreferences(bundle, application, user.getRawRhIdHeader());
     }
     catch (Exception e) {
-      builder= Response.serverError();
-      builder.entity(new Msg(e.getMessage()));
       log.warning("Retrieving settings failed: " + e.getMessage());
+      throw new ServerErrorException(Response.serverError().entity(new Msg(e.getMessage())).build());
     }
-
-    return builder.build();
   }
 }
