@@ -41,7 +41,7 @@ public class FullTriggerHandlingTest {
         Assert.assertEquals("bla",ft.conditions.get(0).expression);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("email",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
 
         Assert.assertEquals("hula", ft.trigger.name);
 
@@ -53,7 +53,7 @@ public class FullTriggerHandlingTest {
         Policy p = new Policy();
         p.customerid = "1234";
         p.conditions = "bla";
-        p.actions = "email";
+        p.actions = "notification";
         p.name = "hula";
         p.description = "some text";
         return p;
@@ -66,34 +66,6 @@ public class FullTriggerHandlingTest {
         FullTrigger ft = new FullTrigger(p);
 
         p.actions = "notification";
-        ft.updateFromPolicy(p);
-
-        Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
-    }
-
-    @Test
-    void testActionUpdate2() {
-        Policy p = createPolicy();
-
-        FullTrigger ft = new FullTrigger(p);
-
-        p.actions = "notification;email";
-        ft.updateFromPolicy(p);
-
-        Assert.assertEquals(2,ft.trigger.actions.size());
-        int i = (int) ft.trigger.actions.stream().filter(t -> t.actionPlugin.equals("email") || t.actionPlugin.equals("notification")).count();
-        Assert.assertEquals(2,i);
-    }
-
-    @Test
-    void testActionUpdate3() {
-        Policy p = createPolicy();
-        p.actions = "notification;email";
-
-        FullTrigger ft = new FullTrigger(p);
-
-        p.actions = "notification;";
         ft.updateFromPolicy(p);
 
         Assert.assertEquals(1,ft.trigger.actions.size());
@@ -143,7 +115,7 @@ public class FullTriggerHandlingTest {
     @Test
     void testActionWithParam() {
         Policy p = createPolicy();
-        p.actions = "email hans@dampf.de";
+        p.actions = "notification maybe-param";
 
         FullTrigger ft = new FullTrigger(p);
 

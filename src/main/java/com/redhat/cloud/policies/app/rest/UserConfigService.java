@@ -41,12 +41,12 @@ import java.util.logging.Logger;
 /**
  * @author hrupp
  */
-@Path("/api/policies/v1.0/user-config")
+@Path("/api/policies/v1.0/preferences")
 @Produces("application/json")
 @Consumes("application/json")
 @SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
-public class UserConfigService {
+public class UserPreferencesService {
 
   public static final String FALSE = "false";
   public static final String TRUE = "true";
@@ -60,52 +60,8 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @POST
-  @Path("/email-preference")
-  @Transactional
-  public Response saveSettings(@Valid SettingsValues values) {
-
-    Response.ResponseBuilder builder;
-
-    if (!user.canWritePolicies()) {
-      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type(MediaType.TEXT_PLAIN_TYPE).build();
-    }
-
-    values.username = user.getName();
-    values.accountId = user.getAccount();
-    SettingsValues tmp = SettingsValues.findById(user.getName());
-
-    try {
-      // Also send to notification service
-      if (values.immediateEmail) {
-        notifications.addNotification("policies-instant-mail", user.getRawRhIdHeader());
-      } else {
-        notifications.removeNotification("policies-instant-mail", user.getRawRhIdHeader());
-      }
-      if (values.dailyEmail) {
-        notifications.addNotification("policies-daily-mail", user.getRawRhIdHeader());
-      } else {
-        notifications.removeNotification("policies-daily-mail", user.getRawRhIdHeader());
-      }
-      if (tmp != null) {
-        tmp.immediateEmail = values.immediateEmail;
-        tmp.dailyEmail = values.dailyEmail;
-      } else {
-        values.persist();
-      }
-      builder = Response.ok();
-    }
-    catch (Exception e) {
-      builder = Response.serverError().entity("Storing of settings in notification service failed.");
-      builder.type(MediaType.TEXT_PLAIN_TYPE);
-      log.warning("Storing settings failed: " + e.getMessage());
-    }
-
-    return builder.build();
-  }
-
   @GET
-  @Path("/email-preference")
+  @Path("/preferences")
   public Response getSettingsSchema() {
 
     if (!user.canReadPolicies()) {
@@ -140,25 +96,4 @@ public class UserConfigService {
 
     return builder.build();
   }
-
-  private static final String settingsString =
-      "[{\n" +
-          "  \"fields\": [ {\n" +
-          "    \"name\": \"immediateEmail\",\n" +
-          "    \"label\": \"Instant notification\",\n" +
-          "    \"description\": \"Immediate email for each system with triggered policies\",\n" +
-          "    \"initialValue\": %1,\n" +
-          "    \"component\": \"descriptiveCheckbox\",\n" +
-          "    \"validate\": []\n" +
-          "  },\n" +
-          "  {\n" +
-          "    \"name\": \"dailyEmail\",\n" +
-          "    \"label\": \"Daily digest\",\n" +
-          "    \"description\": \"Daily summary of all systems with triggered policies in 24 hour span\",\n" +
-          "    \"initialValue\": %2,\n" +
-          "    \"component\": \"descriptiveCheckbox\",\n" +
-          "    \"validate\": []\n" +
-          "\n" +
-          "  }]\n" +
-          "}]";
 }

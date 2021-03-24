@@ -42,7 +42,6 @@ public class FullTrigger {
     trigger.actions = new HashSet<>();
     actionToTriggerActionMap = new HashMap<>();
     actionToTriggerActionMap.put("notification","notification");
-    actionToTriggerActionMap.put("email","email");
   }
 
   public FullTrigger(Policy policy, boolean generatePseudoId) {

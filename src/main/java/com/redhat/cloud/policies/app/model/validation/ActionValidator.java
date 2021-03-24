@@ -30,7 +30,6 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
    List<String> validActions = new ArrayList();
 
    public void initialize(ValidActionS constraint) {
-      validActions.add("email");
       validActions.add("notification");
    }
 

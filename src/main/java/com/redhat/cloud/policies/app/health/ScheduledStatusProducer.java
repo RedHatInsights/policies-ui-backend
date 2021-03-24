@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app.health;
 
-import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
@@ -45,10 +44,6 @@ public class ScheduledStatusProducer {
   @Inject
   @RestClient
   PolicyEngine engine;
-
-  @Inject
-  @RestClient
-  NotificationSystem notifications;
 
   //  // Quarkus only activates this after the first REST-call to any method in this class
   @Gauge(name="status_isDegraded", unit = MetricUnits.NONE, absolute = true,
@@ -82,12 +77,6 @@ public class ScheduledStatusProducer {
       }
       catch (Exception e) {
         issues.put("engine", e.getMessage());
-      }
-
-      try {
-        notifications.getApps();
-      } catch (Exception e) {
-        issues.put("notifications", e.getMessage());
       }
 
       StuffHolder.getInstance().setStatusInfo(issues);
