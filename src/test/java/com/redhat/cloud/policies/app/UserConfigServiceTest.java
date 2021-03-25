@@ -24,11 +24,9 @@ import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.Header;
-import io.restassured.path.json.JsonPath;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -56,23 +54,23 @@ public class UserConfigServiceTest extends AbstractITest {
     try {
       mockWithValue(false, false);
       UserPreferences preferences = getPreferences(authHeader);
-      Assert.assertEquals(false, preferences.instantEmail);
-      Assert.assertEquals(false, preferences.dailyEmail);
+      Assert.assertEquals(false, preferences.instant_email);
+      Assert.assertEquals(false, preferences.daily_email);
 
       mockWithValue(true, false);
       preferences = getPreferences(authHeader);
-      Assert.assertEquals(true, preferences.instantEmail);
-      Assert.assertEquals(false, preferences.dailyEmail);
+      Assert.assertEquals(true, preferences.instant_email);
+      Assert.assertEquals(false, preferences.daily_email);
 
       mockWithValue(true, true);
       preferences = getPreferences(authHeader);
-      Assert.assertEquals(true, preferences.instantEmail);
-      Assert.assertEquals(true, preferences.dailyEmail);
+      Assert.assertEquals(true, preferences.instant_email);
+      Assert.assertEquals(true, preferences.daily_email);
 
       mockWithValue(false, true);
       preferences = getPreferences(authHeader);
-      Assert.assertEquals(false, preferences.instantEmail);
-      Assert.assertEquals(true, preferences.dailyEmail);
+      Assert.assertEquals(false, preferences.instant_email);
+      Assert.assertEquals(true, preferences.daily_email);
 
     } finally {
       clearMockValue();
@@ -89,8 +87,8 @@ public class UserConfigServiceTest extends AbstractITest {
   private void mockWithValue(boolean instantEmail, boolean dailyEmail) {
     clearMockValue();
     UserPreferences preferences = new UserPreferences();
-    preferences.instantEmail = instantEmail;
-    preferences.dailyEmail = dailyEmail;
+    preferences.instant_email = instantEmail;
+    preferences.daily_email = dailyEmail;
     mockServerClient
             .when(request()
                     .withPath("/api/notifications/v1.0/user-config/notification-preference/insights/policies")
