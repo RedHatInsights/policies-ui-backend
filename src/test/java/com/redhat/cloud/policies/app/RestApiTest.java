@@ -554,7 +554,7 @@ class RestApiTest extends AbstractITest {
   void testGetPoliciesInvalidFilter() {
     given()
             .header(authHeader)
-            .when().get(API_BASE_V1_0 + "/policies/?filter[actions]=email&filter:op[name]=ilike")
+            .when().get(API_BASE_V1_0 + "/policies/?filter[actions]=notification&filter:op[name]=ilike")
             .then()
             .statusCode(400);
   }
@@ -564,7 +564,7 @@ class RestApiTest extends AbstractITest {
     given()
         .header(authHeader)
       .when()
-        .get(API_BASE_V1_0 + "/policies/?filter[name]=email&filter:op[name]=boolean_is")
+        .get(API_BASE_V1_0 + "/policies/?filter[name]=notification&filter:op[name]=boolean_is")
       .then()
         .statusCode(400);
   }
@@ -590,7 +590,7 @@ class RestApiTest extends AbstractITest {
         .extract().jsonPath();
 
     TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
-    assertEquals("EMAIL roadrunner@acme.org", policy.actions, "Action does not match");
+    assertEquals("NOTIFICATION roadrunner@acme.org", policy.actions, "Action does not match");
     assertEquals("\"cores\" == 1", policy.conditions, "Conditions do not match");
     assertTrue(policy.isEnabled, "Policy is not enabled");
     Calendar cal = Calendar.getInstance();
@@ -778,7 +778,7 @@ class RestApiTest extends AbstractITest {
   @NotNull
   private String setupPolicyForHistory() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
+    tp.actions = "NOTIFICATION";
     tp.conditions = "cores = 2";
     tp.name = "test1";
     // Use an explicit ID; that the mock server knows
@@ -814,7 +814,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeNewPolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
+    tp.actions = "NOTIFICATION";
     tp.conditions = "cores = 2";
     tp.name = "test1";
 
@@ -905,7 +905,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeNewPolicyEngineProblem() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
+    tp.actions = "NOTIFICATION";
     tp.conditions = "cores = 2";
     tp.name = "test1";
     // Use an explicit ID; that the mock server knows
@@ -1006,7 +1006,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeNewPolicyNoRbac() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL;notification";
+    tp.actions = "notification";
     tp.conditions = "cores = 2";
     tp.name = UUID.randomUUID().toString();
 
@@ -1024,7 +1024,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeAndUpdatePolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
+    tp.actions = "NOTIFICATION";
     tp.conditions = "cores = 2";
     tp.name = "test2";
 
@@ -1117,7 +1117,7 @@ class RestApiTest extends AbstractITest {
   @Test
   void storeAndEnableDisablePolicy() {
     TestPolicy tp = new TestPolicy();
-    tp.actions = "EMAIL";
+    tp.actions = "NOTIFICATION";
     tp.conditions = "cores = 2";
     tp.name = "test2";
     tp.isEnabled = false;

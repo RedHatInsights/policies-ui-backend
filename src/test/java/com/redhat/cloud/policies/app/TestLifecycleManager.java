@@ -98,7 +98,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
     mockRbac();
     mockEngine();
-    mockNotifications();
 
     props.put("engine/mp-rest/url", mockServerUrl);
     props.put("rbac/mp-rest/url", mockServerUrl);
@@ -346,25 +345,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                      .withStatusCode(200)
                      .withHeader("Content-Type", "application/json")
                      .withBody("{ \"msg\" : \"ok\" }")
-        );
-  }
-
-  private void mockNotifications() {
-    mockServerClient
-        .when(request()
-              .withPath(".*/endpoints/email/subscription/.*")
-              .withMethod("PUT")
-        )
-        .respond(response()
-                 .withStatusCode(204)
-        );
-    mockServerClient
-        .when(request()
-              .withPath(".*/endpoints/email/subscription/.*")
-              .withMethod("DELETE")
-        )
-        .respond(response()
-                 .withStatusCode(204)
         );
   }
 

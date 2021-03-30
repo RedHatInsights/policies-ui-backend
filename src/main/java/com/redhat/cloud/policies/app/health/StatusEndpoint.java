@@ -16,22 +16,13 @@
  */
 package com.redhat.cloud.policies.app.health;
 
-import com.redhat.cloud.policies.app.NotificationSystem;
-import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
-import com.redhat.cloud.policies.app.model.Policy;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;

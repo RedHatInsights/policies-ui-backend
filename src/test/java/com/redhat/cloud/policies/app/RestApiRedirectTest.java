@@ -54,7 +54,7 @@ public class RestApiRedirectTest extends AbstractITest {
           .extract().jsonPath();
 
       TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
-      Assert.assertEquals("Action does not match", "EMAIL roadrunner@acme.org", policy.actions);
+      Assert.assertEquals("Action does not match", "NOTIFICATION roadrunner@acme.org", policy.actions);
       Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
       Assert.assertTrue("Policy is not enabled", policy.isEnabled);
     }
@@ -62,7 +62,7 @@ public class RestApiRedirectTest extends AbstractITest {
     @Test
     void storeAndDeleteNewPolicy() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "EMAIL";
+        tp.actions = "NOTIFICATION";
         tp.conditions = "cores = 2";
         tp.name = "test1-redirect";
 

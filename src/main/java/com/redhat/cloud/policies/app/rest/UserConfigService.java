@@ -17,22 +17,20 @@
 package com.redhat.cloud.policies.app.rest;
 
 import com.redhat.cloud.policies.app.NotificationSystem;
+import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
-import com.redhat.cloud.policies.app.model.SettingsValues;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -48,8 +46,6 @@ import java.util.logging.Logger;
 @RequestScoped
 public class UserConfigService {
 
-  public static final String FALSE = "false";
-  public static final String TRUE = "true";
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   @SuppressWarnings("CdiInjectionPointsInspection")
@@ -60,105 +56,26 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @POST
-  @Path("/email-preference")
-  @Transactional
-  public Response saveSettings(@Valid SettingsValues values) {
+  @ConfigProperty(name = "notifications.bundle", defaultValue = "insights")
+  private String bundle;
 
-    Response.ResponseBuilder builder;
-
-    if (!user.canWritePolicies()) {
-      return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to change settings").type(MediaType.TEXT_PLAIN_TYPE).build();
-    }
-
-    values.username = user.getName();
-    values.accountId = user.getAccount();
-    SettingsValues tmp = SettingsValues.findById(user.getName());
-
-    try {
-      // Also send to notification service
-      if (values.immediateEmail) {
-        notifications.addNotification("policies-instant-mail", user.getRawRhIdHeader());
-      } else {
-        notifications.removeNotification("policies-instant-mail", user.getRawRhIdHeader());
-      }
-      if (values.dailyEmail) {
-        notifications.addNotification("policies-daily-mail", user.getRawRhIdHeader());
-      } else {
-        notifications.removeNotification("policies-daily-mail", user.getRawRhIdHeader());
-      }
-      if (tmp != null) {
-        tmp.immediateEmail = values.immediateEmail;
-        tmp.dailyEmail = values.dailyEmail;
-      } else {
-        values.persist();
-      }
-      builder = Response.ok();
-    }
-    catch (Exception e) {
-      builder = Response.serverError().entity("Storing of settings in notification service failed.");
-      builder.type(MediaType.TEXT_PLAIN_TYPE);
-      log.warning("Storing settings failed: " + e.getMessage());
-    }
-
-    return builder.build();
-  }
+  @ConfigProperty(name = "notifications.application", defaultValue = "policies")
+  private String application;
 
   @GET
-  @Path("/email-preference")
-  public Response getSettingsSchema() {
+  @Path("/preferences")
+  public UserPreferences getSettingsSchema() {
 
     if (!user.canReadPolicies()) {
-       return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission to read settings").type(MediaType.TEXT_PLAIN_TYPE).build();
-     }
+      throw  new ForbiddenException("You don't have permission to read settings");
+    }
 
-    String response ;
-    Response.ResponseBuilder builder;
     try {
-      response = settingsString;
-
-      // Now we need to find the user record and populate the reply accordingly
-      SettingsValues values = SettingsValues.findById(user.getName());
-      if (values != null) {
-        response = response.replace("%1", values.immediateEmail ? TRUE : FALSE);
-        response = response.replace("%2", values.dailyEmail ? TRUE : FALSE);
-      }
-      else {
-        // User's record does not yet exist, so use defaults
-        response = response.replace("%1", FALSE);
-        response = response.replace("%2", FALSE);
-      }
-      builder = Response.ok(response);
-      EntityTag etag = new EntityTag(String.valueOf(response.hashCode()));
-      builder.header("ETag",etag);
+      return notifications.getUserPreferences(bundle, application, user.getRawRhIdHeader());
     }
     catch (Exception e) {
-      builder= Response.serverError();
-      builder.entity(new Msg(e.getMessage()));
       log.warning("Retrieving settings failed: " + e.getMessage());
+      throw new ServerErrorException(Response.serverError().entity(new Msg(e.getMessage())).build());
     }
-
-    return builder.build();
   }
-
-  private static final String settingsString =
-      "[{\n" +
-          "  \"fields\": [ {\n" +
-          "    \"name\": \"immediateEmail\",\n" +
-          "    \"label\": \"Instant notification\",\n" +
-          "    \"description\": \"Immediate email for each system with triggered policies\",\n" +
-          "    \"initialValue\": %1,\n" +
-          "    \"component\": \"descriptiveCheckbox\",\n" +
-          "    \"validate\": []\n" +
-          "  },\n" +
-          "  {\n" +
-          "    \"name\": \"dailyEmail\",\n" +
-          "    \"label\": \"Daily digest\",\n" +
-          "    \"description\": \"Daily summary of all systems with triggered policies in 24 hour span\",\n" +
-          "    \"initialValue\": %2,\n" +
-          "    \"component\": \"descriptiveCheckbox\",\n" +
-          "    \"validate\": []\n" +
-          "\n" +
-          "  }]\n" +
-          "}]";
 }

@@ -16,12 +16,13 @@
  */
 package com.redhat.cloud.policies.app;
 
-import javax.ws.rs.DELETE;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
@@ -29,23 +30,26 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  */
 @Path("/")
 @RegisterRestClient(configKey = "notifications")
+@Produces("application/json")
+@Consumes("application/json")
 public interface NotificationSystem {
 
-
-
-  @PUT
-  @Path("/endpoints/email/subscription/{event}")
-  void addNotification(
-      @PathParam("event") String event,
-      @HeaderParam("x-rh-identity") String rhIdentity);
-
-  @DELETE
-  @Path("/endpoints/email/subscription/{event}")
-  void removeNotification(
-      @PathParam("event") String event,
-      @HeaderParam("x-rh-identity") String rhIdentity);
+  /*
+  Using @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) didn't work for the return value of `getUserPreferences`
+  Test were always returning "null" on the values. Looks like it needs something else (or maybe is a bug?) to pick the snake_case
+  for the Restclient.
+  - Tried @Schema(name=instant_email")
+   */
+  class UserPreferences {
+    public Boolean instant_email;
+    public Boolean daily_email;
+  }
 
   @GET
-  @Path("/apps")
-  void getApps() ;
+  @Path("/api/notifications/v1.0/user-config/notification-preference/{bundleName}/{applicationName}")
+  UserPreferences getUserPreferences(
+      @PathParam("bundleName") String bundleName,
+      @PathParam("applicationName") String applicationName,
+      @HeaderParam("x-rh-identity") String rhIdentity);
+
 }
