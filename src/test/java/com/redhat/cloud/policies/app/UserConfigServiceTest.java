@@ -80,7 +80,7 @@ public class UserConfigServiceTest extends AbstractITest {
   private void clearMockValue() {
     mockServerClient.clear(HttpRequest.request()
             .withMethod("GET")
-            .withPath("/api/notifications/v1.0/user-config/notification-preference/insights/policies")
+            .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
     );
   }
 
@@ -91,7 +91,7 @@ public class UserConfigServiceTest extends AbstractITest {
     preferences.daily_email = dailyEmail;
     mockServerClient
             .when(request()
-                    .withPath("/api/notifications/v1.0/user-config/notification-preference/insights/policies")
+                    .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
                     .withMethod("GET")
             )
             .respond(response()

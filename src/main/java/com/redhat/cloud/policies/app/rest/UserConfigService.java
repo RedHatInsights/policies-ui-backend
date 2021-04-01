@@ -56,7 +56,7 @@ public class UserConfigService {
   @RestClient
   NotificationSystem notifications;
 
-  @ConfigProperty(name = "notifications.bundle", defaultValue = "insights")
+  @ConfigProperty(name = "notifications.bundle", defaultValue = "rhel")
   private String bundle;
 
   @ConfigProperty(name = "notifications.application", defaultValue = "policies")
