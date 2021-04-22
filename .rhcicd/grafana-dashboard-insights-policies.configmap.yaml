@@ -2656,7 +2656,7 @@ data:
     }
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-clouddot-policies-general.yaml 
+  name: grafana-dashboard-clouddot-policies-general
   labels:
     grafana_dashboard: "true"
   annotations:
