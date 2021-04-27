@@ -31,9 +31,7 @@ import org.eclipse.microprofile.health.Readiness;
 public class ReadinessProbe extends AbstractHealthCheck implements HealthCheck {
   @Override
   public HealthCheckResponse call() {
-
     HealthCheckResponseBuilder builder = getBuilder("ready");
-
     return builder.build();
   }
 }

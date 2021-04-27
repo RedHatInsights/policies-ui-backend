@@ -104,9 +104,12 @@ public class PolicyCrudService {
   public static final String MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES = "Missing permissions to retrieve policies";
   public static final String MISSING_PERMISSIONS_TO_VERIFY_POLICY = "Missing permissions to verify policy";
   public static final String MISSING_PERMISSIONS_TO_UPDATE_POLICY = "Missing permissions to update policy";
+
   public static final String ERROR_STRING = "error";
   public static final String CTIME_STRING = "ctime";
+
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+
   private static final ObjectMapper OM = new ObjectMapper();
 
   @Inject

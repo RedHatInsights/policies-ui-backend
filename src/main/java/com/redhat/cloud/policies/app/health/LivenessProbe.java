@@ -31,11 +31,8 @@ import javax.enterprise.context.ApplicationScoped;
 @Liveness
 public class LivenessProbe extends AbstractHealthCheck implements HealthCheck {
 
-
-
   @Override
   public HealthCheckResponse call() {
-
     HealthCheckResponseBuilder builder = getBuilder("live");
     return builder.build();
   }
