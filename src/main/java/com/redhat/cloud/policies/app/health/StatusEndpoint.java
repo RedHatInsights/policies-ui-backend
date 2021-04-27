@@ -42,17 +42,14 @@ public class StatusEndpoint {
   @GET
   @Produces("application/json")
   public Response getStatus() {
-
     Map<String,String> issues = StuffHolder.getInstance().getStatusInfo();
 
     if (!issues.isEmpty()) {
       log.severe("Status reports: " + makeReadable(issues));
       return Response.serverError().entity(issues).build();
     }
-
     return Response.ok().build();
   }
-
 
   private String makeReadable(Map<String, String> issues) {
     return issues.entrySet()

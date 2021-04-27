@@ -25,7 +25,6 @@ import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
  */
 public abstract class AbstractHealthCheck {
 
-
   HealthCheckResponseBuilder getBuilder(String name) {
     boolean degraded = StuffHolder.getInstance().isAdminDown();
 
