@@ -18,7 +18,7 @@ package com.redhat.cloud.policies.app.model.pager;
 
 import com.redhat.cloud.policies.app.model.filter.Filter;
 import io.quarkus.panache.common.Sort;
-import io.reactivex.annotations.Nullable;
+import io.smallrye.common.constraint.Nullable;
 
 
 public class Pager {

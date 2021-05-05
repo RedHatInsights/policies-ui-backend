@@ -48,6 +48,7 @@ import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -592,7 +593,7 @@ public class PolicyCrudService {
   @POST
   @Path("/ids/enabled")
   @Transactional
-  public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, List<UUID> uuids) {
+  public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, @NotEmpty List<UUID> uuids) {
     if (!user.canWritePolicies()) {
         return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
     }

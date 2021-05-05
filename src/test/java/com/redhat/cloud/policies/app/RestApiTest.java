@@ -21,6 +21,7 @@ import static org.hamcrest.CoreMatchers.is;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -1643,6 +1644,38 @@ class RestApiTest extends AbstractITest {
   }
 
   @Test
+  void enableDisableNullBody() {
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body("")
+      .when()
+        .queryParam("enabled",true)
+        .post(API_BASE_V1_0 + "/policies/ids/enabled")
+      .then()
+        .statusCode(400);
+  }
+
+  @Test
+  void enableDisableBadBody() {
+
+    List<String> body = new ArrayList<>();
+    body.add("Hello");
+    body.add("World");
+
+    given()
+        .header(authHeader)
+        .contentType(ContentType.JSON)
+        .body(body)
+      .when()
+        .queryParam("enabled",true)
+        .post(API_BASE_V1_0 + "/policies/ids/enabled")
+      .then()
+        .statusCode(400);
+  }
+
+  @Test
   void enableDisablePoliciesNoAuth() {
     List<UUID> uuids = new ArrayList<>();
     uuids.add(UUID.randomUUID());
@@ -1669,4 +1702,89 @@ class RestApiTest extends AbstractITest {
         .contentType("application/json");
   }
 
+  @Test
+  void mapBadAcceptHeader() {
+
+    String body =
+    given()
+        .header(authHeader)
+        .header("Accept", "blabla")
+        .when()
+        .get(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
+        .then()
+        .statusCode(400)
+        .extract().body().asPrettyString();
+
+    assertNotNull(body);
+    assertTrue(body.contains("Something went wrong,"));
+  }
+
+  @Test
+  void mapBadContentHeader() {
+
+    String body =
+    given()
+        .header(authHeader)
+        .header("Content-Type", "bla bla")
+        .when()
+        .get(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
+        .then()
+        .statusCode(400)
+        .extract().body().asPrettyString();
+
+    assertNotNull(body);
+    assertTrue(body.contains("Something went wrong,"));
+    assertFalse(body.contains("RESTEASY00"));
+  }
+
+  @Test
+  void catchInvalidPath() {
+
+    String body =
+    given()
+        .header(authHeader)
+        .when()
+        .get(API_BASE_V1_0 + "/hula")
+        .then()
+        .statusCode(404)
+        .extract().body().asPrettyString();
+
+    assertNotNull(body);
+    assertTrue(body.contains("Something went wrong,"));
+    assertFalse(body.contains("RESTEASY00"));
+  }
+
+  @Test
+  void catchOtherInvalidPath() {
+
+    String body =
+    given()
+        .header(authHeader)
+        .when()
+        .get(API_BASE_V1_0 )
+        .then()
+        .statusCode(404)
+        .extract().body().asPrettyString();
+
+    assertNotNull(body);
+    assertTrue(body.contains("Something went wrong,"));
+    assertFalse(body.contains("RESTEASY00"));
+  }
+
+  @Test
+  void deletePolicyBadParam() {
+
+    String body =
+    given()
+         .header(authHeader)
+       .when()
+         .delete(API_BASE_V1_0 + "/policies/id?query=test")
+       .then()
+         .statusCode(404)
+       .extract().body().asPrettyString();
+
+    assertNotNull(body);
+    assertTrue(body.contains("Something went wrong,"));
+    assertFalse(body.contains("RESTEASY00"));
+  }
 }
