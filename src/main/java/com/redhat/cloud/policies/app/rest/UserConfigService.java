@@ -57,10 +57,10 @@ public class UserConfigService {
   NotificationSystem notifications;
 
   @ConfigProperty(name = "notifications.bundle", defaultValue = "rhel")
-  private String bundle;
+  String bundle;
 
   @ConfigProperty(name = "notifications.application", defaultValue = "policies")
-  private String application;
+  String application;
 
   @GET
   @Path("/preferences")
