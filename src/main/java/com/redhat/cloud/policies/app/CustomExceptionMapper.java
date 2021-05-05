@@ -2,6 +2,7 @@ package com.redhat.cloud.policies.app;
 
 import com.redhat.cloud.policies.app.model.Msg;
 
+import javax.json.stream.JsonParsingException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,7 +22,10 @@ public class CustomExceptionMapper implements ExceptionMapper<RuntimeException> 
     if (exception instanceof NotFoundException) {
       builder = Response.status(Response.Status.NOT_FOUND);
     }
-    else if (exception.getMessage().contains("RESTEASY003340")) {
+    else if (exception instanceof JsonParsingException) {
+      builder = Response.status(Response.Status.BAD_REQUEST);
+    }
+    else if (exception.getMessage().contains("RESTEASY003340") || exception.getMessage().contains("RESTEASY008200")) {
       builder = Response.status(Response.Status.BAD_REQUEST);
     } else {
       builder = Response.serverError();
