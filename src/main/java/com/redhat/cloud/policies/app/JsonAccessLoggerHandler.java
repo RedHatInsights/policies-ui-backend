@@ -30,6 +30,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import java.util.logging.Logger;
 
 /**
  * @author hrupp
@@ -41,6 +42,7 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
   JsonObjectBuilder jsonObjectBuilder;
   private final boolean filterHealthCalls;
 
+  private final Logger log = Logger.getLogger("Access");
 
   public JsonAccessLoggerHandler(boolean filterHealthCalls) {
     this.filterHealthCalls = filterHealthCalls;
@@ -123,7 +125,8 @@ public class JsonAccessLoggerHandler implements LoggerHandler {
 
     JsonObject jsonMessage = jsonObjectBuilder.build();
     String msg = jsonb.toJson(jsonMessage);
-    System.out.println(msg);
+
+    log.info(msg);
   }
 
 
