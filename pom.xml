@@ -16,7 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <quarkus.version>1.13.3.Final</quarkus.version>
     <surefire-plugin.version>2.22.2</surefire-plugin.version>
-    <jacoco.version>0.8.6</jacoco.version>
+    <jacoco.version>0.8.7</jacoco.version>
 
     <version.testcontainers>1.15.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
