@@ -16,9 +16,12 @@
  */
 package com.redhat.cloud.policies.app;
 
+import io.quarkus.runtime.StartupEvent;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.enterprise.event.Observes;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -36,19 +39,29 @@ public class JaxRsApplication extends Application {
 
   Logger log = Logger.getLogger("Policies UI-Backend");
 
-  @ConfigProperty(name = "accesslog.filter.health", defaultValue = "true")
-  boolean filterHealth;
+  public static final String FILTER_REGEX = ".*(/health(/\\w+)?|/metrics|/api/policies/v1.0/status) HTTP/[0-9].[0-9]\" 200.*\\n?";
+  private static final Pattern pattern = Pattern.compile(FILTER_REGEX);
+
+  @ConfigProperty(name = "quarkus.http.access-log.category")
+  String loggerName;
 
   // Server init is done here, so we can do some more initialisation
+  void init(@Observes Router router) {
+    initAccessLogFilter();
 
-  void observeRouter(@Observes Router router) {
-    //Produce access log
-    Handler<RoutingContext> handler = new JsonAccessLoggerHandler(filterHealth);
-    router.route().order(-1000).handler(handler);
     showVersionInfo();
 
     // Generate a token
     StuffHolder.getInstance();
+  }
+
+  private void initAccessLogFilter() {
+    java.util.logging.Logger accessLog = java.util.logging.Logger.getLogger(loggerName);
+    accessLog.setFilter(record -> {
+      final String logMessage = record.getMessage();
+      Matcher matcher = pattern.matcher(logMessage);
+      return !matcher.matches();
+    });
   }
 
   private void showVersionInfo() {
