@@ -2,7 +2,10 @@
 
 set -exv
 
-IMAGE="quay.io/cloudservices/policies-ui-backend"
+# Go back to root folder
+cd ..
+
+IMAGE="quay.io/ylahav/policies-ui-backend"
 IMAGE_TAG=$(git rev-parse --short=7 HEAD)
 
 if [[ -z "$QUAY_USER" || -z "$QUAY_TOKEN" ]]; then
