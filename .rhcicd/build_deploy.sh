@@ -2,9 +2,6 @@
 
 set -exv
 
-# Go back to root folder
-cd ..
-
 IMAGE="quay.io/cloudservices/policies-ui-backend"
 IMAGE_TAG=$(git rev-parse --short=7 HEAD)
 
