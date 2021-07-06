@@ -46,14 +46,81 @@ objects:
           successThreshold: 1
           timeoutSeconds: 1
         env:
-        - name: CLOWDER_FILE
-          value: ${CLOWDER_FILE}
-        - name: CLOWDER_ENABLED
-          value: ${CLOWDER_ENABLED}
+        - name: APP_NAME
+          value: ${APP_NAME}
+        - name: ENV_NAME
+          value: ${ENV_NAME}
+        - name: QUARKUS_LOG_CLOUDWATCH_LOG_GROUP
+          valueFrom:
+            secretKeyRef:
+              name: cloudwatch
+              key: log_group_name
+        - name: QUARKUS_LOG_CLOUDWATCH_LOG_STREAM_NAME
+          value: ${CLOUD_WATCH_LOG_STREAM_NAME}
+        - name: QUARKUS_LOG_CLOUDWATCH_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: cloudwatch
+              key: aws_access_key_id
+        - name: QUARKUS_LOG_CLOUDWATCH_ACCESS_KEY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cloudwatch
+              key: aws_secret_access_key
+        - name: QUARKUS_LOG_CLOUDWATCH_REGION
+          valueFrom:
+            secretKeyRef:
+              name: cloudwatch
+              key: aws_region
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: ${DB_SECRET_NAME}
+              key: db.host
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: ${DB_SECRET_NAME}
+              key: db.port
+        - name: QUARKUS_DATASOURCE_JDBC_URL
+          value: jdbc:tracing:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/policies_ui_backend?sslmode=${PGSSLMODE}&sslrootcert=${PGSSLROOTCERT}
+        - name: QUARKUS_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${DB_SECRET_NAME}
+              key: db.password
+        - name: QUARKUS_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ${DB_SECRET_NAME}
+              key: db.user
+        - name: PATH_PREFIX
+          value: ${PATH_PREFIX}
+        - name: ENGINE_MP_REST_URL
+          value: http://policies-engine:8080
+        - name: PGSSLMODE
+          value: ${PGSSLMODE}
+        - name: PGSSLROOTCERT
+          value: /etc/rds-certs/rds-cacert
         - name: RBAC_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: RBAC_MP_REST_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
+        - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
+          value: ${ENV_NAME}
+        - name: QUARKUS_LOG_SENTRY_DSN
+          value: >-
+            https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
+        - name: QUARKUS_LOG_SENTRY
+          value: ${SENTRY_ENABLED}
+        - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
+          value: ${CLOUDWATCH_LOGGING_ENABLED}
+        - name: NOTIFICATIONS_MP_REST_URL
+          value: ${NOTIFICATIONS_MP_REST_URL}
+        - name: CLOWDER_FILE
+          value: ${CLOWDER_FILE}
+        - name: CLOWDER_ENABLED
+          value: ${CLOWDER_ENABLED}
         - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
           value: ${CLOUDWATCH_LOGGING_ENABLED}
         resources:
@@ -108,6 +175,10 @@ parameters:
 - name: CLOWDER_FILE
   value: /cdapp/cdappconfig.json
   description: default path for cdappconfig file
+- name: RBAC_SCHEME
+  displayName: Rbac Service Scheme
+  description: Scheme to use for the RBAC service URL. Can be either http or https
+  value: http
 - name: RBAC_HOST
   displayName: Rbac Service Host
   description: Host to use for the RBAC service URL.
@@ -115,7 +186,7 @@ parameters:
 - name: RBAC_PORT
   displayName: Rbac Service Port
   description: Port to use for the RBAC service URL.
-  value: "8000"
+  value: "8080"
 - name: RBAC_SCHEME
   displayName: Rbac Service Scheme
   description: Scheme to use for the RBAC service URL. Can be either http or https
@@ -123,4 +194,31 @@ parameters:
 - name: CLOUDWATCH_LOGGING_ENABLED
   description: Enable Cloudwatch (or not)
   value: "false"
-
+- name: APP_NAME
+  displayName: Application Name
+  description: Application name to be used in request paths. Only used when PATH_PREFIX is also specified.
+  value: policies
+- name: ENV_NAME
+  displayName: stage, prod, fedramp-stage, fedramp-prod...
+- name: CLOUD_WATCH_LOG_STREAM_NAME
+  value: ${HOSTNAME}
+- name: CLOUDWATCH_LOGGING_ENABLED
+  displayName: Enable Cloudwatch (or not)
+  value: "false"
+- name: DB_SECRET_NAME
+  value: policies-ui-backend-db
+- name: PATH_PREFIX
+  displayName: Path Prefix
+  description: Base path for the API
+- name: PGSSLMODE
+  displayName: Postgres SSL mode
+  description: "Options can be found in the doc: https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS"
+  value: 'prefer'
+- name: SENTRY_ENABLED
+  displayName: Enable Sentry (or not)
+  value: "false"
+- name: CLOUDWATCH_LOGGING_ENABLED
+  displayName: Enable Cloudwatch (or not)
+  value: "false"
+- name: NOTIFICATIONS_MP_REST_URL
+  value: "http://notifications-backend.notifications-ci.svc:8080/"
