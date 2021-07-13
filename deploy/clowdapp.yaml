@@ -169,7 +169,7 @@ parameters:
 - description: Determines Clowder deployment
   name: CLOWDER_ENABLED
   value: "false"
-- description: ClowdEnv Name: stage, prod, ephemeral...
+- description: ClowdEnv Name (stage, prod, ephemeral)
   name: ENV_NAME
   required: true
 - name: CLOWDER_FILE
