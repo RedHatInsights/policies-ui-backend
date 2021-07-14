@@ -33,8 +33,7 @@ When developing you can use Quarkus hot-reload
 
 == Talking to the endpoint
 
-.NOTE
-The backend requires a valid `x-rh-identity` to be supplied on calls.
+NOTE: The backend requires a valid `x-rh-identity` to be supplied on calls.
 For testing purposes you can take the one that is stored in
 link:src/test/resources/rhid.txt It has accountId = '1234' set.
 
