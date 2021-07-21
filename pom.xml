@@ -21,6 +21,7 @@
     <version.testcontainers>1.15.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-client-java.version>5.5.4</mockserver-client-java.version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
+    <clowder-quarkus-config-source.version>0.1.4</clowder-quarkus-config-source.version>
   </properties>
 
   <dependencyManagement>
@@ -118,6 +119,13 @@
       <groupId>io.quarkiverse.logging.cloudwatch</groupId>
       <artifactId>quarkus-logging-cloudwatch</artifactId>
       <version>2.3.0</version>
+    </dependency>
+
+    <!-- Configuration dependencies -->
+    <dependency>
+      <groupId>com.redhat.cloud.common</groupId>
+      <artifactId>clowder-quarkus-config-source</artifactId>
+      <version>${clowder-quarkus-config-source.version}</version>
     </dependency>
 
     <!-- Test dependencies -->
