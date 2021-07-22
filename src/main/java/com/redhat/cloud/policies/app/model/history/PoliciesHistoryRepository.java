@@ -143,9 +143,12 @@ public class PoliciesHistoryRepository {
                 return Optional.of("hostName");
             case "ctime":
                 return Optional.of("ctime");
-            default:
+            case "mtime":
                 // Pager may contain a default sort on `mtime` which is not a PoliciesHistoryEntry field.
                 return Optional.empty();
+            default:
+                throw new IllegalArgumentException("Unknown sort column: " + sortColumn);
+             
         }
     }
 
