@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
+import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +76,7 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -109,9 +112,14 @@ public class PolicyCrudService {
   public static final String ERROR_STRING = "error";
   public static final String CTIME_STRING = "ctime";
 
+  public static final String POLICIES_HISTORY_ENABLED_CONF_KEY = "policies-history.enabled";
+
   private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
   private static final ObjectMapper OM = new ObjectMapper();
+
+  @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
+  boolean policiesHistoryEnabled;
 
   @Inject
   @RestClient
@@ -138,6 +146,9 @@ public class PolicyCrudService {
 
   @Inject
   Tracer tracer;
+
+  @Inject
+  PoliciesHistoryRepository policiesHistoryRepository;
 
   // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
   // This class is used only for swagger return type
@@ -934,80 +945,7 @@ public class PolicyCrudService {
 
        try {
          Pager pager = PagingUtils.extractPager(uriInfo);
-
-         int limit = pager.getLimit();
-         // We don't allow unlimited or values > 200
-         limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
-         int pageNum = pager.getOffset() / limit;
-
-         // Once Quarkus supports MP rest client 2.0 we can use
-         // String[] here and use some special query-param style to
-         // support this
-         String sort1=null;
-         String sort2 = null;
-         String order1 = null;
-         String order2= null;
-
-         if (pager.getSort()!= null) {
-           List<Sort.Column> columns = pager.getSort().getColumns();
-           if (columns.size() > 0) {
-             sort1 = getSortFromPageColumn(columns.get(0));
-             order1 = getOrderFromPageColumn(columns.get(0));
-           }
-           if (columns.size() > 1) {
-             sort2 = getSortFromPageColumn(columns.get(1));
-             order2 = getOrderFromPageColumn(columns.get(1));
-           }
-         }
-
-         String tagQuery = getTagsFilterFromPager(pager);
-
-         long totalCount;
-         Response response = null;
-         String alerts;
-         Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
-         Scope scope = tracer.scopeManager().activate(span,false);
-         try {
-           response = engine.findLastTriggered(policyId.toString(),
-               true, // thin
-               pageNum, limit,
-               sort1, sort2, order1, order2, // See Comment in engine def
-               tagQuery,
-               user.getAccount());
-           String countHeader = response.getHeaderString("X-Total-Count");
-           totalCount = Long.parseLong(countHeader);
-           alerts = response.readEntity(String.class);
-         }
-         catch (Exception e) {
-           String msg = "Retrieval of history from engine failed with: " + e.getMessage();
-           span.log(msg);
-           span.setTag(ERROR_STRING,true);
-           log.warning(msg);
-           return Response.serverError().entity(msg).build();
-         }
-         finally{
-           if (response!=null) {
-             response.close();
-           }
-           if (span!=null) {
-             span.finish();
-           }
-           if (scope!=null) {
-             scope.close();
-           }
-         }
-
-         List<HistoryItem> items = new ArrayList<>();
-
-         // The engine may not have returned data to us
-         if (totalCount > 0) {
-           span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
-           try (Scope ignored = tracer.scopeManager().activate(span,true)) {
-             parseHistoryFromEngine(alerts, items);
-           }
-         }
-         Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
-         builder = PagingUtils.responseBuilder(itemsPage);
+         builder = buildHistoryResponse(policyId, pager);
        } catch (IllegalArgumentException iae) {
          tracer.activeSpan().setTag(ERROR_STRING,true);
          builder = Response.status(400,iae.getMessage());
@@ -1019,6 +957,109 @@ public class PolicyCrudService {
        }
      }
      return builder.build();
+  }
+
+  private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) throws Exception {
+    if (policiesHistoryEnabled) {
+      return buildHistoryResponseFromDatabase(policyId, pager);
+    } else {
+      return buildHistoryResponseFromEngineRestCall(policyId, pager);
+    }
+  }
+
+  private ResponseBuilder buildHistoryResponseFromDatabase(UUID policyId, Pager pager) {
+    List<HistoryItem> items;
+    String tenantId = user.getAccount();
+
+    long totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
+    if (totalCount > 0) {
+      items = policiesHistoryRepository.find(tenantId, policyId, pager)
+              .stream().map(historyEntry ->
+                      new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+              ).collect(Collectors.toList());
+    } else {
+      items = Collections.emptyList();
+    }
+
+    Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
+    return PagingUtils.responseBuilder(itemsPage);
+  }
+
+  // TODO Delete this method after we're done retrieving the history from the engine REST API.
+  private ResponseBuilder buildHistoryResponseFromEngineRestCall(UUID policyId, Pager pager) throws Exception {
+    int limit = pager.getLimit();
+    // We don't allow unlimited or values > 200
+    limit = limit == Pager.NO_LIMIT ? 50 :  min(limit,200);
+    int pageNum = pager.getOffset() / limit;
+
+    // Once Quarkus supports MP rest client 2.0 we can use
+    // String[] here and use some special query-param style to
+    // support this
+    String sort1=null;
+    String sort2 = null;
+    String order1 = null;
+    String order2= null;
+
+    if (pager.getSort()!= null) {
+      List<Sort.Column> columns = pager.getSort().getColumns();
+      if (columns.size() > 0) {
+        sort1 = getSortFromPageColumn(columns.get(0));
+        order1 = getOrderFromPageColumn(columns.get(0));
+      }
+      if (columns.size() > 1) {
+        sort2 = getSortFromPageColumn(columns.get(1));
+        order2 = getOrderFromPageColumn(columns.get(1));
+      }
+    }
+
+    String tagQuery = getTagsFilterFromPager(pager);
+
+    long totalCount;
+    Response response = null;
+    String alerts;
+    Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
+    Scope scope = tracer.scopeManager().activate(span,false);
+    try {
+      response = engine.findLastTriggered(policyId.toString(),
+              true, // thin
+              pageNum, limit,
+              sort1, sort2, order1, order2, // See Comment in engine def
+              tagQuery,
+              user.getAccount());
+      String countHeader = response.getHeaderString("X-Total-Count");
+      totalCount = Long.parseLong(countHeader);
+      alerts = response.readEntity(String.class);
+    }
+    catch (Exception e) {
+      String msg = "Retrieval of history from engine failed with: " + e.getMessage();
+      span.log(msg);
+      span.setTag(ERROR_STRING,true);
+      log.warning(msg);
+      return Response.serverError().entity(msg);
+    }
+    finally{
+      if (response!=null) {
+        response.close();
+      }
+      if (span!=null) {
+        span.finish();
+      }
+      if (scope!=null) {
+        scope.close();
+      }
+    }
+
+    List<HistoryItem> items = new ArrayList<>();
+
+    // The engine may not have returned data to us
+    if (totalCount > 0) {
+      span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
+      try (Scope ignored = tracer.scopeManager().activate(span,true)) {
+        parseHistoryFromEngine(alerts, items);
+      }
+    }
+    Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
+    return PagingUtils.responseBuilder(itemsPage);
   }
 
   public static void parseHistoryFromEngine(String alerts, List<HistoryItem> items) throws JsonProcessingException {
