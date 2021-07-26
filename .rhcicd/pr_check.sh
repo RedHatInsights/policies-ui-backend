@@ -2,7 +2,7 @@
 
 set -exv
 
-IMAGE="quay.io/cloudservices/notifications-backend"
+IMAGE="quay.io/cloudservices/policies-ui-backend"
 IMAGE_TAG=$(git rev-parse --short=7 HEAD)
 
 DOCKER_CONF="$PWD/.docker"
