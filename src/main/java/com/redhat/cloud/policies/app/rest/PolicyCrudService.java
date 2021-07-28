@@ -40,6 +40,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.json.JsonString;
 import javax.persistence.EntityManager;
@@ -76,6 +77,7 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
+import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -155,6 +157,14 @@ public class PolicyCrudService {
   private static class PagedResponseOfPolicy extends PagingUtils.PagedResponse<Policy> {
     private PagedResponseOfPolicy(Page<Policy> page) {
       super(page);
+    }
+  }
+
+  void logAtStartup(@Observes StartupEvent event) {
+    if (policiesHistoryEnabled) {
+      log.info("Policies history is enabled. The history data will be retrieved from the database.");
+    } else {
+      log.info("Policies history is disabled. The history data will be retrieved from Infinispan.");
     }
   }
 
