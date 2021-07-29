@@ -2,7 +2,7 @@
 
 set -exv
 
-/bin/bash build_deploy.sh testrun
+/bin/bash .rhcicd/build_deploy.sh testrun
 
 # Until test results produce a junit XML file, create a dummy result file so Jenkins will pass
 mkdir -p $WORKSPACE/artifacts
