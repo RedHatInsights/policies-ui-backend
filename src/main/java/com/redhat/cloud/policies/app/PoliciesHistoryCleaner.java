@@ -38,10 +38,10 @@ public class PoliciesHistoryCleaner {
         Duration deleteDelay = ConfigProvider.getConfig().getOptionalValue(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, Duration.class)
                 .orElse(DEFAULT_DELETE_DELAY);
         Instant deleteBefore = Instant.now().minus(deleteDelay);
-        LOGGER.debugf("Policies history purge starting. Entries older than %s will be deleted.", deleteBefore.toString());
+        LOGGER.infof("Policies history purge starting. Entries older than %s will be deleted.", deleteBefore.toString());
         int deleted = session.createQuery("DELETE FROM PoliciesHistoryEntry WHERE ctime < :ctime")
                 .setParameter("ctime", deleteBefore.toEpochMilli())
                 .executeUpdate();
-        LOGGER.debugf("Policies history purge ended. %d entries were deleted from the database.", deleted);
+        LOGGER.infof("Policies history purge ended. %d entries were deleted from the database.", deleted);
     }
 }
