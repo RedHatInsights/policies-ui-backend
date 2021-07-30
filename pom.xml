@@ -335,22 +335,6 @@
               </execution>
           </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <executable>helpers/create_manifest.sh</executable>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>post-integration-test</phase>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
   <profiles>
