@@ -366,7 +366,7 @@
           <includeOnlyProperties>
             <includeOnlyProperty>git.commit.id.abbrev</includeOnlyProperty>
           </includeOnlyProperties>
-          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
           <generateGitPropertiesFile>true</generateGitPropertiesFile>
         </configuration>
       </plugin>
