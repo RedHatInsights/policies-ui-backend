@@ -16,18 +16,18 @@
  */
 package com.redhat.cloud.policies.app;
 
-import io.quarkus.runtime.StartupEvent;
-import io.vertx.core.Handler;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.enterprise.event.Observes;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import java.util.logging.Logger;
+import org.jboss.logging.Logger;
 
 /**
  * Set the base path for the application
@@ -49,7 +49,7 @@ public class JaxRsApplication extends Application {
   void init(@Observes Router router) {
     initAccessLogFilter();
 
-    showVersionInfo();
+    log.info(readGitProperties());
 
     // Generate a token
     StuffHolder.getInstance();
@@ -64,21 +64,28 @@ public class JaxRsApplication extends Application {
     });
   }
 
-  private void showVersionInfo() {
-    // Produce build-info and log on startup
-
-    String commmitSha = System.getenv("OPENSHIFT_BUILD_COMMIT");
-    if (commmitSha != null ) {
-      String openshiftBuildReference = System.getenv("OPENSHIFT_BUILD_REFERENCE");
-      String openshiftBuildName = System.getenv("OPENSHIFT_BUILD_NAME");
-
-      String info = String.format("%n    s2i-build [%s]%n    from branch [%s]%n    with git sha [%s]",
-          openshiftBuildName,
-          openshiftBuildReference,
-          commmitSha);
-      log.info(info);
-    } else {
-      log.info("%n    Not built on OpenShift s2i, no version info available");
+  private String readGitProperties() {
+    ClassLoader classLoader = getClass().getClassLoader();
+    InputStream inputStream = classLoader.getResourceAsStream("git.properties");
+    try {
+      return readFromInputStream(inputStream);
+    } catch (IOException e) {
+      log.log(Logger.Level.ERROR, "Could not read git.properties.", e);
+      return "Version information could not be retrieved";
     }
+  }
+
+  private String readFromInputStream(InputStream inputStream) throws IOException {
+    if (inputStream == null) {
+      return "git.properties file not available";
+    }
+    StringBuilder resultStringBuilder = new StringBuilder();
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        resultStringBuilder.append(line).append("\n");
+      }
+    }
+    return resultStringBuilder.toString();
   }
 }
