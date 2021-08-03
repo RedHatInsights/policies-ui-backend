@@ -13,10 +13,10 @@ objects:
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdApp
   metadata:
-    name: policies
+    name: policies-ui-backend
     labels:
-      app: policies
-      clowdapp: policies
+      app: policies-ui-backend
+      clowdapp: policies-ui-backend
   spec:
     envName: ${ENV_NAME}
     deployments:
@@ -31,77 +31,29 @@ objects:
             path: /health/live
             port: 8000
             scheme: HTTP
-          initialDelaySeconds: 40
-          periodSeconds: 10
+          initialDelaySeconds: 420
+          periodSeconds: 20
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 5
         readinessProbe:
           failureThreshold: 3
           httpGet:
             path: /health/ready
             port: 8000
             scheme: HTTP
-          initialDelaySeconds: 40
-          periodSeconds: 10
+          initialDelaySeconds: 420
+          periodSeconds: 20
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 5
         env:
         - name: APP_NAME
           value: ${APP_NAME}
         - name: ENV_NAME
           value: ${ENV_NAME}
-        - name: QUARKUS_LOG_CLOUDWATCH_LOG_GROUP
-          valueFrom:
-            secretKeyRef:
-              name: cloudwatch
-              key: log_group_name
-        - name: QUARKUS_LOG_CLOUDWATCH_LOG_STREAM_NAME
-          value: ${CLOUD_WATCH_LOG_STREAM_NAME}
-        - name: QUARKUS_LOG_CLOUDWATCH_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: cloudwatch
-              key: aws_access_key_id
-        - name: QUARKUS_LOG_CLOUDWATCH_ACCESS_KEY_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: cloudwatch
-              key: aws_secret_access_key
-        - name: QUARKUS_LOG_CLOUDWATCH_REGION
-          valueFrom:
-            secretKeyRef:
-              name: cloudwatch
-              key: aws_region
-        - name: DATABASE_HOST
-          valueFrom:
-            secretKeyRef:
-              name: ${DB_SECRET_NAME}
-              key: db.host
-        - name: DATABASE_PORT
-          valueFrom:
-            secretKeyRef:
-              name: ${DB_SECRET_NAME}
-              key: db.port
-        - name: QUARKUS_DATASOURCE_JDBC_URL
-          value: jdbc:tracing:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/policies_ui_backend?sslmode=${PGSSLMODE}&sslrootcert=${PGSSLROOTCERT}
-        - name: QUARKUS_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: ${DB_SECRET_NAME}
-              key: db.password
-        - name: QUARKUS_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: ${DB_SECRET_NAME}
-              key: db.user
         - name: PATH_PREFIX
           value: ${PATH_PREFIX}
         - name: ENGINE_MP_REST_URL
           value: http://policies-engine:8080
-        - name: PGSSLMODE
-          value: ${PGSSLMODE}
-        - name: PGSSLROOTCERT
-          value: /etc/rds-certs/rds-cacert
         - name: RBAC_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: RBAC_MP_REST_URL
@@ -113,16 +65,12 @@ objects:
             https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
         - name: QUARKUS_LOG_SENTRY
           value: ${SENTRY_ENABLED}
-        - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
-          value: ${CLOUDWATCH_LOGGING_ENABLED}
         - name: NOTIFICATIONS_MP_REST_URL
           value: ${NOTIFICATIONS_MP_REST_URL}
         - name: CLOWDER_FILE
           value: ${CLOWDER_FILE}
         - name: CLOWDER_ENABLED
           value: ${CLOWDER_ENABLED}
-        - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
-          value: ${CLOUDWATCH_LOGGING_ENABLED}
         resources:
           limits:
             cpu: ${CPU_LIMIT}
@@ -137,7 +85,7 @@ objects:
         - mountPath: /tmp
           name: tmpdir
     database:
-      name: policies-db
+      name: policies-ui-backend-db
       version: 12
     optionalDependencies:
       - rbac
@@ -148,16 +96,16 @@ parameters:
   value: INFO
 - description: Cpu limit of service
   name: CPU_LIMIT
-  value: 500m
+  value: 1000m
 - description: memory limit of service
   name: MEMORY_LIMIT
-  value: 500Mi
+  value: 4Gi
 - name: CPU_REQUEST
   description: The cpu request
   value: 500m
 - name: MEMORY_REQUEST
   description: The memory request
-  value: 250Mi
+  value: 2Gi
 - name: MIN_REPLICAS
   value: '1'
 - description: Image tag
@@ -191,32 +139,15 @@ parameters:
   displayName: Rbac Service Scheme
   description: Scheme to use for the RBAC service URL. Can be either http or https
   value: http
-- name: CLOUDWATCH_LOGGING_ENABLED
-  description: Enable Cloudwatch (or not)
-  value: "false"
 - name: APP_NAME
   displayName: Application Name
   description: Application name to be used in request paths. Only used when PATH_PREFIX is also specified.
   value: policies
-- name: CLOUD_WATCH_LOG_STREAM_NAME
-  value: ${HOSTNAME}
-- name: CLOUDWATCH_LOGGING_ENABLED
-  displayName: Enable Cloudwatch (or not)
-  value: "false"
-- name: DB_SECRET_NAME
-  value: policies-ui-backend-db
 - name: PATH_PREFIX
   displayName: Path Prefix
   description: Base path for the API
-- name: PGSSLMODE
-  displayName: Postgres SSL mode
-  description: "Options can be found in the doc: https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS"
-  value: 'prefer'
 - name: SENTRY_ENABLED
   displayName: Enable Sentry (or not)
-  value: "false"
-- name: CLOUDWATCH_LOGGING_ENABLED
-  displayName: Enable Cloudwatch (or not)
   value: "false"
 - name: NOTIFICATIONS_MP_REST_URL
   value: "http://notifications-backend.notifications-ci.svc:8080/"
