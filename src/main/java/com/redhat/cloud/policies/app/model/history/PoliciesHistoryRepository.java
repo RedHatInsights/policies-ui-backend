@@ -74,9 +74,9 @@ public class PoliciesHistoryRepository {
 
         if (pager.getLimit() > 0) {
             query.setMaxResults(pager.getLimit());
-            if (pager.getOffset() > 0) {
-                query.setFirstResult(pager.getOffset() * pager.getLimit());
-            }
+        }
+        if (pager.getOffset() > 0) {
+            query.setFirstResult(pager.getOffset());
         }
 
         return query.getResultList();

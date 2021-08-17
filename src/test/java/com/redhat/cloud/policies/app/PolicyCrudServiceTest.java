@@ -60,7 +60,7 @@ public class PolicyCrudServiceTest extends AbstractITest {
                 .queryParam("sortColumn", "name")
                 .queryParam("sortDirection", "desc")
                 .queryParam("limit", 2)
-                .queryParam("offset", 1)
+                .queryParam("offset", 2)
                 .when().get("/policies/{id}/history/trigger")
                 .then().statusCode(200)
                 .extract().asString();
