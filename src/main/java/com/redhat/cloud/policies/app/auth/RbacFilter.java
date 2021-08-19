@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.auth;
 
 import com.redhat.cloud.policies.app.RbacServer;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.cache.CacheResult;
 import java.io.IOException;
@@ -66,7 +67,8 @@ public class RbacFilter implements ContainerRequestFilter {
     }
 
     long t1 = System.currentTimeMillis();
-    try (Scope ignored = tracer.buildSpan("getRBac").startActive(true)){
+    Span span = tracer.buildSpan("getRBac").start();
+    try (Scope ignored = tracer.scopeManager().activate(span)){
       result = getRbacInfo(user.getRawRhIdHeader());
     } catch (Throwable e) {
       requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
@@ -76,6 +78,7 @@ public class RbacFilter implements ContainerRequestFilter {
       if (warnSlowRbac.get() && (t2 - t1) > 500) {
         log.warning("Call to RBAC took " + (t2 - t1) + "ms");
       }
+      span.finish();
     }
 
     final String policiesPath = "policies";
