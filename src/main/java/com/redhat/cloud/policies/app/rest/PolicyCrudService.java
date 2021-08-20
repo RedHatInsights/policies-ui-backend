@@ -1028,7 +1028,7 @@ public class PolicyCrudService {
     Response response = null;
     String alerts;
     Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
-    Scope scope = tracer.scopeManager().activate(span,false);
+    Scope scope = tracer.scopeManager().activate(span);
     try {
       response = engine.findLastTriggered(policyId.toString(),
               true, // thin
@@ -1064,8 +1064,12 @@ public class PolicyCrudService {
     // The engine may not have returned data to us
     if (totalCount > 0) {
       span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
-      try (Scope ignored = tracer.scopeManager().activate(span,true)) {
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         parseHistoryFromEngine(alerts, items);
+      } finally {
+        if (span != null) {
+          span.finish();
+        }
       }
     }
     Page<HistoryItem> itemsPage = new Page<>(items,pager,totalCount);
