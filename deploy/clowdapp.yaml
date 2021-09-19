@@ -55,7 +55,7 @@ objects:
         - name: PATH_PREFIX
           value: ${PATH_PREFIX}
         - name: ENGINE_MP_REST_URL
-          value: http://policies-engine-policies-engine:8080
+          value: http://policies-engine:8080
         - name: RBAC_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: RBAC_MP_REST_URL
