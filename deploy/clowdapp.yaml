@@ -19,6 +19,8 @@ objects:
       clowdapp: policies-ui-backend
   spec:
     envName: ${ENV_NAME}
+    testing:
+      iqePlugin: policies
     deployments:
     - name: policies-ui-backend
       minReplicas: ${{MIN_REPLICAS}}
@@ -134,7 +136,7 @@ parameters:
 - name: RBAC_PORT
   displayName: Rbac Service Port
   description: Port to use for the RBAC service URL.
-  value: "8080"
+  value: "8000"
 - name: RBAC_SCHEME
   displayName: Rbac Service Scheme
   description: Scheme to use for the RBAC service URL. Can be either http or https
