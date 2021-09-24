@@ -1,6 +1,5 @@
 FROM registry.access.redhat.com/ubi7-minimal
 
-LABEL maintainer="hrupp@redhat.com"
 RUN microdnf install java-11-openjdk-headless && microdnf clean all
 
 ENV quarkus.http.port=8080 \
