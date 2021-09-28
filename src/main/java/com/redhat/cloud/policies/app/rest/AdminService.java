@@ -38,8 +38,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -172,46 +177,63 @@ public class AdminService {
 
   @GET
   @Path("/verify")
+  @Produces("text/plain")
   public Response findOrphans() {
 
-    Map<String,List<TTT>> orphanedPolicies = new HashMap<>();
-    List<TTT> orphanedInDB = new ArrayList<>();
-    List<TTT> orphanedInEngine = new ArrayList<>();
+    StreamingOutput so = new StreamingOutput() {
+      @Override
+      public void write(OutputStream output) throws IOException, WebApplicationException {
+        // Find active policies that do not have a trigger in engine
+        output.write("Orphaned in DB: \n".getBytes(StandardCharsets.UTF_8));
+        try (Stream<Policy> policies = Policy.streamAll()) {
+          policies
+              .forEach(p -> {
+                try {
+                  engine.fetchTrigger(p.id, p.customerid);
+                }
+                catch (NotFoundException nfe) {
+                  try {
+                    output.write(new TTT(p.customerid, p.id).toBytes());
+                    output.write("\n".getBytes(StandardCharsets.UTF_8));
+                    output.flush();
+                  }
+                  catch (IOException ioe) {
+                    // TODO
+                  }
+                }
+              });
+        }
 
-    // Find active policies that do not have a trigger in engine
-    try (Stream<Policy> policies = Policy.streamAll()) {
-      policies
-          .forEach(p -> {
-            try {
-              engine.fetchTrigger(p.id, p.customerid);
-            }
-            catch (NotFoundException nfe) {
-              orphanedInDB.add(new TTT(p.customerid,p.id));
-            }
-          });
-    }
-    orphanedPolicies.put("orphanedInDB",orphanedInDB);
+        output.write("Orphaned in engine: \n".getBytes(StandardCharsets.UTF_8));
+        // Find triggers in engine for accounts and check if
+        // they have an active trigger in the DB
+        List<String> customersInDb;
+        try (Stream<Policy> policies = Policy.streamAll()) {
+          customersInDb = policies.map(p -> p.customerid)
+              .distinct().collect(Collectors.toList());
+        }
+        customersInDb
+            .forEach(cid-> {
+              List<Trigger> triggers = engine.findTriggersForCustomer(cid);
+              triggers.forEach(t -> {
+                Policy pol = Policy.findById(cid, UUID.fromString(t.id));
+                if (pol == null) {
+                  try {
+                    output.write(new TTT(cid, t.id).toBytes());
+                    output.write("\n".getBytes(StandardCharsets.UTF_8));
+                    output.flush();
+                  }
+                  catch (IOException ioe) {
+                    // TODO
+                  }
+                }
+              });
+            });
 
-    // Find triggers in engine for accounts and check if
-    // they have an active trigger in the DB
-    List<String> customersInDb;
-    try (Stream<Policy> policies = Policy.streamAll()) {
-      customersInDb = policies.map(p -> p.customerid)
-          .distinct().collect(Collectors.toList());
-    }
-    customersInDb
-        .forEach(cid-> {
-          List<Trigger> triggers = engine.findTriggersForCustomer(cid);
-          triggers.forEach(t -> {
-            Policy pol = Policy.findById(cid, UUID.fromString(t.id));
-            if (pol == null) {
-              orphanedInEngine.add(new TTT(cid,t.id));
-            }
-          });
-        });
-    orphanedPolicies.put("orphanedInEngine",orphanedInEngine);
+      }
+    };
 
-    return Response.ok().entity(orphanedPolicies).build();
+    return Response.ok(so).build();
   }
 
   @Path("/stats")
@@ -304,6 +326,10 @@ public class AdminService {
       sb.append(", tId='").append(tid).append('\'');
       sb.append('}');
       return sb.toString();
+    }
+
+    public byte[] toBytes() {
+      return toString().getBytes(StandardCharsets.UTF_8);
     }
   }
 }
