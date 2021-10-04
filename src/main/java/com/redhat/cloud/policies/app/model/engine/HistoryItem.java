@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app.model.engine;
 
-
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.Objects;
@@ -56,12 +55,12 @@ public class HistoryItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         HistoryItem that = (HistoryItem) o;
-        return ctime == that.ctime &&
-                id.equals(that.id) &&
-                hostName.equals(that.hostName);
+        return ctime == that.ctime && id.equals(that.id) && hostName.equals(that.hostName);
     }
 
     @Override

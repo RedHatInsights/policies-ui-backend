@@ -46,12 +46,12 @@ public class FactService {
 
     @GET
     @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
-    @APIResponse(responseCode = "200", description = "List of facts", content =
-    @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
+    @APIResponse(responseCode = "200", description = "List of facts", content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
     public Response listFacts() {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts")).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts"))
+                    .build();
         }
 
         Response.ResponseBuilder builder = Response.ok();

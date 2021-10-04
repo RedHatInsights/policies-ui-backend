@@ -85,11 +85,7 @@ public class Filter {
     }
 
     public enum Operator {
-        EQUAL("="),
-        LIKE("LIKE"),
-        ILIKE("LIKE"),
-        NOT_EQUAL("!="),
-        BOOLEAN_IS("IS");
+        EQUAL("="), LIKE("LIKE"), ILIKE("LIKE"), NOT_EQUAL("!="), BOOLEAN_IS("IS");
 
         String operation;
 
@@ -103,8 +99,7 @@ public class Filter {
 
         public static Operator fromName(String name) {
             final String upperCaseName = name.toUpperCase();
-            Optional<Operator> result = Arrays.stream(Operator.values())
-                    .filter(val -> val.name().equals(upperCaseName))
+            Optional<Operator> result = Arrays.stream(Operator.values()).filter(val -> val.name().equals(upperCaseName))
                     .findAny();
             if (result.isPresent()) {
                 return result.get();

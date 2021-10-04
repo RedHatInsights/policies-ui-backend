@@ -23,19 +23,20 @@ public class PoliciesHistoryCleaner {
     Session session;
 
     /**
-     * The policies UI shows a retention time for policies history entries.
-     * This scheduled job deletes from the database the history entries which are older than that retention time.
+     * The policies UI shows a retention time for policies history entries. This scheduled job deletes from the database
+     * the history entries which are older than that retention time.
      */
     @Scheduled(identity = "PoliciesHistoryCleaner", every = "${policies-history.cleaner.period}")
     @Transactional
     public void clean() {
-        Duration deleteDelay = ConfigProvider.getConfig().getOptionalValue(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, Duration.class)
+        Duration deleteDelay = ConfigProvider.getConfig()
+                .getOptionalValue(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, Duration.class)
                 .orElse(DEFAULT_DELETE_DELAY);
         Instant deleteBefore = Instant.now().minus(deleteDelay);
-        LOGGER.infof("Policies history purge starting. Entries older than %s will be deleted.", deleteBefore.toString());
+        LOGGER.infof("Policies history purge starting. Entries older than %s will be deleted.",
+                deleteBefore.toString());
         int deleted = session.createQuery("DELETE FROM PoliciesHistoryEntry WHERE ctime < :ctime")
-                .setParameter("ctime", deleteBefore.toEpochMilli())
-                .executeUpdate();
+                .setParameter("ctime", deleteBefore.toEpochMilli()).executeUpdate();
         LOGGER.infof("Policies history purge ended. %d entries were deleted from the database.", deleted);
     }
 }

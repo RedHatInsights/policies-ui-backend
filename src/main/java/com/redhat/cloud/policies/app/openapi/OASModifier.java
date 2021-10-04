@@ -28,9 +28,7 @@ import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 
 /**
- * Modify the path in the openapi document to not
- * have the prefix, which is already in the
- * servers part of the document.
+ * Modify the path in the openapi document to not have the prefix, which is already in the servers part of the document.
  */
 public class OASModifier implements OASFilter {
 
@@ -43,10 +41,8 @@ public class OASModifier implements OASFilter {
             PathItem p = paths.getPathItem(key);
             String mangledName = mangleName(key);
             if (!mangledName.startsWith("/user-config") && // POL-230 this is a private api, so don't show it.
-                    !mangledName.startsWith("/policies/sync") &&
-                    !mangledName.startsWith("/admin") &&
-                    !mangledName.startsWith("/status")
-            ) { // POL-277 private api
+                    !mangledName.startsWith("/policies/sync") && !mangledName.startsWith("/admin")
+                    && !mangledName.startsWith("/status")) { // POL-277 private api
                 replacementItems.put(mangledName, p);
             }
 

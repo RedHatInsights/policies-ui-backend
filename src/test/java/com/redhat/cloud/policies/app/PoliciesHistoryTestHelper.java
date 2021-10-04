@@ -15,7 +15,8 @@ public class PoliciesHistoryTestHelper {
     Session session;
 
     @Transactional
-    public PoliciesHistoryEntry createPoliciesHistoryEntry(String tenantId, UUID policyId, String hostId, String hostName, long ctime) {
+    public PoliciesHistoryEntry createPoliciesHistoryEntry(String tenantId, UUID policyId, String hostId,
+            String hostName, long ctime) {
         PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
         historyEntry.setId(UUID.randomUUID());
         historyEntry.setTenantId(tenantId);

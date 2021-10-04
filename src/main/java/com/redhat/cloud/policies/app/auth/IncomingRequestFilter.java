@@ -33,26 +33,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Request filter. This runs on all incoming requests before method matching
- * and reads the x-rh-identity header. If that is not present, calls will
- * aborted with a "401 unauthorised" response.
+ * Request filter. This runs on all incoming requests before method matching and reads the x-rh-identity header. If that
+ * is not present, calls will aborted with a "401 unauthorised" response.
  * <p>
- * If the header is present and valid, we produce a {{@link java.security.Principal}}
- * and inject that into the call chain via {{@link SecurityContext}}. The
- * principal will also be made available for Injection, so that you can write in
- * your code.
+ * If the header is present and valid, we produce a {{@link java.security.Principal}} and inject that into the call
+ * chain via {{@link SecurityContext}}. The principal will also be made available for Injection, so that you can write
+ * in your code.
  * <p>
- * We don't yet query for RBAC here, as this filter is not part of the tracing
- * span, so we would not be able to trace the rbac calls.
- * See {@link RbacFilter} for this purpose.
+ * We don't yet query for RBAC here, as this filter is not part of the tracing span, so we would not be able to trace
+ * the rbac calls. See {@link RbacFilter} for this purpose.
  * <p>
  * Usage in code:
- * <pre>{@code
- * @Inject
+ * 
+ * <pre>
+ * {@code
+ * &#64;Inject
  * Principal user;
  * [...]
  * String username = user.getName();
- * }</pre>
+ * }
+ * </pre>
  */
 @PreMatching
 @Provider
@@ -77,10 +77,8 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         String normalisedPath = routingContext.normalisedPath();
 
         // The following are available to everyone
-        if (normalisedPath.endsWith("openapi.json") ||
-                normalisedPath.equals("/api/policies/v1.0/status") ||
-                normalisedPath.startsWith("/admin")
-        ) {
+        if (normalisedPath.endsWith("openapi.json") || normalisedPath.equals("/api/policies/v1.0/status")
+                || normalisedPath.startsWith("/admin")) {
             return; // We are done here
         }
 
@@ -124,9 +122,8 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
         // Basic sanity check
         XRhIdentity rhIdentity = xrhid.get();
-        if (rhIdentity.getUsername() == null || rhIdentity.getUsername().isEmpty() ||
-                rhIdentity.identity.accountNumber == null || rhIdentity.identity.accountNumber.isEmpty()
-        ) {
+        if (rhIdentity.getUsername() == null || rhIdentity.getUsername().isEmpty()
+                || rhIdentity.identity.accountNumber == null || rhIdentity.identity.accountNumber.isEmpty()) {
             logIfNeeded("X-rh-identity header has no user or account");
             return null;
         }

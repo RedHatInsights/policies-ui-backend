@@ -32,10 +32,9 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 public interface NotificationSystem {
 
     /*
-    Using @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) didn't work for the return value of `getUserPreferences`
-    Test were always returning "null" on the values. Looks like it needs something else (or maybe is a bug?) to pick the snake_case
-    for the Restclient.
-    - Tried @Schema(name=instant_email")
+     * Using @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) didn't work for the return value of
+     * `getUserPreferences` Test were always returning "null" on the values. Looks like it needs something else (or
+     * maybe is a bug?) to pick the snake_case for the Restclient. - Tried @Schema(name=instant_email")
      */
     class UserPreferences {
         public Boolean instant_email;
@@ -44,9 +43,7 @@ public interface NotificationSystem {
 
     @GET
     @Path("/api/notifications/v1.0/user-config/notification-preference/{bundleName}/{applicationName}")
-    UserPreferences getUserPreferences(
-            @PathParam("bundleName") String bundleName,
-            @PathParam("applicationName") String applicationName,
-            @HeaderParam("x-rh-identity") String rhIdentity);
+    UserPreferences getUserPreferences(@PathParam("bundleName") String bundleName,
+            @PathParam("applicationName") String applicationName, @HeaderParam("x-rh-identity") String rhIdentity);
 
 }

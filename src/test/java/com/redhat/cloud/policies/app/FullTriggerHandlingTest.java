@@ -110,7 +110,6 @@ public class FullTriggerHandlingTest {
         Assert.assertTrue(ft.trigger.enabled);
     }
 
-
     @Test
     void testActionWithParam() {
         Policy p = createPolicy();

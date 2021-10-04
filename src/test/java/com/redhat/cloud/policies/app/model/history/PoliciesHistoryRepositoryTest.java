@@ -45,12 +45,18 @@ public class PoliciesHistoryRepositoryTest {
          * Some of the following history entries don't make sense from a functional perspective, but it doesn't matter.
          * The only goal here is to test things from a technical perspective.
          */
-        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID_1, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 1L);
-        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 2L);
-        PoliciesHistoryEntry historyEntry3 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_1, 3L);
-        PoliciesHistoryEntry historyEntry4 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_2, 3L);
-        PoliciesHistoryEntry historyEntry5 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_2 + "-foo", HOST_NAME_2, 4L);
-        PoliciesHistoryEntry historyEntry6 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_2, "bar-" + HOST_NAME_2, 5L);
+        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID_1, POLICY_ID_1, HOST_ID_1,
+                HOST_NAME_1, 1L);
+        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_1, HOST_ID_1,
+                HOST_NAME_1, 2L);
+        PoliciesHistoryEntry historyEntry3 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1,
+                HOST_NAME_1, 3L);
+        PoliciesHistoryEntry historyEntry4 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1,
+                HOST_NAME_2, 3L);
+        PoliciesHistoryEntry historyEntry5 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2,
+                HOST_ID_2 + "-foo", HOST_NAME_2, 4L);
+        PoliciesHistoryEntry historyEntry6 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_2,
+                "bar-" + HOST_NAME_2, 5L);
 
         /*
          * Pager #1: empty settings.
@@ -67,7 +73,8 @@ public class PoliciesHistoryRepositoryTest {
         assertTrue(repository.find(TENANT_ID_1, UUID.randomUUID(), pager).isEmpty());
         assertEquals(List.of(historyEntry1), repository.find(TENANT_ID_1, POLICY_ID_1, pager));
         assertEquals(List.of(historyEntry2), repository.find(TENANT_ID_2, POLICY_ID_1, pager));
-        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry3, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
+        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry3, historyEntry4),
+                repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #2: single EQUAL filter.
@@ -81,14 +88,16 @@ public class PoliciesHistoryRepositoryTest {
          */
         pager = Pager.builder().filter("name", LIKE, "host-name-2").build();
         assertEquals(3, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
+        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry4),
+                repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #4: single NOT_EQUAL filter.
          */
         pager = Pager.builder().filter("name", NOT_EQUAL, "red-hat").build();
         assertEquals(4, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry3, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
+        assertEquals(List.of(historyEntry6, historyEntry5, historyEntry3, historyEntry4),
+                repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #5: combined EQUAL and LIKE filters.
@@ -102,14 +111,16 @@ public class PoliciesHistoryRepositoryTest {
          */
         pager = Pager.builder().addSort("ctime", Ascending).build();
         assertEquals(4, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(historyEntry3, historyEntry4, historyEntry5, historyEntry6), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
+        assertEquals(List.of(historyEntry3, historyEntry4, historyEntry5, historyEntry6),
+                repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #7: combined sorts.
          */
         pager = Pager.builder().addSort("id", Descending).addSort("name", Ascending).build();
         assertEquals(4, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(historyEntry5, historyEntry6, historyEntry3, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
+        assertEquals(List.of(historyEntry5, historyEntry6, historyEntry3, historyEntry4),
+                repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #8: limit.
@@ -126,16 +137,11 @@ public class PoliciesHistoryRepositoryTest {
         assertEquals(List.of(historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
-         * Pager #10: everything.
-         * The query result is not asserted. This is only here to make sure the app doesn't go boom when everything is combined.
+         * Pager #10: everything. The query result is not asserted. This is only here to make sure the app doesn't go
+         * boom when everything is combined.
          */
-        pager = Pager.builder()
-                .itemsPerPage(2)
-                .page(3)
-                .filter("name", EQUAL, "foo")
-                .filter("id", LIKE, "bar")
-                .addSort("name", Ascending)
-                .addSort("ctime", Descending).build();
+        pager = Pager.builder().itemsPerPage(2).page(3).filter("name", EQUAL, "foo").filter("id", LIKE, "bar")
+                .addSort("name", Ascending).addSort("ctime", Descending).build();
         repository.find(TENANT_ID_2, POLICY_ID_2, pager);
     }
 }

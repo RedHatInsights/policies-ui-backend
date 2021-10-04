@@ -54,7 +54,6 @@ public class TagsFilterTest {
         assertEquals("tags.display_name MATCHES '*vm*'", query);
     }
 
-
     @Test
     void filter4() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[name]=VM&filter[id]=123"));

@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app;
 
-
 import io.restassured.http.Header;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,12 +27,11 @@ import javax.persistence.Query;
 import java.util.Map;
 
 /**
- * Test base for a few common things.
- * The heavy lifting of mock-setup is done in the {@link TestLifecycleManager}
+ * Test base for a few common things. The heavy lifting of mock-setup is done in the {@link TestLifecycleManager}
  */
 public abstract class AbstractITest {
 
-    static Header authHeader;       // User with access rights
+    static Header authHeader; // User with access rights
     static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
     static Header authHeaderNoAccount; // Account number is empty
 
@@ -58,7 +56,8 @@ public abstract class AbstractITest {
         String url = links.get(rel);
         Assert.assertNotNull("Rel [" + rel + "] not found", url);
         String tmp = String.format("limit=%d&offset=%d", limit, offset);
-        Assert.assertTrue("Url for rel [" + rel + "] should end in [" + tmp + "], but was [" + url + "]", url.endsWith(tmp));
+        Assert.assertTrue("Url for rel [" + rel + "] should end in [" + tmp + "], but was [" + url + "]",
+                url.endsWith(tmp));
     }
 
     protected long countPoliciesInDB() {

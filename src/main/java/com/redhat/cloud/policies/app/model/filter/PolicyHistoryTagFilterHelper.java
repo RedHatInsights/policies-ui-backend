@@ -34,28 +34,28 @@ public class PolicyHistoryTagFilterHelper {
             Filter.FilterItem item = iterator.next();
 
             switch (item.field) {
-                case "name":
-                    sb.append("tags.display_name");
-                    break;
-                case "id":
-                    sb.append("tags.inventory_id");
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown filter field: " + item.field);
+            case "name":
+                sb.append("tags.display_name");
+                break;
+            case "id":
+                sb.append("tags.inventory_id");
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown filter field: " + item.field);
             }
             sb.append(' ');
             switch (item.operator) {
-                case EQUAL:
-                    sb.append('=');
-                    break;
-                case LIKE:
-                    sb.append("MATCHES");
-                    break;
-                case NOT_EQUAL:
-                    sb.append("!=");
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
+            case EQUAL:
+                sb.append('=');
+                break;
+            case LIKE:
+                sb.append("MATCHES");
+                break;
+            case NOT_EQUAL:
+                sb.append("!=");
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
             }
             sb.append(" '");
             if (item.operator.equals(LIKE)) {

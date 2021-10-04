@@ -30,8 +30,7 @@ public class PoliciesHistoryCleanerTest {
     @BeforeEach
     @Transactional
     public void beforeEach() {
-        session.createQuery("DELETE FROM PoliciesHistoryEntry")
-                .executeUpdate();
+        session.createQuery("DELETE FROM PoliciesHistoryEntry").executeUpdate();
     }
 
     @Test

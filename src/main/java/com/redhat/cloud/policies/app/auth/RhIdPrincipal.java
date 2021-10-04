@@ -60,7 +60,6 @@ public class RhIdPrincipal implements Principal {
         return canWritePolicies;
     }
 
-
     public void setRawRhIdHeader(String rawRhId) {
         this.rawRhId = rawRhId;
     }

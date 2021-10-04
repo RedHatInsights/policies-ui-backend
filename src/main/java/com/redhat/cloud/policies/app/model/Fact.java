@@ -32,4 +32,3 @@ public class Fact extends PanacheEntity {
         return listAll();
     }
 }
-

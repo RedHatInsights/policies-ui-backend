@@ -76,7 +76,7 @@ public class AdminService {
 
     Set<String> filterIds = new HashSet<>();
 
-    private static final String[] BUCKETS = {"1", "2", "3", "4", "5-10", "10+"};
+    private static final String[] BUCKETS = { "1", "2", "3", "4", "5-10", "10+" };
 
     @PostConstruct
     void postConstruct() {
@@ -90,10 +90,8 @@ public class AdminService {
     }
 
     /**
-     * Signal health to outside world. Allowed values for state
-     * * 'ok': all ok
-     * * 'degraded': signal instance as degraded on status endpoint
-     * * 'admin-down': signal health-checks as down. Signals k8s to kill the pod
+     * Signal health to outside world. Allowed values for state * 'ok': all ok * 'degraded': signal instance as degraded
+     * on status endpoint * 'admin-down': signal health-checks as down. Signals k8s to kill the pod
      */
     @Path("/status")
     @POST
@@ -104,25 +102,21 @@ public class AdminService {
         StuffHolder th = StuffHolder.getInstance();
 
         switch (status.orElse("ok")) {
-            case "ok":
-                th.setDegraded(false);
-                th.setAdminDown(false);
-                builder = Response.ok()
-                        .entity(new Msg("Reset state to ok"));
-                break;
-            case "degraded":
-                th.setDegraded(true);
-                builder = Response.ok()
-                        .entity(new Msg("Set degraded state"));
-                break;
-            case "admin-down":
-                th.setAdminDown(true);
-                builder = Response.ok()
-                        .entity(new Msg("Set admin down state"));
-                break;
-            default:
-                builder = Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new Msg("Unknown status passed"));
+        case "ok":
+            th.setDegraded(false);
+            th.setAdminDown(false);
+            builder = Response.ok().entity(new Msg("Reset state to ok"));
+            break;
+        case "degraded":
+            th.setDegraded(true);
+            builder = Response.ok().entity(new Msg("Set degraded state"));
+            break;
+        case "admin-down":
+            th.setAdminDown(true);
+            builder = Response.ok().entity(new Msg("Set admin down state"));
+            break;
+        default:
+            builder = Response.status(Response.Status.BAD_REQUEST).entity(new Msg("Unknown status passed"));
         }
 
         statusProducer.update();
@@ -140,7 +134,7 @@ public class AdminService {
             return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission for this").build();
         }
 
-        final int[] count = {0};
+        final int[] count = { 0 };
         try (Stream<Policy> policies = Policy.streamAll()) {
             policies.forEach(p -> {
                 FullTrigger fullTrigger;
@@ -175,14 +169,13 @@ public class AdminService {
 
         // Find active policies that do not have a trigger in engine
         try (Stream<Policy> policies = Policy.streamAll()) {
-            policies
-                    .forEach(p -> {
-                        try {
-                            engine.fetchTrigger(p.id, p.customerid);
-                        } catch (NotFoundException nfe) {
-                            orphanedInDB.add(new TTT(p.customerid, p.id));
-                        }
-                    });
+            policies.forEach(p -> {
+                try {
+                    engine.fetchTrigger(p.id, p.customerid);
+                } catch (NotFoundException nfe) {
+                    orphanedInDB.add(new TTT(p.customerid, p.id));
+                }
+            });
         }
         orphanedPolicies.put("orphanedInDB", orphanedInDB);
 
@@ -190,19 +183,17 @@ public class AdminService {
         // they have an active trigger in the DB
         List<String> customersInDb;
         try (Stream<Policy> policies = Policy.streamAll()) {
-            customersInDb = policies.map(p -> p.customerid)
-                    .distinct().collect(Collectors.toList());
+            customersInDb = policies.map(p -> p.customerid).distinct().collect(Collectors.toList());
         }
-        customersInDb
-                .forEach(cid -> {
-                    List<Trigger> triggers = engine.findTriggersForCustomer(cid);
-                    triggers.forEach(t -> {
-                        Policy pol = Policy.findById(cid, UUID.fromString(t.id));
-                        if (pol == null) {
-                            orphanedInEngine.add(new TTT(cid, t.id));
-                        }
-                    });
-                });
+        customersInDb.forEach(cid -> {
+            List<Trigger> triggers = engine.findTriggersForCustomer(cid);
+            triggers.forEach(t -> {
+                Policy pol = Policy.findById(cid, UUID.fromString(t.id));
+                if (pol == null) {
+                    orphanedInEngine.add(new TTT(cid, t.id));
+                }
+            });
+        });
         orphanedPolicies.put("orphanedInEngine", orphanedInEngine);
 
         return Response.ok().entity(orphanedPolicies).build();
@@ -214,8 +205,8 @@ public class AdminService {
         long totalCount = Policy.count();
         Map<String, Integer> buckets = populateBuckets();
 
-        List<Object[]> list = entityManager.createNativeQuery("select p.customerId,count (p) from policy p group by p.customerId")
-                .getResultList();
+        List<Object[]> list = entityManager
+                .createNativeQuery("select p.customerId,count (p) from policy p group by p.customerId").getResultList();
         System.out.println(list.size());
         long cCount = list.size();
 
@@ -223,7 +214,7 @@ public class AdminService {
         idsMap.put("ids", filterIds);
         long fcount = Policy.count("customerId in (:ids)", idsMap);
 
-        final long[] filteredIdsCount = {0};
+        final long[] filteredIdsCount = { 0 };
         list.forEach(i -> {
             String cid = (String) i[0];
 
@@ -233,7 +224,6 @@ public class AdminService {
             int count = ((BigInteger) i[1]).intValue();
             putToBucket(buckets, count);
         });
-
 
         Map<String, Object> result = new HashMap<>();
         result.put("totalPoliciesCount", totalCount);

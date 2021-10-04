@@ -23,10 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * {
- * "email": "some.value@redhat.com",
- * "hide-sat": true
- * }
+ * { "email": "some.value@redhat.com", "hide-sat": true }
  */
 @Entity
 @Table(name = "settings")

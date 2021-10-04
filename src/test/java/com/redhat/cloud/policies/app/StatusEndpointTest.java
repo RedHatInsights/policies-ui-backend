@@ -32,10 +32,7 @@ public class StatusEndpointTest extends AbstractITest {
     @Test
     void getStatusSimple() {
 
-        when()
-                .get("/api/policies/v1.0/status")
-                .then()
-                .statusCode(200);
+        when().get("/api/policies/v1.0/status").then().statusCode(200);
 
         // Run twice
         String body = getMetric();
@@ -48,21 +45,11 @@ public class StatusEndpointTest extends AbstractITest {
     @Test
     void getStatusDegraded() {
 
-        with()
-                .queryParam("status", "degraded")
-                .accept("application/json")
-                .contentType("application/json")
-                .when()
-                .post("/admin/status")
-                .then()
-                .statusCode(200);
+        with().queryParam("status", "degraded").accept("application/json").contentType("application/json").when()
+                .post("/admin/status").then().statusCode(200);
 
         try {
-            when()
-                    .get("/api/policies/v1.0/status")
-                    .then()
-                    .body("admin-degraded", is("true"))
-                    .statusCode(500);
+            when().get("/api/policies/v1.0/status").then().body("admin-degraded", is("true")).statusCode(500);
 
             String body = getMetric();
             Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
@@ -71,24 +58,12 @@ public class StatusEndpointTest extends AbstractITest {
             Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
 
         } finally {
-            with()
-                    .queryParam("status", "ok")
-                    .accept("application/json")
-                    .contentType("application/json")
-                    .when()
-                    .post("/admin/status")
-                    .then()
-                    .statusCode(200);
+            with().queryParam("status", "ok").accept("application/json").contentType("application/json").when()
+                    .post("/admin/status").then().statusCode(200);
         }
     }
 
     private String getMetric() {
-        return when()
-                .get("/metrics/application/status_isDegraded")
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .asString();
+        return when().get("/metrics/application/status_isDegraded").then().statusCode(200).extract().body().asString();
     }
 }

@@ -26,9 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Some additional testing around parsing of alert history items.
- * This is on a unit test level so also make it easier to understand
- * and follow format changes from the engine.
+ * Some additional testing around parsing of alert history items. This is on a unit test level so also make it easier to
+ * understand and follow format changes from the engine.
  */
 public class AlertHistoryParserTest {
 

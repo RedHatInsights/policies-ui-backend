@@ -23,8 +23,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 
 /**
- * Provider for UUIDs for Tests. A test can
- * provide a known uuid and later check on it.
+ * Provider for UUIDs for Tests. A test can provide a known uuid and later check on it.
  */
 @ApplicationScoped
 @Alternative

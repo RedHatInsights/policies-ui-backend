@@ -49,8 +49,7 @@ public class Policy extends PanacheEntityBase {
 
     // The ID will be created by code.
     @Id
-    public
-    UUID id;
+    public UUID id;
 
     @JsonbTransient
     public String customerid;
@@ -67,29 +66,20 @@ public class Policy extends PanacheEntityBase {
     @Column(name = "is_enabled")
     public boolean isEnabled;
 
-    @Schema(description = "Condition string.",
-            example = "arch = \"x86_64\"")
+    @Schema(description = "Condition string.", example = "arch = \"x86_64\"")
     @NotEmpty
     @NotNull
     public String conditions;
 
-    @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true." +
-            "Allowed values is 'notification'")
+    @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true."
+            + "Allowed values is 'notification'")
     @ValidActionS
     public String actions;
 
-    @Schema(type = SchemaType.STRING,
-            description = "Last update time in a form like '2020-01-24 12:19:56.718', output only",
-            readOnly = true,
-            format = "yyyy-MM-dd hh:mm:ss.ddd",
-            implementation = String.class)
+    @Schema(type = SchemaType.STRING, description = "Last update time in a form like '2020-01-24 12:19:56.718', output only", readOnly = true, format = "yyyy-MM-dd hh:mm:ss.ddd", implementation = String.class)
     private Timestamp mtime = new Timestamp(System.currentTimeMillis());
 
-    @Schema(type = SchemaType.STRING,
-            description = "Create time in a form like '2020-01-24 12:19:56.718', output only",
-            readOnly = true,
-            format = "yyyy-MM-dd hh:mm:ss.ddd",
-            implementation = String.class)
+    @Schema(type = SchemaType.STRING, description = "Create time in a form like '2020-01-24 12:19:56.718', output only", readOnly = true, format = "yyyy-MM-dd hh:mm:ss.ddd", implementation = String.class)
     private Timestamp ctime = new Timestamp(System.currentTimeMillis());
 
     @Transient
@@ -107,7 +97,6 @@ public class Policy extends PanacheEntityBase {
     public String getMtime() {
         return mtime.toString();
     }
-
 
     @JsonbTransient
     public void setLastTriggered(long tTime) {
@@ -133,48 +122,29 @@ public class Policy extends PanacheEntityBase {
             SortableColumn.fromName(column.getName());
         }
 
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
+        pager.getFilter().getParameters().map().keySet().forEach(FilterableColumn::fromName);
 
         Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 
-        PanacheQuery<Policy> panacheQuery = find(
-                filter.getQuery(),
-                pager.getSort(),
-                filter.getParameters()
-        );
+        PanacheQuery<Policy> panacheQuery = find(filter.getQuery(), pager.getSort(), filter.getParameters());
 
         if (pager.getLimit() != Pager.NO_LIMIT) {
             panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
         }
 
-        return new Page<>(
-                panacheQuery.list(),
-                pager,
-                panacheQuery.count()
-        );
+        return new Page<>(panacheQuery.list(), pager, panacheQuery.count());
     }
 
     public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
 
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
+        pager.getFilter().getParameters().map().keySet().forEach(FilterableColumn::fromName);
 
         Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 
+        PanacheQuery<Policy> panacheQuery = find(filter.getQuery(), filter.getParameters());
 
-        PanacheQuery<Policy> panacheQuery = find(
-                filter.getQuery(),
-                filter.getParameters()
-        );
-
-        return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
+        return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id)
+                .collect(Collectors.toList());
     }
 
     public static Policy findById(String customer, UUID theId) {
@@ -223,10 +193,7 @@ public class Policy extends PanacheEntityBase {
     }
 
     enum SortableColumn {
-        NAME("name"),
-        DESCRIPTION("description"),
-        IS_ENABLED("is_enabled"),
-        MTIME("mtime");
+        NAME("name"), DESCRIPTION("description"), IS_ENABLED("is_enabled"), MTIME("mtime");
 
         private final String name;
 
@@ -250,9 +217,7 @@ public class Policy extends PanacheEntityBase {
     }
 
     enum FilterableColumn {
-        NAME("name"),
-        DESCRIPTION("description"),
-        IS_ENABLED("is_enabled");
+        NAME("name"), DESCRIPTION("description"), IS_ENABLED("is_enabled");
 
         private final String name;
 
@@ -262,8 +227,7 @@ public class Policy extends PanacheEntityBase {
 
         public static FilterableColumn fromName(String columnName) {
             Optional<FilterableColumn> result = Arrays.stream(FilterableColumn.values())
-                    .filter(val -> val.name.equals(columnName))
-                    .findAny();
+                    .filter(val -> val.name.equals(columnName)).findAny();
             if (result.isPresent()) {
                 return result.get();
             }

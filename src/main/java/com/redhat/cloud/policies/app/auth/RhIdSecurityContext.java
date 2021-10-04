@@ -20,8 +20,7 @@ import java.security.Principal;
 import javax.ws.rs.core.SecurityContext;
 
 /**
- * An implementation of SecurityContext, that gets the data
- * from the parsed x-rh-identity header.
+ * An implementation of SecurityContext, that gets the data from the parsed x-rh-identity header.
  */
 public class RhIdSecurityContext implements SecurityContext {
 
@@ -40,12 +39,12 @@ public class RhIdSecurityContext implements SecurityContext {
 
     @Override
     public boolean isUserInRole(String s) {
-        return false;  // TODO: Determine later by calling the backend.
+        return false; // TODO: Determine later by calling the backend.
     }
 
     @Override
     public boolean isSecure() {
-        return false;  // TODO:determine from call?
+        return false; // TODO:determine from call?
     }
 
     @Override

@@ -149,7 +149,8 @@ public class PolicyCrudService {
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
 
-    // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
+    // workaround for returning generic types:
+    // https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
     private static class PagedResponseOfPolicy extends PagingUtils.PagedResponse<Policy> {
         private PagedResponseOfPolicy(Page<Policy> page) {
@@ -169,105 +170,32 @@ public class PolicyCrudService {
     @GET
     @Path("/")
     @Parameters({
-            @Parameter(
-                    name = "offset",
-                    in = ParameterIn.QUERY,
-                    description = "Page number, starts 0, if not specified uses 0.",
-                    schema = @Schema(type = SchemaType.INTEGER)
-            ),
-            @Parameter(
-                    name = "limit",
-                    in = ParameterIn.QUERY,
-                    description = "Number of items per page, if not specified uses 50. " + Pager.NO_LIMIT + " can be used to specify an unlimited page, when specified it ignores the offset",
-                    schema = @Schema(type = SchemaType.INTEGER)
-            ),
-            @Parameter(
-                    name = "sortColumn",
-                    in = ParameterIn.QUERY,
-                    description = "Column to sort the results by",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "name",
-                                    "description",
-                                    "is_enabled",
-                                    "mtime"
-                            }
-                    )
-            ),
-            @Parameter(
-                    name = "sortDirection",
-                    in = ParameterIn.QUERY,
-                    description = "Sort direction used",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "asc",
-                                    "desc"
-                            }
-                    )
-            ),
-            @Parameter(
-                    name = "filter[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the name depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "like",
-                                    "ilike",
-                                    "not_equal"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "filter[description]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the description depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[description]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "like",
-                                    "ilike",
-                                    "not_equal"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "filter[is_enabled]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the is_enabled field." +
-                            "Defaults to true if no operand is given.",
-                    schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true", "false"})
-            ),
-    })
+            @Parameter(name = "offset", in = ParameterIn.QUERY, description = "Page number, starts 0, if not specified uses 0.", schema = @Schema(type = SchemaType.INTEGER)),
+            @Parameter(name = "limit", in = ParameterIn.QUERY, description = "Number of items per page, if not specified uses 50. "
+                    + Pager.NO_LIMIT
+                    + " can be used to specify an unlimited page, when specified it ignores the offset", schema = @Schema(type = SchemaType.INTEGER)),
+            @Parameter(name = "sortColumn", in = ParameterIn.QUERY, description = "Column to sort the results by", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "name", "description", "is_enabled", "mtime" })),
+            @Parameter(name = "sortDirection", in = ParameterIn.QUERY, description = "Sort direction used", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "asc", "desc" })),
+            @Parameter(name = "filter[name]", in = ParameterIn.QUERY, description = "Filtering policies by the name depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[name]", in = ParameterIn.QUERY, description = "Operations used with the filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "like", "ilike", "not_equal" }, defaultValue = "equal")),
+            @Parameter(name = "filter[description]", in = ParameterIn.QUERY, description = "Filtering policies by the description depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[description]", in = ParameterIn.QUERY, description = "Operations used with the filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "like", "ilike", "not_equal" }, defaultValue = "equal")),
+            @Parameter(name = "filter[is_enabled]", in = ParameterIn.QUERY, description = "Filtering policies by the is_enabled field."
+                    + "Defaults to true if no operand is given.", schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {
+                            "true", "false" })), })
     @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
     @APIResponse(responseCode = "404", description = "No policies found for customer")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-    @APIResponse(responseCode = "200", description = "Policies found", content =
-    @Content(schema = @Schema(implementation = PagedResponseOfPolicy.class)),
-            headers = @Header(name = "TotalCount", description = "Total number of items found",
-                    schema = @Schema(type = SchemaType.INTEGER)))
+    @APIResponse(responseCode = "200", description = "Policies found", content = @Content(schema = @Schema(implementation = PagedResponseOfPolicy.class)), headers = @Header(name = "TotalCount", description = "Total number of items found", schema = @Schema(type = SchemaType.INTEGER)))
     public Response getPoliciesForCustomer() {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES))
+                    .build();
         }
 
         Page<Policy> page;
@@ -307,65 +235,24 @@ public class PolicyCrudService {
     @GET
     @Path("/ids")
     @Parameters({
-            @Parameter(
-                    name = "filter[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the name depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "like",
-                                    "ilike",
-                                    "not_equal"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "filter[description]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the description depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[description]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "like",
-                                    "ilike",
-                                    "not_equal"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "filter[is_enabled]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering policies by the is_enabled field." +
-                            "Defaults to true if no operand is given.",
-                    schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {"true", "false"})
-            ),
-    })
+            @Parameter(name = "filter[name]", in = ParameterIn.QUERY, description = "Filtering policies by the name depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[name]", in = ParameterIn.QUERY, description = "Operations used with the filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "like", "ilike", "not_equal" }, defaultValue = "equal")),
+            @Parameter(name = "filter[description]", in = ParameterIn.QUERY, description = "Filtering policies by the description depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[description]", in = ParameterIn.QUERY, description = "Operations used with the filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "like", "ilike", "not_equal" }, defaultValue = "equal")),
+            @Parameter(name = "filter[is_enabled]", in = ParameterIn.QUERY, description = "Filtering policies by the is_enabled field."
+                    + "Defaults to true if no operand is given.", schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {
+                            "true", "false" })), })
     @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
     @APIResponse(responseCode = "404", description = "No policies found for customer")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-    @APIResponse(responseCode = "200", description = "PolicyIds found", content =
-    @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
+    @APIResponse(responseCode = "200", description = "PolicyIds found", content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
     public Response getPolicyIdsForCustomer() {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES))
+                    .build();
         }
 
         List<UUID> uuids;
@@ -380,28 +267,22 @@ public class PolicyCrudService {
         return Response.ok(uuids).build();
     }
 
-
     @Operation(summary = "Validate (and possibly persist) a passed policy for the given account")
-    @Parameter(name = "alsoStore",
-            description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
-    @APIResponses({
-            @APIResponse(responseCode = "500", description = "Internal error"),
-            @APIResponse(responseCode = "400", description = "No policy provided or policy validation failed",
-                    content = @Content(schema = @Schema(implementation = Msg.class))),
-            @APIResponse(responseCode = "409", description = "Persisting failed",
-                    content = @Content(schema = @Schema(implementation = Msg.class))),
+    @Parameter(name = "alsoStore", description = "If passed and set to true, the passed policy is also persisted (if it is valid)")
+    @APIResponses({ @APIResponse(responseCode = "500", description = "Internal error"),
+            @APIResponse(responseCode = "400", description = "No policy provided or policy validation failed", content = @Content(schema = @Schema(implementation = Msg.class))),
+            @APIResponse(responseCode = "409", description = "Persisting failed", content = @Content(schema = @Schema(implementation = Msg.class))),
             @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action"),
-            @APIResponse(responseCode = "201", description = "Policy persisted",
-                    content = @Content(schema = @Schema(implementation = Policy.class))),
-            @APIResponse(responseCode = "200", description = "Policy validated")
-    })
+            @APIResponse(responseCode = "201", description = "Policy persisted", content = @Content(schema = @Schema(implementation = Policy.class))),
+            @APIResponse(responseCode = "200", description = "Policy validated") })
     @POST
     @Path("/")
     @Transactional
     public Response storePolicy(@QueryParam("alsoStore") boolean alsoStore, @NotNull @Valid Policy policy) {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY))
+                    .build();
         }
 
         // We use the indirection, so that for testing we can produce known UUIDs
@@ -425,7 +306,8 @@ public class PolicyCrudService {
         }
 
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy"))
+                    .build();
         }
 
         // Basic validation was successful, so try to persist.
@@ -447,8 +329,8 @@ public class PolicyCrudService {
         }
 
         // Policy is persisted. Return its location.
-        URI location =
-                UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(id);
+        URI location = UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy")
+                .build(id);
         ResponseBuilder builder = Response.created(location).entity(policy);
         return builder.build();
 
@@ -485,7 +367,8 @@ public class PolicyCrudService {
     public Response deletePolicy(@PathParam("id") UUID policyId) {
 
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy"))
+                    .build();
         }
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -516,15 +399,15 @@ public class PolicyCrudService {
 
     @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-    @APIResponse(responseCode = "200", description = "Policies deleted",
-            content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
+    @APIResponse(responseCode = "200", description = "Policies deleted", content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
     @DELETE
     @Path("/ids")
     @Transactional
     public Response deletePolicies(List<UUID> uuids) {
 
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy"))
+                    .build();
         }
 
         List<UUID> deleted = new ArrayList<>(uuids.size());
@@ -557,9 +440,7 @@ public class PolicyCrudService {
 
     @Operation(summary = "Enable/disable a policy")
     @Parameter(name = "id", description = "ID of the Policy")
-    @Parameter(name = "enabled",
-            schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"),
-            description = "Should the policy be enabled (true) or disabled (false, default)")
+    @Parameter(name = "enabled", schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"), description = "Should the policy be enabled (true) or disabled (false, default)")
     @APIResponse(responseCode = "200", description = "Policy updated")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
     @APIResponse(responseCode = "404", description = "Policy not found")
@@ -567,9 +448,11 @@ public class PolicyCrudService {
     @POST
     @Path("/{id:[0-9a-fA-F-]+}/enabled")
     @Transactional
-    public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
+    public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId,
+            @QueryParam("enabled") boolean shouldBeEnabled) {
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY))
+                    .build();
         }
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
@@ -600,19 +483,16 @@ public class PolicyCrudService {
 
     @Operation(summary = "Enable/disable policies identified by list of uuid in body")
     @Parameter(name = "uuids", schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class))
-    @APIResponse(responseCode = "200", description = "Policy updated", content = @Content(
-            schema = @Schema(
-                    type = SchemaType.ARRAY,
-                    implementation = UUID.class
-            )
-    ))
+    @APIResponse(responseCode = "200", description = "Policy updated", content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
     @POST
     @Path("/ids/enabled")
     @Transactional
-    public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, @NotEmpty List<UUID> uuids) {
+    public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled,
+            @NotEmpty List<UUID> uuids) {
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY))
+                    .build();
         }
         List<UUID> changed = new ArrayList<>(uuids.size());
         try {
@@ -648,21 +528,18 @@ public class PolicyCrudService {
     @Operation(summary = "Update a single policy for a customer by its id")
     @PUT
     @Path("/{policyId}")
-    @APIResponse(responseCode = "200", description = "Policy updated or policy validated",
-            content = @Content(schema = @Schema(implementation = Policy.class))
-    )
+    @APIResponse(responseCode = "200", description = "Policy updated or policy validated", content = @Content(schema = @Schema(implementation = Policy.class)))
     @APIResponse(responseCode = "400", description = "Invalid or no policy provided")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
     @APIResponse(responseCode = "404", description = "Policy did not exist - did you store it before?")
-    @APIResponse(responseCode = "409", description = "Persisting failed",
-            content = @Content(schema = @Schema(implementation = Msg.class))
-    )
+    @APIResponse(responseCode = "409", description = "Persisting failed", content = @Content(schema = @Schema(implementation = Msg.class)))
     @Transactional
     public Response updatePolicy(@QueryParam("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
-                                 @NotNull @Valid Policy policy) {
+            @NotNull @Valid Policy policy) {
 
         if (!user.canWritePolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY))
+                    .build();
         }
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
@@ -736,12 +613,12 @@ public class PolicyCrudService {
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Condition validated", content = @Content(schema = @Schema(implementation = Msg.class))),
             @APIResponse(responseCode = "400", description = "No policy provided or condition not valid", content = @Content(schema = @Schema(implementation = Msg.class))),
-            @APIResponse(responseCode = "500", description = "Internal error")
-    })
+            @APIResponse(responseCode = "500", description = "Internal error") })
     public Response validateCondition(@Valid @NotNull Policy policy) {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY))
+                    .build();
         }
 
         policy.customerid = user.getAccount();
@@ -764,18 +641,18 @@ public class PolicyCrudService {
     @Operation(summary = "Validates the Policy.name and verifies if it is unique.")
     @POST
     @Path("/validate-name")
-    @RequestBody(content = {@Content(schema = @Schema(type = SchemaType.STRING))})
+    @RequestBody(content = { @Content(schema = @Schema(type = SchemaType.STRING)) })
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Name validated", content = @Content(schema = @Schema(implementation = Msg.class))),
             @APIResponse(responseCode = "400", description = "Policy validation failed", content = @Content(schema = @Schema(implementation = Msg.class))),
             @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action", content = @Content(schema = @Schema(implementation = Msg.class))),
             @APIResponse(responseCode = "409", description = "Name not unique"),
-            @APIResponse(responseCode = "500", description = "Internal error")
-    })
+            @APIResponse(responseCode = "500", description = "Internal error") })
     @Parameter(name = "id", description = "UUID of the policy")
     public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY))
+                    .build();
         }
 
         Policy policy = new Policy();
@@ -785,10 +662,8 @@ public class PolicyCrudService {
         Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
 
         if (result.size() > 0) {
-            String error = String.join(
-                    ";",
-                    result.stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet())
-            );
+            String error = String.join(";",
+                    result.stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet()));
             return Response.status(400).entity(new Msg(error)).build();
         }
 
@@ -800,19 +675,18 @@ public class PolicyCrudService {
         return Response.status(200).entity(new Msg("Policy.name validated")).build();
     }
 
-
     @Operation(summary = "Retrieve a single policy for a customer by its id")
     @GET
     @Path("/{id}")
-    @APIResponse(responseCode = "200", description = "Policy found", content =
-    @Content(schema = @Schema(implementation = Policy.class)))
+    @APIResponse(responseCode = "200", description = "Policy found", content = @Content(schema = @Schema(implementation = Policy.class)))
     @APIResponse(responseCode = "404", description = "Policy not found")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action", content = @Content(schema = @Schema(implementation = Msg.class)))
     @Parameter(name = "id", description = "UUID of the policy")
     public Response getPolicy(@PathParam("id") UUID policyId) {
 
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES))
+                    .build();
         }
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
@@ -838,7 +712,8 @@ public class PolicyCrudService {
         return builder.build();
     }
 
-    // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
+    // workaround for returning generic types:
+    // https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
     private static class PagedResponseOfHistoryItem extends PagingUtils.PagedResponse<HistoryItem> {
         private PagedResponseOfHistoryItem(Page<HistoryItem> page) {
@@ -847,99 +722,31 @@ public class PolicyCrudService {
     }
 
     @Operation(summary = "Retrieve the trigger history of a single policy")
-    @APIResponse(responseCode = "200", description = "History could be retrieved",
-            content = @Content(schema = @Schema(implementation = PagedResponseOfHistoryItem.class)),
-            headers = @Header(name = "TotalCount", description = "Total number of items found",
-                    schema = @Schema(type = SchemaType.INTEGER)))
+    @APIResponse(responseCode = "200", description = "History could be retrieved", content = @Content(schema = @Schema(implementation = PagedResponseOfHistoryItem.class)), headers = @Header(name = "TotalCount", description = "Total number of items found", schema = @Schema(type = SchemaType.INTEGER)))
     @APIResponse(responseCode = "400", description = "Bad parameters passed")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
     @APIResponse(responseCode = "404", description = "Policy not found")
     @APIResponse(responseCode = "500", description = "Retrieval of History failed")
     @Parameters({
-            @Parameter(
-                    name = "offset",
-                    in = ParameterIn.QUERY,
-                    description = "Page number, starts 0, if not specified uses 0.",
-                    schema = @Schema(type = SchemaType.INTEGER)
-            ),
-            @Parameter(
-                    name = "limit",
-                    in = ParameterIn.QUERY,
-                    description = "Number of items per page, if not specified uses 50. Maximum value is 200.",
-                    schema = @Schema(type = SchemaType.INTEGER)
-            ),
-            @Parameter(
-                    name = "filter[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering history entries by the host name depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[name]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the name filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "like",
-                                    "not_equal"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "filter[id]",
-                    in = ParameterIn.QUERY,
-                    description = "Filtering history entries by the id depending on the Filter operator used.",
-                    schema = @Schema(type = SchemaType.STRING)
-            ),
-            @Parameter(
-                    name = "filter:op[id]",
-                    in = ParameterIn.QUERY,
-                    description = "Operations used with the name filter",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "equal",
-                                    "not_equal",
-                                    "like"
-                            },
-                            defaultValue = "equal"
-                    )
-            ),
-            @Parameter(
-                    name = "sortColumn",
-                    in = ParameterIn.QUERY,
-                    description = "Column to sort the results by",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "hostName",
-                                    CTIME_STRING
-                            },
-                            defaultValue = CTIME_STRING
-                    )
-            ),
-            @Parameter(
-                    name = "sortDirection",
-                    in = ParameterIn.QUERY,
-                    description = "Sort direction used",
-                    schema = @Schema(
-                            type = SchemaType.STRING,
-                            enumeration = {
-                                    "asc",
-                                    "desc"
-                            }
-                    )
-            ),
-            @Parameter(name = "id", description = "UUID of the policy")
-    })
+            @Parameter(name = "offset", in = ParameterIn.QUERY, description = "Page number, starts 0, if not specified uses 0.", schema = @Schema(type = SchemaType.INTEGER)),
+            @Parameter(name = "limit", in = ParameterIn.QUERY, description = "Number of items per page, if not specified uses 50. Maximum value is 200.", schema = @Schema(type = SchemaType.INTEGER)),
+            @Parameter(name = "filter[name]", in = ParameterIn.QUERY, description = "Filtering history entries by the host name depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[name]", in = ParameterIn.QUERY, description = "Operations used with the name filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "like", "not_equal" }, defaultValue = "equal")),
+            @Parameter(name = "filter[id]", in = ParameterIn.QUERY, description = "Filtering history entries by the id depending on the Filter operator used.", schema = @Schema(type = SchemaType.STRING)),
+            @Parameter(name = "filter:op[id]", in = ParameterIn.QUERY, description = "Operations used with the name filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "equal", "not_equal", "like" }, defaultValue = "equal")),
+            @Parameter(name = "sortColumn", in = ParameterIn.QUERY, description = "Column to sort the results by", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "hostName", CTIME_STRING }, defaultValue = CTIME_STRING)),
+            @Parameter(name = "sortDirection", in = ParameterIn.QUERY, description = "Sort direction used", schema = @Schema(type = SchemaType.STRING, enumeration = {
+                    "asc", "desc" })),
+            @Parameter(name = "id", description = "UUID of the policy") })
     @GET
     @Path("/{id}/history/trigger")
     public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {
         if (!user.canReadPolicies()) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new Msg("Missing permissions to retrieve the policy history")).build();
         }
 
         ResponseBuilder builder;
@@ -979,10 +786,10 @@ public class PolicyCrudService {
 
         long totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
         if (totalCount > 0) {
-            items = policiesHistoryRepository.find(tenantId, policyId, pager)
-                    .stream().map(historyEntry ->
-                            new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
-                    ).collect(Collectors.toList());
+            items = policiesHistoryRepository.find(tenantId, policyId, pager).stream()
+                    .map(historyEntry -> new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(),
+                            historyEntry.getHostName()))
+                    .collect(Collectors.toList());
         } else {
             items = Collections.emptyList();
         }
@@ -1026,12 +833,9 @@ public class PolicyCrudService {
         Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
         Scope scope = tracer.scopeManager().activate(span);
         try {
-            response = engine.findLastTriggered(policyId.toString(),
-                    true, // thin
-                    pageNum, limit,
-                    sort1, sort2, order1, order2, // See Comment in engine def
-                    tagQuery,
-                    user.getAccount());
+            response = engine.findLastTriggered(policyId.toString(), true, // thin
+                    pageNum, limit, sort1, sort2, order1, order2, // See Comment in engine def
+                    tagQuery, user.getAccount());
             String countHeader = response.getHeaderString("X-Total-Count");
             totalCount = Long.parseLong(countHeader);
             alerts = response.readEntity(String.class);
@@ -1098,15 +902,15 @@ public class PolicyCrudService {
     private String getSortFromPageColumn(Sort.Column column) {
         String sort = column.getName();
         switch (sort) {
-            case "name":
-                sort = "tags.display_name";
-                break;
-            case CTIME_STRING:
-            case "mtime":
-                sort = CTIME_STRING;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown sort column: " + sort);
+        case "name":
+            sort = "tags.display_name";
+            break;
+        case CTIME_STRING:
+        case "mtime":
+            sort = CTIME_STRING;
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown sort column: " + sort);
         }
         return sort;
     }
@@ -1117,10 +921,8 @@ public class PolicyCrudService {
     }
 
     /*
-     Return last triggered time from Trigger.lifecycle if it exists
-     Return 0 otherwise.
-     We need to go through the lifecycle list, as this is sorted in
-     ascending order with potentially other events in-between.
+     * Return last triggered time from Trigger.lifecycle if it exists Return 0 otherwise. We need to go through the
+     * lifecycle list, as this is sorted in ascending order with potentially other events in-between.
      */
     private long getLastTriggeredFromTriggerLifecycle(Trigger trigger) {
 
@@ -1147,6 +949,5 @@ public class PolicyCrudService {
 
         return null;
     }
-
 
 }

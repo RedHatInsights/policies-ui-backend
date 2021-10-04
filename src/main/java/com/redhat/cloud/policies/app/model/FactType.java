@@ -18,10 +18,7 @@ package com.redhat.cloud.policies.app.model;
 
 public enum FactType {
 
-    STRING("STRING"),
-    BOOLEAN("BOOLEAN"),
-    LIST("LIST"),
-    INT("INT");
+    STRING("STRING"), BOOLEAN("BOOLEAN"), LIST("LIST"), INT("INT");
 
     String name;
 

@@ -23,8 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Redirect routes with only the major version
- * to major.minor ones.
+ * Redirect routes with only the major version to major.minor ones.
  */
 @SuppressWarnings("unused")
 public class RouteRedirector {
@@ -35,12 +34,11 @@ public class RouteRedirector {
     Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     /**
-     * If the requested route is the one with major version only,
-     * we rewrite it on the fly.
-     * We need to take the URI from the underlying http request, as the
-     * normalised path does not contain query parameters.
+     * If the requested route is the one with major version only, we rewrite it on the fly. We need to take the URI from
+     * the underlying http request, as the normalised path does not contain query parameters.
      *
-     * @param rc RoutingContext from vert.x
+     * @param rc
+     *            RoutingContext from vert.x
      */
     @RouteFilter(400)
     void myRedirector(RoutingContext rc) {

@@ -30,10 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * We gather the Status of ourselves and remotes.
- * This is then put into the StuffHolder from
- * where both the Gauge below and the Status rest
- * endpoint can fetch it.
+ * We gather the Status of ourselves and remotes. This is then put into the StuffHolder from where both the Gauge below
+ * and the Status rest endpoint can fetch it.
  */
 @ApplicationScoped
 public class ScheduledStatusProducer {
@@ -44,9 +42,8 @@ public class ScheduledStatusProducer {
     @RestClient
     PolicyEngine engine;
 
-    //  // Quarkus only activates this after the first REST-call to any method in this class
-    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
-            description = "Returns 0 if good, value > 0 for number of entries in the status message")
+    // Quarkus only activates this after the first REST-call to any method in this class
+    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true, description = "Returns 0 if good, value > 0 for number of entries in the status message")
     int isDegraded() {
         return StuffHolder.getInstance().getStatusInfo().size();
     }

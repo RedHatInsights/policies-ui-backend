@@ -28,8 +28,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Provide a /status endpoint, that returns a 200 if all is cool
- * and a 500 with list of issues if not.
+ * Provide a /status endpoint, that returns a 200 if all is cool and a 500 with list of issues if not.
  */
 @Path("/api/policies/v1.0/status")
 @ApplicationScoped
@@ -50,9 +49,6 @@ public class StatusEndpoint {
     }
 
     private String makeReadable(Map<String, String> issues) {
-        return issues.entrySet()
-                .stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining("; "));
+        return issues.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("; "));
     }
 }

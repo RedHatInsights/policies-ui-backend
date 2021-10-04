@@ -63,11 +63,8 @@ public class PagingUtils {
                 }
                 pageBuilder.itemsPerPage(limit);
             } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException(String.format(
-                        "%s expects an int but found [%s]",
-                        QUERY_LIMIT,
-                        itemsPerPage
-                ), nfe);
+                throw new IllegalArgumentException(
+                        String.format("%s expects an int but found [%s]", QUERY_LIMIT, itemsPerPage), nfe);
             }
         }
 
@@ -77,11 +74,8 @@ public class PagingUtils {
                 try {
                     pageBuilder.page(Integer.parseInt(page));
                 } catch (NumberFormatException nfe) {
-                    throw new IllegalArgumentException(String.format(
-                            "%s expects an int but found [%s]",
-                            QUERY_OFFSET,
-                            page
-                    ), nfe);
+                    throw new IllegalArgumentException(
+                            String.format("%s expects an int but found [%s]", QUERY_OFFSET, page), nfe);
                 }
             }
         }
@@ -126,7 +120,8 @@ public class PagingUtils {
                     operator = Filter.Operator.EQUAL;
                     if (operatorString != null) {
                         if (operatorString.equalsIgnoreCase(Filter.Operator.BOOLEAN_IS.name())) {
-                            throw new IllegalArgumentException("Invalid filter: Column [" + column + "] does not allow boolean_is");
+                            throw new IllegalArgumentException(
+                                    "Invalid filter: Column [" + column + "] does not allow boolean_is");
                         }
                         operator = Filter.Operator.fromName(operatorString);
                     }
@@ -139,25 +134,27 @@ public class PagingUtils {
     }
 
     /**
-     * Obtain the direction from the passed direction string. This string is
-     * case insensitive and only the first 3 chars count. So 'asc' and 'ascending'
-     * and 'Ascending' (or 'des*' will be ok)
+     * Obtain the direction from the passed direction string. This string is case insensitive and only the first 3 chars
+     * count. So 'asc' and 'ascending' and 'Ascending' (or 'des*' will be ok)
      *
-     * @param directionString Incoming direction string.
-     * @param column          Column name for display purposes in case the passed direction is not valid
+     * @param directionString
+     *            Incoming direction string.
+     * @param column
+     *            Column name for display purposes in case the passed direction is not valid
+     * 
      * @return Direction
      */
     static Sort.Direction getDirection(String directionString, String column) {
         Sort.Direction direction;
         switch (directionString.toLowerCase().substring(0, 3)) {
-            case "asc":
-                direction = Sort.Direction.Ascending;
-                break;
-            case "des":
-                direction = Sort.Direction.Descending;
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected sort order found: [" + column + "]");
+        case "asc":
+            direction = Sort.Direction.Ascending;
+            break;
+        case "des":
+            direction = Sort.Direction.Descending;
+            break;
+        default:
+            throw new IllegalArgumentException("Unexpected sort order found: [" + column + "]");
         }
         return direction;
     }
@@ -178,8 +175,7 @@ public class PagingUtils {
     }
 
     /**
-     * Provide a paged response in the desired format.
-     * Links need to look like:<br/>
+     * Provide a paged response in the desired format. Links need to look like:<br/>
      *
      * <pre>
      * "first": "/api/myapp/v1/collection/?limit=5&offset=0",
@@ -196,7 +192,6 @@ public class PagingUtils {
         public PagedResponse(Page<T> page) {
             meta = new Meta(page.getTotalCount());
             data.addAll(page);
-
 
             String location = "/api/policies/v1.0/policies";
             String format = "%s?limit=%d&offset=%d";
@@ -220,8 +215,7 @@ public class PagingUtils {
                     links.put("next", String.format(format, location, limit, pager.getOffset() + limit));
                 }
                 if (pager.getOffset() > 0) {
-                    links.put("prev", String.format(format, location, limit,
-                            max(0, pager.getOffset() - limit)));
+                    links.put("prev", String.format(format, location, limit, max(0, pager.getOffset() - limit)));
                 }
             }
         }

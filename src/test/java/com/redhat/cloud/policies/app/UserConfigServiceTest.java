@@ -75,10 +75,8 @@ public class UserConfigServiceTest extends AbstractITest {
     }
 
     private void clearMockValue() {
-        mockServerClient.clear(HttpRequest.request()
-                .withMethod("GET")
-                .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
-        );
+        mockServerClient.clear(HttpRequest.request().withMethod("GET")
+                .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies"));
     }
 
     private void mockWithValue(boolean instantEmail, boolean dailyEmail) {
@@ -87,25 +85,15 @@ public class UserConfigServiceTest extends AbstractITest {
         preferences.instant_email = instantEmail;
         preferences.daily_email = dailyEmail;
         mockServerClient
-                .when(request()
-                        .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
-                        .withMethod("GET")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(JsonBody.json(preferences))
-                );
+                .when(request().withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
+                        .withMethod("GET"))
+                .respond(response().withStatusCode(200).withHeader("Content-Type", "application/json")
+                        .withBody(JsonBody.json(preferences)));
     }
 
     private UserPreferences getPreferences(Header authHeader) {
-        return given()
-                .header(authHeader)
-                .when()
-                .get(PREFERENCE_URL)
-                .then()
-                .statusCode(200)
-                .extract().as(UserPreferences.class);
+        return given().header(authHeader).when().get(PREFERENCE_URL).then().statusCode(200).extract()
+                .as(UserPreferences.class);
     }
 
 }

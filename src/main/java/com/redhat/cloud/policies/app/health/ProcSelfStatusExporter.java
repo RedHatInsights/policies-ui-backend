@@ -25,18 +25,9 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-
 /**
- * Exports the following from /proc/self/status. See proc(5)
- * VmHWM:    265580 kB
- * VmRSS:    233156 kB
- * RssAnon:          210444 kB
- * RssFile:           22712 kB
- * VmStk:       136 kB
- * VmLib:     24416 kB
- * VmData:  3529900 kB
- * VmSize:  13529900 kB
- * Threads: 23
+ * Exports the following from /proc/self/status. See proc(5) VmHWM: 265580 kB VmRSS: 233156 kB RssAnon: 210444 kB
+ * RssFile: 22712 kB VmStk: 136 kB VmLib: 24416 kB VmData: 3529900 kB VmSize: 13529900 kB Threads: 23
  */
 @ApplicationScoped
 public class ProcSelfStatusExporter {
@@ -75,35 +66,35 @@ public class ProcSelfStatusExporter {
                 String[] parts = line.split("[ \t]+");
 
                 switch (parts[0]) {
-                    case "VmHWM:":
-                        vmHwm = Long.parseLong(parts[1]);
-                        break;
-                    case "VmRSS:":
-                        vmRss = Long.parseLong(parts[1]);
-                        break;
-                    case "RssAnon:":
-                        rssAnon = Long.parseLong(parts[1]);
-                        break;
-                    case "RssFile:":
-                        rssFile = Long.parseLong(parts[1]);
-                        break;
-                    case "VmStk:":
-                        vmStk = Long.parseLong(parts[1]);
-                        break;
-                    case "VmLib:":
-                        vmLib = Long.parseLong(parts[1]);
-                        break;
-                    case "VmData:":
-                        vmData = Long.parseLong(parts[1]);
-                        break;
-                    case "VmSize:":
-                        vmSize = Long.parseLong(parts[1]);
-                        break;
-                    case "Threads:":
-                        threads = Integer.parseInt(parts[1]);
-                        break;
-                    default:
-                        // That file has more entries, but which we don't care about
+                case "VmHWM:":
+                    vmHwm = Long.parseLong(parts[1]);
+                    break;
+                case "VmRSS:":
+                    vmRss = Long.parseLong(parts[1]);
+                    break;
+                case "RssAnon:":
+                    rssAnon = Long.parseLong(parts[1]);
+                    break;
+                case "RssFile:":
+                    rssFile = Long.parseLong(parts[1]);
+                    break;
+                case "VmStk:":
+                    vmStk = Long.parseLong(parts[1]);
+                    break;
+                case "VmLib:":
+                    vmLib = Long.parseLong(parts[1]);
+                    break;
+                case "VmData:":
+                    vmData = Long.parseLong(parts[1]);
+                    break;
+                case "VmSize:":
+                    vmSize = Long.parseLong(parts[1]);
+                    break;
+                case "Threads:":
+                    threads = Integer.parseInt(parts[1]);
+                    break;
+                default:
+                    // That file has more entries, but which we don't care about
                 }
             }
         } catch (Exception e) {

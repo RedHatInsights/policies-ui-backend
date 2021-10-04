@@ -66,7 +66,8 @@ public class PagingUtilsTest {
 
     @Test
     public void testExtractPagerSortMultiple() throws URISyntaxException {
-        Pager pager = getPagerFromUriString("https://foo?sortColumn=foo&sortDirection=desc&sortColumn=bar&sortDirection=asc");
+        Pager pager = getPagerFromUriString(
+                "https://foo?sortColumn=foo&sortDirection=desc&sortColumn=bar&sortDirection=asc");
         Assert.assertEquals(2, pager.getSort().getColumns().size());
         Assert.assertEquals("foo", pager.getSort().getColumns().get(0).getName());
         Assert.assertEquals(Sort.Direction.Descending, pager.getSort().getColumns().get(0).getDirection());
@@ -99,7 +100,6 @@ public class PagingUtilsTest {
         assertEquals("mtime", column.getName());
         assertEquals(Sort.Direction.Descending, column.getDirection());
     }
-
 
     private Pager getPagerFromUriString(String str) throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI(str));
@@ -161,11 +161,7 @@ public class PagingUtilsTest {
 
     @Test
     public void testResponseBuilder() {
-        Page<String> page = new Page<>(
-                List.of("Hello", "World"),
-                Pager.builder().itemsPerPage(10).page(0).build(),
-                54
-        );
+        Page<String> page = new Page<>(List.of("Hello", "World"), Pager.builder().itemsPerPage(10).page(0).build(), 54);
         Response response = PagingUtils.responseBuilder(page).build();
 
         Assert.assertEquals("54", response.getHeaderString("TotalCount"));
@@ -174,16 +170,11 @@ public class PagingUtilsTest {
 
     @Test
     public void testResponseBuilderEmpty() {
-        Page<String> page = new Page<>(
-                List.of(),
-                Pager.builder().itemsPerPage(10).page(0).build(),
-                0
-        );
+        Page<String> page = new Page<>(List.of(), Pager.builder().itemsPerPage(10).page(0).build(), 0);
         Response response = PagingUtils.responseBuilder(page).build();
 
         Assert.assertEquals(null, response.getHeaderString("TotalCount"));
         Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
-
 
 }

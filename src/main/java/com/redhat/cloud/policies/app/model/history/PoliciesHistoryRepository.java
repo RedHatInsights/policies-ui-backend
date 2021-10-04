@@ -33,8 +33,7 @@ public class PoliciesHistoryRepository {
 
         LOGGER.tracef("HQL query ready to be executed: %s", hql);
 
-        TypedQuery<Long> query = session.createQuery(hql, Long.class)
-                .setParameter("tenantId", tenantId)
+        TypedQuery<Long> query = session.createQuery(hql, Long.class).setParameter("tenantId", tenantId)
                 .setParameter("policyId", policyId.toString());
 
         setFiltersValues(query, pager.getFilter().getItems());
@@ -67,8 +66,7 @@ public class PoliciesHistoryRepository {
         LOGGER.tracef("HQL query ready to be executed: %s", hql);
 
         TypedQuery<PoliciesHistoryEntry> query = session.createQuery(hql, PoliciesHistoryEntry.class)
-                .setParameter("tenantId", tenantId)
-                .setParameter("policyId", policyId.toString());
+                .setParameter("tenantId", tenantId).setParameter("policyId", policyId.toString());
 
         setFiltersValues(query, pager.getFilter().getItems());
 
@@ -111,55 +109,55 @@ public class PoliciesHistoryRepository {
 
     private static String getEntityFieldName(Filter.FilterItem filterItem) {
         switch (filterItem.field) {
-            case "id":
-                return "hostId";
-            case "name":
-                return "hostName";
-            case "ctime":
-                return "ctime";
-            default:
-                throw new IllegalArgumentException("Unknown filter field: " + filterItem.field);
+        case "id":
+            return "hostId";
+        case "name":
+            return "hostName";
+        case "ctime":
+            return "ctime";
+        default:
+            throw new IllegalArgumentException("Unknown filter field: " + filterItem.field);
         }
     }
 
     private static String getHqlOperator(Filter.FilterItem filterItem) {
         switch (filterItem.operator) {
-            case EQUAL:
-                return " = ";
-            case LIKE:
-                return " LIKE ";
-            case NOT_EQUAL:
-                return " <> ";
-            default:
-                throw new IllegalArgumentException("Unknown operator: " + filterItem.operator);
+        case EQUAL:
+            return " = ";
+        case LIKE:
+            return " LIKE ";
+        case NOT_EQUAL:
+            return " <> ";
+        default:
+            throw new IllegalArgumentException("Unknown operator: " + filterItem.operator);
         }
     }
 
     private static Optional<String> getEntityFieldName(String sortColumn) {
         switch (sortColumn) {
-            case "id":
-                return Optional.of("hostId");
-            case "name":
-                return Optional.of("hostName");
-            case "ctime":
-                return Optional.of("ctime");
-            case "mtime":
-                // Pager may contain a default sort on `mtime` which is not a PoliciesHistoryEntry field.
-                return Optional.empty();
-            default:
-                throw new IllegalArgumentException("Unknown sort column: " + sortColumn);
+        case "id":
+            return Optional.of("hostId");
+        case "name":
+            return Optional.of("hostName");
+        case "ctime":
+            return Optional.of("ctime");
+        case "mtime":
+            // Pager may contain a default sort on `mtime` which is not a PoliciesHistoryEntry field.
+            return Optional.empty();
+        default:
+            throw new IllegalArgumentException("Unknown sort column: " + sortColumn);
 
         }
     }
 
     private static String getSortDirection(Sort.Direction direction) {
         switch (direction) {
-            case Ascending:
-                return "ASC";
-            case Descending:
-                return "DESC";
-            default:
-                throw new IllegalArgumentException("Unknown sort direction: " + direction);
+        case Ascending:
+            return "ASC";
+        case Descending:
+            return "DESC";
+        default:
+            throw new IllegalArgumentException("Unknown sort direction: " + direction);
         }
     }
 }

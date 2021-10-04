@@ -44,26 +44,20 @@ public class PolicyCrudServiceTest extends AbstractITest {
     public void test() {
         UUID policyId = createPolicy();
 
-        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-1", "foo", 1L);
+        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-1", "foo",
+                1L);
         helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-2", "fooBAR", 2L);
         helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-3", "FoOoOo", 3L);
-        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-4", " foo", 4L);
+        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-4", " foo",
+                4L);
         helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-5", "barFOO", 5L);
         helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-6", "bar", 6L);
 
-        String responseBody = given()
-                .basePath(API_BASE_V1_0)
-                .header(authHeader)
-                .pathParam("id", policyId)
-                .queryParam("filter[name]", "foo")
-                .queryParam("filter:op[name]", "LIKE")
-                .queryParam("sortColumn", "name")
-                .queryParam("sortDirection", "desc")
-                .queryParam("limit", 2)
-                .queryParam("offset", 2)
-                .when().get("/policies/{id}/history/trigger")
-                .then().statusCode(200)
-                .extract().asString();
+        String responseBody = given().basePath(API_BASE_V1_0).header(authHeader).pathParam("id", policyId)
+                .queryParam("filter[name]", "foo").queryParam("filter:op[name]", "LIKE")
+                .queryParam("sortColumn", "name").queryParam("sortDirection", "desc").queryParam("limit", 2)
+                .queryParam("offset", 2).when().get("/policies/{id}/history/trigger").then().statusCode(200).extract()
+                .asString();
 
         JsonObject history = new JsonObject(responseBody);
         JsonArray data = history.getJsonArray("data");
@@ -80,14 +74,8 @@ public class PolicyCrudServiceTest extends AbstractITest {
         policy.name = "my-policy";
         policy.conditions = "arch = \"x86_64\"";
 
-        String responseBody = given()
-                .basePath(API_BASE_V1_0)
-                .header(authHeader)
-                .contentType(JSON)
-                .body(Json.encode(policy))
-                .queryParam("alsoStore", true)
-                .when().post("/policies")
-                .then().statusCode(201)
+        String responseBody = given().basePath(API_BASE_V1_0).header(authHeader).contentType(JSON)
+                .body(Json.encode(policy)).queryParam("alsoStore", true).when().post("/policies").then().statusCode(201)
                 .extract().asString();
 
         JsonObject jsonPolicy = new JsonObject(responseBody);
