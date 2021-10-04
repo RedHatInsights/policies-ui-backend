@@ -26,7 +26,7 @@ public class PoliciesHistoryCleaner {
      * The policies UI shows a retention time for policies history entries.
      * This scheduled job deletes from the database the history entries which are older than that retention time.
      */
-    @Scheduled(identity = "PoliciesHistoryCleaner", every = "{policies-history.cleaner.period}")
+    @Scheduled(identity = "PoliciesHistoryCleaner", every = "${policies-history.cleaner.period}")
     @Transactional
     public void clean() {
         Duration deleteDelay = ConfigProvider.getConfig().getOptionalValue(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, Duration.class)
