@@ -36,55 +36,54 @@ import java.util.Map;
 
 /**
  * Do some validation of the OApiModel.
- * @author hrupp
  */
 @QuarkusTest
 @Tag("integration")
 public class OapiTest extends AbstractITest {
 
-  private static final String OAPI_JSON = "openapi.json";
-  private static final String TARGET_OPENAPI = "./target/openapi.json";
+    private static final String OAPI_JSON = "openapi.json";
+    private static final String TARGET_OPENAPI = "./target/openapi.json";
 
-  // QuarkusTest will inject the host+port for us.
- 	@TestHTTPResource(API_BASE_V1_0 + "/" + OAPI_JSON)
-	URL url;
+    // QuarkusTest will inject the host+port for us.
+    @TestHTTPResource(API_BASE_V1_0 + "/" + OAPI_JSON)
+    URL url;
 
- 	@Test
- 	public void validateOpenApi() throws Exception {
- 		OpenApi3 model = new OpenApi3Parser().parse(url, true);
- 		System.out.printf("OpenAPI Model at %s\n", url);
- 		if (! model.isValid()) {
- 			for (ValidationResults.ValidationItem item : model.getValidationItems()) {
- 				System.err.println(item);
- 			}
- 			Assert.fail("OpenAPI spec is not valid");
- 		}
- 		//
- 		// Now that basic validation is done, we can add some of our own
-		//
-		Map<String, Path> paths = model.getPaths();
-		Map<String, Schema> schemas = model.getSchemas();
+    @Test
+    public void validateOpenApi() throws Exception {
+        OpenApi3 model = new OpenApi3Parser().parse(url, true);
+        System.out.printf("OpenAPI Model at %s\n", url);
+        if (!model.isValid()) {
+            for (ValidationResults.ValidationItem item : model.getValidationItems()) {
+                System.err.println(item);
+            }
+            Assert.fail("OpenAPI spec is not valid");
+        }
+        //
+        // Now that basic validation is done, we can add some of our own
+        //
+        Map<String, Path> paths = model.getPaths();
+        Map<String, Schema> schemas = model.getSchemas();
 
-		// The base path filler. See also OASModifier.mangleName
- 		Assert.assertTrue(paths.containsKey("/"));
+        // The base path filler. See also OASModifier.mangleName
+        Assert.assertTrue(paths.containsKey("/"));
 
- 		// User config is private, so don't show it
- 		Assert.assertFalse(paths.containsKey("/user-config"));
- 		Assert.assertFalse(schemas.containsKey("SettingsValues"));
+        // User config is private, so don't show it
+        Assert.assertFalse(paths.containsKey("/user-config"));
+        Assert.assertFalse(schemas.containsKey("SettingsValues"));
 
- 		// Check that openapi does not (again) collapse parameters
-		Assert.assertEquals(9, paths.get("/policies").getOperation("get").getParameters().size());
+        // Check that openapi does not (again) collapse parameters
+        Assert.assertEquals(9, paths.get("/policies").getOperation("get").getParameters().size());
 
-		// Check that all properties are present ( https://github.com/smallrye/smallrye-open-api/issues/437 )
-		Map<String, Schema> policyProperties = schemas.get("Policy").getProperties();
-		Assert.assertEquals(9, policyProperties.size());
-		Assert.assertTrue(policyProperties.containsKey("ctime"));
-		Assert.assertTrue(policyProperties.containsKey("mtime"));
+        // Check that all properties are present ( https://github.com/smallrye/smallrye-open-api/issues/437 )
+        Map<String, Schema> policyProperties = schemas.get("Policy").getProperties();
+        Assert.assertEquals(9, policyProperties.size());
+        Assert.assertTrue(policyProperties.containsKey("ctime"));
+        Assert.assertTrue(policyProperties.containsKey("mtime"));
 
-		// Now that the OpenAPI file has been validated, save a copy to the filesystem
-		// This file is going to be uploaded in a regular CI build to know the API state
-		// for a given build.
-		InputStream in = url.openStream();
-		Files.copy(in, Paths.get(TARGET_OPENAPI), StandardCopyOption.REPLACE_EXISTING);
- 	}
+        // Now that the OpenAPI file has been validated, save a copy to the filesystem
+        // This file is going to be uploaded in a regular CI build to know the API state
+        // for a given build.
+        InputStream in = url.openStream();
+        Files.copy(in, Paths.get(TARGET_OPENAPI), StandardCopyOption.REPLACE_EXISTING);
+    }
 }

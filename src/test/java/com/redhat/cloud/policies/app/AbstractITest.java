@@ -30,42 +30,41 @@ import java.util.Map;
 /**
  * Test base for a few common things.
  * The heavy lifting of mock-setup is done in the {@link TestLifecycleManager}
- * @author hrupp
  */
 public abstract class AbstractITest {
 
-  static Header authHeader;       // User with access rights
-  static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
-  static Header authHeaderNoAccount; // Account number is empty
+    static Header authHeader;       // User with access rights
+    static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
+    static Header authHeaderNoAccount; // Account number is empty
 
-  static final String API_BASE_V1_0 = "/api/policies/v1.0";
-  static final String API_BASE_V1 = "/api/policies/v1";
-  public MockServerClient mockServerClient;
-  @Inject
-  EntityManager entityManager;
+    static final String API_BASE_V1_0 = "/api/policies/v1.0";
+    static final String API_BASE_V1 = "/api/policies/v1";
+    public MockServerClient mockServerClient;
 
-  @BeforeAll
-  static void setupRhId() {
-    // provide rh-id
-    String rhid = HeaderHelperTest.getStringFromFile("rhid.txt",false);
-    authHeader = new Header("x-rh-identity", rhid);
-    rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt",false);
-    authRbacNoAccess = new Header("x-rh-identity", rhid);
-    rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt",false);
-    authHeaderNoAccount = new Header("x-rh-identity", rhid);
-  }
+    @Inject
+    EntityManager entityManager;
 
-  protected void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
-    String url = links.get(rel);
-    Assert.assertNotNull("Rel [" + rel + "] not found" , url);
-    String tmp = String.format("limit=%d&offset=%d",limit,offset);
-    Assert.assertTrue("Url for rel ["+rel+"] should end in ["+tmp+"], but was [" + url +"]", url.endsWith(tmp));
-  }
+    @BeforeAll
+    static void setupRhId() {
+        // provide rh-id
+        String rhid = HeaderHelperTest.getStringFromFile("rhid.txt", false);
+        authHeader = new Header("x-rh-identity", rhid);
+        rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt", false);
+        authRbacNoAccess = new Header("x-rh-identity", rhid);
+        rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt", false);
+        authHeaderNoAccount = new Header("x-rh-identity", rhid);
+    }
 
-  protected long countPoliciesInDB() {
-    Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
-    q.setParameter("cid", "1234");
-    long count = (long) q.getSingleResult();
-    return count;
-  }
+    protected void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
+        String url = links.get(rel);
+        Assert.assertNotNull("Rel [" + rel + "] not found", url);
+        String tmp = String.format("limit=%d&offset=%d", limit, offset);
+        Assert.assertTrue("Url for rel [" + rel + "] should end in [" + tmp + "], but was [" + url + "]", url.endsWith(tmp));
+    }
+
+    protected long countPoliciesInDB() {
+        Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
+        q.setParameter("cid", "1234");
+        return (long) q.getSingleResult();
+    }
 }

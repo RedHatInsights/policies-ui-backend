@@ -29,61 +29,58 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author hrupp
- */
 public class RbacParsingTest {
 
-  @Test
-  void testParseExample() throws Exception {
-    File file = new File("src/test/resources/rbac_example.json");
-    Jsonb jb = JsonbBuilder.create();
-    RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
-    assertEquals(rbac.data.size(), 2);
+    @Test
+    void testParseExample() throws Exception {
+        File file = new File("src/test/resources/rbac_example.json");
+        Jsonb jb = JsonbBuilder.create();
+        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+        assertEquals(rbac.data.size(), 2);
 
-    assertTrue(rbac.canWrite("resname"));
-    // We don't have explicit read permission for "resname" but we have bar:*:read.
-    assertTrue(rbac.canRead("resname"));
-    assertFalse(rbac.canWriteAll());
-    assertFalse(rbac.canWrite("no-perm"));
+        assertTrue(rbac.canWrite("resname"));
+        // We don't have explicit read permission for "resname" but we have bar:*:read.
+        assertTrue(rbac.canRead("resname"));
+        assertFalse(rbac.canWriteAll());
+        assertFalse(rbac.canWrite("no-perm"));
 
-  }
+    }
 
-  @Test
-  void testNoAccess() throws Exception {
-    File file = new File("src/test/resources/rbac_example_no_access.json");
-    Jsonb jb = JsonbBuilder.create();
-    RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+    @Test
+    void testNoAccess() throws Exception {
+        File file = new File("src/test/resources/rbac_example_no_access.json");
+        Jsonb jb = JsonbBuilder.create();
+        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assertFalse(rbac.canReadAll());
-    assertFalse(rbac.canWriteAll());
-    assertFalse(rbac.canWrite("foobar"));
-    assertFalse(rbac.canRead("1337"));
-  }
+        assertFalse(rbac.canReadAll());
+        assertFalse(rbac.canWriteAll());
+        assertFalse(rbac.canWrite("foobar"));
+        assertFalse(rbac.canRead("1337"));
+    }
 
-  @Test
-  void testFullAccess() throws Exception {
-    File file = new File("src/test/resources/rbac_example_full_access.json");
-    Jsonb jb = JsonbBuilder.create();
-    RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+    @Test
+    void testFullAccess() throws Exception {
+        File file = new File("src/test/resources/rbac_example_full_access.json");
+        Jsonb jb = JsonbBuilder.create();
+        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assertTrue(rbac.canRead("*"));
-    assertTrue(rbac.canRead("anything"));
-    assertTrue(rbac.canReadAll());
-    assertTrue(rbac.canWrite("*"));
-    assertTrue(rbac.canWrite("anything"));
-    assertTrue(rbac.canWriteAll());
-  }
+        assertTrue(rbac.canRead("*"));
+        assertTrue(rbac.canRead("anything"));
+        assertTrue(rbac.canReadAll());
+        assertTrue(rbac.canWrite("*"));
+        assertTrue(rbac.canWrite("anything"));
+        assertTrue(rbac.canWriteAll());
+    }
 
-  @Test
-  void testPartialAccess() throws FileNotFoundException {
-    File file = new File("src/test/resources/rbac_example_partial_access.json");
-    Jsonb jb = JsonbBuilder.create();
-    RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+    @Test
+    void testPartialAccess() throws FileNotFoundException {
+        File file = new File("src/test/resources/rbac_example_partial_access.json");
+        Jsonb jb = JsonbBuilder.create();
+        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
 
-    assertTrue(rbac.canReadAll());
-    assertFalse(rbac.canWriteAll());
-    assertTrue(rbac.canDo("*","execute"));
-    assertTrue(rbac.canDo("foobar","execute"));
-  }
+        assertTrue(rbac.canReadAll());
+        assertFalse(rbac.canWriteAll());
+        assertTrue(rbac.canDo("*", "execute"));
+        assertTrue(rbac.canDo("foobar", "execute"));
+    }
 }

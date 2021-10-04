@@ -72,21 +72,21 @@ public class PoliciesHistoryRepositoryTest {
         /*
          * Pager #2: single EQUAL filter.
          */
-        pager = Pager.builder().filter("name", EQUAL,"host-name").build();
+        pager = Pager.builder().filter("name", EQUAL, "host-name").build();
         assertEquals(0, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
         assertTrue(repository.find(TENANT_ID_2, POLICY_ID_2, pager).isEmpty());
 
         /*
          * Pager #3: single LIKE filter.
          */
-        pager = Pager.builder().filter("name", LIKE,"host-name-2").build();
+        pager = Pager.builder().filter("name", LIKE, "host-name-2").build();
         assertEquals(3, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
         assertEquals(List.of(historyEntry6, historyEntry5, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 
         /*
          * Pager #4: single NOT_EQUAL filter.
          */
-        pager = Pager.builder().filter("name", NOT_EQUAL,"red-hat").build();
+        pager = Pager.builder().filter("name", NOT_EQUAL, "red-hat").build();
         assertEquals(4, repository.count(TENANT_ID_2, POLICY_ID_2, pager));
         assertEquals(List.of(historyEntry6, historyEntry5, historyEntry3, historyEntry4), repository.find(TENANT_ID_2, POLICY_ID_2, pager));
 

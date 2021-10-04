@@ -10,9 +10,9 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -21,15 +21,15 @@ public class PagingUtilsTest {
     @Test
     public void testExtractDefaultPager() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo");
-        Assert.assertEquals(50, pager.getLimit());
-        Assert.assertEquals(0, pager.getOffset());
+        assertEquals(50, pager.getLimit());
+        assertEquals(0, pager.getOffset());
     }
 
     @Test
     public void testExtractPager() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?offset=12&limit=100");
-        Assert.assertEquals(100, pager.getLimit());
-        Assert.assertEquals(12, pager.getOffset());
+        assertEquals(100, pager.getLimit());
+        assertEquals(12, pager.getOffset());
     }
 
     @Test
@@ -47,27 +47,27 @@ public class PagingUtilsTest {
     @Test
     public void testExtractPagerSort() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?sortColumn=foo&sortDirection=desc");
-        Assert.assertEquals(1, pager.getSort().getColumns().size());
-        Assert.assertEquals("foo", pager.getSort().getColumns().get(0).getName());
-        Assert.assertEquals(Sort.Direction.Descending, pager.getSort().getColumns().get(0).getDirection());
+        assertEquals(1, pager.getSort().getColumns().size());
+        assertEquals("foo", pager.getSort().getColumns().get(0).getName());
+        assertEquals(Sort.Direction.Descending, pager.getSort().getColumns().get(0).getDirection());
     }
 
     @Test
     public void testExtractPagerSortWithDefaultDirection() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?sortColumn=foobar");
-        Assert.assertEquals(1, pager.getSort().getColumns().size());
-        Assert.assertEquals("foobar", pager.getSort().getColumns().get(0).getName());
-        Assert.assertEquals(Sort.Direction.Ascending, pager.getSort().getColumns().get(0).getDirection());
+        assertEquals(1, pager.getSort().getColumns().size());
+        assertEquals("foobar", pager.getSort().getColumns().get(0).getName());
+        assertEquals(Sort.Direction.Ascending, pager.getSort().getColumns().get(0).getDirection());
     }
 
     @Test
     public void testExtractPagerSortMultiple() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?sortColumn=foo&sortDirection=desc&sortColumn=bar&sortDirection=asc");
-        Assert.assertEquals(2, pager.getSort().getColumns().size());
-        Assert.assertEquals("foo", pager.getSort().getColumns().get(0).getName());
-        Assert.assertEquals(Sort.Direction.Descending, pager.getSort().getColumns().get(0).getDirection());
-        Assert.assertEquals("bar", pager.getSort().getColumns().get(1).getName());
-        Assert.assertEquals(Sort.Direction.Ascending, pager.getSort().getColumns().get(1).getDirection());
+        assertEquals(2, pager.getSort().getColumns().size());
+        assertEquals("foo", pager.getSort().getColumns().get(0).getName());
+        assertEquals(Sort.Direction.Descending, pager.getSort().getColumns().get(0).getDirection());
+        assertEquals("bar", pager.getSort().getColumns().get(1).getName());
+        assertEquals(Sort.Direction.Ascending, pager.getSort().getColumns().get(1).getDirection());
     }
 
     @Test
@@ -97,21 +97,20 @@ public class PagingUtilsTest {
 
     private Pager getPagerFromUriString(String str) throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI(str));
-        Pager pager = PagingUtils.extractPager(info);
-        return pager;
+        return PagingUtils.extractPager(info);
     }
 
     @Test
     public void testExtractFilter() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[guy]=brush");
-        Assert.assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
+        assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
     }
 
     @Test
     public void testExtractFilterCustomOperator() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[guy]=%25brush%25&filter:op[guy]=like");
-        Assert.assertEquals("%brush%", pager.getFilter().getParameters().map().get("guy"));
-        Assert.assertEquals("guy LIKE :guy", pager.getFilter().getQuery());
+        assertEquals("%brush%", pager.getFilter().getParameters().map().get("guy"));
+        assertEquals("guy LIKE :guy", pager.getFilter().getQuery());
     }
 
     @Test
@@ -122,27 +121,27 @@ public class PagingUtilsTest {
         } catch (IllegalArgumentException e) {
             return;
         }
-        Assert.assertTrue("Should not reach this", false);
+        fail("Should not reach this");
     }
 
     @Test
     public void testExtractFilterBooleanOperator() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[is_enabled]=true&filter:op[is_enabled]=boolean_is");
-        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
+        assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
     }
 
     @Test
     public void testExtractFilterBooleanOperator2() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[is_enabled]=true");
-        Assert.assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
+        assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
     }
 
     @Test
     public void testExtractFilterMultipleParams() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[guy]=brush&filter[foo]=bar&filter[raw]=ewf");
-        Assert.assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
-        Assert.assertEquals("bar", pager.getFilter().getParameters().map().get("foo"));
-        Assert.assertEquals("ewf", pager.getFilter().getParameters().map().get("raw"));
+        assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
+        assertEquals("bar", pager.getFilter().getParameters().map().get("foo"));
+        assertEquals("ewf", pager.getFilter().getParameters().map().get("raw"));
     }
 
     @Test
@@ -160,8 +159,8 @@ public class PagingUtilsTest {
         );
         Response response = PagingUtils.responseBuilder(page).build();
 
-        Assert.assertEquals("54", response.getHeaderString("TotalCount"));
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("54", response.getHeaderString("TotalCount"));
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
     @Test
@@ -173,9 +172,7 @@ public class PagingUtilsTest {
         );
         Response response = PagingUtils.responseBuilder(page).build();
 
-        Assert.assertEquals(null, response.getHeaderString("TotalCount"));
-        Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        assertNull(response.getHeaderString("TotalCount"));
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
-
-
 }

@@ -19,31 +19,32 @@ package com.redhat.cloud.policies.app;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.rest.PolicyCrudService;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Some additional testing around parsing of alert history items.
  * This is on a unit test level so also make it easier to understand
  * and follow format changes from the engine.
- * @author hrupp
  */
 public class AlertHistoryParserTest {
 
-  @Test
-  void testAlertHistoryDocument() throws JsonProcessingException {
+    @Test
+    void testAlertHistoryDocument() throws JsonProcessingException {
 
-    String alerts = HeaderHelperTest.getStringFromFile("alerts-history2.json",false);
+        String alerts = HeaderHelperTest.getStringFromFile("alerts-history2.json", false);
 
-    List<HistoryItem> items = new ArrayList<>();
+        List<HistoryItem> items = new ArrayList<>();
 
-    PolicyCrudService.parseHistoryFromEngine(alerts,items);
+        PolicyCrudService.parseHistoryFromEngine(alerts, items);
 
-    Assert.assertEquals(1,items.size());
-    HistoryItem item = items.get(0);
-    Assert.assertEquals("VM",item.hostName);
-  }
+        assertEquals(1, items.size());
+
+        HistoryItem item = items.get(0);
+        assertEquals("VM", item.hostName);
+    }
 }
