@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 public class PagingUtils {
 
     private PagingUtils() {
-
     }
 
     public static Pager extractPager(UriInfo uriInfo) {

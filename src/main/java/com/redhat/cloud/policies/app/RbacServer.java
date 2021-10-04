@@ -26,20 +26,14 @@ import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-/**
- * @author hrupp
- */
 @Path("/api/rbac/v1")
 @RegisterRestClient(configKey = "rbac")
 @RegisterProvider(RbacRestClientRequestFilter.class)
 public interface RbacServer {
 
-  @GET
-  @Path("/access/") // trailing slash is required by api
-  @Consumes("application/json")
-  @Produces("application/json")
-  RbacRaw getRbacInfo(@QueryParam("application") String application,
-                           @HeaderParam("x-rh-identity") String rhIdentity
-
-             ) ;
+    @GET
+    @Path("/access/") // trailing slash is required by api
+    @Consumes("application/json")
+    @Produces("application/json")
+    RbacRaw getRbacInfo(@QueryParam("application") String application, @HeaderParam("x-rh-identity") String rhIdentity);
 }

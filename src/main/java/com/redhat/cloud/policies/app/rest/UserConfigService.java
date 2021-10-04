@@ -36,9 +36,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.logging.Logger;
 
-/**
- * @author hrupp
- */
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
@@ -46,36 +43,34 @@ import java.util.logging.Logger;
 @RequestScoped
 public class UserConfigService {
 
-  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  @SuppressWarnings("CdiInjectionPointsInspection")
-  @Inject
-  RhIdPrincipal user;
+    @SuppressWarnings("CdiInjectionPointsInspection")
+    @Inject
+    RhIdPrincipal user;
 
-  @Inject
-  @RestClient
-  NotificationSystem notifications;
+    @Inject
+    @RestClient
+    NotificationSystem notifications;
 
-  @ConfigProperty(name = "notifications.bundle", defaultValue = "rhel")
-  String bundle;
+    @ConfigProperty(name = "notifications.bundle", defaultValue = "rhel")
+    String bundle;
 
-  @ConfigProperty(name = "notifications.application", defaultValue = "policies")
-  String application;
+    @ConfigProperty(name = "notifications.application", defaultValue = "policies")
+    String application;
 
-  @GET
-  @Path("/preferences")
-  public UserPreferences getSettingsSchema() {
+    @GET
+    @Path("/preferences")
+    public UserPreferences getSettingsSchema() {
+        if (!user.canReadPolicies()) {
+            throw new ForbiddenException("You don't have permission to read settings");
+        }
 
-    if (!user.canReadPolicies()) {
-      throw  new ForbiddenException("You don't have permission to read settings");
+        try {
+            return notifications.getUserPreferences(bundle, application, user.getRawRhIdHeader());
+        } catch (Exception e) {
+            log.warning("Retrieving settings failed: " + e.getMessage());
+            throw new ServerErrorException(Response.serverError().entity(new Msg(e.getMessage())).build());
+        }
     }
-
-    try {
-      return notifications.getUserPreferences(bundle, application, user.getRawRhIdHeader());
-    }
-    catch (Exception e) {
-      log.warning("Retrieving settings failed: " + e.getMessage());
-      throw new ServerErrorException(Response.serverError().entity(new Msg(e.getMessage())).build());
-    }
-  }
 }

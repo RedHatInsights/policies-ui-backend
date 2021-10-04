@@ -37,142 +37,139 @@ import java.util.logging.Logger;
  * VmData:  3529900 kB
  * VmSize:  13529900 kB
  * Threads: 23
- *
- * @author hrupp
  */
 @ApplicationScoped
 public class ProcSelfStatusExporter {
 
-  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  private static final String PATHNAME = "/proc/self/status";
+    private static final String PATHNAME = "/proc/self/status";
 
-  private boolean hasWarned = false;
+    private boolean hasWarned = false;
 
-  long vmHwm;
-  long vmRss;
-  long rssAnon;
-  long rssFile;
-  long vmStk;
-  long vmLib;
-  long vmData;
-  long vmSize;
-  int threads;
+    long vmHwm;
+    long vmRss;
+    long rssAnon;
+    long rssFile;
+    long vmStk;
+    long vmLib;
+    long vmData;
+    long vmSize;
+    int threads;
 
 
-  @Scheduled(every = "10s")
-  void gather() {
+    @Scheduled(every = "10s")
+    void gather() {
 
-    File status = new File(PATHNAME);
-    if (!status.exists() || !status.canRead()) {
-      if (!hasWarned) {
-        log.warning("Can't read " + PATHNAME);
-        hasWarned = true;
-      }
-      return;
-    }
-
-    try (Scanner fr = new Scanner(status)) {
-      while (fr.hasNextLine()) {
-        String line = fr.nextLine();
-        String[] parts = line.split("[ \t]+");
-
-        switch (parts[0]) {
-          case "VmHWM:":
-            vmHwm = Long.parseLong(parts[1]) ;
-            break;
-          case "VmRSS:":
-            vmRss = Long.parseLong(parts[1]) ;
-            break;
-          case "RssAnon:":
-            rssAnon = Long.parseLong(parts[1]) ;
-            break;
-          case "RssFile:":
-            rssFile = Long.parseLong(parts[1]) ;
-            break;
-          case "VmStk:":
-            vmStk = Long.parseLong(parts[1]) ;
-            break;
-          case "VmLib:":
-            vmLib = Long.parseLong(parts[1]) ;
-            break;
-          case "VmData:":
-            vmData = Long.parseLong(parts[1]) ;
-            break;
-          case "VmSize:":
-            vmSize = Long.parseLong(parts[1]) ;
-            break;
-          case "Threads:":
-            threads = Integer.parseInt(parts[1]) ;
-            break;
-          default:
-            // That file has more entries, but which we don't care about
+        File status = new File(PATHNAME);
+        if (!status.exists() || !status.canRead()) {
+            if (!hasWarned) {
+                log.warning("Can't read " + PATHNAME);
+                hasWarned = true;
+            }
+            return;
         }
-      }
+
+        try (Scanner fr = new Scanner(status)) {
+            while (fr.hasNextLine()) {
+                String line = fr.nextLine();
+                String[] parts = line.split("[ \t]+");
+
+                switch (parts[0]) {
+                    case "VmHWM:":
+                        vmHwm = Long.parseLong(parts[1]);
+                        break;
+                    case "VmRSS:":
+                        vmRss = Long.parseLong(parts[1]);
+                        break;
+                    case "RssAnon:":
+                        rssAnon = Long.parseLong(parts[1]);
+                        break;
+                    case "RssFile:":
+                        rssFile = Long.parseLong(parts[1]);
+                        break;
+                    case "VmStk:":
+                        vmStk = Long.parseLong(parts[1]);
+                        break;
+                    case "VmLib:":
+                        vmLib = Long.parseLong(parts[1]);
+                        break;
+                    case "VmData:":
+                        vmData = Long.parseLong(parts[1]);
+                        break;
+                    case "VmSize:":
+                        vmSize = Long.parseLong(parts[1]);
+                        break;
+                    case "Threads:":
+                        threads = Integer.parseInt(parts[1]);
+                        break;
+                    default:
+                        // That file has more entries, but which we don't care about
+                }
+            }
+        } catch (Exception e) {
+            log.warning("Reading failed: " + e.getMessage());
+        }
     }
-    catch (Exception e) {
-      log.warning("Reading failed: " + e.getMessage());
+
+    @Gauge(name = "status.vmHwm", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmHwm() {
+        return vmHwm;
     }
-  }
 
-  @Gauge(name="status.vmHwm", absolute = true, unit = MetricUnits.KILOBYTES,tags = "type=proc" )
-  public long getVmHwm() {
-    return vmHwm;
-  }
+    @Gauge(name = "status.vmRss", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmRss() {
+        return vmRss;
+    }
 
-  @Gauge(name="status.vmRss", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getVmRss() {
-    return vmRss;
-  }
+    @Gauge(name = "status.rssAnon", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getRssAnon() {
+        return rssAnon;
+    }
 
-  @Gauge(name="status.rssAnon", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getRssAnon() {
-    return rssAnon;
-  }
+    @Gauge(name = "status.rssFile", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getRssFile() {
+        return rssFile;
+    }
 
-  @Gauge(name="status.rssFile", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getRssFile() {
-    return rssFile;
-  }
+    @Gauge(name = "status.vmStk", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmStk() {
+        return vmStk;
+    }
 
-  @Gauge(name="status.vmStk", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getVmStk() {
-    return vmStk;
-  }
+    @Gauge(name = "status.vmLib", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmLib() {
+        return vmLib;
+    }
 
-  @Gauge(name="status.vmLib", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getVmLib() {
-    return vmLib;
-  }
+    @Gauge(name = "status.vmData", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmData() {
+        return vmData;
+    }
 
-  @Gauge(name="status.vmData", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getVmData() {
-    return vmData;
-  }
+    @Gauge(name = "status.vmSize", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
+    public long getVmSize() {
+        return vmSize;
+    }
 
-  @Gauge(name="status.vmSize", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-  public long getVmSize() {
-    return vmSize;
-  }
+    @Gauge(name = "status.threads", absolute = true, unit = MetricUnits.NONE, tags = "type=proc")
+    public long getThreads() {
+        return threads;
+    }
 
-  @Gauge(name="status.threads", absolute = true, unit = MetricUnits.NONE, tags = "type=proc")
-  public long getThreads() {
-    return threads;
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
-    sb.append("vmHwm=").append(vmHwm / 1024);
-    sb.append(", vmRss=").append(vmRss / 1024);
-    sb.append(", rssAnon=").append(rssAnon / 1024);
-    sb.append(", rssFile=").append(rssFile / 1024);
-    sb.append(", vmStk=").append(vmStk / 1024);
-    sb.append(", vmLib=").append(vmLib / 1024);
-    sb.append(", vmData=").append(vmData / 1024);
-    sb.append(", vmSize=").append(vmSize / 1024);
-    sb.append(", threads=").append(threads);
-    sb.append('}');
-    return sb.toString();
-  }
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
+        sb.append("vmHwm=").append(vmHwm / 1024);
+        sb.append(", vmRss=").append(vmRss / 1024);
+        sb.append(", rssAnon=").append(rssAnon / 1024);
+        sb.append(", rssFile=").append(rssFile / 1024);
+        sb.append(", vmStk=").append(vmStk / 1024);
+        sb.append(", vmLib=").append(vmLib / 1024);
+        sb.append(", vmData=").append(vmData / 1024);
+        sb.append(", vmSize=").append(vmSize / 1024);
+        sb.append(", threads=").append(threads);
+        sb.append('}');
+        return sb.toString();
+    }
 }

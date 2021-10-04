@@ -27,125 +27,122 @@ import java.util.UUID;
 
 /**
  * A trigger in the backend, that we send over
- * @author hrupp
  */
 public class FullTrigger {
 
-  private Map<String,String> actionToTriggerActionMap;
+    private final Map<String, String> actionToTriggerActionMap;
 
-  public Trigger trigger;
-  public List<Condition> conditions;
+    public Trigger trigger;
+    public List<Condition> conditions;
 
-  public FullTrigger() {
-    trigger = new Trigger();
-    conditions = new ArrayList<>();
-    trigger.actions = new HashSet<>();
-    actionToTriggerActionMap = new HashMap<>();
-    actionToTriggerActionMap.put("notification","notification");
-  }
-
-  public FullTrigger(Policy policy, boolean generatePseudoId) {
-    this();
-    if (generatePseudoId) {
-      trigger.id = generateId();
-    }
-    else if (policy.id != null) {
-      trigger.id = policy.id.toString();
-    }
-    trigger.name = policy.name;
-    trigger.description = policy.description;
-    trigger.enabled = policy.isEnabled;
-    var cond = new Condition();
-    cond.expression = policy.conditions;
-    conditions.add(cond);
-    storeActions(trigger, policy);
-  }
-
-  private void storeActions(Trigger trigger, Policy policy) {
-    if (policy.actions == null) {
-      return;
+    public FullTrigger() {
+        trigger = new Trigger();
+        conditions = new ArrayList<>();
+        trigger.actions = new HashSet<>();
+        actionToTriggerActionMap = new HashMap<>();
+        actionToTriggerActionMap.put("notification", "notification");
     }
 
-    String[] actionsIn = policy.actions.split(";");
-    for (String actionIn : actionsIn) {
-      var ta = new TriggerAction();
-      if (actionIn.trim().isEmpty()) {
-        continue;
-      }
-      ta.actionPlugin = getActionName(actionIn);
-
-      trigger.actions.add(ta);
-    }
-  }
-
-  public FullTrigger(Policy policy) {
-    this(policy,false);
-  }
-
-  private static String generateId() {
-    return UUID.randomUUID().toString();
-  }
-
-  public void updateFromPolicy(Policy policy) {
-    if (trigger.actions == null) {
-      trigger.actions = new HashSet<>();
-    }
-    if (policy.actions == null || policy.actions.isEmpty()) {
-      trigger.actions.clear();
-    } else {
-      String[] actionsIn = policy.actions.split(";");
-      Set<TriggerAction> newActions = new HashSet<>();
-      for (String actionIn : actionsIn) {
-        if (actionIn.trim().isEmpty()) {
-          continue;
+    public FullTrigger(Policy policy, boolean generatePseudoId) {
+        this();
+        if (generatePseudoId) {
+            trigger.id = generateId();
+        } else if (policy.id != null) {
+            trigger.id = policy.id.toString();
         }
-        String actionName;
-        actionName = getActionName(actionIn);
+        trigger.name = policy.name;
+        trigger.description = policy.description;
+        trigger.enabled = policy.isEnabled;
+        var cond = new Condition();
+        cond.expression = policy.conditions;
+        conditions.add(cond);
+        storeActions(trigger, policy);
+    }
 
-        boolean found = false;
-        for (TriggerAction ta : trigger.actions) {
-          String taName = ta.actionPlugin;
-          if (taName.equals(actionName)) {
-            newActions.add(ta);
-            found = true;
-            break;
-          }
+    private void storeActions(Trigger trigger, Policy policy) {
+        if (policy.actions == null) {
+            return;
         }
-        if (!found) {
-          var ta = new TriggerAction();
-          ta.actionPlugin = actionName;
-          newActions.add(ta);
+
+        String[] actionsIn = policy.actions.split(";");
+        for (String actionIn : actionsIn) {
+            var ta = new TriggerAction();
+            if (actionIn.trim().isEmpty()) {
+                continue;
+            }
+            ta.actionPlugin = getActionName(actionIn);
+
+            trigger.actions.add(ta);
         }
-      }
-      trigger.actions.removeIf(ta -> !newActions.contains(ta));
-      trigger.actions.addAll(newActions);
     }
 
-    trigger.enabled = policy.isEnabled;
-    trigger.name = policy.name;
-    trigger.description = policy.description;
-
-    if (conditions.size()!=0) {
-      conditions.get(0).expression = policy.conditions;
-    }
-    else {
-      Condition condition = new Condition();
-      condition.expression = policy.conditions;
-      conditions.add(condition);
-    }
-  }
-
-  private String getActionName(String actionIn) {
-    String actionName = actionIn.toLowerCase();
-    if (actionName.contains(" ")) {
-      actionName = actionName.substring(0, actionName.indexOf(' '));
+    public FullTrigger(Policy policy) {
+        this(policy, false);
     }
 
-    if (!actionToTriggerActionMap.containsKey(actionName)) {
-      throw new IllegalArgumentException("Key " + actionName + " not found");
+    private static String generateId() {
+        return UUID.randomUUID().toString();
     }
-    actionName = actionToTriggerActionMap.get(actionName);
-    return actionName;
-  }
+
+    public void updateFromPolicy(Policy policy) {
+        if (trigger.actions == null) {
+            trigger.actions = new HashSet<>();
+        }
+        if (policy.actions == null || policy.actions.isEmpty()) {
+            trigger.actions.clear();
+        } else {
+            String[] actionsIn = policy.actions.split(";");
+            Set<TriggerAction> newActions = new HashSet<>();
+            for (String actionIn : actionsIn) {
+                if (actionIn.trim().isEmpty()) {
+                    continue;
+                }
+                String actionName;
+                actionName = getActionName(actionIn);
+
+                boolean found = false;
+                for (TriggerAction ta : trigger.actions) {
+                    String taName = ta.actionPlugin;
+                    if (taName.equals(actionName)) {
+                        newActions.add(ta);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    var ta = new TriggerAction();
+                    ta.actionPlugin = actionName;
+                    newActions.add(ta);
+                }
+            }
+            trigger.actions.removeIf(ta -> !newActions.contains(ta));
+            trigger.actions.addAll(newActions);
+        }
+
+        trigger.enabled = policy.isEnabled;
+        trigger.name = policy.name;
+        trigger.description = policy.description;
+
+        if (conditions.size() != 0) {
+            conditions.get(0).expression = policy.conditions;
+        } else {
+            Condition condition = new Condition();
+            condition.expression = policy.conditions;
+            conditions.add(condition);
+        }
+    }
+
+    private String getActionName(String actionIn) {
+        String actionName = actionIn.toLowerCase();
+        if (actionName.contains(" ")) {
+            actionName = actionName.substring(0, actionName.indexOf(' '));
+        }
+
+        if (!actionToTriggerActionMap.containsKey(actionName)) {
+            throw new IllegalArgumentException("Key " + actionName + " not found");
+        }
+        actionName = actionToTriggerActionMap.get(actionName);
+        return actionName;
+    }
 
 }

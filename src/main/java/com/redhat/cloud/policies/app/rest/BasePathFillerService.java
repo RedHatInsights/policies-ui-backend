@@ -25,17 +25,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-/**
- * @author hrupp
- */
 @Path("/")
 public class BasePathFillerService {
 
-  @Operation(summary = "Just a filler to have a defined return code for the base path")
-  @APIResponse(responseCode = "404", description = "There is no API functionality at this place")
-  @GET
-  @Consumes(MediaType.MEDIA_TYPE_WILDCARD)
-  public Response doReply() {
-    return Response.status(404,"There is nothing to see here. Move along").build();
-  }
+    @Operation(summary = "Just a filler to have a defined return code for the base path")
+    @APIResponse(responseCode = "404", description = "There is no API functionality at this place")
+    @GET
+    @Consumes(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response doReply() {
+        return Response.status(404, "There is nothing to see here. Move along").build();
+    }
 }

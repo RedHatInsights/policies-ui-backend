@@ -23,58 +23,54 @@ import java.util.List;
 
 import static com.redhat.cloud.policies.app.model.filter.Filter.Operator.LIKE;
 
-/**
- * @author hrupp
- */
 public class PolicyHistoryTagFilterHelper {
 
-  public static String getTagsFilterFromPager(Pager pager) {
-    StringBuilder sb = new StringBuilder();
-    Filter filter = pager.getFilter();
-    List<Filter.FilterItem> items = filter.getItems();
-    Iterator<Filter.FilterItem> iterator = items.iterator();
-    while(iterator.hasNext()) {
-      Filter.FilterItem item = iterator.next();
+    public static String getTagsFilterFromPager(Pager pager) {
+        StringBuilder sb = new StringBuilder();
+        Filter filter = pager.getFilter();
+        List<Filter.FilterItem> items = filter.getItems();
+        Iterator<Filter.FilterItem> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            Filter.FilterItem item = iterator.next();
 
-      switch (item.field) {
-        case "name":
-          sb.append("tags.display_name");
-          break;
-        case "id":
-          sb.append("tags.inventory_id");
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown filter field: " + item.field);
-      }
-      sb.append(' ');
-      switch (item.operator) {
-        case EQUAL:
-          sb.append('=');
-          break;
-        case LIKE:
-          sb.append("MATCHES");
-          break;
-        case NOT_EQUAL:
-          sb.append("!=");
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
-      }
-      sb.append(" '");
-      if (item.operator.equals(LIKE)) {
-        sb.append("*");
-      }
-      sb.append(item.value.toString().toLowerCase());
-      if (item.operator.equals(LIKE)) {
-        sb.append("*");
-      }
-      sb.append("'");
-      if (iterator.hasNext()) {
-        sb.append(" AND ");
-      }
+            switch (item.field) {
+                case "name":
+                    sb.append("tags.display_name");
+                    break;
+                case "id":
+                    sb.append("tags.inventory_id");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown filter field: " + item.field);
+            }
+            sb.append(' ');
+            switch (item.operator) {
+                case EQUAL:
+                    sb.append('=');
+                    break;
+                case LIKE:
+                    sb.append("MATCHES");
+                    break;
+                case NOT_EQUAL:
+                    sb.append("!=");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown operator: " + item.operator.toString());
+            }
+            sb.append(" '");
+            if (item.operator.equals(LIKE)) {
+                sb.append("*");
+            }
+            sb.append(item.value.toString().toLowerCase());
+            if (item.operator.equals(LIKE)) {
+                sb.append("*");
+            }
+            sb.append("'");
+            if (iterator.hasNext()) {
+                sb.append(" AND ");
+            }
+        }
+        return sb.length() == 0 ? null : sb.toString();
     }
-
-    return sb.length() == 0 ? null : sb.toString();
-  }
 
 }

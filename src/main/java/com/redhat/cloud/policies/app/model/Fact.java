@@ -22,12 +22,11 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-/**
- * @author hrupp
- */
 @Entity
 public class Fact extends PanacheEntity {
+
     public String name;
+
     @Enumerated(EnumType.STRING)
     public FactType type;
 

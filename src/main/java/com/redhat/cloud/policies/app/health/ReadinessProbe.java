@@ -24,14 +24,14 @@ import org.eclipse.microprofile.health.Readiness;
 
 /**
  * Health check that determines if we should receive requests.
- * @author hrupp
  */
 @ApplicationScoped
 @Readiness
 public class ReadinessProbe extends AbstractHealthCheck implements HealthCheck {
-  @Override
-  public HealthCheckResponse call() {
-    HealthCheckResponseBuilder builder = getBuilder("ready");
-    return builder.build();
-  }
+
+    @Override
+    public HealthCheckResponse call() {
+        HealthCheckResponseBuilder builder = getBuilder("ready");
+        return builder.build();
+    }
 }

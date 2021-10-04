@@ -25,15 +25,14 @@ import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Health check that defines if we are up or having issues.
- * @author hrupp
  */
 @ApplicationScoped
 @Liveness
 public class LivenessProbe extends AbstractHealthCheck implements HealthCheck {
 
-  @Override
-  public HealthCheckResponse call() {
-    HealthCheckResponseBuilder builder = getBuilder("live");
-    return builder.build();
-  }
+    @Override
+    public HealthCheckResponse call() {
+        HealthCheckResponseBuilder builder = getBuilder("live");
+        return builder.build();
+    }
 }

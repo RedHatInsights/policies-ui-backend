@@ -18,24 +18,23 @@ package com.redhat.cloud.policies.app.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-/**
- * @author hrupp
- */
 @Schema(description = "Reason for failure")
 public class Msg {
-  public String msg;
 
-  protected Msg() {};
+    public String msg;
 
-  public Msg(String msg) {
-    this.msg = msg;
-  }
+    protected Msg() {
+    }
 
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder("Msg{");
-    sb.append("msg='").append(msg).append('\'');
-    sb.append('}');
-    return sb.toString();
-  }
+    public Msg(String msg) {
+        this.msg = msg;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Msg{");
+        sb.append("msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

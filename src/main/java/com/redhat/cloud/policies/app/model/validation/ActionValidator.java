@@ -23,28 +23,28 @@ import javax.validation.ConstraintValidatorContext;
 
 /**
  * Do the validation if passed actions are good or not.
- * @author hrupp
  */
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
-   List<String> validActions = new ArrayList();
+    private final List<String> validActions = new ArrayList<>();
 
-   public void initialize(ValidActionS constraint) {
-      validActions.add("notification");
-   }
+    public void initialize(ValidActionS constraint) {
+        validActions.add("notification");
+    }
 
-   public boolean isValid(String input, ConstraintValidatorContext context) {
-      if (input == null || input.isEmpty()) {
-         return true;
-      }
-      String[] actions = input.split(";");
-      int i = 0;
-      for (String action: actions) {
-         String a = action.toLowerCase().strip();
-         if (a.isEmpty() || validActions.contains(a)) {
-            i++;
-         }
-      }
-      return i == actions.length;
-   }
+    @Override
+    public boolean isValid(String input, ConstraintValidatorContext context) {
+        if (input == null || input.isEmpty()) {
+            return true;
+        }
+        String[] actions = input.split(";");
+        int i = 0;
+        for (String action : actions) {
+            String a = action.toLowerCase().strip();
+            if (a.isEmpty() || validActions.contains(a)) {
+                i++;
+            }
+        }
+        return i == actions.length;
+    }
 }

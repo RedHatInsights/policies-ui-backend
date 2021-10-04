@@ -21,7 +21,6 @@ import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Provider for UUIDs
- * @author hrupp
  */
 @ApplicationScoped
 public class UUIDHelperBean {

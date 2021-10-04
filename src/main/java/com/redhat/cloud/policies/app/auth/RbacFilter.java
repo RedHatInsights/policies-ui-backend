@@ -35,75 +35,72 @@ import javax.ws.rs.ext.Provider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-/**
- * @author hrupp
- */
 @Provider
-@Priority(Priorities.HEADER_DECORATOR +1)
+@Priority(Priorities.HEADER_DECORATOR + 1)
 public class RbacFilter implements ContainerRequestFilter {
 
-  private final Logger log = Logger.getLogger("RbacFilter");
+    private final Logger log = Logger.getLogger("RbacFilter");
 
-  @Inject
-  Tracer tracer;
+    @Inject
+    Tracer tracer;
 
-  @Inject
-  @RestClient
-  RbacServer rbac;
+    @Inject
+    @RestClient
+    RbacServer rbac;
 
-  @Inject
-  RhIdPrincipal user;
+    @Inject
+    RhIdPrincipal user;
 
-  @ConfigProperty(name = "warn.rbac.slow", defaultValue = "true")
-  Instance<Boolean> warnSlowRbac;
+    @ConfigProperty(name = "warn.rbac.slow", defaultValue = "true")
+    Instance<Boolean> warnSlowRbac;
 
-  @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
-    RbacRaw result;
+    @Override
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        RbacRaw result;
 
-    String path = requestContext.getUriInfo().getPath(true);
-    if (path.startsWith("/admin") || path.equals("/api/policies/v1.0/status")) {
-      return;
+        String path = requestContext.getUriInfo().getPath(true);
+        if (path.startsWith("/admin") || path.equals("/api/policies/v1.0/status")) {
+            return;
+        }
+
+        long t1 = System.currentTimeMillis();
+        Span span = tracer.buildSpan("getRBac").start();
+        try (Scope ignored = tracer.scopeManager().activate(span)) {
+            result = getRbacInfo(user.getRawRhIdHeader());
+        } catch (Throwable e) {
+            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+            return;
+        } finally {
+            long t2 = System.currentTimeMillis();
+            if (warnSlowRbac.get() && (t2 - t1) > 500) {
+                log.warning("Call to RBAC took " + (t2 - t1) + "ms");
+            }
+            span.finish();
+        }
+
+        final String policiesPath = "policies";
+
+        user.setRbac(result.canRead(policiesPath), result.canWrite(policiesPath));
+        RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
+        userPrincipal.setRbac(result.canRead(policiesPath), result.canWrite(policiesPath));
     }
 
-    long t1 = System.currentTimeMillis();
-    Span span = tracer.buildSpan("getRBac").start();
-    try (Scope ignored = tracer.scopeManager().activate(span)){
-      result = getRbacInfo(user.getRawRhIdHeader());
-    } catch (Throwable e) {
-      requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-      return;
-    } finally {
-      long t2 = System.currentTimeMillis();
-      if (warnSlowRbac.get() && (t2 - t1) > 500) {
-        log.warning("Call to RBAC took " + (t2 - t1) + "ms");
-      }
-      span.finish();
+    /*
+     * This code is on purpose in a separate method and not inside the main
+     * filter method so that the caching annotation can be applied. This speeds
+     * up the user experience, as results are returned from the cache.
+     * TTL of the cache items is defined in application.properties
+     * quarkus.cache.caffeine.rbac-cache.expire-after-write
+     *
+     * Also it is important to Exceptions for the remote bubble out the method,
+     * as if an Exception is thrown, the cache will not store the result.
+     * Catching and returning null would end up in the next call directly
+     * return null from the cache without retrying the remote call.
+     */
+    @CacheResult(cacheName = "rbac-cache")
+    RbacRaw getRbacInfo(String xrhidHeader) {
+        RbacRaw result;
+        result = rbac.getRbacInfo("policies", xrhidHeader);
+        return result;
     }
-
-    final String policiesPath = "policies";
-
-    user.setRbac(result.canRead(policiesPath),result.canWrite(policiesPath));
-    RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
-    userPrincipal.setRbac(result.canRead(policiesPath),result.canWrite(policiesPath));
-  }
-
-  /*
-   * This code is on purpose in a separate method and not inside the main
-   * filter method so that the caching annotation can be applied. This speeds
-   * up the user experience, as results are returned from the cache.
-   * TTL of the cache items is defined in application.properties
-   * quarkus.cache.caffeine.rbac-cache.expire-after-write
-   *
-   * Also it is important to Exceptions for the remote bubble out the method,
-   * as if an Exception is thrown, the cache will not store the result.
-   * Catching and returning null would end up in the next call directly
-   * return null from the cache without retrying the remote call.
-   */
-  @CacheResult(cacheName = "rbac-cache")
-  RbacRaw getRbacInfo(String xrhidHeader)  {
-    RbacRaw result;
-    result = rbac.getRbacInfo("policies", xrhidHeader);
-    return result;
-  }
 }

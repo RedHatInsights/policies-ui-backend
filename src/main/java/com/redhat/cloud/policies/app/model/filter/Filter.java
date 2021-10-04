@@ -5,25 +5,15 @@ import io.quarkus.panache.common.Parameters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
 
 public class Filter {
 
     private final Parameters parameters = new Parameters();
-    private StringBuilder query = new StringBuilder();
+    private final StringBuilder query = new StringBuilder();
     private final List<FilterItem> items = new ArrayList<>();
 
     public Filter() {
-
-    }
-
-    private Filter(Map<String, Object> map, StringBuilder query) {
-        for (String key : map.keySet()) {
-            this.parameters.and(key, map.get(key));
-        }
-        this.query = query;
     }
 
     public Filter(Filter in) {
@@ -38,8 +28,7 @@ public class Filter {
         return this.query.toString();
     }
 
-    public List<FilterItem> getItems()
-    {
+    public List<FilterItem> getItems() {
         return this.items;
     }
 

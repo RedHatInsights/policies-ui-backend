@@ -34,55 +34,51 @@ import java.util.Map;
  * This is then put into the StuffHolder from
  * where both the Gauge below and the Status rest
  * endpoint can fetch it.
- * @author hrupp
  */
 @ApplicationScoped
 public class ScheduledStatusProducer {
 
-  public static final String DUMMY = "dummy";
+    public static final String DUMMY = "dummy";
 
-  @Inject
-  @RestClient
-  PolicyEngine engine;
+    @Inject
+    @RestClient
+    PolicyEngine engine;
 
-  //  // Quarkus only activates this after the first REST-call to any method in this class
-  @Gauge(name="status_isDegraded", unit = MetricUnits.NONE, absolute = true,
-      description = "Returns 0 if good, value > 0 for number of entries in the status message")
-  int isDegraded() {
-    return StuffHolder.getInstance().getStatusInfo().size();
-  }
+    //  // Quarkus only activates this after the first REST-call to any method in this class
+    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
+            description = "Returns 0 if good, value > 0 for number of entries in the status message")
+    int isDegraded() {
+        return StuffHolder.getInstance().getStatusInfo().size();
+    }
 
-  @Scheduled(every = "10s")
-  void gather() {
+    @Scheduled(every = "10s")
+    void gather() {
+        Map<String, String> issues;
+        issues = new HashMap<>();
 
-      Map<String, String> issues;
-      issues = new HashMap<>();
+        // Admin has used the endpoint to signal degraded status
+        boolean degraded = StuffHolder.getInstance().isDegraded();
+        if (degraded) {
+            issues.put("admin-degraded", "true");
+        }
 
-      // Admin has used the endpoint to signal degraded status
-      boolean degraded = StuffHolder.getInstance().isDegraded();
-      if (degraded) {
-        issues.put("admin-degraded", "true");
-      }
+        // Now the normal checks
+        try {
+            Policy.findByName(DUMMY, "-dummy-");
+        } catch (Exception e) {
+            issues.put("backend-db", e.getMessage());
+        }
 
-      // Now the normal checks
-      try {
-        Policy.findByName(DUMMY, "-dummy-");
-      }
-      catch (Exception e) {
-        issues.put("backend-db", e.getMessage());
-      }
+        try {
+            engine.findTriggersById(DUMMY, DUMMY);
+        } catch (Exception e) {
+            issues.put("engine", e.getMessage());
+        }
 
-      try {
-        engine.findTriggersById(DUMMY, DUMMY);
-      }
-      catch (Exception e) {
-        issues.put("engine", e.getMessage());
-      }
+        StuffHolder.getInstance().setStatusInfo(issues);
+    }
 
-      StuffHolder.getInstance().setStatusInfo(issues);
-  }
-
-  public void update() {
-    gather();
-  }
+    public void update() {
+        gather();
+    }
 }

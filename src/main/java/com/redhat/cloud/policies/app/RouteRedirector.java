@@ -25,40 +25,40 @@ import java.util.logging.Logger;
 /**
  * Redirect routes with only the major version
  * to major.minor ones.
- * @author hrupp
  */
 @SuppressWarnings("unused")
 public class RouteRedirector {
 
-  private static final String API_POLICIES_V_1 = "/api/policies/v1/";
-  private static final String API_POLICIES_V_1_0 = "/api/policies/v1.0/";
+    private static final String API_POLICIES_V_1 = "/api/policies/v1/";
+    private static final String API_POLICIES_V_1_0 = "/api/policies/v1.0/";
 
-  Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  /**
-   * If the requested route is the one with major version only,
-   * we rewrite it on the fly.
-   * We need to take the URI from the underlying http request, as the
-   * normalised path does not contain query parameters.
-   * @param rc RoutingContext from vert.x
-   */
-  @RouteFilter(400)
-  void myRedirector(RoutingContext rc) {
-    String uri = rc.request().uri();
-    if (log.isLoggable(Level.FINER)) {
-      uri = uri.replaceAll("[\n|\r|\t]", "_");
-      log.finer("Incoming uri: " + uri);
+    /**
+     * If the requested route is the one with major version only,
+     * we rewrite it on the fly.
+     * We need to take the URI from the underlying http request, as the
+     * normalised path does not contain query parameters.
+     *
+     * @param rc RoutingContext from vert.x
+     */
+    @RouteFilter(400)
+    void myRedirector(RoutingContext rc) {
+        String uri = rc.request().uri();
+        if (log.isLoggable(Level.FINER)) {
+            uri = uri.replaceAll("[\n|\r|\t]", "_");
+            log.finer("Incoming uri: " + uri);
+        }
+        if (uri.startsWith(API_POLICIES_V_1)) {
+            String remain = uri.substring(API_POLICIES_V_1.length());
+            if (log.isLoggable(Level.FINER)) {
+                remain = remain.replaceAll("[\n|\r|\t]", "_");
+                log.finer("Rerouting to :" + API_POLICIES_V_1_0 + remain);
+            }
+
+            rc.reroute(API_POLICIES_V_1_0 + remain);
+            return;
+        }
+        rc.next();
     }
-    if (uri.startsWith(API_POLICIES_V_1)) {
-      String remain = uri.substring(API_POLICIES_V_1.length());
-      if (log.isLoggable(Level.FINER)) {
-        remain = remain.replaceAll("[\n|\r|\t]", "_");
-        log.finer("Rerouting to :" + API_POLICIES_V_1_0 +remain);
-      }
-
-      rc.reroute(API_POLICIES_V_1_0 +remain);
-      return;
-    }
-    rc.next();
-  }
 }

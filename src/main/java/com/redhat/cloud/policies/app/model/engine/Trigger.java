@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author hrupp
- */
 public class Trigger {
+
     public String id;
     public String name;
     public String description;
@@ -33,7 +31,7 @@ public class Trigger {
     public boolean autoResolveAlerts;
     public String autoResolveMatch;
     public String firingMatch;
-    public List<Map<String,Object>> lifecycle;
+    public List<Map<String, Object>> lifecycle;
 
     public Trigger() {
         // Needed for (de)Serialization purposes
