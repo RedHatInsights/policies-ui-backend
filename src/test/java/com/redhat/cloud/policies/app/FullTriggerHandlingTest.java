@@ -19,8 +19,11 @@ package com.redhat.cloud.policies.app;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Some testing around FullTrigger setup and updating
@@ -33,18 +36,18 @@ public class FullTriggerHandlingTest {
 
         FullTrigger ft = new FullTrigger(p);
 
-        Assert.assertFalse(ft.trigger.enabled);
-        Assert.assertEquals("hula", ft.trigger.name);
+        assertFalse(ft.trigger.enabled);
+        assertEquals("hula", ft.trigger.name);
 
-        Assert.assertEquals(1, ft.conditions.size());
-        Assert.assertEquals("bla", ft.conditions.get(0).expression);
+        assertEquals(1, ft.conditions.size());
+        assertEquals("bla", ft.conditions.get(0).expression);
 
-        Assert.assertEquals(1, ft.trigger.actions.size());
-        Assert.assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
+        assertEquals(1, ft.trigger.actions.size());
+        assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
 
-        Assert.assertEquals("hula", ft.trigger.name);
+        assertEquals("hula", ft.trigger.name);
 
-        Assert.assertEquals("some text", ft.trigger.description);
+        assertEquals("some text", ft.trigger.description);
     }
 
     @NotNull
@@ -67,8 +70,8 @@ public class FullTriggerHandlingTest {
         p.actions = "notification";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(1, ft.trigger.actions.size());
-        Assert.assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
+        assertEquals(1, ft.trigger.actions.size());
+        assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
@@ -81,7 +84,7 @@ public class FullTriggerHandlingTest {
         p.actions = null;
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(0, ft.trigger.actions.size());
+        assertEquals(0, ft.trigger.actions.size());
     }
 
     @Test
@@ -93,9 +96,8 @@ public class FullTriggerHandlingTest {
         p.conditions = "blabla";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(1, ft.conditions.size());
-        Assert.assertEquals("blabla", ft.conditions.get(0).expression);
-
+        assertEquals(1, ft.conditions.size());
+        assertEquals("blabla", ft.conditions.get(0).expression);
     }
 
     @Test
@@ -107,9 +109,8 @@ public class FullTriggerHandlingTest {
         p.isEnabled = true;
         ft.updateFromPolicy(p);
 
-        Assert.assertTrue(ft.trigger.enabled);
+        assertTrue(ft.trigger.enabled);
     }
-
 
     @Test
     void testActionWithParam() {
@@ -118,7 +119,7 @@ public class FullTriggerHandlingTest {
 
         FullTrigger ft = new FullTrigger(p);
 
-        Assert.assertEquals(1, ft.trigger.actions.size());
+        assertEquals(1, ft.trigger.actions.size());
     }
 
     @Test
@@ -130,7 +131,7 @@ public class FullTriggerHandlingTest {
         p.name = p.name + "-2";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals("hula-2", ft.trigger.name);
+        assertEquals("hula-2", ft.trigger.name);
     }
 
     @Test
@@ -142,7 +143,6 @@ public class FullTriggerHandlingTest {
         p.description = p.description + "-2";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals("some text-2", ft.trigger.description);
+        assertEquals("some text-2", ft.trigger.description);
     }
-
 }

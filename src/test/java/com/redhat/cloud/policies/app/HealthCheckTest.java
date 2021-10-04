@@ -23,7 +23,7 @@ import static io.restassured.RestAssured.when;
 import static io.restassured.RestAssured.with;
 
 @QuarkusTest
-public class HealthCheckTest {
+class HealthCheckTest {
 
     @Test
     void testNormalHealth() {
@@ -35,7 +35,6 @@ public class HealthCheckTest {
 
     @Test
     void testAdminDown() {
-
         with()
                 .queryParam("status", "admin-down")
                 .accept("application/json")
@@ -60,6 +59,5 @@ public class HealthCheckTest {
                     .then()
                     .statusCode(200);
         }
-
     }
 }

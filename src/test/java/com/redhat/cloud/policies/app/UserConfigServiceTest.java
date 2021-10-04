@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -24,7 +25,6 @@ import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.Header;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Tag;
@@ -37,7 +37,7 @@ import org.mockserver.model.JsonBody;
 @QuarkusTestResource(TestLifecycleManager.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Tag("integration")
-public class UserConfigServiceTest extends AbstractITest {
+class UserConfigServiceTest extends AbstractITest {
 
     private static final String PREFERENCE_URL = API_BASE_V1_0 + "/user-config/preferences";
 
@@ -46,28 +46,28 @@ public class UserConfigServiceTest extends AbstractITest {
         setupRhId();
     }
 
-    @Test()
-    public void passNotificationResponse() {
+    @Test
+    void passNotificationResponse() {
         try {
             mockWithValue(false, false);
             UserPreferences preferences = getPreferences(authHeader);
-            Assert.assertEquals(false, preferences.instant_email);
-            Assert.assertEquals(false, preferences.daily_email);
+            assertFalse(preferences.instant_email);
+            assertFalse(preferences.daily_email);
 
             mockWithValue(true, false);
             preferences = getPreferences(authHeader);
-            Assert.assertEquals(true, preferences.instant_email);
-            Assert.assertEquals(false, preferences.daily_email);
+            assertTrue(preferences.instant_email);
+            assertFalse(preferences.daily_email);
 
             mockWithValue(true, true);
             preferences = getPreferences(authHeader);
-            Assert.assertEquals(true, preferences.instant_email);
-            Assert.assertEquals(true, preferences.daily_email);
+            assertTrue(preferences.instant_email);
+            assertTrue(preferences.daily_email);
 
             mockWithValue(false, true);
             preferences = getPreferences(authHeader);
-            Assert.assertEquals(false, preferences.instant_email);
-            Assert.assertEquals(true, preferences.daily_email);
+            assertFalse(preferences.instant_email);
+            assertTrue(preferences.daily_email);
 
         } finally {
             clearMockValue();

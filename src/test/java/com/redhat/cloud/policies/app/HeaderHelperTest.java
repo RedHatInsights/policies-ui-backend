@@ -16,80 +16,80 @@
  */
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.auth.HeaderHelper;
-import com.redhat.cloud.policies.app.auth.XRhIdentity;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import com.redhat.cloud.policies.app.auth.HeaderHelper;
+import com.redhat.cloud.policies.app.auth.XRhIdentity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-public class HeaderHelperTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+class HeaderHelperTest {
 
     private static final String RHID = "x-rh-identity";
 
     @Test
-    public void testNoHeader() {
+    void testNoHeader() {
         Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(null);
-        Assert.assertFalse(user.isPresent());
+        assertFalse(user.isPresent());
     }
 
     @Test
-    public void testSimpleHeaderNoRID() {
+    void testSimpleHeaderNoRID() {
         MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         HttpHeaders headers = new ResteasyHttpHeaders(map);
 
         Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-        Assert.assertFalse(user.isPresent());
-
+        assertFalse(user.isPresent());
     }
 
     @Test
-    public void testSimpleHeaderBadRID() {
+    void testSimpleHeaderBadRID() {
         MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         map.putSingle(RHID, "frobnitz");
         HttpHeaders headers = new ResteasyHttpHeaders(map);
 
         Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-        Assert.assertFalse(user.isPresent());
-
+        assertFalse(user.isPresent());
     }
 
     @Test
-    public void testSimpleHeaderGoodRID() {
+    void testSimpleHeaderGoodRID() {
         String rhid = getStringFromFile("rhid.txt", true);
 
         Optional<XRhIdentity> user = HeaderHelper.getRhIdFromString(rhid);
-        Assert.assertTrue(user.isPresent());
-        Assert.assertEquals("Username does not match", "joe-doe-user", user.get().getUsername());
-        Assert.assertEquals("Account does not match", "1234", user.get().identity.accountNumber);
-
+        assertTrue(user.isPresent());
+        assertEquals("joe-doe-user", user.get().getUsername(), "Username does not match");
+        assertEquals("1234", user.get().identity.accountNumber, "Account does not match");
     }
 
     @Test
-    public void testSimpleHeaderGoodRID2() {
+    void testSimpleHeaderGoodRID2() {
         MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         String rhid = getStringFromFile("rhid.txt", true);
         map.putSingle(RHID, rhid);
         HttpHeaders headers = new ResteasyHttpHeaders(map);
 
         Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-        Assert.assertTrue(user.isPresent());
-        Assert.assertEquals("Username does not match", "joe-doe-user", user.get().getUsername());
-        Assert.assertEquals("Account does not match", "1234", user.get().identity.accountNumber);
-
+        assertTrue(user.isPresent());
+        assertEquals("joe-doe-user", user.get().getUsername(), "Username does not match");
+        assertEquals("1234", user.get().identity.accountNumber, "Account does not match");
     }
 
     @NotNull
-    public static String getStringFromFile(String filename, boolean removeTrailingNewline) {
+    static String getStringFromFile(String filename, boolean removeTrailingNewline) {
         String rhid = "";
         try (FileInputStream fis = new FileInputStream("src/test/resources/" + filename)) {
             Reader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
@@ -106,7 +106,7 @@ public class HeaderHelperTest {
                 rhid = rhid.substring(0, rhid.indexOf('\n'));
             }
         } catch (IOException ioe) {
-            Assert.fail("File reading failed: " + ioe.getMessage());
+            fail("File reading failed: " + ioe.getMessage());
         }
         return rhid;
     }

@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
-public class PoliciesHistoryCleanerTest {
+class PoliciesHistoryCleanerTest {
 
     @Inject
     Session session;
@@ -29,14 +29,14 @@ public class PoliciesHistoryCleanerTest {
 
     @BeforeEach
     @Transactional
-    public void beforeEach() {
+    void beforeEach() {
         session.createQuery("DELETE FROM PoliciesHistoryEntry")
                 .executeUpdate();
     }
 
     @Test
     @TestTransaction
-    public void testWithDefaultConfiguration() {
+    void testWithDefaultConfiguration() {
         createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)));
         createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)));
         assertCount(2L);
@@ -46,7 +46,7 @@ public class PoliciesHistoryCleanerTest {
 
     @Test
     @TestTransaction
-    public void testWithCustomConfiguration() {
+    void testWithCustomConfiguration() {
         System.setProperty(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, "30m");
         createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)));
         createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)));

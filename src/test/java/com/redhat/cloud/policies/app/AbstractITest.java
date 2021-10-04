@@ -16,22 +16,22 @@
  */
 package com.redhat.cloud.policies.app;
 
-
+import java.util.Map;
 import io.restassured.http.Header;
-import org.junit.Assert;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockserver.client.MockServerClient;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.util.Map;
+import org.junit.jupiter.api.BeforeAll;
+import org.mockserver.client.MockServerClient;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test base for a few common things.
  * The heavy lifting of mock-setup is done in the {@link TestLifecycleManager}
  */
-public abstract class AbstractITest {
+abstract class AbstractITest {
 
     static Header authHeader;       // User with access rights
     static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
@@ -40,6 +40,7 @@ public abstract class AbstractITest {
     static final String API_BASE_V1_0 = "/api/policies/v1.0";
     static final String API_BASE_V1 = "/api/policies/v1";
     public MockServerClient mockServerClient;
+
     @Inject
     EntityManager entityManager;
 
@@ -54,17 +55,16 @@ public abstract class AbstractITest {
         authHeaderNoAccount = new Header("x-rh-identity", rhid);
     }
 
-    protected void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
+    void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
         String url = links.get(rel);
-        Assert.assertNotNull("Rel [" + rel + "] not found", url);
+        assertNotNull(url, "Rel [" + rel + "] not found");
         String tmp = String.format("limit=%d&offset=%d", limit, offset);
-        Assert.assertTrue("Url for rel [" + rel + "] should end in [" + tmp + "], but was [" + url + "]", url.endsWith(tmp));
+        assertTrue(url.endsWith(tmp), "Url for rel [" + rel + "] should end in [" + tmp + "], but was [" + url + "]");
     }
 
-    protected long countPoliciesInDB() {
+    long countPoliciesInDB() {
         Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
         q.setParameter("cid", "1234");
-        long count = (long) q.getSingleResult();
-        return count;
+        return (long) q.getSingleResult();
     }
 }

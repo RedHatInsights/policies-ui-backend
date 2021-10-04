@@ -11,7 +11,7 @@ import static io.restassured.http.ContentType.JSON;
 import static io.restassured.http.ContentType.TEXT;
 
 @QuarkusTest
-public class NonApplicationRootPathTest {
+class NonApplicationRootPathTest {
 
     @BeforeAll
     static void beforeAll() {
