@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
 public class Filter {
 
     private final Parameters parameters = new Parameters();
@@ -38,8 +37,7 @@ public class Filter {
         return this.query.toString();
     }
 
-    public List<FilterItem> getItems()
-    {
+    public List<FilterItem> getItems() {
         return this.items;
     }
 

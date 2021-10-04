@@ -20,23 +20,19 @@ import com.redhat.cloud.policies.app.StuffHolder;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 
-/**
- * @author hrupp
- */
 public abstract class AbstractHealthCheck {
 
-  HealthCheckResponseBuilder getBuilder(String name) {
-    boolean degraded = StuffHolder.getInstance().isAdminDown();
+    HealthCheckResponseBuilder getBuilder(String name) {
+        boolean degraded = StuffHolder.getInstance().isAdminDown();
 
-    HealthCheckResponseBuilder builder = HealthCheckResponse.named(name);
+        HealthCheckResponseBuilder builder = HealthCheckResponse.named(name);
 
-    if (degraded) {
-      builder.withData("status","admin-down");
-      builder.down();
+        if (degraded) {
+            builder.withData("status", "admin-down");
+            builder.down();
+        } else {
+            builder.up();
+        }
+        return builder;
     }
-    else {
-      builder.up();
-    }
-    return builder;
-  }
 }

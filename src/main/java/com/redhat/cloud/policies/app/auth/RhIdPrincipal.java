@@ -20,52 +20,52 @@ import java.security.Principal;
 
 /**
  * Simple implementation of {@link Principal}
- * @author hrupp
  */
 public class RhIdPrincipal implements Principal {
 
-  private String name;
-  private String account;
-  private boolean canReadPolicies;
-  private boolean canWritePolicies;
-  private String rawRhId;
+    private String name;
+    private String account;
+    private boolean canReadPolicies;
+    private boolean canWritePolicies;
+    private String rawRhId;
 
-  public RhIdPrincipal() {
-  }
+    public RhIdPrincipal() {
+    }
 
-  public RhIdPrincipal(String name, String account) {
-    this.name = name;
-    this.account = account;
-  }
+    public RhIdPrincipal(String name, String account) {
+        this.name = name;
+        this.account = account;
+    }
 
-  void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
+    void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
 
-    this.canReadPolicies = canReadPolicies;
-    this.canWritePolicies = canWritePolicies;
-  }
-  @Override
-  public String getName() {
-    return name;
-  }
+        this.canReadPolicies = canReadPolicies;
+        this.canWritePolicies = canWritePolicies;
+    }
 
-  public String getAccount() {
-    return account;
-  }
+    @Override
+    public String getName() {
+        return name;
+    }
 
-  public boolean canReadPolicies() {
-    return canReadPolicies;
-  }
+    public String getAccount() {
+        return account;
+    }
 
-  public boolean canWritePolicies() {
-    return canWritePolicies;
-  }
+    public boolean canReadPolicies() {
+        return canReadPolicies;
+    }
+
+    public boolean canWritePolicies() {
+        return canWritePolicies;
+    }
 
 
-  public void setRawRhIdHeader(String rawRhId) {
-    this.rawRhId = rawRhId;
-  }
+    public void setRawRhIdHeader(String rawRhId) {
+        this.rawRhId = rawRhId;
+    }
 
-  public String getRawRhIdHeader() {
-    return rawRhId;
-  }
+    public String getRawRhIdHeader() {
+        return rawRhId;
+    }
 }

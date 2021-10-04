@@ -98,20 +98,19 @@ public class PagingUtils {
                 }
                 pageBuilder.addSort(column, direction);
             }
-        }
-        else {
+        } else {
             // default sort is by mtime descending, so that newest end up on top
             Sort.Direction direction = Sort.Direction.Descending;
 
             // check if the user specified a sort order (but no column, so mtime is meant)
-            if (directions!=null && directions.size()>0) {
+            if (directions != null && directions.size() > 0) {
                 direction = getDirection(directions.get(0), "mtime");
             }
 
-            pageBuilder.addSort("mtime",direction);
+            pageBuilder.addSort("mtime", direction);
         }
 
-        for (String key: queryParams.keySet()) {
+        for (String key : queryParams.keySet()) {
             Matcher filterMatcher = FILTER_PATTERN.matcher(key);
             if (filterMatcher.find()) {
                 String column = filterMatcher.group(1);
@@ -119,11 +118,10 @@ public class PagingUtils {
                 Filter.Operator operator;
                 if (column.equals("is_enabled")) {
                     operator = Filter.Operator.BOOLEAN_IS;
-                    if (value==null || value.isEmpty()) {
+                    if (value == null || value.isEmpty()) {
                         value = "true";
                     }
-                }
-                else {
+                } else {
                     String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
                     operator = Filter.Operator.EQUAL;
                     if (operatorString != null) {
@@ -144,13 +142,14 @@ public class PagingUtils {
      * Obtain the direction from the passed direction string. This string is
      * case insensitive and only the first 3 chars count. So 'asc' and 'ascending'
      * and 'Ascending' (or 'des*' will be ok)
+     *
      * @param directionString Incoming direction string.
-     * @param column Column name for display purposes in case the passed direction is not valid
+     * @param column          Column name for display purposes in case the passed direction is not valid
      * @return Direction
      */
     static Sort.Direction getDirection(String directionString, String column) {
         Sort.Direction direction;
-        switch(directionString.toLowerCase().substring(0,3)) {
+        switch (directionString.toLowerCase().substring(0, 3)) {
             case "asc":
                 direction = Sort.Direction.Ascending;
                 break;
@@ -163,7 +162,7 @@ public class PagingUtils {
         return direction;
     }
 
-    public static <T>ResponseBuilder responseBuilder(Page<T> page) {
+    public static <T> ResponseBuilder responseBuilder(Page<T> page) {
         ResponseBuilder builder;
 
         if (page.isEmpty()) {
@@ -171,7 +170,7 @@ public class PagingUtils {
         } else {
             builder = Response.ok(new PagedResponse<>(page));
             EntityTag etag = new EntityTag(String.valueOf(page.hashCode()));
-            builder.header("ETag",etag);
+            builder.header("ETag", etag);
             builder.header("TotalCount", Long.toString(page.getTotalCount()));
         }
 
@@ -182,17 +181,17 @@ public class PagingUtils {
      * Provide a paged response in the desired format.
      * Links need to look like:<br/>
      *
-     <pre>
-    "first": "/api/myapp/v1/collection/?limit=5&offset=0",
-    "last": "/api/myapp/v1/collection/?limit=5&offset=10",
-    "next": "/api/myapp/v1/collection/?limit=5&offset=10",
-    "prev": "/api/myapp/v1/collection/?limit=5&offset=0"
-     </pre>
+     * <pre>
+     * "first": "/api/myapp/v1/collection/?limit=5&offset=0",
+     * "last": "/api/myapp/v1/collection/?limit=5&offset=10",
+     * "next": "/api/myapp/v1/collection/?limit=5&offset=10",
+     * "prev": "/api/myapp/v1/collection/?limit=5&offset=0"
+     * </pre>
      */
     public static class PagedResponse<T> {
-      public Meta meta;
-      public Map<String,String> links = new HashMap<>(3);
-      public List<T> data = new ArrayList<>();
+        public Meta meta;
+        public Map<String, String> links = new HashMap<>(3);
+        public List<T> data = new ArrayList<>();
 
         public PagedResponse(Page<T> page) {
             meta = new Meta(page.getTotalCount());
@@ -222,7 +221,7 @@ public class PagingUtils {
                 }
                 if (pager.getOffset() > 0) {
                     links.put("prev", String.format(format, location, limit,
-                            max(0,pager.getOffset() - limit)));
+                            max(0, pager.getOffset() - limit)));
                 }
             }
         }

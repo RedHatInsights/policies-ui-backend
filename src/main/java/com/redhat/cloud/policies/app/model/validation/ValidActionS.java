@@ -21,9 +21,6 @@ import java.lang.annotation.RetentionPolicy;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-/**
- * @author hrupp
- */
 @Constraint(validatedBy = ActionValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidActionS {

@@ -21,25 +21,24 @@ import javax.persistence.Column;
 
 /**
  * Stripped down policy object for testing purposes.
- * @author hrupp
  */
 public class TestPolicy {
 
-  public UUID id;
-  public String customerid;
+    public UUID id;
+    public String customerid;
 
-  public String name;
-  public String description;
-  @Column(name = "is_enabled")
-  public boolean isEnabled;
+    public String name;
+    public String description;
+    @Column(name = "is_enabled")
+    public boolean isEnabled;
 
-  public String conditions;
-  public String actions;
+    public String conditions;
+    public String actions;
 
-  @Column(name = "mtime")
-  public String mtime;
+    @Column(name = "mtime")
+    public String mtime;
 
-  public String ctime;
+    public String ctime;
 
-  public Long lastTriggered;
+    public Long lastTriggered;
 }

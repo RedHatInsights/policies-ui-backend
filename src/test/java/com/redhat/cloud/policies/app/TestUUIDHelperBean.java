@@ -25,7 +25,6 @@ import javax.enterprise.inject.Alternative;
 /**
  * Provider for UUIDs for Tests. A test can
  * provide a known uuid and later check on it.
- * @author hrupp
  */
 @ApplicationScoped
 @Alternative

@@ -23,22 +23,21 @@ import javax.enterprise.inject.Produces;
 
 /**
  * Produce Principals for injection
- * @author hrupp
  */
 @Priority(1)
 @Alternative
 @RequestScoped
 public class RhIdPrincipalProducer {
 
-  private RhIdPrincipal principal;
+    private RhIdPrincipal principal;
 
-  public void setPrincipal(RhIdPrincipal principal) {
-    this.principal = principal;
-  }
+    public void setPrincipal(RhIdPrincipal principal) {
+        this.principal = principal;
+    }
 
-  @RequestScoped
-  @Produces
-  RhIdPrincipal currentPrincipal() {
-    return this.principal;
-  }
+    @RequestScoped
+    @Produces
+    RhIdPrincipal currentPrincipal() {
+        return this.principal;
+    }
 }

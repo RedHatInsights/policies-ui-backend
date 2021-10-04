@@ -24,27 +24,25 @@ import javax.ws.rs.client.ClientRequestFilter;
 
 /**
  * Filter to optionally add data on outgoing requests to the RBAC service
- * @author hrupp
  */
 public class RbacRestClientRequestFilter implements ClientRequestFilter {
 
-  private String authInfo;
+    private String authInfo;
 
-  public RbacRestClientRequestFilter() {
-     String tmp = System.getProperty("develop.exceptional.user.auth.info");
-    if (tmp!=null && !tmp.isEmpty()) {
-      authInfo = Base64.getEncoder().encodeToString(tmp.getBytes());
+    public RbacRestClientRequestFilter() {
+        String tmp = System.getProperty("develop.exceptional.user.auth.info");
+        if (tmp != null && !tmp.isEmpty()) {
+            authInfo = Base64.getEncoder().encodeToString(tmp.getBytes());
+        }
     }
-  }
 
-  @Override
-  public void filter(ClientRequestContext requestContext) throws IOException {
-
-    if (authInfo!=null) {
-      URI uri = requestContext.getUri();
-      if (uri.toString().startsWith("https://ci.cloud.redhat.com")) {
-        requestContext.getHeaders().putSingle("Authorization", "Basic " + authInfo);
-      }
+    @Override
+    public void filter(ClientRequestContext requestContext) throws IOException {
+        if (authInfo != null) {
+            URI uri = requestContext.getUri();
+            if (uri.toString().startsWith("https://ci.cloud.redhat.com")) {
+                requestContext.getHeaders().putSingle("Authorization", "Basic " + authInfo);
+            }
+        }
     }
-  }
 }

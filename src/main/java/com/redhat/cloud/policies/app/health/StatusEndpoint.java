@@ -30,31 +30,29 @@ import java.util.stream.Collectors;
 /**
  * Provide a /status endpoint, that returns a 200 if all is cool
  * and a 500 with list of issues if not.
- *
- * @author hrupp
  */
 @Path("/api/policies/v1.0/status")
 @ApplicationScoped
 public class StatusEndpoint {
 
-  private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
-  @GET
-  @Produces("application/json")
-  public Response getStatus() {
-    Map<String,String> issues = StuffHolder.getInstance().getStatusInfo();
+    @GET
+    @Produces("application/json")
+    public Response getStatus() {
+        Map<String, String> issues = StuffHolder.getInstance().getStatusInfo();
 
-    if (!issues.isEmpty()) {
-      log.severe("Status reports: " + makeReadable(issues));
-      return Response.serverError().entity(issues).build();
+        if (!issues.isEmpty()) {
+            log.severe("Status reports: " + makeReadable(issues));
+            return Response.serverError().entity(issues).build();
+        }
+        return Response.ok().build();
     }
-    return Response.ok().build();
-  }
 
-  private String makeReadable(Map<String, String> issues) {
-    return issues.entrySet()
-        .stream()
-        .map(e -> e.getKey() + "=" + e.getValue())
-        .collect(Collectors.joining("; "));
-  }
+    private String makeReadable(Map<String, String> issues) {
+        return issues.entrySet()
+                .stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("; "));
+    }
 }

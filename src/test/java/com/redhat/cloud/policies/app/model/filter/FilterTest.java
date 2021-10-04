@@ -29,8 +29,8 @@ public class FilterTest {
                 .and("fake", Filter.Operator.LIKE, "mix");
         Assert.assertEquals("foo = :foo and fake LIKE :fake", builder.getQuery());
         Assert.assertEquals(Parameters
-                .with("foo", "bar")
-                .and("fake", "mix").map(),
+                        .with("foo", "bar")
+                        .and("fake", "mix").map(),
                 builder.getParameters().map()
         );
     }
@@ -48,6 +48,7 @@ public class FilterTest {
                 builder.getParameters().map()
         );
     }
+
     @Test
     public void testWithOrAnd() {
         Filter builder = new Filter();

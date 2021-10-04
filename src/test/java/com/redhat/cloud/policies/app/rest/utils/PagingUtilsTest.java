@@ -35,13 +35,17 @@ public class PagingUtilsTest {
     @Test
     public void testExtractPagerInvalidOffset() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=bar&limit=100"));
-        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info);
+        });
     }
 
     @Test
     public void testExtractPagerInvalidLimit() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=12&limit=foo"));
-        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info);
+        });
     }
 
     @Test
@@ -73,7 +77,9 @@ public class PagingUtilsTest {
     @Test
     public void testExtractPagerSortWrongDirection() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?sortColumn=foo&sortDirection=bar"));
-        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info);
+        });
     }
 
     @Test
@@ -148,7 +154,9 @@ public class PagingUtilsTest {
     @Test
     public void testExtractFilterInvalidOperator() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=wrong"));
-        assertThrows(IllegalArgumentException.class , () -> {PagingUtils.extractPager(info); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info);
+        });
     }
 
     @Test

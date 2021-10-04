@@ -31,80 +31,78 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
  * Modify the path in the openapi document to not
  * have the prefix, which is already in the
  * servers part of the document.
- * @author hrupp
  */
 public class OASModifier implements OASFilter {
 
-  @Override
-  public void filterOpenAPI(OpenAPI openAPI) {
-    Paths paths = openAPI.getPaths();
-    Set<String> keySet = paths.getPathItems().keySet();
-    Map<String,PathItem> replacementItems = new HashMap<>();
-    for (String key : keySet) {
-      PathItem p = paths.getPathItem(key);
-      String mangledName = mangleName(key);
-      if (!mangledName.startsWith("/user-config") && // POL-230 this is a private api, so don't show it.
-          !mangledName.startsWith("/policies/sync") &&
-          !mangledName.startsWith("/admin") &&
-          !mangledName.startsWith("/status")
-      ) { // POL-277 private api
-        replacementItems.put(mangledName, p);
-      }
+    @Override
+    public void filterOpenAPI(OpenAPI openAPI) {
+        Paths paths = openAPI.getPaths();
+        Set<String> keySet = paths.getPathItems().keySet();
+        Map<String, PathItem> replacementItems = new HashMap<>();
+        for (String key : keySet) {
+            PathItem p = paths.getPathItem(key);
+            String mangledName = mangleName(key);
+            if (!mangledName.startsWith("/user-config") && // POL-230 this is a private api, so don't show it.
+                    !mangledName.startsWith("/policies/sync") &&
+                    !mangledName.startsWith("/admin") &&
+                    !mangledName.startsWith("/status")
+            ) { // POL-277 private api
+                replacementItems.put(mangledName, p);
+            }
 
-      Map<PathItem.HttpMethod, Operation> operations = p.getOperations();
-      for (Map.Entry<PathItem.HttpMethod,Operation> entry: operations.entrySet()) {
-        Operation op = entry.getValue();
+            Map<PathItem.HttpMethod, Operation> operations = p.getOperations();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operations.entrySet()) {
+                Operation op = entry.getValue();
 
-        if (op.getOperationId() == null || op.getOperationId().isEmpty()) {
+                if (op.getOperationId() == null || op.getOperationId().isEmpty()) {
 
-          String id = toCamelCase(mangledName);
-          id = entry.getKey().toString().toLowerCase() + id;
-          op.setOperationId(id);
+                    String id = toCamelCase(mangledName);
+                    id = entry.getKey().toString().toLowerCase() + id;
+                    op.setOperationId(id);
+                }
+            }
         }
-      }
-    }
-    paths.setPathItems(replacementItems);
+        paths.setPathItems(replacementItems);
 
-    // Settings values should not be shown in openapi export
-    Components components = openAPI.getComponents();
-    Map<String, Schema> existingSchemas = components.getSchemas();
-    Map<String, Schema> modifiedSchemas = new HashMap<>(existingSchemas);
-    modifiedSchemas.remove("SettingsValues");
-    components.setSchemas(modifiedSchemas);
-  }
-
-  private String toCamelCase(String mangledName) {
-    StringBuilder sb = new StringBuilder();
-    boolean needsUpper = false;
-    for (char c: mangledName.toCharArray()) {
-      if (c == '/') {
-        needsUpper = true;
-        continue;
-      }
-      if (c == '}') {
-        continue;
-      }
-      if (c == '{') {
-        sb.append("By");
-        needsUpper = true;
-        continue;
-      }
-      if (needsUpper) {
-        sb.append(Character.toUpperCase(c));
-        needsUpper = false;
-      }
-      else {
-        sb.append(c);
-      }
+        // Settings values should not be shown in openapi export
+        Components components = openAPI.getComponents();
+        Map<String, Schema> existingSchemas = components.getSchemas();
+        Map<String, Schema> modifiedSchemas = new HashMap<>(existingSchemas);
+        modifiedSchemas.remove("SettingsValues");
+        components.setSchemas(modifiedSchemas);
     }
-    return sb.toString();
-  }
 
-  private String mangleName(String key) {
-    // Base Filler - would report as empty otherwise
-    if (key.equals("/api/policies/v1.0")) {
-      return "/";
+    private String toCamelCase(String mangledName) {
+        StringBuilder sb = new StringBuilder();
+        boolean needsUpper = false;
+        for (char c : mangledName.toCharArray()) {
+            if (c == '/') {
+                needsUpper = true;
+                continue;
+            }
+            if (c == '}') {
+                continue;
+            }
+            if (c == '{') {
+                sb.append("By");
+                needsUpper = true;
+                continue;
+            }
+            if (needsUpper) {
+                sb.append(Character.toUpperCase(c));
+                needsUpper = false;
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
-    return key.replace("/api/policies/v1.0","");
-  }
+
+    private String mangleName(String key) {
+        // Base Filler - would report as empty otherwise
+        if (key.equals("/api/policies/v1.0")) {
+            return "/";
+        }
+        return key.replace("/api/policies/v1.0", "");
+    }
 }

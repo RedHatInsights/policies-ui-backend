@@ -23,25 +23,22 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author hrupp
- *
- *
-{
-  "email": "some.value@redhat.com",
-  "hide-sat": true
-}
+ * {
+ * "email": "some.value@redhat.com",
+ * "hide-sat": true
+ * }
  */
 @Entity
 @Table(name = "settings")
 public class SettingsValues extends PanacheEntityBase {
-  @Id
-  @JsonbTransient
-  public String username;
+    @Id
+    @JsonbTransient
+    public String username;
 
-  @JsonbTransient
-  public String accountId;
+    @JsonbTransient
+    public String accountId;
 
-  public boolean immediateEmail;
+    public boolean immediateEmail;
 
-  public boolean dailyEmail;
+    public boolean dailyEmail;
 }

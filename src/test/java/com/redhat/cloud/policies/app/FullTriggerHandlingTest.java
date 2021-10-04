@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Some testing around FullTrigger setup and updating
- * @author hrupp
  */
 public class FullTriggerHandlingTest {
 
@@ -37,15 +36,15 @@ public class FullTriggerHandlingTest {
         Assert.assertFalse(ft.trigger.enabled);
         Assert.assertEquals("hula", ft.trigger.name);
 
-        Assert.assertEquals(1,ft.conditions.size());
-        Assert.assertEquals("bla",ft.conditions.get(0).expression);
+        Assert.assertEquals(1, ft.conditions.size());
+        Assert.assertEquals("bla", ft.conditions.get(0).expression);
 
-        Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals(1, ft.trigger.actions.size());
+        Assert.assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
 
         Assert.assertEquals("hula", ft.trigger.name);
 
-        Assert.assertEquals("some text",ft.trigger.description);
+        Assert.assertEquals("some text", ft.trigger.description);
     }
 
     @NotNull
@@ -68,8 +67,8 @@ public class FullTriggerHandlingTest {
         p.actions = "notification";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(1,ft.trigger.actions.size());
-        Assert.assertEquals("notification",ft.trigger.actions.iterator().next().actionPlugin);
+        Assert.assertEquals(1, ft.trigger.actions.size());
+        Assert.assertEquals("notification", ft.trigger.actions.iterator().next().actionPlugin);
     }
 
     @Test
@@ -82,7 +81,7 @@ public class FullTriggerHandlingTest {
         p.actions = null;
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(0,ft.trigger.actions.size());
+        Assert.assertEquals(0, ft.trigger.actions.size());
     }
 
     @Test
@@ -94,8 +93,8 @@ public class FullTriggerHandlingTest {
         p.conditions = "blabla";
         ft.updateFromPolicy(p);
 
-        Assert.assertEquals(1,ft.conditions.size());
-        Assert.assertEquals("blabla",ft.conditions.get(0).expression);
+        Assert.assertEquals(1, ft.conditions.size());
+        Assert.assertEquals("blabla", ft.conditions.get(0).expression);
 
     }
 
@@ -119,7 +118,7 @@ public class FullTriggerHandlingTest {
 
         FullTrigger ft = new FullTrigger(p);
 
-        Assert.assertEquals(1,ft.trigger.actions.size());
+        Assert.assertEquals(1, ft.trigger.actions.size());
     }
 
     @Test

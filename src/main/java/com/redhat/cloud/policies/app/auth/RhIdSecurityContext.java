@@ -22,35 +22,34 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * An implementation of SecurityContext, that gets the data
  * from the parsed x-rh-identity header.
- * @author hrupp
  */
 public class RhIdSecurityContext implements SecurityContext {
 
-  private XRhIdentity rhIdentity;
-  private RhIdPrincipal rhPrincipal;
+    private XRhIdentity rhIdentity;
+    private RhIdPrincipal rhPrincipal;
 
-  public RhIdSecurityContext(XRhIdentity rhIdentity, RhIdPrincipal rhPrincipal) {
-    this.rhIdentity = rhIdentity;
-    this.rhPrincipal = rhPrincipal;
-  }
+    public RhIdSecurityContext(XRhIdentity rhIdentity, RhIdPrincipal rhPrincipal) {
+        this.rhIdentity = rhIdentity;
+        this.rhPrincipal = rhPrincipal;
+    }
 
-  @Override
-  public Principal getUserPrincipal() {
-    return rhPrincipal;
-  }
+    @Override
+    public Principal getUserPrincipal() {
+        return rhPrincipal;
+    }
 
-  @Override
-  public boolean isUserInRole(String s) {
-    return false;  // TODO: Determine later by calling the backend.
-  }
+    @Override
+    public boolean isUserInRole(String s) {
+        return false;  // TODO: Determine later by calling the backend.
+    }
 
-  @Override
-  public boolean isSecure() {
-    return false;  // TODO:determine from call?
-  }
+    @Override
+    public boolean isSecure() {
+        return false;  // TODO:determine from call?
+    }
 
-  @Override
-  public String getAuthenticationScheme() {
-    return "X-RH-IDENTITY";
-  }
+    @Override
+    public String getAuthenticationScheme() {
+        return "X-RH-IDENTITY";
+    }
 }

@@ -24,44 +24,41 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 
-/**
- * @author hrupp
- */
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @Tag("integration")
 public class BasePathTest extends AbstractITest {
 
-  @Test
-  void checkBasePath404Json() {
-    given()
-        .header(authHeader)
-        .accept(ContentType.JSON)
-      .when()
-        .get(API_BASE_V1_0)
-      .then()
-        .statusCode(404);
-  }
+    @Test
+    void checkBasePath404Json() {
+        given()
+                .header(authHeader)
+                .accept(ContentType.JSON)
+                .when()
+                .get(API_BASE_V1_0)
+                .then()
+                .statusCode(404);
+    }
 
-  @Test
-  void checkBasePath404Txt() {
-    given()
-        .header(authHeader)
-        .accept(ContentType.TEXT)
-      .when()
-        .get(API_BASE_V1_0)
-      .then()
-        .statusCode(404);
-  }
+    @Test
+    void checkBasePath404Txt() {
+        given()
+                .header(authHeader)
+                .accept(ContentType.TEXT)
+                .when()
+                .get(API_BASE_V1_0)
+                .then()
+                .statusCode(404);
+    }
 
-  @Test
-  void checkBasePath404Html() {
-    given()
-        .header(authHeader)
-        .accept(ContentType.HTML)
-      .when()
-        .get(API_BASE_V1_0)
-      .then()
-        .statusCode(404);
-  }
+    @Test
+    void checkBasePath404Html() {
+        given()
+                .header(authHeader)
+                .accept(ContentType.HTML)
+                .when()
+                .get(API_BASE_V1_0)
+                .then()
+                .statusCode(404);
+    }
 }

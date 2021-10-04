@@ -20,7 +20,6 @@ import com.redhat.cloud.policies.app.model.filter.Filter;
 import io.quarkus.panache.common.Sort;
 import io.smallrye.common.constraint.Nullable;
 
-
 public class Pager {
 
     public static final int NO_LIMIT = -1;
