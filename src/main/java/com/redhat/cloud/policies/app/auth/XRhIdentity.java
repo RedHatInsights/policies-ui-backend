@@ -21,48 +21,47 @@ import javax.json.bind.annotation.JsonbProperty;
 
 /**
  * Data model of the representation of a x-rh-identity header.
- * @author hrupp
  */
 public class XRhIdentity {
 
-  public Map<String, Object> entitlements;
-  public Identity identity;
+    public Map<String, Object> entitlements;
+    public Identity identity;
 
-  public String getUsername() {
-    if (identity==null || identity.user==null) {
-      return null;
+    public String getUsername() {
+        if (identity == null || identity.user == null) {
+            return null;
+        }
+        return identity.user.username;
     }
-    return identity.user.username;
-  }
 
-  public static class Identity {
+    public static class Identity {
 
-    @JsonbProperty("account_number")
-    public String accountNumber;
-    public String type;
-    public User user;
-    public Internal internal;
-  }
+        @JsonbProperty("account_number")
+        public String accountNumber;
+        public String type;
+        public User user;
+        public Internal internal;
+    }
 
-  public static class User {
+    public static class User {
 
-    public String email;
-    @JsonbProperty("first_name")
-    public String firstName;
-    @JsonbProperty("last_name")
-    public String lastName;
-    public String username;
-    @JsonbProperty("is_active")
-    public boolean isActive;
-    @JsonbProperty("is_internal")
-    public boolean isInternal;
-    @JsonbProperty("is_org_admin")
-    public boolean isOrgAdmin;
-  }
+        public String email;
+        @JsonbProperty("first_name")
+        public String firstName;
+        @JsonbProperty("last_name")
+        public String lastName;
+        public String username;
+        @JsonbProperty("is_active")
+        public boolean isActive;
+        @JsonbProperty("is_internal")
+        public boolean isInternal;
+        @JsonbProperty("is_org_admin")
+        public boolean isOrgAdmin;
+    }
 
-  public static class Internal {
+    public static class Internal {
 
-    @JsonbProperty("org_id")
-    public String orgId;
-  }
+        @JsonbProperty("org_id")
+        public String orgId;
+    }
 }

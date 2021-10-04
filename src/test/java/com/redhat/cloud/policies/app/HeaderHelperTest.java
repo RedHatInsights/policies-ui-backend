@@ -32,87 +32,82 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-/**
- * @author hrupp
- */
 public class HeaderHelperTest {
 
-  private static final String RHID = "x-rh-identity";
+    private static final String RHID = "x-rh-identity";
 
-  @Test
-  public void testNoHeader() {
-
-    Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(null);
-    Assert.assertFalse(user.isPresent());
-  }
-
-  @Test
-  public void testSimpleHeaderNoRID() {
-    MultivaluedMap<String,String> map = new MultivaluedHashMap<>();
-    HttpHeaders headers = new ResteasyHttpHeaders(map);
-
-    Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-    Assert.assertFalse(user.isPresent());
-
-  }
-
-  @Test
-  public void testSimpleHeaderBadRID() {
-    MultivaluedMap<String,String> map = new MultivaluedHashMap<>();
-    map.putSingle(RHID, "frobnitz");
-    HttpHeaders headers = new ResteasyHttpHeaders(map);
-
-    Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-    Assert.assertFalse(user.isPresent());
-
-  }
-
-  @Test
-  public void testSimpleHeaderGoodRID() {
-    String rhid = getStringFromFile("rhid.txt",true);
-
-    Optional<XRhIdentity> user = HeaderHelper.getRhIdFromString(rhid);
-    Assert.assertTrue(user.isPresent());
-    Assert.assertEquals("Username does not match","joe-doe-user",user.get().getUsername());
-    Assert.assertEquals("Account does not match","1234",user.get().identity.accountNumber);
-
-  }
-
-  @Test
-  public void testSimpleHeaderGoodRID2() {
-    MultivaluedMap<String,String> map = new MultivaluedHashMap<>();
-    String rhid = getStringFromFile("rhid.txt",true);
-    map.putSingle(RHID, rhid);
-    HttpHeaders headers = new ResteasyHttpHeaders(map);
-
-    Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
-    Assert.assertTrue(user.isPresent());
-    Assert.assertEquals("Username does not match","joe-doe-user",user.get().getUsername());
-    Assert.assertEquals("Account does not match","1234",user.get().identity.accountNumber);
-
-  }
-
-  @NotNull
-  public static String getStringFromFile(String filename, boolean removeTrailingNewline) {
-    String rhid = "";
-    try (FileInputStream fis = new FileInputStream("src/test/resources/" + filename)) {
-      Reader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
-      StringBuilder sb = new StringBuilder();
-      char[] buf = new char[1024];
-      int chars_read = r.read(buf);
-      while (chars_read >= 0) {
-        sb.append(buf,0,chars_read);
-        chars_read = r.read(buf);
-      }
-      r.close();
-      rhid = sb.toString();
-      if (removeTrailingNewline && rhid.endsWith("\n")) {
-        rhid = rhid.substring(0,rhid.indexOf('\n'));
-      }
+    @Test
+    public void testNoHeader() {
+        Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(null);
+        Assert.assertFalse(user.isPresent());
     }
-    catch (IOException ioe) {
-      Assert.fail("File reading failed: " + ioe.getMessage());
+
+    @Test
+    public void testSimpleHeaderNoRID() {
+        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+        HttpHeaders headers = new ResteasyHttpHeaders(map);
+
+        Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
+        Assert.assertFalse(user.isPresent());
+
     }
-    return rhid;
-  }
+
+    @Test
+    public void testSimpleHeaderBadRID() {
+        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+        map.putSingle(RHID, "frobnitz");
+        HttpHeaders headers = new ResteasyHttpHeaders(map);
+
+        Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
+        Assert.assertFalse(user.isPresent());
+
+    }
+
+    @Test
+    public void testSimpleHeaderGoodRID() {
+        String rhid = getStringFromFile("rhid.txt", true);
+
+        Optional<XRhIdentity> user = HeaderHelper.getRhIdFromString(rhid);
+        Assert.assertTrue(user.isPresent());
+        Assert.assertEquals("Username does not match", "joe-doe-user", user.get().getUsername());
+        Assert.assertEquals("Account does not match", "1234", user.get().identity.accountNumber);
+
+    }
+
+    @Test
+    public void testSimpleHeaderGoodRID2() {
+        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+        String rhid = getStringFromFile("rhid.txt", true);
+        map.putSingle(RHID, rhid);
+        HttpHeaders headers = new ResteasyHttpHeaders(map);
+
+        Optional<XRhIdentity> user = HeaderHelper.getRhIdFromHeader(headers);
+        Assert.assertTrue(user.isPresent());
+        Assert.assertEquals("Username does not match", "joe-doe-user", user.get().getUsername());
+        Assert.assertEquals("Account does not match", "1234", user.get().identity.accountNumber);
+
+    }
+
+    @NotNull
+    public static String getStringFromFile(String filename, boolean removeTrailingNewline) {
+        String rhid = "";
+        try (FileInputStream fis = new FileInputStream("src/test/resources/" + filename)) {
+            Reader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
+            StringBuilder sb = new StringBuilder();
+            char[] buf = new char[1024];
+            int chars_read = r.read(buf);
+            while (chars_read >= 0) {
+                sb.append(buf, 0, chars_read);
+                chars_read = r.read(buf);
+            }
+            r.close();
+            rhid = sb.toString();
+            if (removeTrailingNewline && rhid.endsWith("\n")) {
+                rhid = rhid.substring(0, rhid.indexOf('\n'));
+            }
+        } catch (IOException ioe) {
+            Assert.fail("File reading failed: " + ioe.getMessage());
+        }
+        return rhid;
+    }
 }

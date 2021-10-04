@@ -25,31 +25,28 @@ import javax.ws.rs.Produces;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-/**
- * @author hrupp
- */
 @Path("/")
 @RegisterRestClient(configKey = "notifications")
 @Produces("application/json")
 @Consumes("application/json")
 public interface NotificationSystem {
 
-  /*
-  Using @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) didn't work for the return value of `getUserPreferences`
-  Test were always returning "null" on the values. Looks like it needs something else (or maybe is a bug?) to pick the snake_case
-  for the Restclient.
-  - Tried @Schema(name=instant_email")
-   */
-  class UserPreferences {
-    public Boolean instant_email;
-    public Boolean daily_email;
-  }
+    /*
+    Using @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class) didn't work for the return value of `getUserPreferences`
+    Test were always returning "null" on the values. Looks like it needs something else (or maybe is a bug?) to pick the snake_case
+    for the Restclient.
+    - Tried @Schema(name=instant_email")
+     */
+    class UserPreferences {
+        public Boolean instant_email;
+        public Boolean daily_email;
+    }
 
-  @GET
-  @Path("/api/notifications/v1.0/user-config/notification-preference/{bundleName}/{applicationName}")
-  UserPreferences getUserPreferences(
-      @PathParam("bundleName") String bundleName,
-      @PathParam("applicationName") String applicationName,
-      @HeaderParam("x-rh-identity") String rhIdentity);
+    @GET
+    @Path("/api/notifications/v1.0/user-config/notification-preference/{bundleName}/{applicationName}")
+    UserPreferences getUserPreferences(
+            @PathParam("bundleName") String bundleName,
+            @PathParam("applicationName") String applicationName,
+            @HeaderParam("x-rh-identity") String rhIdentity);
 
 }

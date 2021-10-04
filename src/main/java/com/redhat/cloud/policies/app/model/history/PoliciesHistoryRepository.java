@@ -148,7 +148,7 @@ public class PoliciesHistoryRepository {
                 return Optional.empty();
             default:
                 throw new IllegalArgumentException("Unknown sort column: " + sortColumn);
-             
+
         }
     }
 

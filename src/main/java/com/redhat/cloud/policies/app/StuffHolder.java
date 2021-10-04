@@ -20,57 +20,54 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * @author hrupp
- */
 public class StuffHolder {
 
-  private static StuffHolder tokenHolder;
+    private static StuffHolder tokenHolder;
 
-  private final String token;
-  private boolean adminDown;
-  private boolean degraded;
-  private Map<String,String> statusInfo;
+    private final String token;
+    private boolean adminDown;
+    private boolean degraded;
+    private Map<String, String> statusInfo;
 
-  private StuffHolder() {
-    token = UUID.randomUUID().toString();
-    adminDown = false;
-    System.out.println("Token: " + token);
-    statusInfo = new HashMap<>();
-  }
-
-  public boolean compareToken(String input) {
-    return token.equals(input);
-  }
-
-  public static StuffHolder getInstance() {
-    if (tokenHolder==null) {
-      tokenHolder = new StuffHolder();
+    private StuffHolder() {
+        token = UUID.randomUUID().toString();
+        adminDown = false;
+        System.out.println("Token: " + token);
+        statusInfo = new HashMap<>();
     }
-    return tokenHolder;
-  }
 
-  public boolean isAdminDown() {
-    return adminDown;
-  }
+    public boolean compareToken(String input) {
+        return token.equals(input);
+    }
 
-  public void setAdminDown(boolean status) {
-    this.adminDown = status;
-  }
+    public static StuffHolder getInstance() {
+        if (tokenHolder == null) {
+            tokenHolder = new StuffHolder();
+        }
+        return tokenHolder;
+    }
 
-  public boolean isDegraded() {
-    return degraded;
-  }
+    public boolean isAdminDown() {
+        return adminDown;
+    }
 
-  public void setDegraded(boolean degraded) {
-    this.degraded = degraded;
-  }
+    public void setAdminDown(boolean status) {
+        this.adminDown = status;
+    }
 
-  public Map<String, String> getStatusInfo() {
-    return statusInfo;
-  }
+    public boolean isDegraded() {
+        return degraded;
+    }
 
-  public void setStatusInfo(Map<String, String> statusInfo) {
-    this.statusInfo = statusInfo;
-  }
+    public void setDegraded(boolean degraded) {
+        this.degraded = degraded;
+    }
+
+    public Map<String, String> getStatusInfo() {
+        return statusInfo;
+    }
+
+    public void setStatusInfo(Map<String, String> statusInfo) {
+        this.statusInfo = statusInfo;
+    }
 }

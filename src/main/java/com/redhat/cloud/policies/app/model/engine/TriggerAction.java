@@ -19,15 +19,12 @@ package com.redhat.cloud.policies.app.model.engine;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author hrupp
- */
 public class TriggerAction {
-  public String actionId;
-  public String actionPlugin;
-  public Map<String, Object> properties = new HashMap<>();
+    public String actionId;
+    public String actionPlugin;
+    public Map<String, Object> properties = new HashMap<>();
 
-  public TriggerAction() {
-    // needed for (de)serialization purposes
-  }
+    public TriggerAction() {
+        // needed for (de)serialization purposes
+    }
 }

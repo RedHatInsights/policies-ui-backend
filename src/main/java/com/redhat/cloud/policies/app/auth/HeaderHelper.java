@@ -23,32 +23,29 @@ import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbException;
 import javax.ws.rs.core.HttpHeaders;
 
-/**
- * @author hrupp
- */
 public abstract class HeaderHelper {
 
-  private static Jsonb jsonb = JsonbBuilder.create();
+    private static Jsonb jsonb = JsonbBuilder.create();
 
-  public static Optional<XRhIdentity> getRhIdFromHeader(HttpHeaders httpHeaders) {
-    if (httpHeaders==null) {
-      return Optional.empty();
+    public static Optional<XRhIdentity> getRhIdFromHeader(HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return Optional.empty();
+        }
+        String headerString = httpHeaders.getHeaderString("x-rh-identity");
+        if (headerString == null) {
+            return Optional.empty();
+        }
+        return getRhIdFromString(headerString);
     }
-    String headerString = httpHeaders.getHeaderString("x-rh-identity");
-    if (headerString==null) {
-      return Optional.empty();
-    }
-    return getRhIdFromString(headerString);
-  }
 
-  public static Optional<XRhIdentity> getRhIdFromString(String xRhIdHeader) {
-    XRhIdentity rhIdentity;
-    try {
-      String json_string = new String(Base64.getDecoder().decode(xRhIdHeader));
-      rhIdentity = jsonb.fromJson(json_string, XRhIdentity.class);
-    } catch (JsonbException jbe) {
-      return Optional.empty();
+    public static Optional<XRhIdentity> getRhIdFromString(String xRhIdHeader) {
+        XRhIdentity rhIdentity;
+        try {
+            String json_string = new String(Base64.getDecoder().decode(xRhIdHeader));
+            rhIdentity = jsonb.fromJson(json_string, XRhIdentity.class);
+        } catch (JsonbException jbe) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(rhIdentity);
     }
-    return Optional.ofNullable(rhIdentity);
-  }
 }

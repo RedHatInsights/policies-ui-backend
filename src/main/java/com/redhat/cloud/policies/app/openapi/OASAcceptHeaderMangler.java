@@ -21,7 +21,6 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * Change the accpet header if needed for Openapi requests
- * @author hrupp
  */
 public class OASAcceptHeaderMangler {
 
@@ -40,7 +39,7 @@ public class OASAcceptHeaderMangler {
     void oasAcceptHeaderMangler(RoutingContext rc) {
         if (rc.normalisedPath().endsWith("openapi.json")) {
             rc.request().headers().remove("Accept");
-            rc.request().headers().add("Accept","application/json");
+            rc.request().headers().add("Accept", "application/json");
         }
         rc.next();
     }

@@ -34,9 +34,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
-/**
- * @author hrupp
- */
 @Path("/api/policies/v1.0/facts")
 @Produces("application/json")
 @Consumes("application/json")
@@ -44,22 +41,22 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 @SimplyTimed(absolute = true, name = "FactSvc")
 public class FactService {
 
-  @Inject
-  RhIdPrincipal user;
+    @Inject
+    RhIdPrincipal user;
 
-  @GET
-  @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
-  @APIResponse(responseCode = "200", description = "List of facts", content =
-               @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
-  public Response listFacts() {
+    @GET
+    @Operation(summary = "Retrieve a list of fact (keys) along with their data types")
+    @APIResponse(responseCode = "200", description = "List of facts", content =
+    @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Fact.class)))
+    public Response listFacts() {
 
-    if (!user.canReadPolicies()) {
-      return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts")).build();
+        if (!user.canReadPolicies()) {
+            return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve facts")).build();
+        }
+
+        Response.ResponseBuilder builder = Response.ok();
+        builder.entity(Fact.getFacts());
+        return builder.build();
     }
-
-    Response.ResponseBuilder builder = Response.ok();
-    builder.entity(Fact.getFacts());
-    return builder.build();
-  }
 
 }

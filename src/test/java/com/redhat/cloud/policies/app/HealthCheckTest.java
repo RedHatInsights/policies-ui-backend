@@ -22,48 +22,44 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.when;
 import static io.restassured.RestAssured.with;
 
-/**
- * @author hrupp
- */
 @QuarkusTest
 public class HealthCheckTest {
 
-  @Test
-  void testNormalHealth() {
-    when()
-        .get("/health")
-      .then()
-        .statusCode(200);
-  }
-
-  @Test
-  void testAdminDown() {
-
-    with()
-        .queryParam("status","admin-down")
-        .accept("application/json")
-        .contentType("application/json")
-      .when()
-        .post("/admin/status")
-      .then()
-        .statusCode(200);
-
-    try {
-      when()
-          .get("/health")
-          .then()
-          .statusCode(503);
-    }
-    finally {
-      with()
-          .queryParam("status","ok")
-          .accept("application/json")
-          .contentType("application/json")
-        .when()
-          .post("/admin/status")
-        .then()
-          .statusCode(200);
+    @Test
+    void testNormalHealth() {
+        when()
+                .get("/health")
+                .then()
+                .statusCode(200);
     }
 
-  }
+    @Test
+    void testAdminDown() {
+
+        with()
+                .queryParam("status", "admin-down")
+                .accept("application/json")
+                .contentType("application/json")
+                .when()
+                .post("/admin/status")
+                .then()
+                .statusCode(200);
+
+        try {
+            when()
+                    .get("/health")
+                    .then()
+                    .statusCode(503);
+        } finally {
+            with()
+                    .queryParam("status", "ok")
+                    .accept("application/json")
+                    .contentType("application/json")
+                    .when()
+                    .post("/admin/status")
+                    .then()
+                    .statusCode(200);
+        }
+
+    }
 }

@@ -29,21 +29,20 @@ import java.util.List;
  * Some additional testing around parsing of alert history items.
  * This is on a unit test level so also make it easier to understand
  * and follow format changes from the engine.
- * @author hrupp
  */
 public class AlertHistoryParserTest {
 
-  @Test
-  void testAlertHistoryDocument() throws JsonProcessingException {
+    @Test
+    void testAlertHistoryDocument() throws JsonProcessingException {
 
-    String alerts = HeaderHelperTest.getStringFromFile("alerts-history2.json",false);
+        String alerts = HeaderHelperTest.getStringFromFile("alerts-history2.json", false);
 
-    List<HistoryItem> items = new ArrayList<>();
+        List<HistoryItem> items = new ArrayList<>();
 
-    PolicyCrudService.parseHistoryFromEngine(alerts,items);
+        PolicyCrudService.parseHistoryFromEngine(alerts, items);
 
-    Assert.assertEquals(1,items.size());
-    HistoryItem item = items.get(0);
-    Assert.assertEquals("VM",item.hostName);
-  }
+        Assert.assertEquals(1, items.size());
+        HistoryItem item = items.get(0);
+        Assert.assertEquals("VM", item.hostName);
+    }
 }

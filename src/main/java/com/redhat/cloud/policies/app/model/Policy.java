@@ -44,239 +44,235 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-/**
- * @author hrupp
- */
 @Entity
 public class Policy extends PanacheEntityBase {
 
-  // The ID will be created by code.
-  @Id
-  public
-  UUID id;
+    // The ID will be created by code.
+    @Id
+    public
+    UUID id;
 
-  @JsonbTransient
-  public String customerid;
+    @JsonbTransient
+    public String customerid;
 
-  @NotNull
-  @NotEmpty
-  @Schema(description = "Name of the rule. Must be unique per customer account.")
-  @Size(max = 150)
-  public String name;
+    @NotNull
+    @NotEmpty
+    @Schema(description = "Name of the rule. Must be unique per customer account.")
+    @Size(max = 150)
+    public String name;
 
-  @Schema(description = "A short description of the policy.")
-  public String description;
+    @Schema(description = "A short description of the policy.")
+    public String description;
 
-  @Column(name = "is_enabled")
-  public boolean isEnabled;
+    @Column(name = "is_enabled")
+    public boolean isEnabled;
 
-  @Schema(description = "Condition string.",
-          example = "arch = \"x86_64\"")
-  @NotEmpty
-  @NotNull
-  public String conditions;
+    @Schema(description = "Condition string.",
+            example = "arch = \"x86_64\"")
+    @NotEmpty
+    @NotNull
+    public String conditions;
 
-  @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true." +
-      "Allowed values is 'notification'")
-  @ValidActionS
-  public String actions;
+    @Schema(description = "String describing actions separated by ';' when the policy is evaluated to true." +
+            "Allowed values is 'notification'")
+    @ValidActionS
+    public String actions;
 
-  @Schema(type = SchemaType.STRING,
-          description = "Last update time in a form like '2020-01-24 12:19:56.718', output only",
-          readOnly = true,
-          format = "yyyy-MM-dd hh:mm:ss.ddd",
-          implementation = String.class)
-  private Timestamp mtime=new Timestamp(System.currentTimeMillis());
+    @Schema(type = SchemaType.STRING,
+            description = "Last update time in a form like '2020-01-24 12:19:56.718', output only",
+            readOnly = true,
+            format = "yyyy-MM-dd hh:mm:ss.ddd",
+            implementation = String.class)
+    private Timestamp mtime = new Timestamp(System.currentTimeMillis());
 
-  @Schema (type = SchemaType.STRING,
-          description = "Create time in a form like '2020-01-24 12:19:56.718', output only",
-          readOnly = true,
-          format = "yyyy-MM-dd hh:mm:ss.ddd",
-          implementation = String.class)
-  private Timestamp ctime=new Timestamp(System.currentTimeMillis());
+    @Schema(type = SchemaType.STRING,
+            description = "Create time in a form like '2020-01-24 12:19:56.718', output only",
+            readOnly = true,
+            format = "yyyy-MM-dd hh:mm:ss.ddd",
+            implementation = String.class)
+    private Timestamp ctime = new Timestamp(System.currentTimeMillis());
 
-  @Transient
-  private long lastTriggered;
+    @Transient
+    private long lastTriggered;
 
-  @JsonbTransient
-  public void setMtime(String mtime) {
-    this.mtime = Timestamp.valueOf(mtime);
-  }
-
-  public void setMtimeToNow() {
-    this.mtime = new Timestamp(System.currentTimeMillis());
-  }
-
-  public String getMtime() {
-    return mtime.toString();
-  }
-
-
-  @JsonbTransient
-  public void setLastTriggered(long tTime) {
-    lastTriggered = tTime;
-  }
-
-  public long getLastTriggered() {
-    return lastTriggered;
-  }
-
-  @JsonbTransient
-  public void setCtime(String ctime) {
-    this.ctime = Timestamp.valueOf(ctime);
-  }
-
-  public String getCtime() {
-    return ctime.toString();
-  }
-
-
-  public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
-
-    for (Sort.Column column : pager.getSort().getColumns()) {
-      SortableColumn.fromName(column.getName());
+    @JsonbTransient
+    public void setMtime(String mtime) {
+        this.mtime = Timestamp.valueOf(mtime);
     }
 
-    pager.getFilter()
-            .getParameters()
-            .map()
-            .keySet()
-            .forEach(FilterableColumn::fromName);
-
-    Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-
-    PanacheQuery<Policy> panacheQuery = find(
-            filter.getQuery(),
-            pager.getSort(),
-            filter.getParameters()
-    );
-
-    if (pager.getLimit() != Pager.NO_LIMIT) {
-      panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
+    public void setMtimeToNow() {
+        this.mtime = new Timestamp(System.currentTimeMillis());
     }
 
-    return new Page<>(
-            panacheQuery.list(),
-            pager,
-            panacheQuery.count()
-    );
-  }
-
-  public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
-
-    pager.getFilter()
-            .getParameters()
-            .map()
-            .keySet()
-            .forEach(FilterableColumn::fromName);
-
-    Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-
-
-    PanacheQuery<Policy> panacheQuery = find(
-            filter.getQuery(),
-            filter.getParameters()
-    );
-
-    return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
-  }
-
-  public static Policy findById(String customer, UUID theId) {
-    return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
-  }
-
-  public static Policy findByName(String customer, String name) {
-    return find("customerid = ?1 and name = ?2", customer, name).firstResult();
-  }
-
-  public UUID store(String customer, Policy policy) {
-    if (!customer.equals(policy.customerid)) {
-      throw new IllegalArgumentException("Store: customer id do not match");
-    }
-    policy.persist();
-    return id;
-  }
-
-  public void delete(Policy policy) {
-    if (policy==null || !policy.isPersistent()) {
-      throw new IllegalStateException("Policy was not persisted");
-    }
-    policy.delete();
-    policy.flush();
-  }
-
-  public void populateFrom(Policy policy) {
-    this.id = policy.id;
-    this.name = policy.name;
-    this.description = policy.description;
-    this.actions = policy.actions;
-    this.conditions = policy.conditions;
-    this.isEnabled = policy.isEnabled;
-    this.customerid = policy.customerid;
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder("Policy{");
-    sb.append("id=").append(id);
-    sb.append(", customerid='").append(customerid).append('\'');
-    sb.append(", name='").append(name).append('\'');
-    sb.append(", mtime=").append(mtime);
-    sb.append('}');
-    return sb.toString();
-  }
-
-  enum SortableColumn {
-    NAME("name"),
-    DESCRIPTION("description"),
-    IS_ENABLED("is_enabled"),
-    MTIME("mtime");
-
-    private final String name;
-
-    SortableColumn(final String name) {
-      this.name = name;
+    public String getMtime() {
+        return mtime.toString();
     }
 
-    public String getName() {
-      return name;
+
+    @JsonbTransient
+    public void setLastTriggered(long tTime) {
+        lastTriggered = tTime;
     }
 
-    public static SortableColumn fromName(String columnName) {
-      for (SortableColumn column : SortableColumn.values()) {
-        if (column.getName().equals(columnName)) {
-          return column;
+    public long getLastTriggered() {
+        return lastTriggered;
+    }
+
+    @JsonbTransient
+    public void setCtime(String ctime) {
+        this.ctime = Timestamp.valueOf(ctime);
+    }
+
+    public String getCtime() {
+        return ctime.toString();
+    }
+
+    public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
+
+        for (Sort.Column column : pager.getSort().getColumns()) {
+            SortableColumn.fromName(column.getName());
         }
-      }
-      throw new IllegalArgumentException("Unknown Policy.SortableColumn requested: [" + columnName + "]");
+
+        pager.getFilter()
+                .getParameters()
+                .map()
+                .keySet()
+                .forEach(FilterableColumn::fromName);
+
+        Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
+
+        PanacheQuery<Policy> panacheQuery = find(
+                filter.getQuery(),
+                pager.getSort(),
+                filter.getParameters()
+        );
+
+        if (pager.getLimit() != Pager.NO_LIMIT) {
+            panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
+        }
+
+        return new Page<>(
+                panacheQuery.list(),
+                pager,
+                panacheQuery.count()
+        );
     }
 
-  }
+    public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
 
-  enum FilterableColumn {
-    NAME("name"),
-    DESCRIPTION("description"),
-    IS_ENABLED("is_enabled");
+        pager.getFilter()
+                .getParameters()
+                .map()
+                .keySet()
+                .forEach(FilterableColumn::fromName);
 
-    private final String name;
+        Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
 
-    FilterableColumn(final String name) {
-      this.name = name;
+
+        PanacheQuery<Policy> panacheQuery = find(
+                filter.getQuery(),
+                filter.getParameters()
+        );
+
+        return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
     }
 
-    public static FilterableColumn fromName(String columnName) {
-      Optional<FilterableColumn> result = Arrays.stream(FilterableColumn.values())
-              .filter(val -> val.name.equals(columnName))
-              .findAny();
-      if (result.isPresent()) {
-        return result.get();
-      }
-      throw new IllegalArgumentException("Unknown Policy.FilterableColumn requested: [" + columnName + "]");
+    public static Policy findById(String customer, UUID theId) {
+        return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
     }
-  }
 
-  static String sortToOrderBy(Sort sort) {
-    var columns = sort.getColumns();
+    public static Policy findByName(String customer, String name) {
+        return find("customerid = ?1 and name = ?2", customer, name).firstResult();
+    }
+
+    public UUID store(String customer, Policy policy) {
+        if (!customer.equals(policy.customerid)) {
+            throw new IllegalArgumentException("Store: customer id do not match");
+        }
+        policy.persist();
+        return id;
+    }
+
+    public void delete(Policy policy) {
+        if (policy == null || !policy.isPersistent()) {
+            throw new IllegalStateException("Policy was not persisted");
+        }
+        policy.delete();
+        policy.flush();
+    }
+
+    public void populateFrom(Policy policy) {
+        this.id = policy.id;
+        this.name = policy.name;
+        this.description = policy.description;
+        this.actions = policy.actions;
+        this.conditions = policy.conditions;
+        this.isEnabled = policy.isEnabled;
+        this.customerid = policy.customerid;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Policy{");
+        sb.append("id=").append(id);
+        sb.append(", customerid='").append(customerid).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", mtime=").append(mtime);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    enum SortableColumn {
+        NAME("name"),
+        DESCRIPTION("description"),
+        IS_ENABLED("is_enabled"),
+        MTIME("mtime");
+
+        private final String name;
+
+        SortableColumn(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static SortableColumn fromName(String columnName) {
+            for (SortableColumn column : SortableColumn.values()) {
+                if (column.getName().equals(columnName)) {
+                    return column;
+                }
+            }
+            throw new IllegalArgumentException("Unknown Policy.SortableColumn requested: [" + columnName + "]");
+        }
+
+    }
+
+    enum FilterableColumn {
+        NAME("name"),
+        DESCRIPTION("description"),
+        IS_ENABLED("is_enabled");
+
+        private final String name;
+
+        FilterableColumn(final String name) {
+            this.name = name;
+        }
+
+        public static FilterableColumn fromName(String columnName) {
+            Optional<FilterableColumn> result = Arrays.stream(FilterableColumn.values())
+                    .filter(val -> val.name.equals(columnName))
+                    .findAny();
+            if (result.isPresent()) {
+                return result.get();
+            }
+            throw new IllegalArgumentException("Unknown Policy.FilterableColumn requested: [" + columnName + "]");
+        }
+    }
+
+    static String sortToOrderBy(Sort sort) {
+        var columns = sort.getColumns();
         StringBuilder sb = new StringBuilder(" ORDER BY ");
         for (int i = 0; i < columns.size(); i++) {
             Sort.Column column = columns.get(i);
@@ -292,9 +288,9 @@ public class Policy extends PanacheEntityBase {
 
 @RegisterForReflection
 class PolicyId {
-  public final UUID id;
+    public final UUID id;
 
-  public PolicyId(UUID id) {
-    this.id = id;
-  }
+    public PolicyId(UUID id) {
+        this.id = id;
+    }
 }

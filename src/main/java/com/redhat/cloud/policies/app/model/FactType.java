@@ -16,21 +16,16 @@
  */
 package com.redhat.cloud.policies.app.model;
 
-/**
- * @author hrupp
- */
 public enum FactType {
 
-  STRING("STRING"),
-  BOOLEAN("BOOLEAN"),
-  LIST("LIST"),
-  INT("INT");
+    STRING("STRING"),
+    BOOLEAN("BOOLEAN"),
+    LIST("LIST"),
+    INT("INT");
 
-  String name;
+    String name;
 
-  FactType(String name) {
-    this.name=name;
-  }
-
-
+    FactType(String name) {
+        this.name = name;
+    }
 }
