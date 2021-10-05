@@ -74,7 +74,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
         RoutingContext routingContext = request().getCurrent();
 
-        String normalisedPath = routingContext.normalisedPath();
+        String normalisedPath = routingContext.normalizedPath();
 
         // The following are available to everyone
         if (normalisedPath.endsWith("openapi.json") ||
@@ -86,7 +86,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
         // Get the x-rh-identity header and parse it.
         String xrhid_header = requestContext.getHeaderString("x-rh-identity");
-        XRhIdentity rhIdentity = determineXRhIdentity(requestContext, xrhid_header);
+        XRhIdentity rhIdentity = determineXRhIdentity(xrhid_header);
         if (rhIdentity == null) {
             // Header was somehow bad
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
@@ -107,7 +107,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         producer.setPrincipal(rhPrincipal);
     }
 
-    private XRhIdentity determineXRhIdentity(ContainerRequestContext requestContext, String xrhid_header) {
+    private XRhIdentity determineXRhIdentity(String xrhid_header) {
         if (xrhid_header == null || xrhid_header.isEmpty()) {
             logIfNeeded("No x-rh-identity header passed");
             return null;
@@ -140,11 +140,10 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     }
 
     // Helper to get the vert.x routing context
-    CurrentVertxRequest request() {
+    private CurrentVertxRequest request() {
         if (currentVertxRequest == null) {
             currentVertxRequest = CDI.current().select(CurrentVertxRequest.class).get();
         }
         return currentVertxRequest;
     }
-
 }

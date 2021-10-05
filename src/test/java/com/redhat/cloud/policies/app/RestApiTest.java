@@ -634,10 +634,10 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath = er.body().jsonPath();
         int totalCount = jsonPath.getInt("meta.count");
         assertEquals(2, totalCount);
-        List returnedBody = jsonPath.getList("data");
+        List<Map<String, Object>> returnedBody = jsonPath.getList("data");
         try {
             assertEquals(2, returnedBody.size());
-            Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+            Map<String, Object> map = returnedBody.get(0);
             assertEquals("VM 22", map.get("hostName"));
             assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
         } finally {
@@ -680,10 +680,10 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath = er.body().jsonPath();
         int totalCount = jsonPath.getInt("meta.count");
         assertEquals(1, totalCount);
-        List returnedBody = jsonPath.getList("data");
+        List<Map<String, Object>> returnedBody = jsonPath.getList("data");
         try {
             assertEquals(1, returnedBody.size());
-            Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+            Map<String, Object> map = returnedBody.get(0);
             assertEquals("VM", map.get("hostName"));
             assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
         } finally {
@@ -709,10 +709,10 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath = er.body().jsonPath();
         int totalCount = jsonPath.getInt("meta.count");
         assertEquals(1, totalCount);
-        List returnedBody = jsonPath.getList("data");
+        List<Map<String, Object>> returnedBody = jsonPath.getList("data");
         try {
             assertEquals(1, returnedBody.size());
-            Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+            Map<String, Object> map = returnedBody.get(0);
             assertEquals("VM22", map.get("hostName"));
             assertEquals("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", map.get("id"));
         } finally {
@@ -738,10 +738,10 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath = er.body().jsonPath();
         int totalCount = jsonPath.getInt("meta.count");
         assertEquals(1, totalCount);
-        List returnedBody = jsonPath.getList("data");
+        List<Map<String, Object>> returnedBody = jsonPath.getList("data");
         try {
             assertEquals(1, returnedBody.size());
-            Map<String, Object> map = (Map<String, Object>) returnedBody.get(0);
+            Map<String, Object> map = returnedBody.get(0);
             assertEquals("VM", map.get("hostName"));
             assertEquals("dce4760b-0000-48f0-0000-7a07a6a45d1d", map.get("id"));
         } finally {
@@ -848,8 +848,8 @@ class RestApiTest extends AbstractITest {
                             .extract().body()
                             .jsonPath();
 
-            assertTrue(body.get("conditions").equals("cores = 2"));
-            assertTrue(body.get("name").equals("test1"));
+            assertEquals("cores = 2", body.get("conditions"));
+            assertEquals("test1", body.get("name"));
             assertEquals(body.get("id").toString(), returnedBody.id.toString());
         } finally {
             // now delete it again
@@ -1228,7 +1228,7 @@ class RestApiTest extends AbstractITest {
 
         Jsonb jsonb = JsonbBuilder.create();
         TestPolicy ret = jsonb.fromJson(resp, TestPolicy.class);
-        assertTrue(tp.conditions.equals(ret.conditions));
+        assertEquals(tp.conditions, ret.conditions);
 
         try {
             // update
@@ -1391,7 +1391,6 @@ class RestApiTest extends AbstractITest {
                 .when().post(API_BASE_V1_0 + "/policies/validate-name")
                 .then()
                 .statusCode(400);
-        assertTrue(name.length() > 150);
     }
 
     @Test
@@ -1440,9 +1439,7 @@ class RestApiTest extends AbstractITest {
                 .when().post(API_BASE_V1_0 + "/policies/validate-name?id=bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
                 .then()
                 .statusCode(400);
-        assertTrue(name.length() > 150);
     }
-
 
     @Test
     void deletePolicy() {
