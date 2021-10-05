@@ -26,12 +26,11 @@ import static io.restassured.RestAssured.with;
 import static org.hamcrest.core.Is.is;
 
 @QuarkusTest
-public class StatusEndpointTest extends AbstractITest {
+class StatusEndpointTest extends AbstractITest {
 
     @Order(1)
     @Test
     void getStatusSimple() {
-
         when()
                 .get("/api/policies/v1.0/status")
                 .then()
@@ -47,7 +46,6 @@ public class StatusEndpointTest extends AbstractITest {
     @Order(2)
     @Test
     void getStatusDegraded() {
-
         with()
                 .queryParam("status", "degraded")
                 .accept("application/json")

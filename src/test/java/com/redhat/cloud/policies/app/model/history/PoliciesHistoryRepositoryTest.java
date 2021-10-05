@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
-public class PoliciesHistoryRepositoryTest {
+class PoliciesHistoryRepositoryTest {
 
     private static final String TENANT_ID_1 = "tenant-id-1";
     private static final String TENANT_ID_2 = "tenant-id-2";
@@ -39,7 +39,7 @@ public class PoliciesHistoryRepositoryTest {
     PoliciesHistoryRepository repository;
 
     @Test
-    public void test() {
+    void test() {
 
         /*
          * Some of the following history entries don't make sense from a functional perspective, but it doesn't matter.

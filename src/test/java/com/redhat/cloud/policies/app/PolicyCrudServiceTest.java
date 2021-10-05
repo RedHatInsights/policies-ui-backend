@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
-public class PolicyCrudServiceTest extends AbstractITest {
+class PolicyCrudServiceTest extends AbstractITest {
 
     private static final String TENANT_ID = "1234";
 
@@ -41,7 +41,7 @@ public class PolicyCrudServiceTest extends AbstractITest {
     }
 
     @Test
-    public void test() {
+    void test() {
         UUID policyId = createPolicy();
 
         PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-1", "foo", 1L);

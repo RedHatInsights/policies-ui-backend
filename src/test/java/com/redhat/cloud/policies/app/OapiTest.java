@@ -23,7 +23,6 @@ import com.reprezen.kaizen.oasparser.model3.Schema;
 import com.reprezen.kaizen.oasparser.val.ValidationResults;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -34,12 +33,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Do some validation of the OApiModel.
  */
 @QuarkusTest
 @Tag("integration")
-public class OapiTest extends AbstractITest {
+class OapiTest extends AbstractITest {
 
     private static final String OAPI_JSON = "openapi.json";
     private static final String TARGET_OPENAPI = "./target/openapi.json";
@@ -49,14 +53,14 @@ public class OapiTest extends AbstractITest {
     URL url;
 
     @Test
-    public void validateOpenApi() throws Exception {
+    void validateOpenApi() throws Exception {
         OpenApi3 model = new OpenApi3Parser().parse(url, true);
         System.out.printf("OpenAPI Model at %s\n", url);
         if (!model.isValid()) {
             for (ValidationResults.ValidationItem item : model.getValidationItems()) {
                 System.err.println(item);
             }
-            Assert.fail("OpenAPI spec is not valid");
+            fail("OpenAPI spec is not valid");
         }
         //
         // Now that basic validation is done, we can add some of our own
@@ -65,20 +69,20 @@ public class OapiTest extends AbstractITest {
         Map<String, Schema> schemas = model.getSchemas();
 
         // The base path filler. See also OASModifier.mangleName
-        Assert.assertTrue(paths.containsKey("/"));
+        assertTrue(paths.containsKey("/"));
 
         // User config is private, so don't show it
-        Assert.assertFalse(paths.containsKey("/user-config"));
-        Assert.assertFalse(schemas.containsKey("SettingsValues"));
+        assertFalse(paths.containsKey("/user-config"));
+        assertFalse(schemas.containsKey("SettingsValues"));
 
         // Check that openapi does not (again) collapse parameters
-        Assert.assertEquals(9, paths.get("/policies").getOperation("get").getParameters().size());
+        assertEquals(9, paths.get("/policies").getOperation("get").getParameters().size());
 
         // Check that all properties are present ( https://github.com/smallrye/smallrye-open-api/issues/437 )
         Map<String, Schema> policyProperties = schemas.get("Policy").getProperties();
-        Assert.assertEquals(9, policyProperties.size());
-        Assert.assertTrue(policyProperties.containsKey("ctime"));
-        Assert.assertTrue(policyProperties.containsKey("mtime"));
+        assertEquals(9, policyProperties.size());
+        assertTrue(policyProperties.containsKey("ctime"));
+        assertTrue(policyProperties.containsKey("mtime"));
 
         // Now that the OpenAPI file has been validated, save a copy to the filesystem
         // This file is going to be uploaded in a regular CI build to know the API state

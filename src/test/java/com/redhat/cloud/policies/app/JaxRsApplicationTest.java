@@ -4,7 +4,8 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 import static com.redhat.cloud.policies.app.JaxRsApplication.FILTER_REGEX;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class JaxRsApplicationTest {
 

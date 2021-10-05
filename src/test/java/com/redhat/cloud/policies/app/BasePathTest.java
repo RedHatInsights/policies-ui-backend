@@ -27,7 +27,7 @@ import static io.restassured.RestAssured.given;
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @Tag("integration")
-public class BasePathTest extends AbstractITest {
+class BasePathTest extends AbstractITest {
 
     @Test
     void checkBasePath404Json() {

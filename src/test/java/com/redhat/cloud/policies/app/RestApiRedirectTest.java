@@ -19,6 +19,8 @@ package com.redhat.cloud.policies.app;
 import static org.hamcrest.CoreMatchers.containsString;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -26,7 +28,6 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,7 @@ import java.util.Map;
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @Tag("integration")
-public class RestApiRedirectTest extends AbstractITest {
+class RestApiRedirectTest extends AbstractITest {
 
     @Test
     void testGetOnePolicyApiV1Redirect() {
@@ -53,9 +54,9 @@ public class RestApiRedirectTest extends AbstractITest {
                         .extract().jsonPath();
 
         TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
-        Assert.assertEquals("Action does not match", "NOTIFICATION roadrunner@acme.org", policy.actions);
-        Assert.assertEquals("Conditions do not match", "\"cores\" == 1", policy.conditions);
-        Assert.assertTrue("Policy is not enabled", policy.isEnabled);
+        assertEquals("NOTIFICATION roadrunner@acme.org", policy.actions, "Action does not match");
+        assertEquals("\"cores\" == 1", policy.conditions, "Conditions do not match");
+        assertTrue(policy.isEnabled, "Policy is not enabled");
     }
 
     @Test
@@ -79,8 +80,8 @@ public class RestApiRedirectTest extends AbstractITest {
 
         TestPolicy returnedBody = er.body().as(TestPolicy.class);
         try {
-            Assert.assertEquals("cores = 2", returnedBody.conditions);
-            Assert.assertEquals("test1-redirect", returnedBody.name);
+            assertEquals("cores = 2", returnedBody.conditions);
+            assertEquals("test1-redirect", returnedBody.name);
         } finally {
             given()
                     .header(authHeader)
@@ -104,9 +105,9 @@ public class RestApiRedirectTest extends AbstractITest {
                         .extract().body().jsonPath();
 
         long policiesInDb = countPoliciesInDB();
-        Assert.assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
+        assertEquals(policiesInDb, jsonPath.getInt("meta.count"));
         Map<String, String> links = jsonPath.get("links");
-        Assert.assertEquals(links.size(), 4);
+        assertEquals(links.size(), 4);
         extractAndCheck(links, "first", 5, 0);
         extractAndCheck(links, "prev", 5, 0);
         extractAndCheck(links, "next", 5, 7);

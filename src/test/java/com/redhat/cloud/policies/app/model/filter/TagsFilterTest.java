@@ -19,16 +19,16 @@ package com.redhat.cloud.policies.app.model.filter;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import org.jboss.resteasy.specimpl.ResteasyUriInfo;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TagsFilterTest {
+class TagsFilterTest {
 
     @Test
     void filter1() throws URISyntaxException {
@@ -53,7 +53,6 @@ public class TagsFilterTest {
         String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
         assertEquals("tags.display_name MATCHES '*vm*'", query);
     }
-
 
     @Test
     void filter4() throws URISyntaxException {
@@ -95,5 +94,4 @@ public class TagsFilterTest {
         String query = PolicyHistoryTagFilterHelper.getTagsFilterFromPager(pager);
         assertEquals("tags.display_name MATCHES '*tolowercasestring*'", query);
     }
-
 }
