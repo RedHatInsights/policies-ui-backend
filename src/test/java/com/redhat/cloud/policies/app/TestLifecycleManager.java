@@ -16,7 +16,8 @@
  */
 package com.redhat.cloud.policies.app;
 
-import static java.util.Calendar.*;
+import static java.util.Calendar.getInstance;
+import static java.util.Calendar.MAY;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
