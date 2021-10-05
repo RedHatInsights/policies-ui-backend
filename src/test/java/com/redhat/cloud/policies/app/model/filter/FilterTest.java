@@ -3,7 +3,7 @@ package com.redhat.cloud.policies.app.model.filter;
 import io.quarkus.panache.common.Parameters;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FilterTest {
 
