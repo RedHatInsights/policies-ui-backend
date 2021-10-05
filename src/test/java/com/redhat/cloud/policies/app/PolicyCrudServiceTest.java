@@ -41,6 +41,26 @@ class PolicyCrudServiceTest extends AbstractITest {
     }
 
     @Test
+    void name() {
+        Policy policy = new Policy();
+        policy.actions = "Notification";
+        policy.name = "my-policy";
+        policy.conditions = "arch = \"x86_64\"";
+
+        String responseBody = given()
+                .basePath(API_BASE_V1_0)
+                .header(authHeader)
+                .contentType(JSON)
+                .body(Json.encode(policy))
+                .queryParam("alsoStore", true)
+                .when().post("/policies")
+                .then().statusCode(201)
+                .extract().asString();
+
+        System.out.println(responseBody);
+    }
+
+    @Test
     void test() {
         UUID policyId = createPolicy();
 

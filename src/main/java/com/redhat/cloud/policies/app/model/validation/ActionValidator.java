@@ -26,8 +26,9 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
-    List<String> validActions = new ArrayList();
+    List<String> validActions = new ArrayList<>();
 
+    @Override
     public void initialize(ValidActionS constraint) {
         validActions.add("notification");
     }

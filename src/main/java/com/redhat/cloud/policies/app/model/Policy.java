@@ -108,7 +108,6 @@ public class Policy extends PanacheEntityBase {
         return mtime.toString();
     }
 
-
     @JsonbTransient
     public void setLastTriggered(long tTime) {
         lastTriggered = tTime;
