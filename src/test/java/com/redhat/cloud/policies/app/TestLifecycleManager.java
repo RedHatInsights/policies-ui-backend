@@ -35,7 +35,6 @@ import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
 
