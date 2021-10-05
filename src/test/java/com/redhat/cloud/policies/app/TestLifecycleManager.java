@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app;
 
+import static java.util.Calendar.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -34,6 +35,7 @@ import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
 
@@ -60,7 +62,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         // System.err.println(mockServerClient.retrieveRecordedRequests(request()));
     }
 
-
     @Override
     public void inject(Object testInstance) {
         if (testInstance instanceof AbstractITest) {
@@ -70,8 +71,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     }
 
     void setupPostgres(Map<String, String> props) {
-        postgreSQLContainer =
-                new PostgreSQLContainer("postgres");
+        postgreSQLContainer = new PostgreSQLContainer<>("postgres");
         postgreSQLContainer.start();
         // Now that postgres is started, we need to get its URL and tell Quarkus
         // quarkus.datasource.driver=io.opentracing.contrib.jdbc.TracingDriver
@@ -82,7 +82,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         props.put("quarkus.datasource.username", "test");
         props.put("quarkus.datasource.password", "test");
         props.put("quarkus.datasource.jdbc.driver", "io.opentracing.contrib.jdbc.TracingDriver");
-
     }
 
     void setupMockEngine(Map<String, String> props) {
@@ -103,7 +102,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     }
 
     private void mockEngine() {
-
         mockServerClient
                 .when(request()
                         // special case to simulate that the engine has a general failure.
@@ -124,18 +122,18 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         trigger.id = "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c";
         trigger.lifecycle = new ArrayList<>();
         Map<String, Object> ev = new HashMap<>();
-        Calendar cal = Calendar.getInstance();
-        cal.set(2020, 04, 8, 10, 00, 00);
+        Calendar cal = getInstance();
+        cal.set(2020, MAY, 8, 10, 0, 0);
         ev.put("status", "ALERT_GENERATE");
         ev.put("stime", cal.getTimeInMillis());
         trigger.lifecycle.add(ev);
         ev = new HashMap<>();
-        cal.set(2020, 04, 9, 10, 00, 00);
+        cal.set(2020, MAY, 9, 10, 0, 0);
         ev.put("status", "ALERT_GENERATE");
         ev.put("stime", cal.getTimeInMillis());
         trigger.lifecycle.add(ev);
         ev = new HashMap<>();
-        cal.set(2020, 04, 10, 10, 00, 00);
+        cal.set(2020, MAY, 10, 10, 0, 0);
         ev.put("status", "ALERT_GENERATE");
         ev.put("stime", cal.getTimeInMillis());
         trigger.lifecycle.add(ev);

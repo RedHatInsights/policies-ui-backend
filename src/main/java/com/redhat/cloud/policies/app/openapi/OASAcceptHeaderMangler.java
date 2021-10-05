@@ -20,8 +20,9 @@ import io.quarkus.vertx.web.RouteFilter;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * Change the accpet header if needed for Openapi requests
+ * Change the accept header if needed for Openapi requests
  */
+@SuppressWarnings("unused")
 public class OASAcceptHeaderMangler {
 
     /*
@@ -37,7 +38,7 @@ public class OASAcceptHeaderMangler {
      */
     @RouteFilter(401)
     void oasAcceptHeaderMangler(RoutingContext rc) {
-        if (rc.normalisedPath().endsWith("openapi.json")) {
+        if (rc.normalizedPath().endsWith("openapi.json")) {
             rc.request().headers().remove("Accept");
             rc.request().headers().add("Accept", "application/json");
         }
