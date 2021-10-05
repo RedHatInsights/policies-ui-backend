@@ -55,6 +55,9 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     @Override
     public void stop() {
         postgreSQLContainer.stop();
+        // Helper to debug mock server issues
+        // System.err.println(mockServerClient.retrieveLogMessages(request()));
+        // System.err.println(mockServerClient.retrieveRecordedRequests(request()));
     }
 
 
