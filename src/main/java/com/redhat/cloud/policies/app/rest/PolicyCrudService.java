@@ -120,12 +120,6 @@ public class PolicyCrudService {
     @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
     boolean policiesHistoryEnabled;
 
-    @ConfigProperty(name = "clowder.endpoints.policies-engine", defaultValue = "NO SET")
-    String engineUrlFromClowder;
-
-    @ConfigProperty(name = "engine/mp-rest/url", defaultValue = "NO SET")
-    String engineMpRestUrl;
-
     @Inject
     @RestClient
     PolicyEngine engine;
@@ -169,9 +163,6 @@ public class PolicyCrudService {
         } else {
             log.info("Policies history is disabled. The history data will be retrieved from Infinispan.");
         }
-        // TODO This is needed to fix a Clowder issue. Remove it ASAP.
-        log.info("Engine URL from Clowder: " + engineUrlFromClowder);
-        log.info("Engine MP URL: " + engineMpRestUrl);
     }
 
     @Operation(summary = "Return all policies for a given account")
