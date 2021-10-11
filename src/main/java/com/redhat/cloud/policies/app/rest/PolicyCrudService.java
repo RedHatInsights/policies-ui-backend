@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -78,6 +79,7 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -116,16 +118,12 @@ public class PolicyCrudService {
     private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     private static final ObjectMapper OM = new ObjectMapper();
-    private static final String NOT_SET = "NOT_SET";
 
     @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
     boolean policiesHistoryEnabled;
 
-    @ConfigProperty(name = "clowder.endpoints.policies-engine", defaultValue = NOT_SET)
-    String engineUrlFromClowder;
-
-    @ConfigProperty(name = "engine/mp-rest/url", defaultValue = NOT_SET)
-    String engineMpRestUrl;
+    @ConfigProperty(name = "clowder.endpoints.policies-engine")
+    Optional<String> engineUrlFromClowder;
 
     @Inject
     @RestClient
@@ -164,6 +162,8 @@ public class PolicyCrudService {
         }
     }
 
+    private static final String ENGINE_URL_KEY = "engine/mp-rest/url";
+
     void logAtStartup(@Observes StartupEvent event) {
         if (policiesHistoryEnabled) {
             log.info("Policies history is enabled. The history data will be retrieved from the database.");
@@ -171,11 +171,12 @@ public class PolicyCrudService {
             log.info("Policies history is disabled. The history data will be retrieved from Infinispan.");
         }
         // TODO This is needed to fix a Clowder issue. Remove it ASAP.
-        log.info("Engine URL from Clowder: " + engineUrlFromClowder);
-        log.info("Engine MP URL: " + engineMpRestUrl);
-        if (!NOT_SET.equals(engineUrlFromClowder)) {
-            System.setProperty("engine/mp-rest/url", engineUrlFromClowder);
+        if (engineUrlFromClowder.isPresent()) {
+            log.info("Overriding the policies-engine URL with the config value from Clowder: " + engineUrlFromClowder.get());
+            System.setProperty(ENGINE_URL_KEY, engineUrlFromClowder.get());
         }
+        String engineUrl = ConfigProvider.getConfig().getValue(ENGINE_URL_KEY, String.class);
+        log.info(ENGINE_URL_KEY + " is set to " + engineUrl);
     }
 
     @Operation(summary = "Return all policies for a given account")
