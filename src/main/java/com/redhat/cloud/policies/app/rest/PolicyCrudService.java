@@ -116,14 +116,15 @@ public class PolicyCrudService {
     private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     private static final ObjectMapper OM = new ObjectMapper();
+    private static final String NOT_SET = "NOT_SET";
 
     @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
     boolean policiesHistoryEnabled;
 
-    @ConfigProperty(name = "clowder.endpoints.policies-engine", defaultValue = "NO SET")
+    @ConfigProperty(name = "clowder.endpoints.policies-engine", defaultValue = NOT_SET)
     String engineUrlFromClowder;
 
-    @ConfigProperty(name = "engine/mp-rest/url", defaultValue = "NO SET")
+    @ConfigProperty(name = "engine/mp-rest/url", defaultValue = NOT_SET)
     String engineMpRestUrl;
 
     @Inject
@@ -172,6 +173,9 @@ public class PolicyCrudService {
         // TODO This is needed to fix a Clowder issue. Remove it ASAP.
         log.info("Engine URL from Clowder: " + engineUrlFromClowder);
         log.info("Engine MP URL: " + engineMpRestUrl);
+        if (!NOT_SET.equals(engineUrlFromClowder)) {
+            System.setProperty("engine/mp-rest/url", engineUrlFromClowder);
+        }
     }
 
     @Operation(summary = "Return all policies for a given account")
