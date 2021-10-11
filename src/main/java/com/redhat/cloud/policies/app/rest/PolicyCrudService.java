@@ -172,8 +172,8 @@ public class PolicyCrudService {
         }
         // TODO This is needed to fix a Clowder issue. Remove it ASAP.
         if (engineUrlFromClowder.isPresent()) {
-            log.info("Overriding the policies-engine URL with the config value from Clowder: " + engineUrlFromClowder.get());
-            System.setProperty(ENGINE_URL_KEY, engineUrlFromClowder.get());
+            log.info("Overriding the policies-engine URL with the config value from Clowder: http://" + engineUrlFromClowder.get());
+            System.setProperty(ENGINE_URL_KEY, "http://" + engineUrlFromClowder.get());
         }
         String engineUrl = ConfigProvider.getConfig().getValue(ENGINE_URL_KEY, String.class);
         log.info(ENGINE_URL_KEY + " is set to " + engineUrl);
