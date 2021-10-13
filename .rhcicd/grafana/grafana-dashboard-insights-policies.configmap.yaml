@@ -18,7 +18,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1633939605951,
+      "iteration": 1634132450431,
       "links": [],
       "panels": [
         {
@@ -306,6 +306,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:117",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -314,6 +315,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:118",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -553,7 +555,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace='policies-prod',container=\"policies-engine\"}) BY (pod, namespace)",
+              "expr": "sum(container_memory_working_set_bytes{container=\"policies-engine\"}) BY (pod, namespace)",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -579,6 +581,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:42",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -587,6 +590,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:43",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -705,7 +709,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace='policies-prod',container=\"policies-ui-backend\"}) BY (pod, namespace)",
+              "expr": "sum(container_memory_working_set_bytes{container=\"policies-ui-backend\"}) BY (pod, namespace)",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -731,6 +735,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:80",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -739,6 +744,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:81",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1455,7 +1461,7 @@ data:
       "timezone": "",
       "title": "Policies Dashboard",
       "uid": "wX1EjUqZk",
-      "version": 19
+      "version": 20
     }
 kind: ConfigMap
 metadata:
