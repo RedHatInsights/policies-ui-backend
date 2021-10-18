@@ -54,8 +54,6 @@ objects:
           value: ${ENV_NAME}
         - name: PATH_PREFIX
           value: ${PATH_PREFIX}
-        - name: ENGINE_MP_REST_URL
-          value: http://policies-engine:8080
         - name: RBAC_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: RBAC_MP_REST_URL
@@ -67,8 +65,6 @@ objects:
             https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
         - name: QUARKUS_LOG_SENTRY
           value: ${SENTRY_ENABLED}
-        - name: NOTIFICATIONS_MP_REST_URL
-          value: ${NOTIFICATIONS_MP_REST_URL}
         - name: CLOWDER_FILE
           value: ${CLOWDER_FILE}
         - name: CLOWDER_ENABLED
