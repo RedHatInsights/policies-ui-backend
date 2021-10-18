@@ -92,6 +92,7 @@ objects:
     optionalDependencies:
       - rbac
       - ingress
+      - policies-engine
 
 parameters:
 - name: LOG_LEVEL
