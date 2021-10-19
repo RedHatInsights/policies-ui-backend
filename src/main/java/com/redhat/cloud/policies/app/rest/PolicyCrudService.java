@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -79,7 +78,6 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -122,9 +120,6 @@ public class PolicyCrudService {
     @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
     boolean policiesHistoryEnabled;
 
-    @ConfigProperty(name = "clowder.endpoints.policies-engine")
-    Optional<String> engineUrlFromClowder;
-
     @Inject
     @RestClient
     PolicyEngine engine;
@@ -162,22 +157,12 @@ public class PolicyCrudService {
         }
     }
 
-    private static final String ENGINE_URL_KEY = "engine/mp-rest/url";
-
     void logAtStartup(@Observes StartupEvent event) {
         if (policiesHistoryEnabled) {
             log.info("Policies history is enabled. The history data will be retrieved from the database.");
         } else {
             log.info("Policies history is disabled. The history data will be retrieved from Infinispan.");
         }
-        // TODO This is needed to fix a Clowder issue. Remove it ASAP.
-        if (engineUrlFromClowder.isPresent()) {
-            String engineUrl = "http://" + engineUrlFromClowder.get();
-            log.info("Overriding the policies-engine URL with the config value from Clowder: " + engineUrl);
-            System.setProperty(ENGINE_URL_KEY, engineUrl);
-        }
-        String engineUrl = ConfigProvider.getConfig().getValue(ENGINE_URL_KEY, String.class);
-        log.info(ENGINE_URL_KEY + " is set to " + engineUrl);
     }
 
     @Operation(summary = "Return all policies for a given account")

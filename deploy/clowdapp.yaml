@@ -69,6 +69,8 @@ objects:
           value: ${CLOWDER_FILE}
         - name: CLOWDER_ENABLED
           value: ${CLOWDER_ENABLED}
+        - name: POLICIES_HISTORY_ENABLED
+          value: ${POLICIES_HISTORY_ENABLED}
         resources:
           limits:
             cpu: ${CPU_LIMIT}
@@ -148,5 +150,6 @@ parameters:
 - name: SENTRY_ENABLED
   displayName: Enable Sentry (or not)
   value: "false"
-- name: NOTIFICATIONS_MP_REST_URL
-  value: "http://notifications-backend.notifications-ci.svc:8080/"
+- name: POLICIES_HISTORY_ENABLED
+  displayName: Enable history entries retrieval from policies-history (Postgres)
+  value: "true"
