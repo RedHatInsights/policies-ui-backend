@@ -205,6 +205,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
         <configuration>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <release>${java.release}</release>
           <source>${java.source}}</source>
         </configuration>
