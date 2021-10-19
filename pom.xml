@@ -99,7 +99,7 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-logging-sentry</artifactId>
-    </dependency>
+  </dependency>
 
     <dependency>
         <groupId>io.quarkus</groupId>
@@ -177,12 +177,6 @@
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>22.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

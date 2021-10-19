@@ -18,7 +18,7 @@ package com.redhat.cloud.policies.app;
 
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.FullTrigger;
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
