@@ -54,8 +54,6 @@ objects:
           value: ${ENV_NAME}
         - name: PATH_PREFIX
           value: ${PATH_PREFIX}
-        - name: RBAC_URL
-          value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: RBAC_MP_REST_URL
           value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
@@ -92,7 +90,6 @@ objects:
       - ingress
       - policies-engine
       - host-inventory
-
 parameters:
 - name: LOG_LEVEL
   value: INFO
@@ -137,10 +134,6 @@ parameters:
   displayName: Rbac Service Port
   description: Port to use for the RBAC service URL.
   value: "8000"
-- name: RBAC_SCHEME
-  displayName: Rbac Service Scheme
-  description: Scheme to use for the RBAC service URL. Can be either http or https
-  value: http
 - name: APP_NAME
   displayName: Application Name
   description: Application name to be used in request paths. Only used when PATH_PREFIX is also specified.
