@@ -91,6 +91,7 @@ objects:
       - rbac
       - ingress
       - policies-engine
+      - host-inventory
 
 parameters:
 - name: LOG_LEVEL
