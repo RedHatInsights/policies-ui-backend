@@ -69,6 +69,8 @@ objects:
           value: ${CLOWDER_ENABLED}
         - name: POLICIES_HISTORY_ENABLED
           value: ${POLICIES_HISTORY_ENABLED}
+        - name: QUARKUS_HTTP_PORT
+          value: "8000"
         resources:
           limits:
             cpu: ${CPU_LIMIT}
