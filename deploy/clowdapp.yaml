@@ -63,8 +63,6 @@ objects:
           value: ${SENTRY_ENABLED}
         - name: CLOWDER_FILE
           value: ${CLOWDER_FILE}
-        - name: CLOWDER_ENABLED
-          value: ${CLOWDER_ENABLED}
         - name: POLICIES_HISTORY_ENABLED
           value: ${POLICIES_HISTORY_ENABLED}
         - name: QUARKUS_HTTP_PORT
@@ -113,9 +111,6 @@ parameters:
 - description: Image name
   name: IMAGE
   value: quay.io/cloudservices/policies-ui-backend
-- description: Determines Clowder deployment
-  name: CLOWDER_ENABLED
-  value: "false"
 - description: ClowdEnv Name (stage, prod, ephemeral)
   name: ENV_NAME
   required: true
