@@ -54,8 +54,6 @@ objects:
           value: ${ENV_NAME}
         - name: PATH_PREFIX
           value: ${PATH_PREFIX}
-        - name: RBAC_MP_REST_URL
-          value: ${RBAC_SCHEME}://${RBAC_HOST}:${RBAC_PORT}
         - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
           value: ${ENV_NAME}
         - name: QUARKUS_LOG_SENTRY_DSN
@@ -124,18 +122,6 @@ parameters:
 - name: CLOWDER_FILE
   value: /cdapp/cdappconfig.json
   description: default path for cdappconfig file
-- name: RBAC_SCHEME
-  displayName: Rbac Service Scheme
-  description: Scheme to use for the RBAC service URL. Can be either http or https
-  value: http
-- name: RBAC_HOST
-  displayName: Rbac Service Host
-  description: Host to use for the RBAC service URL.
-  value: "rbac-service"
-- name: RBAC_PORT
-  displayName: Rbac Service Port
-  description: Port to use for the RBAC service URL.
-  value: "8000"
 - name: APP_NAME
   displayName: Application Name
   description: Application name to be used in request paths. Only used when PATH_PREFIX is also specified.
