@@ -1,62 +1,48 @@
 package com.redhat.cloud.policies.app.model.validation;
 
 import javax.validation.ConstraintValidatorContext;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ActionValidatorTest {
 
-    private ActionValidator testee;
-    private ConstraintValidatorContext constraintValidatorContext;
+    private final ActionValidator testee;
+    private final ConstraintValidatorContext constraintValidatorContext;
 
-    @BeforeEach
-    void setUp() {
+    public ActionValidatorTest() {
         this.testee = new ActionValidator();
         this.testee.initialize(null);
 
         this.constraintValidatorContext = mock(ConstraintValidatorContext.class);
     }
 
-    @Test
-    void shouldBeValidWhenInputIsEmpty() {
-        assertTrue(testee.isValid("", constraintValidatorContext));
+    @Nested
+    class ValidValidations {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "notification", " ; ", " ;notification"})
+        void shouldBeValid(String input) {
+            assertTrue(testee.isValid(input, constraintValidatorContext));
+        }
+
+        @Test
+        void shouldBeValidWhenInputIsNull() {
+            assertTrue(testee.isValid(null, constraintValidatorContext));
+        }
     }
 
-    @Test
-    void shouldBeValidWhenInputIsNull() {
-        assertTrue(testee.isValid(null, constraintValidatorContext));
-    }
+    @Nested
+    class InvalidValidations {
 
-    @Test
-    void shouldBeValidWhenInputIsNotification() {
-        assertTrue(testee.isValid("notification", constraintValidatorContext));
-    }
-
-    @Test
-    void shouldBeInValidWhenInputIsNotificationWithUpperCase() {
-        assertTrue(testee.isValid("Notification", constraintValidatorContext));
-    }
-
-    @Test
-    void shouldBeValidWhenInputIsEmptyAndContainsSemicolon() {
-        assertTrue(testee.isValid(" ; ", constraintValidatorContext));
-    }
-
-    @Test
-    void shouldBeValidWhenInputIsEmptyAndContainsSemicolonsAndNotification() {
-        assertTrue(testee.isValid(" ;notification", constraintValidatorContext));
-    }
-
-    @Test
-    void shouldBeInValidWhenInputIsEmptyAndContainsSemicolonAndNotificationS() {
-        assertFalse(testee.isValid(" ;notificationS", constraintValidatorContext));
-    }
-
-    @Test
-    void shouldInValidWhenInputIsEmptyAndContainsColonAndNotification() {
-        assertFalse(testee.isValid(" :notification", constraintValidatorContext));
+        @ParameterizedTest
+        @ValueSource(strings = {"Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
+        void shouldBeInValid(String input) {
+            assertFalse(testee.isValid(input, constraintValidatorContext));
+        }
     }
 }

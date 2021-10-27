@@ -40,7 +40,7 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
         String[] actions = input.split(";");
         int i = 0;
         for (String action : actions) {
-            String a = action.toLowerCase().strip();
+            String a = action.strip();
             if (a.isEmpty() || validActions.contains(a)) {
                 i++;
             }
