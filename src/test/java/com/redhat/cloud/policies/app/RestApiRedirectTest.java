@@ -62,7 +62,7 @@ class RestApiRedirectTest extends AbstractITest {
     @Test
     void storeAndDeleteNewPolicy() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
+        tp.actions = "notification";
         tp.conditions = "cores = 2";
         tp.name = "test1-redirect";
 
