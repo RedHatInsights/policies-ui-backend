@@ -41,7 +41,7 @@ class ActionValidatorTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
-        void shouldBeInValid(String input) {
+        void shouldBeInvalid(String input) {
             assertFalse(testee.isValid(input, constraintValidatorContext));
         }
     }
