@@ -32,14 +32,12 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
         if (input == null || input.isEmpty()) {
             return true;
         }
-        String[] actions = input.split(";");
-        int i = 0;
-        for (String action : actions) {
+        for (String action : input.split(";")) {
             String a = action.strip();
-            if (a.isEmpty() || VALID_ACTIONS.contains(a)) {
-                i++;
+            if (!a.isEmpty() && !VALID_ACTIONS.contains(a)) {
+                return false;
             }
         }
-        return i == actions.length;
+        return true;
     }
 }
