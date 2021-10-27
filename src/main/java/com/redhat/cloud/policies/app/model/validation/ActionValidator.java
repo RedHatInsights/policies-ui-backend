@@ -26,11 +26,7 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
-    List<String> validActions = new ArrayList<>();
-
-    public void initialize(ValidActionS constraint) {
-        validActions.add("notification");
-    }
+    private static final List<String> VALID_ACTIONS = List.of("notification");
 
     @Override
     public boolean isValid(String input, ConstraintValidatorContext context) {
@@ -41,7 +37,7 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
         int i = 0;
         for (String action : actions) {
             String a = action.strip();
-            if (a.isEmpty() || validActions.contains(a)) {
+            if (a.isEmpty() || VALID_ACTIONS.contains(a)) {
                 i++;
             }
         }
