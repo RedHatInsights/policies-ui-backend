@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.model.validation;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -25,23 +26,25 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
-    private static final List<String> VALID_ACTIONS = List.of("notification");
+    List<String> validActions = new ArrayList<>();
+
+    public void initialize(ValidActionS constraint) {
+        validActions.add("notification");
+    }
 
     @Override
     public boolean isValid(String input, ConstraintValidatorContext context) {
         if (input == null || input.isEmpty()) {
             return true;
         }
-
         String[] actions = input.split(";");
         int i = 0;
         for (String action : actions) {
             String a = action.strip();
             if (a.isEmpty() || validActions.contains(a)) {
                 i++;
-
             }
         }
-        return true;
+        return i == actions.length;
     }
 }
