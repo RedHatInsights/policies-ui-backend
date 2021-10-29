@@ -13,10 +13,14 @@ public class ClowderConfigInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(ClowderConfigInitializer.class);
     private static final String ENGINE_URL_KEY = "engine/mp-rest/url";
+    private static final String NOTIFICATIONS_URL_KEY = "notifications/mp-rest/url";
     private static final String RBAC_URL_KEY = "rbac/mp-rest/url";
 
     @ConfigProperty(name = "clowder.endpoints.policies-engine-policies-engine")
     Optional<String> policiesEngineClowderEndpoint;
+
+    @ConfigProperty(name = "clowder.endpoints.notifications-backend-notifications-backend")
+    Optional<String> notificationsBackendClowderEndpoint;
 
     @ConfigProperty(name = "clowder.endpoints.rbac-service")
     Optional<String> rbacClowderEndpoint;
@@ -26,6 +30,11 @@ public class ClowderConfigInitializer {
             String engineUrl = "http://" + policiesEngineClowderEndpoint.get();
             LOGGER.infof("Overriding the policies-engine URL with the config value from Clowder: %s", engineUrl);
             System.setProperty(ENGINE_URL_KEY, engineUrl);
+        }
+        if (notificationsBackendClowderEndpoint.isPresent()) {
+            String notificationsUrl = "http://" + notificationsBackendClowderEndpoint.get();
+            LOGGER.infof("Overriding the notifications-backend URL with the config value from Clowder: %s", notificationsUrl);
+            System.setProperty(NOTIFICATIONS_URL_KEY, notificationsUrl);
         }
         if (rbacClowderEndpoint.isPresent()) {
             String rbacUrl = "http://" + rbacClowderEndpoint.get();
