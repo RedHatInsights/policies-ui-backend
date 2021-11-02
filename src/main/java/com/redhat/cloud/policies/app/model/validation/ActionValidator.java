@@ -33,7 +33,7 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
             return true;
         }
         for (String action : input.split(";")) {
-            String a = action.toLowerCase().strip();
+            String a = action.strip();
             if (!a.isEmpty() && !VALID_ACTIONS.contains(a)) {
                 return false;
             }

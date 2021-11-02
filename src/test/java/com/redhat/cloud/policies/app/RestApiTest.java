@@ -771,7 +771,7 @@ class RestApiTest extends AbstractITest {
     @NotNull
     private String setupPolicyForHistory() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
+        tp.actions = "notification";
         tp.conditions = "cores = 2";
         tp.name = "test1";
         // Use an explicit ID; that the mock server knows
@@ -807,7 +807,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void storeNewPolicy() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
+        tp.actions = "notification";
         tp.conditions = "cores = 2";
         tp.name = "test1";
 
@@ -1016,7 +1016,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void storeAndUpdatePolicy() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
+        tp.actions = "notification";
         tp.conditions = "cores = 2";
         tp.name = "test2";
 
@@ -1107,7 +1107,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void storeAndEnableDisablePolicy() {
         TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
+        tp.actions = "notification";
         tp.conditions = "cores = 2";
         tp.name = "test2";
         tp.isEnabled = false;
