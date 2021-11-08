@@ -24,8 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -630,6 +633,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void getOnePolicyHistory() {
         String uuid = setupPolicyForHistory();
+        mockPoliciesHistory("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", "VM 22", 2);
 
         ExtractableResponse<Response> er =
                 given()
@@ -656,25 +660,9 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
-    void getOnePolicyHistoryBadSort() {
-        String uuid = setupPolicyForHistory();
-
-        try {
-            given()
-                    .header(authHeader)
-                    .contentType(ContentType.JSON)
-                    .when()
-                    .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger?sortColumn=id")
-                    .then()
-                    .statusCode(400);
-        } finally {
-            deletePolicyById(uuid);
-        }
-    }
-
-    @Test
     void getOnePolicyHistoryFilterByName() {
         String uuid = setupPolicyForHistory();
+        mockPoliciesHistory("dce4760b-0000-48f0-0000-7a07a6a45d1d", "VM", 1);
 
         ExtractableResponse<Response> er =
                 given()
@@ -704,6 +692,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void getOnePolicyHistoryFilterByNameNotEqual() {
         String uuid = setupPolicyForHistory();
+        mockPoliciesHistory("dce4760b-0000-48f0-aaaa-7a07a6a45d1d", "VM22", 1);
 
         ExtractableResponse<Response> er =
                 given()
@@ -733,6 +722,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void getOnePolicyHistoryFilterById() {
         String uuid = setupPolicyForHistory();
+        mockPoliciesHistory("dce4760b-0000-48f0-0000-7a07a6a45d1d", "VM", 1);
 
         ExtractableResponse<Response> er =
                 given()
@@ -762,6 +752,7 @@ class RestApiTest extends AbstractITest {
     @Test
     void getOnePolicyHistoryFilterByIdLike() {
         String uuid = setupPolicyForHistory();
+        mockPoliciesHistory("dce4760b-0000-48f0-0000-7a07a6a45d1d", "VM", 1);
 
         try {
             given()
@@ -1780,5 +1771,21 @@ class RestApiTest extends AbstractITest {
         assertNotNull(body);
         assertTrue(body.contains("Something went wrong,"));
         assertFalse(body.contains("RESTEASY00"));
+    }
+
+    private void mockPoliciesHistory(String hostId, String hostName, int count) {
+        String tenantId = "1234";
+        UUID policyId = UUID.fromString("8671900e-9d31-47bf-9249-8f45698ede72");
+        List<PoliciesHistoryEntry> entries = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
+            entry.setTenantId(tenantId);
+            entry.setPolicyId(policyId.toString());
+            entry.setHostId(hostId);
+            entry.setHostName(hostName);
+            entries.add(entry);
+        }
+        when(policiesHistoryRepository.count(eq(tenantId), eq(policyId), any())).thenReturn((long) entries.size());
+        when(policiesHistoryRepository.find(eq(tenantId), eq(policyId), any())).thenReturn(entries);
     }
 }

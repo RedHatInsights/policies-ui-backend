@@ -8,15 +8,12 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
 import java.util.UUID;
 
-import static com.redhat.cloud.policies.app.rest.PolicyCrudService.POLICIES_HISTORY_ENABLED_CONF_KEY;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,16 +26,6 @@ class PolicyCrudServiceTest extends AbstractITest {
 
     @Inject
     PoliciesHistoryTestHelper helper;
-
-    @BeforeAll
-    public static void beforeAll() {
-        System.setProperty(POLICIES_HISTORY_ENABLED_CONF_KEY, "true");
-    }
-
-    @AfterAll
-    public static void afterAll() {
-        System.clearProperty(POLICIES_HISTORY_ENABLED_CONF_KEY);
-    }
 
     @Test
     void test() {
