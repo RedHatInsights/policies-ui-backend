@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.policies.app.EnvironmentFlags;
 import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -25,6 +26,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ServerErrorException;
@@ -59,9 +61,16 @@ public class UserConfigService {
     @ConfigProperty(name = "notifications.application", defaultValue = "policies")
     String application;
 
+    @Inject
+    EnvironmentFlags environmentFlags;
+
     @GET
     @Path("/preferences")
     public UserPreferences getSettingsSchema() {
+
+        if (environmentFlags.isFedramp()) {
+            throw new NotFoundException();
+        }
 
         if (!user.canReadPolicies()) {
             throw new ForbiddenException("You don't have permission to read settings");
