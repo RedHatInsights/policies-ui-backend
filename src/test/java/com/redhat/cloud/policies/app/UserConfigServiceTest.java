@@ -83,7 +83,7 @@ class UserConfigServiceTest extends AbstractITest {
 
     @Test
     void testFedramp() {
-        when(environmentFlags.isFedramp()).thenReturn(Boolean.FALSE);
+        when(environmentFlags.isFedramp()).thenReturn(Boolean.TRUE);
 
         given()
                 .header(authHeader)
