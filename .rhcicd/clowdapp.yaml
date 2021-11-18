@@ -21,7 +21,7 @@ objects:
     testing:
       iqePlugin: policies
     deployments:
-    - name: policies-ui-backend
+    - name: service
       minReplicas: ${{MIN_REPLICAS}}
       web: true
       podSpec:
@@ -44,7 +44,7 @@ objects:
             path: /health/ready
             port: 8000
             scheme: HTTP
-          initialDelaySeconds: 420
+          initialDelaySeconds: 60
           periodSeconds: 10
           timeoutSeconds: 1
           successThreshold: 1
@@ -54,7 +54,7 @@ objects:
             path: /health/live
             port: 8000
             scheme: HTTP
-          initialDelaySeconds: 420
+          initialDelaySeconds: 60
           periodSeconds: 10
           timeoutSeconds: 1
           successThreshold: 1
@@ -81,13 +81,13 @@ parameters:
   description: Enable Cloudwatch (or not)
   value: "false"
 - name: CPU_LIMIT
-  description: CPU limit on ephemeral
+  description: CPU limit
   value: 500m
 - name: CPU_REQUEST
-  description: CPU request on ephemeral
+  description: CPU request
   value: 500m
 - name: ENV_NAME
-  description: ClowdEnvironment name (stage, prod, ephemeral)
+  description: ClowdEnvironment name (ephemeral, stage, prod)
   required: true
 - name: IMAGE
   description: Image URL
@@ -96,10 +96,10 @@ parameters:
   description: Image tag
   value: latest
 - name: MEMORY_LIMIT
-  description: Memory limit on ephemeral
+  description: Memory limit
   value: 500Mi
 - name: MEMORY_REQUEST
-  description: Memory request on ephemeral
+  description: Memory request
   value: 250Mi
 - name: MIN_REPLICAS
   value: "1"
