@@ -17,7 +17,8 @@ objects:
     - policies-engine
     - rbac
     database:
-      sharedDbAppName: policies-engine
+      name: policies-ui-backend
+      version: 12
     testing:
       iqePlugin: policies
     deployments:
