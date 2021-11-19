@@ -16,10 +16,10 @@ public class ClowderConfigInitializer {
     private static final String NOTIFICATIONS_URL_KEY = "notifications/mp-rest/url";
     private static final String RBAC_URL_KEY = "rbac/mp-rest/url";
 
-    @ConfigProperty(name = "clowder.endpoints.policies-engine-policies-engine")
+    @ConfigProperty(name = "clowder.endpoints.policies-engine-service")
     Optional<String> policiesEngineClowderEndpoint;
 
-    @ConfigProperty(name = "clowder.endpoints.notifications-backend-notifications-backend")
+    @ConfigProperty(name = "clowder.endpoints.notifications-backend-service")
     Optional<String> notificationsBackendClowderEndpoint;
 
     @ConfigProperty(name = "clowder.endpoints.rbac-service")
