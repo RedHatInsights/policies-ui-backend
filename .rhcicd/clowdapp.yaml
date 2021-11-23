@@ -77,6 +77,8 @@ objects:
           value: https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
         - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
           value: ${ENV_NAME}
+        - name: RBAC_MP_REST_READTIMEOUT
+          value: ${RBAC_READ_TIMEOUT}
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
@@ -107,6 +109,9 @@ parameters:
 - name: POLICIES_HISTORY_ENABLED
   description: Enable history entries retrieval from policies-history (Postgres)
   value: "true"
+- name: RBAC_READ_TIMEOUT
+  description: Delay in milliseconds before an RBAC query is interrupted
+  value: "2000"
 - name: SENTRY_ENABLED
   description: Enable Sentry (or not)
   value: "false"
