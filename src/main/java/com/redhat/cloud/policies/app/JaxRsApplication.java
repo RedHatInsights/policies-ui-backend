@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app;
 
-import io.vertx.ext.web.Router;
+import io.quarkus.runtime.StartupEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +44,7 @@ public class JaxRsApplication extends Application {
     String loggerName;
 
     // Server init is done here, so we can do some more initialisation
-    void init(@Observes Router router) {
+    void init(@Observes StartupEvent event) {
         initAccessLogFilter();
 
         log.info(readGitProperties());
