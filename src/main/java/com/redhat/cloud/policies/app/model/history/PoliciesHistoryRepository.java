@@ -82,6 +82,14 @@ public class PoliciesHistoryRepository {
         return query.getResultList();
     }
 
+    public Long getLastTriggerTime(String tenantId, UUID policyId) {
+        String hql = "SELECT MAX(ctime) FROM PoliciesHistoryEntry WHERE tenantId = :tenantId AND policyId = :policyId";
+        return session.createQuery(hql, Long.class)
+                .setParameter("tenantId", tenantId)
+                .setParameter("policyId", policyId.toString())
+                .getSingleResult();
+    }
+
     private static String addFiltersConditions(String hql, List<Filter.FilterItem> filterItems) {
         // The filters from the pager are added to the HQL query.
         for (Filter.FilterItem filterItem : filterItems) {
