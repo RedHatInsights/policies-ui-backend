@@ -24,9 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
@@ -36,6 +39,7 @@ import io.restassured.response.ExtractableResponse;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,6 +62,9 @@ class RestApiTest extends AbstractITest {
 
     @Inject
     TestUUIDHelperBean uuidHelper;
+
+    @InjectMock
+    PoliciesHistoryRepository policiesHistoryRepository;
 
     @AfterEach
     void cleanUUID() {
@@ -578,6 +585,9 @@ class RestApiTest extends AbstractITest {
 
     @Test
     void testGetOnePolicy() {
+        when(policiesHistoryRepository.getLastTriggerTime("1234", UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")))
+                .thenReturn(new GregorianCalendar(2020, 4, 10, 10, 0, 0).getTimeInMillis());
+
         JsonPath jsonPath =
                 given()
                         .header(authHeader)
