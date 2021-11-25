@@ -16,25 +16,45 @@
  */
 package com.redhat.cloud.policies.app.model.validation;
 
+import com.redhat.cloud.policies.app.EnvironmentFlags;
+
 import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
  * Do the validation if passed actions are good or not.
  */
+@ApplicationScoped
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
+    @Inject
+    EnvironmentFlags environmentFlags;
+
     private static final List<String> VALID_ACTIONS = List.of("notification");
+    private static final List<String> VALID_ACTIONS_FEDRAMP = List.of();
+
+    public List<String> getValidActions() {
+        if (environmentFlags.isFedramp()) {
+            return VALID_ACTIONS_FEDRAMP;
+        }
+
+        return VALID_ACTIONS;
+    }
 
     @Override
     public boolean isValid(String input, ConstraintValidatorContext context) {
         if (input == null || input.isEmpty()) {
             return true;
         }
+
+        final List<String> validActions = getValidActions();
+
         for (String action : input.split(";")) {
             String a = action.strip();
-            if (!a.isEmpty() && !VALID_ACTIONS.contains(a)) {
+            if (!a.isEmpty() && !validActions.contains(a)) {
                 return false;
             }
         }

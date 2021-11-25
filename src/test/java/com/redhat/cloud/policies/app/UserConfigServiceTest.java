@@ -25,6 +25,7 @@ import static org.mockserver.model.HttpResponse.response;
 import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.Header;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -34,6 +35,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.JsonBody;
 
+import static org.mockito.Mockito.when;
+
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -41,6 +44,9 @@ import org.mockserver.model.JsonBody;
 class UserConfigServiceTest extends AbstractITest {
 
     private static final String PREFERENCE_URL = API_BASE_V1_0 + "/user-config/preferences";
+
+    @InjectMock
+    EnvironmentFlags environmentFlags;
 
     @BeforeAll
     static void setUpEnv() {
@@ -73,6 +79,18 @@ class UserConfigServiceTest extends AbstractITest {
         } finally {
             clearMockValue();
         }
+    }
+
+    @Test
+    void testFedramp() {
+        when(environmentFlags.isFedramp()).thenReturn(Boolean.TRUE);
+
+        given()
+                .header(authHeader)
+                .when()
+                .get(PREFERENCE_URL)
+                .then()
+                .statusCode(404);
     }
 
     private void clearMockValue() {

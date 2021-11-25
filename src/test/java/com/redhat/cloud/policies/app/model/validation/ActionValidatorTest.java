@@ -2,22 +2,30 @@ package com.redhat.cloud.policies.app.model.validation;
 
 import javax.validation.ConstraintValidatorContext;
 
+import com.redhat.cloud.policies.app.EnvironmentFlags;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ActionValidatorTest {
 
     private final ActionValidator testee;
     private final ConstraintValidatorContext constraintValidatorContext;
 
+    EnvironmentFlags environmentFlags;
+
     public ActionValidatorTest() {
+        this.environmentFlags = Mockito.mock(EnvironmentFlags.class);
         this.testee = new ActionValidator();
         this.testee.initialize(null);
-
+        this.testee.environmentFlags = environmentFlags;
         this.constraintValidatorContext = mock(ConstraintValidatorContext.class);
     }
 
@@ -41,6 +49,41 @@ class ActionValidatorTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
+        void shouldBeInvalid(String input) {
+            assertFalse(testee.isValid(input, constraintValidatorContext));
+        }
+    }
+
+    @Nested
+    class ValidFedrampValidations {
+
+        @BeforeEach
+        public void beforeEach() {
+            when(environmentFlags.isFedramp()).thenReturn(true);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "", " ; "})
+        void shouldBeValid(String input) {
+            assertTrue(testee.isValid(input, constraintValidatorContext));
+        }
+
+        @Test
+        void shouldBeValidWhenInputIsNull() {
+            assertTrue(testee.isValid(null, constraintValidatorContext));
+        }
+    }
+
+    @Nested
+    class InvalidFedrampValidations {
+
+        @BeforeEach
+        public void beforeEach() {
+            when(environmentFlags.isFedramp()).thenReturn(true);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"notification", " ;notification", "Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
         void shouldBeInvalid(String input) {
             assertFalse(testee.isValid(input, constraintValidatorContext));
         }
