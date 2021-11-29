@@ -63,8 +63,6 @@ objects:
         env:
         - name: ENV_NAME
           value: ${ENV_NAME}
-        - name: POLICIES_HISTORY_ENABLED
-          value: ${POLICIES_HISTORY_ENABLED}
         - name: QUARKUS_HTTP_PORT
           value: "8000"
         - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
@@ -106,9 +104,6 @@ parameters:
   value: 250Mi
 - name: MIN_REPLICAS
   value: "1"
-- name: POLICIES_HISTORY_ENABLED
-  description: Enable history entries retrieval from policies-history (Postgres)
-  value: "true"
 - name: RBAC_READ_TIMEOUT
   description: Delay in milliseconds before an RBAC query is interrupted
   value: "2000"

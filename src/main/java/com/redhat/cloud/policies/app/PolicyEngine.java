@@ -30,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
 
 import com.redhat.cloud.policies.app.model.engine.Trigger;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -123,19 +122,4 @@ public interface PolicyEngine {
     @Path("/triggers/{triggerId}/enable")
     void disableTrigger(@PathParam("triggerId") UUID triggerId,
                         @HeaderParam("Hawkular-Tenant") String customerId);
-
-    @GET
-    @Consumes("application/json")
-    Response findLastTriggered(@QueryParam("triggerIds") String triggerIds,
-                               @QueryParam("thin") boolean thin,
-                               @QueryParam("page") int page,
-                               @QueryParam("per_page") int per_page,
-                               // Once MP-RestClient 2.0 is available, we can turn the next lines
-                               // into String[] and set the query param style accordingly.
-                               @QueryParam("sort") String sort1,
-                               @QueryParam("sort") String sort2,
-                               @QueryParam("order") String order1,
-                               @QueryParam("order") String order2,
-                               @QueryParam("tagQuery") String tagQuery,
-                               @HeaderParam("Hawkular-Tenant") String customerId);
 }

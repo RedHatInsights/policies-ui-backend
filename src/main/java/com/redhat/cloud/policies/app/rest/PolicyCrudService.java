@@ -40,7 +40,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.json.JsonString;
 import javax.persistence.EntityManager;
@@ -73,12 +72,8 @@ import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
-import io.opentracing.Scope;
-import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
-import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -94,9 +89,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 
-import static com.redhat.cloud.policies.app.model.filter.PolicyHistoryTagFilterHelper.getTagsFilterFromPager;
-import static java.lang.Integer.min;
-
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
@@ -111,14 +103,9 @@ public class PolicyCrudService {
     public static final String ERROR_STRING = "error";
     public static final String CTIME_STRING = "ctime";
 
-    public static final String POLICIES_HISTORY_ENABLED_CONF_KEY = "policies-history.enabled";
-
     private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     private static final ObjectMapper OM = new ObjectMapper();
-
-    @ConfigProperty(name = POLICIES_HISTORY_ENABLED_CONF_KEY, defaultValue = "false")
-    boolean policiesHistoryEnabled;
 
     @Inject
     @RestClient
@@ -154,14 +141,6 @@ public class PolicyCrudService {
     private static class PagedResponseOfPolicy extends PagingUtils.PagedResponse<Policy> {
         private PagedResponseOfPolicy(Page<Policy> page) {
             super(page);
-        }
-    }
-
-    void logAtStartup(@Observes StartupEvent event) {
-        if (policiesHistoryEnabled) {
-            log.info("Policies history is enabled. The history data will be retrieved from the database.");
-        } else {
-            log.info("Policies history is disabled. The history data will be retrieved from Infinispan.");
         }
     }
 
@@ -945,15 +924,7 @@ public class PolicyCrudService {
         return builder.build();
     }
 
-    private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) throws Exception {
-        if (policiesHistoryEnabled) {
-            return buildHistoryResponseFromDatabase(policyId, pager);
-        } else {
-            return buildHistoryResponseFromEngineRestCall(policyId, pager);
-        }
-    }
-
-    private ResponseBuilder buildHistoryResponseFromDatabase(UUID policyId, Pager pager) {
+    private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
         String tenantId = user.getAccount();
 
@@ -971,131 +942,6 @@ public class PolicyCrudService {
         return PagingUtils.responseBuilder(itemsPage);
     }
 
-    // TODO Delete this method after we're done retrieving the history from the engine REST API.
-    private ResponseBuilder buildHistoryResponseFromEngineRestCall(UUID policyId, Pager pager) throws Exception {
-        int limit = pager.getLimit();
-        // We don't allow unlimited or values > 200
-        limit = limit == Pager.NO_LIMIT ? 50 : min(limit, 200);
-        int pageNum = pager.getOffset() / limit;
-
-        // Once Quarkus supports MP rest client 2.0 we can use
-        // String[] here and use some special query-param style to
-        // support this
-        String sort1 = null;
-        String sort2 = null;
-        String order1 = null;
-        String order2 = null;
-
-        if (pager.getSort() != null) {
-            List<Sort.Column> columns = pager.getSort().getColumns();
-            if (columns.size() > 0) {
-                sort1 = getSortFromPageColumn(columns.get(0));
-                order1 = getOrderFromPageColumn(columns.get(0));
-            }
-            if (columns.size() > 1) {
-                sort2 = getSortFromPageColumn(columns.get(1));
-                order2 = getOrderFromPageColumn(columns.get(1));
-            }
-        }
-
-        String tagQuery = getTagsFilterFromPager(pager);
-
-        long totalCount;
-        Response response = null;
-        String alerts;
-        Span span = tracer.buildSpan("fetchLastTriggeredFromEngine").asChildOf(tracer.activeSpan()).start();
-        Scope scope = tracer.scopeManager().activate(span);
-        try {
-            response = engine.findLastTriggered(policyId.toString(),
-                    true, // thin
-                    pageNum, limit,
-                    sort1, sort2, order1, order2, // See Comment in engine def
-                    tagQuery,
-                    user.getAccount());
-            String countHeader = response.getHeaderString("X-Total-Count");
-            totalCount = Long.parseLong(countHeader);
-            alerts = response.readEntity(String.class);
-        } catch (Exception e) {
-            String msg = "Retrieval of history from engine failed with: " + e.getMessage();
-            span.log(msg);
-            span.setTag(ERROR_STRING, true);
-            log.warning(msg);
-            return Response.serverError().entity(msg);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-            if (span != null) {
-                span.finish();
-            }
-            if (scope != null) {
-                scope.close();
-            }
-        }
-
-        List<HistoryItem> items = new ArrayList<>();
-
-        // The engine may not have returned data to us
-        if (totalCount > 0) {
-            span = tracer.buildSpan("extractTriggerHistory").asChildOf(tracer.activeSpan()).start();
-            try (Scope ignored = tracer.scopeManager().activate(span)) {
-                parseHistoryFromEngine(alerts, items);
-            } finally {
-                if (span != null) {
-                    span.finish();
-                }
-            }
-        }
-        Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
-        return PagingUtils.responseBuilder(itemsPage);
-    }
-
-    public static void parseHistoryFromEngine(String alerts, List<HistoryItem> items) throws JsonProcessingException {
-
-        List<Map<String, Object>> data = OM.readValue(alerts, new TypeReference<>() {
-        });
-        for (Map<String, Object> value : data) {
-            Long ctime = (Long) value.get(CTIME_STRING);
-            List<Map<String, String>> tags = (List<Map<String, String>>) value.get("tags");
-            String inventory_id = null;
-            String name = null;
-            for (Map<String, String> tag : tags) {
-                if (tag.containsKey("inventory_id")) {
-                    inventory_id = tag.get("inventory_id");
-                }
-                if (tag.containsKey("display_name")) {
-                    name = tag.get("display_name");
-                }
-            }
-            if (name == null || inventory_id == null) {
-                throw new IllegalStateException("Name or inventory_id not found in tags");
-            }
-            HistoryItem hi = new HistoryItem(ctime, inventory_id, name);
-            items.add(hi);
-        }
-    }
-
-    private String getSortFromPageColumn(Sort.Column column) {
-        String sort = column.getName();
-        switch (sort) {
-            case "name":
-                sort = "tags.display_name";
-                break;
-            case CTIME_STRING:
-            case "mtime":
-                sort = CTIME_STRING;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown sort column: " + sort);
-        }
-        return sort;
-    }
-
-    private String getOrderFromPageColumn(Sort.Column column) {
-        String order = column.getDirection().equals(Sort.Direction.Ascending) ? "asc" : "desc";
-        return order;
-    }
-
     private Response isNameUnique(Policy policy) {
         Policy tmp = Policy.findByName(user.getAccount(), policy.name);
 
@@ -1105,6 +951,4 @@ public class PolicyCrudService {
 
         return null;
     }
-
-
 }
