@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
 import javax.enterprise.event.Observes;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -49,6 +51,10 @@ public class JaxRsApplication extends Application {
 
         log.info(readGitProperties());
 
+        logExternalServiceUrl("engine/mp-rest/url");
+        logExternalServiceUrl("notifications/mp-rest/url");
+        logExternalServiceUrl("rbac/mp-rest/url");
+
         // Generate a token
         StuffHolder.getInstance();
     }
@@ -68,7 +74,7 @@ public class JaxRsApplication extends Application {
         try {
             return readFromInputStream(inputStream);
         } catch (IOException e) {
-            log.log(Logger.Level.ERROR, "Could not read git.properties.", e);
+            log.error("Could not read git.properties.", e);
             return "Version information could not be retrieved";
         }
     }
@@ -85,5 +91,9 @@ public class JaxRsApplication extends Application {
             }
         }
         return resultStringBuilder.toString();
+    }
+
+    private void logExternalServiceUrl(String configKey) {
+        log.infof(configKey + "=%s", ConfigProvider.getConfig().getValue(configKey, String.class));
     }
 }
