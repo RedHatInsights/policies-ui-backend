@@ -77,6 +77,8 @@ objects:
           value: ${ENV_NAME}
         - name: RBAC_MP_REST_READTIMEOUT
           value: ${RBAC_READ_TIMEOUT}
+        - name: FLAG_IS_FEDRAMP
+          value: ${FLAG_IS_FEDRAMP}
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
@@ -109,4 +111,7 @@ parameters:
   value: "2000"
 - name: SENTRY_ENABLED
   description: Enable Sentry (or not)
+  value: "false"
+- name: FLAG_IS_FEDRAMP
+  description: Marks fedramp environments
   value: "false"
