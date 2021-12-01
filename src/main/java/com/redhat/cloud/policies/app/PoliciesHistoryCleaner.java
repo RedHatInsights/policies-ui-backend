@@ -11,6 +11,8 @@ import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 @Singleton
 public class PoliciesHistoryCleaner {
 
@@ -26,7 +28,7 @@ public class PoliciesHistoryCleaner {
      * The policies UI shows a retention time for policies history entries.
      * This scheduled job deletes from the database the history entries which are older than that retention time.
      */
-    @Scheduled(identity = "PoliciesHistoryCleaner", every = "${policies-history.cleaner.period}")
+    @Scheduled(identity = "PoliciesHistoryCleaner", every = "${policies-history.cleaner.period}", delay = 5L, delayUnit = MINUTES)
     @Transactional
     public void clean() {
         Duration deleteDelay = ConfigProvider.getConfig().getOptionalValue(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, Duration.class)
