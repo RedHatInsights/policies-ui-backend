@@ -75,7 +75,7 @@ objects:
           value: https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
         - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
           value: ${ENV_NAME}
-        - name: RBAC_MP_REST_READTIMEOUT
+        - name: QUARKUS_REST_CLIENT_RBAC_READ_TIMEOUT
           value: ${RBAC_READ_TIMEOUT}
         - name: FLAG_IS_FEDRAMP
           value: ${FLAG_IS_FEDRAMP}
