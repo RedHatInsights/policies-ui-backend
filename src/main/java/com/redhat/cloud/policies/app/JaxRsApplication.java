@@ -51,9 +51,9 @@ public class JaxRsApplication extends Application {
 
         log.info(readGitProperties());
 
-        logExternalServiceUrl("engine/mp-rest/url");
-        logExternalServiceUrl("notifications/mp-rest/url");
-        logExternalServiceUrl("rbac/mp-rest/url");
+        logExternalServiceUrl("quarkus.rest-client.engine.url");
+        logExternalServiceUrl("quarkus.rest-client.notifications.url");
+        logExternalServiceUrl("quarkus.rest-client.rbac.url");
 
         // Generate a token
         StuffHolder.getInstance();

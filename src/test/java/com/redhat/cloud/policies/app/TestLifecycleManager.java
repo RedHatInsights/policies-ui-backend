@@ -95,9 +95,9 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         mockRbac();
         mockEngine();
 
-        props.put("engine/mp-rest/url", mockServerUrl);
-        props.put("rbac/mp-rest/url", mockServerUrl);
-        props.put("notifications/mp-rest/url", mockServerUrl);
+        props.put("quarkus.rest-client.engine.url", mockServerUrl);
+        props.put("quarkus.rest-client.rbac.url", mockServerUrl);
+        props.put("quarkus.rest-client.notifications.url", mockServerUrl);
 
     }
 
