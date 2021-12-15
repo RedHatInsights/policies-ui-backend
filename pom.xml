@@ -115,6 +115,8 @@
       <groupId>io.quarkiverse.logging.cloudwatch</groupId>
       <artifactId>quarkus-logging-cloudwatch</artifactId>
       <version>4.0.1</version>
+
+
     </dependency>
 
     <!-- Configuration dependencies -->
