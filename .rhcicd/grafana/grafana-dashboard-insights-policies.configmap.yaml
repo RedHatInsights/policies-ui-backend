@@ -11,15 +11,23 @@ data:
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
             "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
             "type": "dashboard"
           }
         ]
       },
       "editable": true,
+      "fiscalYearStartMonth": 0,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1634132450431,
+      "iteration": 1639645180409,
       "links": [],
+      "liveNow": false,
       "panels": [
         {
           "aliasColors": {},
@@ -27,12 +35,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -59,7 +61,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -69,7 +71,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(http_server_requests_seconds_count{container=\"policies-engine\"}[5m]) * 60) by (status)",
+              "exemplar": true,
+              "expr": "sum(rate(http_server_requests_seconds_count{container=\"policies-engine-service\"}[5m]) * 60) by (status)",
               "interval": "",
               "legendFormat": "{{status}}",
               "refId": "A"
@@ -95,6 +98,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:174",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -103,6 +107,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:175",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -125,12 +130,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -157,7 +156,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -205,6 +204,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:203",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -213,6 +213,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:204",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -232,12 +233,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -264,7 +259,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -331,27 +326,45 @@ data:
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#299c46",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 60
+                  },
+                  {
+                    "color": "#d44a3a",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
             },
             "overrides": []
-          },
-          "format": "percent",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": true,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
           },
           "gridPos": {
             "h": 8,
@@ -362,38 +375,21 @@ data:
           "id": 38,
           "interval": null,
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
           "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": true,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": true
+          "options": {
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                  "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
           },
-          "tableColumn": "",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
               "expr": "100 * kubelet_volume_stats_used_bytes{persistentvolumeclaim=\"policies-engine-data\"} / (kubelet_volume_stats_used_bytes{persistentvolumeclaim=\"policies-engine-data\"} + kubelet_volume_stats_available_bytes{persistentvolumeclaim=\"policies-engine-data\"})",
@@ -401,13 +397,13 @@ data:
               "groupBy": [
                 {
                   "params": [
-                    "$__interval"
+                      "$__interval"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                      "null"
                   ],
                   "type": "fill"
                 }
@@ -424,7 +420,7 @@ data:
                 [
                   {
                     "params": [
-                      "value"
+                        "value"
                     ],
                     "type": "field"
                   },
@@ -437,24 +433,13 @@ data:
               "tags": []
             }
           ],
-          "thresholds": "60,80",
           "title": "Engine persistent volume disk usage",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
+          "type": "gauge"
         },
         {
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -486,17 +471,19 @@ data:
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                  "mean"
               ],
               "fields": "",
               "values": false
             },
+            "text": {},
             "textMode": "auto"
           },
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
-              "expr": "kube_pod_container_status_restarts_total{container=\"policies-engine\"}",
+              "exemplar": true,
+              "expr": "kube_pod_container_status_restarts_total{container=\"policies-engine-service\"}",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -513,12 +500,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -545,7 +526,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -555,7 +536,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{container=\"policies-engine\"}) BY (pod, namespace)",
+              "exemplar": true,
+              "expr": "sum(container_memory_working_set_bytes{container=\"policies-engine-service\"}) BY (pod, namespace)",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -608,7 +590,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -640,17 +621,19 @@ data:
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                  "mean"
               ],
               "fields": "",
               "values": false
             },
+            "text": {},
             "textMode": "auto"
           },
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
-              "expr": "kube_pod_container_status_restarts_total{container=\"policies-ui-backend\"}",
+              "exemplar": true,
+              "expr": "kube_pod_container_status_restarts_total{container=\"policies-ui-backend-service\"}",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -667,12 +650,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -699,7 +676,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -709,7 +686,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{container=\"policies-ui-backend\"}) BY (pod, namespace)",
+              "exemplar": true,
+              "expr": "sum(container_memory_working_set_bytes{container=\"policies-ui-backend-service\"}) BY (pod, namespace)",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -766,7 +744,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -798,7 +775,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -822,13 +799,13 @@ data:
               "groupBy": [
                 {
                   "params": [
-                    "$__interval"
+                      "$__interval"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                      "null"
                   ],
                   "type": "fill"
                 }
@@ -843,7 +820,7 @@ data:
                 [
                   {
                     "params": [
-                      "value"
+                        "value"
                     ],
                     "type": "field"
                   },
@@ -907,6 +884,10 @@ data:
         {
           "collapsed": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -927,7 +908,6 @@ data:
           "description": "Proportion of 5xx status codes returned from this service.",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -959,7 +939,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -974,13 +954,13 @@ data:
               "groupBy": [
                 {
                   "params": [
-                    "$__interval"
+                      "$__interval"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                      "null"
                   ],
                   "type": "fill"
                 }
@@ -995,7 +975,7 @@ data:
                 [
                   {
                     "params": [
-                      "value"
+                        "value"
                     ],
                     "type": "field"
                   },
@@ -1065,12 +1045,6 @@ data:
           },
           "dataFormat": "tsbuckets",
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "gridPos": {
             "h": 9,
             "w": 16,
@@ -1093,13 +1067,13 @@ data:
               "groupBy": [
                 {
                   "params": [
-                    "$__interval"
+                      "$__interval"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                      "null"
                   ],
                   "type": "fill"
                 }
@@ -1115,7 +1089,7 @@ data:
                 [
                   {
                     "params": [
-                      "value"
+                        "value"
                     ],
                     "type": "field"
                   },
@@ -1161,7 +1135,6 @@ data:
           "decimals": 0,
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1196,7 +1169,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1206,7 +1179,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "base_thread_count{container=\"policies-ui-backend\"}",
+              "exemplar": true,
+              "expr": "base_thread_count{container=\"policies-ui-backend-service\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 5,
@@ -1236,6 +1210,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:249",
               "decimals": 0,
               "format": "short",
               "label": null,
@@ -1245,6 +1220,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:250",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1266,7 +1242,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1302,7 +1277,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1323,7 +1298,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend\"}",
+              "exemplar": true,
+              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend-service\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1332,7 +1308,8 @@ data:
               "refId": "A"
             },
             {
-              "expr": " base_memory_maxHeap_bytes{container=\"policies-ui-backend\"}",
+              "exemplar": true,
+              "expr": " base_memory_maxHeap_bytes{container=\"policies-ui-backend-service\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1340,7 +1317,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend\"}",
+              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend-service\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1369,6 +1346,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:274",
               "format": "bytes",
               "label": null,
               "logBase": 1,
@@ -1377,6 +1355,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:275",
               "format": "percentunit",
               "label": "",
               "logBase": 1,
@@ -1392,20 +1371,22 @@ data:
         }
       ],
       "refresh": "5m",
-      "schemaVersion": 26,
+      "schemaVersion": 32,
       "style": "dark",
       "tags": [
-        "policies"
+          "policies"
       ],
       "templating": {
         "list": [
           {
             "allValue": null,
             "current": {
-              "selected": false,
+              "selected": true,
               "text": "stage",
               "value": "crcs02ue1-prometheus"
             },
+            "description": null,
+            "error": null,
             "hide": 0,
             "includeAll": false,
             "label": "environment",
@@ -1424,6 +1405,7 @@ data:
               }
             ],
             "query": "crcs02ue1-prometheus, crcp01ue1-prometheus",
+            "queryValue": "",
             "skipUrlSync": false,
             "type": "custom"
           }
@@ -1435,33 +1417,33 @@ data:
       },
       "timepicker": {
         "refresh_intervals": [
-          "5s",
-          "10s",
-          "30s",
-          "1m",
-          "5m",
-          "15m",
-          "30m",
-          "1h",
-          "2h",
-          "1d"
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
         ],
         "time_options": [
-          "5m",
-          "15m",
-          "1h",
-          "6h",
-          "12h",
-          "24h",
-          "2d",
-          "7d",
-          "30d"
+            "5m",
+            "15m",
+            "1h",
+            "6h",
+            "12h",
+            "24h",
+            "2d",
+            "7d",
+            "30d"
         ]
       },
       "timezone": "",
       "title": "Policies Dashboard",
       "uid": "wX1EjUqZk",
-      "version": 20
+      "version": 21
     }
 kind: ConfigMap
 metadata:
