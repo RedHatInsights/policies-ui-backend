@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
-import static com.redhat.cloud.policies.app.PoliciesHistoryCleaner.POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
@@ -24,36 +23,11 @@ class PoliciesHistoryCleanerTest {
     @Inject
     Session session;
 
-    @Inject
-    PoliciesHistoryCleaner policiesHistoryCleaner;
-
     @BeforeEach
     @Transactional
     void beforeEach() {
         session.createQuery("DELETE FROM PoliciesHistoryEntry")
                 .executeUpdate();
-    }
-
-    @Test
-    @TestTransaction
-    void testWithDefaultConfiguration() {
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)));
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)));
-        assertCount(2L);
-        policiesHistoryCleaner.clean();
-        assertCount(1L);
-    }
-
-    @Test
-    @TestTransaction
-    void testWithCustomConfiguration() {
-        System.setProperty(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY, "30m");
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)));
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)));
-        assertCount(2L);
-        policiesHistoryCleaner.clean();
-        assertCount(0L);
-        System.clearProperty(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY);
     }
 
     @Test
