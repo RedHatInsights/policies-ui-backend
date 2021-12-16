@@ -1317,7 +1317,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend\"}",
+              "expr": "base_memory_usedHeap_bytes{container=\"policies-ui-backend-service\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
