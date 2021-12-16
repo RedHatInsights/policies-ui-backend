@@ -56,6 +56,16 @@ class PoliciesHistoryCleanerTest {
         System.clearProperty(POLICIES_HISTORY_CLEANER_DELETE_AFTER_CONF_KEY);
     }
 
+    @Test
+    @TestTransaction
+    void testPostgresStoredProcedure() {
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)));
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)));
+        assertCount(2L);
+        session.createNativeQuery("CALL cleanPoliciesHistory()").executeUpdate();
+        assertCount(1L);
+    }
+
     private void createPoliciesHistoryEntry(Instant ctime) {
         PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
         historyEntry.setId(UUID.randomUUID());

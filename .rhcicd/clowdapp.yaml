@@ -81,6 +81,65 @@ objects:
           value: ${RBAC_READ_TIMEOUT}
         - name: FLAG_IS_FEDRAMP
           value: ${FLAG_IS_FEDRAMP}
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: policies-db-cleaner-config
+  data:
+    clean.sh: |
+      cat /policies-db-cleaner/clean.sql | psql > /dev/null
+    clean.sql: |
+      CALL cleanPoliciesHistory();
+- apiVersion: batch/v1beta1
+  kind: CronJob
+  metadata:
+    name: policies-db-cleaner-cronjob
+  spec:
+    schedule: ${DB_CLEANER_SCHEDULE}
+    suspend: ${{DISABLE_DB_CLEANER}}
+    concurrencyPolicy: Forbid
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            restartPolicy: Never
+            volumes:
+            - name: policies-db-cleaner-volume
+              configMap:
+                name: policies-db-cleaner-config
+            containers:
+            - name: policies-db-cleaner
+              image: quay.io/cloudservices/postgresql-rds:12-1
+              restartPolicy: Never
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+                limits:
+                  cpu: 200m
+                  memory: 200Mi
+              volumeMounts:
+              - name: policies-db-cleaner-volume
+                mountPath: /policies-db-cleaner
+              command: ['sh', '/policies-db-cleaner/clean.sh']
+              env:
+              - name: PGHOST
+                valueFrom:
+                  secretKeyRef:
+                    name: policies-ui-backend-db
+                    key: ${DB_SECRET_HOSTNAME_KEY}
+              - name: PGDATABASE
+                value: ${DB_NAME}
+              - name: PGUSER
+                valueFrom:
+                  secretKeyRef:
+                    name: policies-ui-backend-db
+                    key: ${DB_SECRET_USERNAME_KEY}
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: policies-ui-backend-db
+                    key: ${DB_SECRET_PASSWORD_KEY}
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
@@ -91,6 +150,24 @@ parameters:
 - name: CPU_REQUEST
   description: CPU request
   value: 500m
+- name: DB_CLEANER_SCHEDULE
+  description: Execution time specified in cron format
+  value: "*/10 * * * *"
+- name: DB_NAME
+  description: Database name used by the policies-db-cleaner CronJob
+  value: policies_ui_backend
+- name: DB_SECRET_HOSTNAME_KEY
+  description: Key of the hostname field in the policies-ui-backend-db secret
+  value: db.host
+- name: DB_SECRET_PASSWORD_KEY
+  description: Key of the password field in the policies-ui-backend-db secret
+  value: db.password
+- name: DB_SECRET_USERNAME_KEY
+  description: Key of the username field in the policies-ui-backend-db secret
+  value: db.user
+- name: DISABLE_DB_CLEANER
+  description: Should the DB cleaner CronJob be disabled?
+  value: "false"
 - name: ENV_NAME
   description: ClowdEnvironment name (ephemeral, stage, prod)
   required: true
