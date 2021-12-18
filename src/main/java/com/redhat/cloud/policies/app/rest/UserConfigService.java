@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.EnvironmentFlags;
+import com.redhat.cloud.policies.app.EnvironmentInfo;
 import com.redhat.cloud.policies.app.NotificationSystem;
 import com.redhat.cloud.policies.app.NotificationSystem.UserPreferences;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -62,13 +62,13 @@ public class UserConfigService {
     String application;
 
     @Inject
-    EnvironmentFlags environmentFlags;
+    EnvironmentInfo environmentInfo;
 
     @GET
     @Path("/preferences")
     public UserPreferences getSettingsSchema() {
 
-        if (environmentFlags.isFedramp()) {
+        if (environmentInfo.isFedramp()) {
             throw new NotFoundException();
         }
 
