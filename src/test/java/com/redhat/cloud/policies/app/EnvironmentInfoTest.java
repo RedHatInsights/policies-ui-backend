@@ -5,6 +5,7 @@ import io.quarkus.test.junit.mockito.InjectSpy;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,17 +18,20 @@ public class EnvironmentInfoTest {
 
     @Test
     void testIsFedramp() {
-        updateField(environmentInfo, "environmentName", "prod", EnvironmentInfo.class);
+        updateField(environmentInfo, "environmentName", Optional.of("prod"), EnvironmentInfo.class);
         assertFalse(environmentInfo.isFedramp());
 
-        updateField(environmentInfo, "environmentName", "stage", EnvironmentInfo.class);
+        updateField(environmentInfo, "environmentName", Optional.of("stage"), EnvironmentInfo.class);
         assertFalse(environmentInfo.isFedramp());
 
-        updateField(environmentInfo, "environmentName", "fedramp-prod", EnvironmentInfo.class);
+        updateField(environmentInfo, "environmentName", Optional.of("fedramp-prod"), EnvironmentInfo.class);
         assertTrue(environmentInfo.isFedramp());
 
-        updateField(environmentInfo, "environmentName", "fedramp-stage", EnvironmentInfo.class);
+        updateField(environmentInfo, "environmentName", Optional.of("fedramp-stage"), EnvironmentInfo.class);
         assertTrue(environmentInfo.isFedramp());
+
+        updateField(environmentInfo, "environmentName", Optional.empty(), EnvironmentInfo.class);
+        assertFalse(environmentInfo.isFedramp());
     }
 
     private static <T, V> void updateField(T object, String field, V value, Class<T> klass) {

@@ -5,22 +5,29 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.Field;
+import java.util.Optional;
 
 @Startup
 public class EnvironmentInfo {
 
     private static final Logger LOG = Logger.getLogger(EnvironmentInfo.class);
 
-    @ConfigProperty(name = "env.name", defaultValue = "")
-    String environmentName;
+    @ConfigProperty(name = "env.name")
+    Optional<String> environmentName;
 
     @PostConstruct
     public void init() {
-        LOG.infof("Environment: %s", environmentName);
+        if (environmentName.isPresent()) {
+            LOG.infof("Environment: %s", environmentName.get());
+        } else {
+            LOG.infof("Environment is not set");
+        }
     }
 
-    public Boolean isFedramp() {
-        return environmentName.equalsIgnoreCase("fedramp-stage") || environmentName.equalsIgnoreCase("fedramp-prod");
+    public boolean isFedramp() {
+        return environmentName.isPresent() && (
+                environmentName.get().equalsIgnoreCase("fedramp-stage") ||
+                environmentName.get().equalsIgnoreCase("fedramp-prod")
+        );
     }
 }
