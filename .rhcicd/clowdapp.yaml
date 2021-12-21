@@ -79,8 +79,6 @@ objects:
           value: ${ENV_NAME}
         - name: QUARKUS_REST_CLIENT_RBAC_READ_TIMEOUT
           value: ${RBAC_READ_TIMEOUT}
-        - name: FLAG_IS_FEDRAMP
-          value: ${FLAG_IS_FEDRAMP}
 - apiVersion: v1
   kind: ConfigMap
   metadata:
@@ -190,7 +188,4 @@ parameters:
   value: "2000"
 - name: SENTRY_ENABLED
   description: Enable Sentry (or not)
-  value: "false"
-- name: FLAG_IS_FEDRAMP
-  description: Marks fedramp environments
   value: "false"

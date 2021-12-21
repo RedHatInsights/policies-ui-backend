@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app.model.validation;
 
-import com.redhat.cloud.policies.app.EnvironmentFlags;
+import com.redhat.cloud.policies.app.EnvironmentInfo;
 
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
@@ -31,13 +31,13 @@ import javax.validation.ConstraintValidatorContext;
 public class ActionValidator implements ConstraintValidator<ValidActionS, String> {
 
     @Inject
-    EnvironmentFlags environmentFlags;
+    EnvironmentInfo environmentInfo;
 
     private static final List<String> VALID_ACTIONS = List.of("notification");
     private static final List<String> VALID_ACTIONS_FEDRAMP = List.of();
 
     public List<String> getValidActions() {
-        if (environmentFlags.isFedramp()) {
+        if (environmentInfo.isFedramp()) {
             return VALID_ACTIONS_FEDRAMP;
         }
 

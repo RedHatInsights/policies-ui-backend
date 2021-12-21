@@ -2,9 +2,7 @@ package com.redhat.cloud.policies.app.model.validation;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.redhat.cloud.policies.app.EnvironmentFlags;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import com.redhat.cloud.policies.app.EnvironmentInfo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,13 +17,13 @@ class ActionValidatorTest {
     private final ActionValidator testee;
     private final ConstraintValidatorContext constraintValidatorContext;
 
-    EnvironmentFlags environmentFlags;
+    EnvironmentInfo environmentInfo;
 
     public ActionValidatorTest() {
-        this.environmentFlags = Mockito.mock(EnvironmentFlags.class);
+        this.environmentInfo = Mockito.mock(EnvironmentInfo.class);
         this.testee = new ActionValidator();
         this.testee.initialize(null);
-        this.testee.environmentFlags = environmentFlags;
+        this.testee.environmentInfo = environmentInfo;
         this.constraintValidatorContext = mock(ConstraintValidatorContext.class);
     }
 
@@ -59,7 +57,7 @@ class ActionValidatorTest {
 
         @BeforeEach
         public void beforeEach() {
-            when(environmentFlags.isFedramp()).thenReturn(true);
+            when(environmentInfo.isFedramp()).thenReturn(true);
         }
 
         @ParameterizedTest
@@ -79,7 +77,7 @@ class ActionValidatorTest {
 
         @BeforeEach
         public void beforeEach() {
-            when(environmentFlags.isFedramp()).thenReturn(true);
+            when(environmentInfo.isFedramp()).thenReturn(true);
         }
 
         @ParameterizedTest
