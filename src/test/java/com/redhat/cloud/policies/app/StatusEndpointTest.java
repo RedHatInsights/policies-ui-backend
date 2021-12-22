@@ -44,7 +44,7 @@ class StatusEndpointTest extends AbstractITest {
         assertTrue(body.contains("status_isDegraded 0.0"));
     }
 
-    @Order(2)
+//    @Order(2)
     @Test
     void getStatusDegraded() {
         with()
@@ -64,6 +64,7 @@ class StatusEndpointTest extends AbstractITest {
                     .statusCode(500);
 
             String body = getMetric();
+            System.out.println(body);
             assertTrue(body.contains("status_isDegraded 1.0"));
 
             body = getMetric();
