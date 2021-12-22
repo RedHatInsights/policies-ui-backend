@@ -73,8 +73,6 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
-import io.quarkus.panache.common.Sort;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -92,7 +90,7 @@ import org.hibernate.exception.ConstraintViolationException;
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
-@SimplyTimed(absolute = true, name = "PolicySvc")
+//@SimplyTimed(absolute = true, name = "PolicySvc")
 @RequestScoped
 public class PolicyCrudService {
 

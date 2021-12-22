@@ -33,7 +33,6 @@ import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.logging.Logger;
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
-@SimplyTimed(absolute = true, name = "UserConfigSvc")
+//@SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
 

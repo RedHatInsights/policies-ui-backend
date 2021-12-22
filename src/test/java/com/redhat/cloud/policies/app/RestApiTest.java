@@ -53,6 +53,7 @@ import javax.json.bind.JsonbBuilder;
 import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;

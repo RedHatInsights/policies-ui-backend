@@ -42,11 +42,11 @@ public class StatusEndpoint {
     public Response getStatus() {
         Map<String, String> issues = StuffHolder.getInstance().getStatusInfo();
 
-        if (!issues.isEmpty()) {
-            log.severe("Status reports: " + makeReadable(issues));
-            return Response.serverError().entity(issues).build();
+        if (issues.isEmpty()) {
+            return Response.ok().build();
         }
-        return Response.ok().build();
+        log.severe("Status reports: " + makeReadable(issues));
+        return Response.serverError().entity(issues).build();
     }
 
     private String makeReadable(Map<String, String> issues) {
