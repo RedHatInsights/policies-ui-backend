@@ -3,8 +3,6 @@ package com.redhat.cloud.policies.app.model.validation;
 import javax.validation.ConstraintValidatorContext;
 
 import com.redhat.cloud.policies.app.EnvironmentFlags;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
