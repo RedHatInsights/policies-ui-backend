@@ -50,11 +50,11 @@ public class ScheduledStatusProducer {
     @Inject
     MeterRegistry registry;
 
-    Integer degraded;
+    Gauge degraded;
 
     @PostConstruct
     void init() {
-        this.degraded = registry.gauge("status_isDegraded", StuffHolder.getInstance().getStatusInfo().size());
+        degraded = Gauge.builder("status_isDegraded", () -> StuffHolder.getInstance().getStatusInfo().size()).register(registry);
     }
 
     @Scheduled(every = "10s")

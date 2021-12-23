@@ -19,6 +19,7 @@ package com.redhat.cloud.policies.app.health;
 import com.redhat.cloud.policies.app.StuffHolder;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -42,11 +43,11 @@ public class StatusEndpoint {
     public Response getStatus() {
         Map<String, String> issues = StuffHolder.getInstance().getStatusInfo();
 
-        if (issues.isEmpty()) {
-            return Response.ok().build();
+        if (!issues.isEmpty()) {
+            log.severe("Status reports: " + makeReadable(issues));
+            return Response.serverError().entity(issues).build();
         }
-        log.severe("Status reports: " + makeReadable(issues));
-        return Response.serverError().entity(issues).build();
+        return Response.ok().build();
     }
 
     private String makeReadable(Map<String, String> issues) {
