@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
-//@SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
 

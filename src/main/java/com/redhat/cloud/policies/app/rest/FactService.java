@@ -38,7 +38,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 @Produces("application/json")
 @Consumes("application/json")
 @RequestScoped
-//@SimplyTimed(absolute = true, name = "FactSvc")
 public class FactService {
 
     @Inject
