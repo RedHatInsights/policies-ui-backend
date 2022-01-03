@@ -24,8 +24,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-
 
 /**
  * Exports the following from /proc/self/status. See proc(5)
@@ -51,26 +51,26 @@ public class ProcSelfStatusExporter {
     @Inject
     MeterRegistry registry;
 
-    Long vmHwm;
-    Long vmRss;
-    Long rssAnon;
-    Long rssFile;
-    Long vmStk;
-    Long vmLib;
-    Long vmData;
-    Long vmSize;
+    AtomicLong vmHwm;
+    AtomicLong vmRss;
+    AtomicLong rssAnon;
+    AtomicLong rssFile;
+    AtomicLong vmStk;
+    AtomicLong vmLib;
+    AtomicLong vmData;
+    AtomicLong vmSize;
     Integer threads;
 
     @PostConstruct
     public void init() {
-        vmHwm = registry.gauge("status.vmHwm", 0L);
-        vmRss = registry.gauge("status.vmRss", 0L);
-        rssAnon = registry.gauge("status.rssAnon", 0L);
-        rssFile = registry.gauge("status.rssFile", 0L);
-        vmStk = registry.gauge("status.vmStk", 0L);
-        vmLib = registry.gauge("status.vmLib", 0L);
-        vmData = registry.gauge("status.vmData", 0L);
-        vmSize = registry.gauge("status.vmSize", 0L);
+        vmHwm = registry.gauge("status.vmHwm", new AtomicLong(0L));
+        vmRss = registry.gauge("status.vmRss", new AtomicLong(0L));
+        rssAnon = registry.gauge("status.rssAnon", new AtomicLong(0L));
+        rssFile = registry.gauge("status.rssFile", new AtomicLong(0L));
+        vmStk = registry.gauge("status.vmStk", new AtomicLong(0L));
+        vmLib = registry.gauge("status.vmLib", new AtomicLong(0L));
+        vmData = registry.gauge("status.vmData", new AtomicLong(0L));
+        vmSize = registry.gauge("status.vmSize", new AtomicLong(0L));
         threads = registry.gauge("status.threads", 0);
     }
 
@@ -93,28 +93,28 @@ public class ProcSelfStatusExporter {
 
                 switch (parts[0]) {
                     case "VmHWM:":
-                        vmHwm = Long.parseLong(parts[1]);
+                        vmHwm.set(Long.parseLong(parts[1]));
                         break;
                     case "VmRSS:":
-                        vmRss = Long.parseLong(parts[1]);
+                        vmRss.set(Long.parseLong(parts[1]));
                         break;
                     case "RssAnon:":
-                        rssAnon = Long.parseLong(parts[1]);
+                        rssAnon.set(Long.parseLong(parts[1]));
                         break;
                     case "RssFile:":
-                        rssFile = Long.parseLong(parts[1]);
+                        rssFile.set(Long.parseLong(parts[1]));
                         break;
                     case "VmStk:":
-                        vmStk = Long.parseLong(parts[1]);
+                        vmStk.set(Long.parseLong(parts[1]));
                         break;
                     case "VmLib:":
-                        vmLib = Long.parseLong(parts[1]);
+                        vmLib.set(Long.parseLong(parts[1]));
                         break;
                     case "VmData:":
-                        vmData = Long.parseLong(parts[1]);
+                        vmData.set(Long.parseLong(parts[1]));
                         break;
                     case "VmSize:":
-                        vmSize = Long.parseLong(parts[1]);
+                        vmSize.set(Long.parseLong(parts[1]));
                         break;
                     case "Threads:":
                         threads = Integer.parseInt(parts[1]);
@@ -131,14 +131,14 @@ public class ProcSelfStatusExporter {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
-        sb.append("vmHwm=").append(vmHwm / 1024);
-        sb.append(", vmRss=").append(vmRss / 1024);
-        sb.append(", rssAnon=").append(rssAnon / 1024);
-        sb.append(", rssFile=").append(rssFile / 1024);
-        sb.append(", vmStk=").append(vmStk / 1024);
-        sb.append(", vmLib=").append(vmLib / 1024);
-        sb.append(", vmData=").append(vmData / 1024);
-        sb.append(", vmSize=").append(vmSize / 1024);
+        sb.append("vmHwm=").append(vmHwm.get() / 1024);
+        sb.append(", vmRss=").append(vmRss.get() / 1024);
+        sb.append(", rssAnon=").append(rssAnon.get() / 1024);
+        sb.append(", rssFile=").append(rssFile.get() / 1024);
+        sb.append(", vmStk=").append(vmStk.get() / 1024);
+        sb.append(", vmLib=").append(vmLib.get() / 1024);
+        sb.append(", vmData=").append(vmData.get() / 1024);
+        sb.append(", vmSize=").append(vmSize.get() / 1024);
         sb.append(", threads=").append(threads);
         sb.append('}');
         return sb.toString();
