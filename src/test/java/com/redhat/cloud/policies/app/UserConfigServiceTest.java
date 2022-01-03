@@ -46,7 +46,7 @@ class UserConfigServiceTest extends AbstractITest {
     private static final String PREFERENCE_URL = API_BASE_V1_0 + "/user-config/preferences";
 
     @InjectMock
-    EnvironmentFlags environmentFlags;
+    EnvironmentInfo environmentInfo;
 
     @BeforeAll
     static void setUpEnv() {
@@ -83,7 +83,7 @@ class UserConfigServiceTest extends AbstractITest {
 
     @Test
     void testFedramp() {
-        when(environmentFlags.isFedramp()).thenReturn(Boolean.TRUE);
+        when(environmentInfo.isFedramp()).thenReturn(Boolean.TRUE);
 
         given()
                 .header(authHeader)
