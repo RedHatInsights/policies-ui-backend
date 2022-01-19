@@ -126,19 +126,22 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: ${DB_SECRET_HOSTNAME_KEY}
+                    key: data["cdappconfig.json"].database.hostname
               - name: PGDATABASE
-                value: ${DB_NAME}
+                valueFrom:
+                  secretKeyRef:
+                    name: policies-ui-backend
+                    key: data["cdappconfig.json"].database.name
               - name: PGUSER
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: ${DB_SECRET_USERNAME_KEY}
+                    key: data["cdappconfig.json"].database.username
               - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: ${DB_SECRET_PASSWORD_KEY}
+                    key: data["cdappconfig.json"].database.password
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
@@ -151,7 +154,7 @@ parameters:
   value: 500m
 - name: DB_CLEANER_SCHEDULE
   description: Execution time specified in cron format
-  value: "*/10 * * * *"
+  value: "*/1 * * * *"
 - name: DB_NAME
   description: Database name used by the policies-db-cleaner CronJob
   value: policies_ui_backend
