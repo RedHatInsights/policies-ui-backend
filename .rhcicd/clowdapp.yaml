@@ -13,9 +13,10 @@ objects:
   spec:
     envName: ${ENV_NAME}
     dependencies:
-    - notifications-backend
     - policies-engine
     - rbac
+    optionalDependencies:
+    - notifications-backend
     database:
       name: policies-ui-backend
       version: 12
