@@ -125,19 +125,19 @@ objects:
               - name: PGHOST
                 valueFrom:
                   secretKeyRef:
-                    name: policies-ui-backend-db
+                    name: policies-ui-backend
                     key: ${DB_SECRET_HOSTNAME_KEY}
               - name: PGDATABASE
                 value: ${DB_NAME}
               - name: PGUSER
                 valueFrom:
                   secretKeyRef:
-                    name: policies-ui-backend-db
+                    name: policies-ui-backend
                     key: ${DB_SECRET_USERNAME_KEY}
               - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: policies-ui-backend-db
+                    name: policies-ui-backend
                     key: ${DB_SECRET_PASSWORD_KEY}
 parameters:
 - name: CLOUDWATCH_ENABLED
