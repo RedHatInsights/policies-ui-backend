@@ -126,22 +126,22 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: data.cdappconfig.json.database.hostname
+                    key: cdappconfig.json.database.hostname
               - name: PGDATABASE
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: data.cdappconfig.json.database.name
+                    key: cdappconfig.json.database.name
               - name: PGUSER
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: data.cdappconfig.json.database.username
+                    key: cdappconfig.json.database.username
               - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: data.cdappconfig.json.database.password
+                    key: cdappconfig.json.database.password
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
