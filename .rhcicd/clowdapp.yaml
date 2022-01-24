@@ -126,22 +126,22 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: cdappconfig.json.database.hostname
+                    key: database.hostname
               - name: PGDATABASE
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: cdappconfig.json.database.name
+                    key: database.name
               - name: PGUSER
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: cdappconfig.json.database.username
+                    key: database.username
               - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
                     name: policies-ui-backend
-                    key: cdappconfig.json.database.password
+                    key: database.password
 parameters:
 - name: CLOUDWATCH_ENABLED
   description: Enable Cloudwatch (or not)
@@ -155,18 +155,6 @@ parameters:
 - name: DB_CLEANER_SCHEDULE
   description: Execution time specified in cron format
   value: "*/1 * * * *"
-- name: DB_NAME
-  description: Database name used by the policies-db-cleaner CronJob
-  value: policies_ui_backend
-- name: DB_SECRET_HOSTNAME_KEY
-  description: Key of the hostname field in the policies-ui-backend-db secret
-  value: db.host
-- name: DB_SECRET_PASSWORD_KEY
-  description: Key of the password field in the policies-ui-backend-db secret
-  value: db.password
-- name: DB_SECRET_USERNAME_KEY
-  description: Key of the username field in the policies-ui-backend-db secret
-  value: db.user
 - name: DISABLE_DB_CLEANER
   description: Should the DB cleaner CronJob be disabled?
   value: "false"
