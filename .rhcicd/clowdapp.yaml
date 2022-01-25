@@ -89,7 +89,7 @@ objects:
       cat /policies-db-cleaner/clean.sql | psql > /dev/null
     clean.sql: |
       CALL cleanPoliciesHistory();
-- apiVersion: batch/v1beta1
+- apiVersion: batch/v1
   kind: CronJob
   metadata:
     name: policies-db-cleaner-cronjob
