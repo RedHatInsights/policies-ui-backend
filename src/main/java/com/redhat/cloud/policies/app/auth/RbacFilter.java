@@ -20,6 +20,8 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
+import java.time.Duration;
+
 import javax.annotation.Priority;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -50,6 +52,9 @@ public class RbacFilter implements ContainerRequestFilter {
     @ConfigProperty(name = "warn.rbac.slow", defaultValue = "true")
     Instance<Boolean> warnSlowRbac;
 
+    @ConfigProperty(name = "warn.rbac.tolerance", defaultValue = "1S")
+    Duration warnSlowRbacTolerance;
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         RbacRaw result;
@@ -69,7 +74,7 @@ public class RbacFilter implements ContainerRequestFilter {
             return;
         } finally {
             long t2 = System.currentTimeMillis();
-            if (warnSlowRbac.get() && (t2 - t1) > 500) {
+            if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.toMillis()) {
                 LOGGER.warnf("Call to RBAC took %d ms", t2 - t1);
             }
             span.finish();
