@@ -9,7 +9,7 @@
   <version>1.0-SNAPSHOT</version>
 
   <properties>
-    <compiler-plugin.version>3.10.0</compiler-plugin.version>
+    <compiler-plugin.version>3.10.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <java.release>11</java.release>
     <java.source>11</java.source>
