@@ -55,9 +55,19 @@ public class RbacFilter implements ContainerRequestFilter {
     @ConfigProperty(name = "warn.rbac.tolerance", defaultValue = "1S")
     Duration warnSlowRbacTolerance;
 
+    @ConfigProperty(name = "rbac.enabled", defaultValue = "true")
+    Boolean isRbacEnabled;
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         RbacRaw result;
+
+        if (!isRbacEnabled) {
+            user.setRbac(true, true);
+            RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
+            userPrincipal.setRbac(true, true);
+            return;
+        }
 
         String path = requestContext.getUriInfo().getPath(true);
         if (path.startsWith("/admin") || path.equals("/api/policies/v1.0/status")) {
