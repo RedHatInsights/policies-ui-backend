@@ -20,7 +20,7 @@
 
     <version.testcontainers>1.16.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
-    <mockserver-client-java.version>5.5.4</mockserver-client-java.version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
+    <mockserver-client-java.version>5.13.2</mockserver-client-java.version> <!-- not the newest, but matches what is in org.testcontainers:mockserver -->
     <clowder-quarkus-config-source.version>1.0.0</clowder-quarkus-config-source.version>
   </properties>
 
