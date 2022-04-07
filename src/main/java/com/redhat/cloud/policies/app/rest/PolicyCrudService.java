@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -88,6 +87,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jboss.logging.Logger;
 
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
@@ -103,7 +103,7 @@ public class PolicyCrudService {
     public static final String ERROR_STRING = "error";
     public static final String CTIME_STRING = "ctime";
 
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    private final Logger log = Logger.getLogger(this.getClass());
 
     private static final ObjectMapper OM = new ObjectMapper();
 
@@ -403,7 +403,7 @@ public class PolicyCrudService {
                 id = policy.store(user.getAccount(), policy);
             } catch (Exception e) {
                 Msg engineExceptionMsg = getEngineExceptionMsg(e);
-                log.warning("Storing policy in engine failed: " + engineExceptionMsg.msg);
+                log.warn("Storing policy in engine failed", e);
                 return Response.status(400, e.getMessage()).entity(engineExceptionMsg).build();
             }
         } catch (Throwable t) {
@@ -422,7 +422,7 @@ public class PolicyCrudService {
         if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
             return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
         } else {
-            log.warning("Getting response failed: " + t.getMessage());
+            log.warn("Getting response failed", t);
             return Response.status(500, t.getMessage()).build();
         }
     }
@@ -465,7 +465,7 @@ public class PolicyCrudService {
                 // Engine does not have it - we can delete anyway
                 deletedOnEngine = true;
             } catch (Exception e) {
-                log.warning("Deletion on engine failed because of " + e.getMessage());
+                log.warn("Deletion on engine failed", e);
                 builder = Response.serverError().entity(new Msg(e.getMessage()));
             }
             if (deletedOnEngine) {
@@ -507,7 +507,7 @@ public class PolicyCrudService {
                     // Engine does not have it - we can delete anyway
                     deletedOnEngine = true;
                 } catch (Exception e) {
-                    log.warning("Deletion on engine failed because of " + e.getMessage());
+                    log.warn("Deletion on engine failed", e);
                 }
                 if (deletedOnEngine) {
                     policy.delete();
@@ -554,7 +554,7 @@ public class PolicyCrudService {
                 builder = Response.ok();
             } catch (NotFoundException nfe) {
                 builder = Response.status(404, "Policy not found in engine");
-                log.warning("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
+                log.warn("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
             } catch (Exception e) {
                 builder = Response.status(500, "Update failed: " + e.getMessage());
             }
@@ -592,7 +592,7 @@ public class PolicyCrudService {
                         }
                         wasChanged = true;
                     } catch (Exception e) {
-                        log.warning("Changing state in engine failed: " + e.getMessage());
+                        log.warn("Changing state in engine failed", e);
                     }
                     if (wasChanged) {
                         storedPolicy.isEnabled = shouldBeEnabled;
@@ -604,7 +604,7 @@ public class PolicyCrudService {
             }
             return Response.ok(changed).build();
         } catch (Throwable e) {
-            log.severe("Enabling failed: " + e.getMessage());
+            log.error("Enabling failed: " + e.getMessage());
             return Response.serverError().build();
         }
     }
@@ -917,7 +917,7 @@ public class PolicyCrudService {
             } catch (Exception e) {
                 tracer.activeSpan().setTag(ERROR_STRING, true);
                 String msg = "Retrieval of history failed with: " + e.getMessage();
-                log.warning(msg);
+                log.warn(msg);
                 builder = Response.serverError().entity(msg);
             }
         }
