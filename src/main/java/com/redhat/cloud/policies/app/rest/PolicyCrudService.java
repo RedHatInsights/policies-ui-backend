@@ -73,6 +73,8 @@ import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
 import io.quarkus.panache.common.Sort;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -135,6 +137,9 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
+
+    @Inject
+    MetricRegistry registry;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -249,6 +254,9 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_getPoliciesForCustomer", new Tag("account", user.getAccount())).inc();
+
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
@@ -332,6 +340,9 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_getPolicyIdsForCustomer", new Tag("account", user.getAccount())).inc();
+
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
@@ -367,6 +378,9 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_storePolicy", new Tag("account", user.getAccount())).inc();
 
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
@@ -451,6 +465,10 @@ public class PolicyCrudService {
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_deletePolicy", new Tag("account", user.getAccount())).inc();
+
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
         ResponseBuilder builder = Response.ok();
@@ -490,6 +508,9 @@ public class PolicyCrudService {
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_deletePolicies", new Tag("account", user.getAccount())).inc();
 
         List<UUID> deleted = new ArrayList<>(uuids.size());
 
@@ -536,6 +557,9 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_setEnabledStateForPolicy", new Tag("account", user.getAccount())).inc();
+
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
         ResponseBuilder builder;
@@ -578,6 +602,10 @@ public class PolicyCrudService {
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_setEnabledStateForPolicies", new Tag("account", user.getAccount())).inc();
+
         List<UUID> changed = new ArrayList<>(uuids.size());
         try {
             for (UUID uuid : uuids) {
@@ -628,6 +656,9 @@ public class PolicyCrudService {
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_updatePolicy", new Tag("account", user.getAccount())).inc();
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
@@ -708,6 +739,9 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
 
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_validateCondition", new Tag("account", user.getAccount())).inc();
+
         policy.customerid = user.getAccount();
 
         try {
@@ -741,6 +775,9 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_validateName", new Tag("account", user.getAccount())).inc();
 
         Policy policy = new Policy();
         policy.id = id;
@@ -778,6 +815,9 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_getPolicy", new Tag("account", user.getAccount())).inc();
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -900,6 +940,9 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
         }
+
+        // TODO Temp counter used to investigate the engine instability, remove ASAP.
+        registry.counter("policies_ui_getTriggerHistoryForPolicy", new Tag("account", user.getAccount())).inc();
 
         ResponseBuilder builder;
 
