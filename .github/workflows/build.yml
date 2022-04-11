@@ -26,7 +26,7 @@ jobs:
           distribution: adopt
       - name: Build with Maven
         run: ./mvnw clean verify --no-transfer-progress
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Upload openapi.json
         with:
           name: openapi.json
