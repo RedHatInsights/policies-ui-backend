@@ -16,28 +16,36 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
-import com.redhat.cloud.policies.app.model.UUIDHelperBean;
-import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
-import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
+import com.redhat.cloud.policies.app.model.UUIDHelperBean;
+import com.redhat.cloud.policies.app.model.engine.FullTrigger;
+import com.redhat.cloud.policies.app.model.engine.HistoryItem;
+import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
+import com.redhat.cloud.policies.app.model.pager.Page;
+import com.redhat.cloud.policies.app.model.pager.Pager;
+import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.opentracing.Tracer;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.headers.Header;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.hibernate.exception.ConstraintViolationException;
+import org.jboss.logging.Logger;
 
-import java.math.BigDecimal;
-import java.net.ConnectException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.json.JsonString;
@@ -62,39 +70,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-
-import com.redhat.cloud.policies.app.model.engine.HistoryItem;
-import com.redhat.cloud.policies.app.model.engine.Trigger;
-import com.redhat.cloud.policies.app.model.pager.Page;
-import com.redhat.cloud.policies.app.model.pager.Pager;
-import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
-import io.opentracing.Tracer;
-import io.quarkus.panache.common.Sort;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.Tag;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.headers.Header;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.hibernate.exception.ConstraintViolationException;
-import org.jboss.logging.Logger;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import java.net.ConnectException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
-@SimplyTimed(absolute = true, name = "PolicySvc")
+@Timed("PolicySvc")
 @RequestScoped
 public class PolicyCrudService {
 
@@ -139,7 +133,7 @@ public class PolicyCrudService {
     PoliciesHistoryRepository policiesHistoryRepository;
 
     @Inject
-    MetricRegistry registry;
+    MeterRegistry registry;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -255,7 +249,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPoliciesForCustomer", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_getPoliciesForCustomer", "account", user.getAccount()).increment();
 
         Page<Policy> page;
         try {
@@ -341,7 +335,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicyIdsForCustomer", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_getPolicyIdsForCustomer", "account", user.getAccount()).increment();
 
         List<UUID> uuids;
         try {
@@ -380,7 +374,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_storePolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_storePolicy", "account", user.getAccount()).increment();
 
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
@@ -467,7 +461,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_deletePolicy", "account", user.getAccount()).increment();
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -510,7 +504,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicies", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_deletePolicies", "account", user.getAccount()).increment();
 
         List<UUID> deleted = new ArrayList<>(uuids.size());
 
@@ -558,7 +552,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_setEnabledStateForPolicy", "account", user.getAccount()).increment();
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
@@ -604,7 +598,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicies", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_setEnabledStateForPolicies", "account", user.getAccount()).increment();
 
         List<UUID> changed = new ArrayList<>(uuids.size());
         try {
@@ -658,7 +652,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_updatePolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_updatePolicy", "account", user.getAccount()).increment();
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
@@ -740,7 +734,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateCondition", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_validateCondition", "account", user.getAccount()).increment();
 
         policy.customerid = user.getAccount();
 
@@ -777,7 +771,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateName", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_validateName", "account", user.getAccount()).increment();
 
         Policy policy = new Policy();
         policy.id = id;
@@ -817,7 +811,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_getPolicy", "account", user.getAccount()).increment();
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -942,7 +936,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getTriggerHistoryForPolicy", new Tag("account", user.getAccount())).inc();
+        registry.counter("policies_ui_getTriggerHistoryForPolicy", "account", user.getAccount()).increment();
 
         ResponseBuilder builder;
 
