@@ -48,7 +48,7 @@ public class ScheduledStatusProducer {
     @Inject
     MeterRegistry meterRegistry;
 
-    private AtomicInteger degraded = new AtomicInteger(0);
+    private final AtomicInteger degraded = new AtomicInteger(StuffHolder.getInstance().getStatusInfo().size());
 
     @PostConstruct
     public void init() {

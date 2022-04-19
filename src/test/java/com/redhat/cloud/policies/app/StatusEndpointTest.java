@@ -46,6 +46,13 @@ class StatusEndpointTest extends AbstractITest {
     @Order(2)
     @Test
     void getStatusDegraded() {
+
+        try {
+            Thread.sleep(15000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         with()
                 .queryParam("status", "degraded")
                 .accept("application/json")
