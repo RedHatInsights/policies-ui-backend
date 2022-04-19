@@ -48,7 +48,7 @@ public class ScheduledStatusProducer {
     @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
             description = "Returns 0 if good, value > 0 for number of entries in the status message")
     int isDegraded() {
-        return StuffHolder.getInstance().getStatusInfo().size();
+        return 0;
     }
 
     @Scheduled(every = "10s")
