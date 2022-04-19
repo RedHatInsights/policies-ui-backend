@@ -45,10 +45,10 @@ public class ScheduledStatusProducer {
     PolicyEngine engine;
 
     //  // Quarkus only activates this after the first REST-call to any method in this class
-    @Gauge(name = "status_isDegraded_should_break_tests", unit = MetricUnits.NONE, absolute = true,
+    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
             description = "Returns 0 if good, value > 0 for number of entries in the status message")
-    int isDegradedShouldBreakTests() {
-        return StuffHolder.getInstance().getStatusInfo().size();
+    int isDegraded() {
+        return 0;
     }
 
     @Scheduled(every = "10s")
