@@ -46,17 +46,6 @@ class StatusEndpointTest extends AbstractITest {
     @Order(2)
     @Test
     void getStatusDegraded() {
-        when()
-                .get("/api/policies/v1.0/status")
-                .then()
-                .statusCode(200);
-
-        // Run twice
-        String body = getMetric();
-        assertTrue(body.contains("status_isDegraded 0.0"));
-        body = getMetric();
-        assertTrue(body.contains("status_isDegraded 0.0"));
-
         with()
                 .queryParam("status", "degraded")
                 .accept("application/json")
