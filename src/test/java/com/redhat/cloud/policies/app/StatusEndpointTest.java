@@ -73,10 +73,10 @@ class StatusEndpointTest extends AbstractITest {
                     .body("admin-degraded", is("true"))
                     .statusCode(500);
 
-            String body1 = getMetric();
-            assertTrue(body1.contains("status_isDegraded 1.0"));
+            String body = getMetric();
+            assertTrue(body.contains("status_isDegraded 1.0"));
 
-            body1 = getMetric();
+            body = getMetric();
             assertTrue(body.contains("status_isDegraded 1.0"));
 
         } finally {
