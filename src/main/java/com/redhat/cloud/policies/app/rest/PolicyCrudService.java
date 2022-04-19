@@ -249,7 +249,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPoliciesForCustomer", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.getPoliciesForCustomer", "account", user.getAccount());
 
         Page<Policy> page;
         try {
@@ -335,7 +335,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicyIdsForCustomer", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.getPolicyIdsForCustomer", "account", user.getAccount());
 
         List<UUID> uuids;
         try {
@@ -374,7 +374,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_storePolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.storePolicy", "account", user.getAccount());
 
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
@@ -461,7 +461,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.deletePolicy", "account", user.getAccount());
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -504,7 +504,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicies", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.deletePolicies", "account", user.getAccount());
 
         List<UUID> deleted = new ArrayList<>(uuids.size());
 
@@ -552,7 +552,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.setEnabledStateForPolicy", "account", user.getAccount());
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
@@ -598,7 +598,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicies", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.setEnabledStateForPolicies", "account", user.getAccount());
 
         List<UUID> changed = new ArrayList<>(uuids.size());
         try {
@@ -652,7 +652,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_updatePolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.updatePolicy", "account", user.getAccount());
 
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
@@ -734,7 +734,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateCondition", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.validateCondition", "account", user.getAccount());
 
         policy.customerid = user.getAccount();
 
@@ -771,7 +771,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateName", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.validateName", "account", user.getAccount());
 
         Policy policy = new Policy();
         policy.id = id;
@@ -811,7 +811,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.getPolicy", "account", user.getAccount());
 
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
@@ -936,7 +936,7 @@ public class PolicyCrudService {
         }
 
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getTriggerHistoryForPolicy", "account", user.getAccount()).increment();
+        registry.timer("policies.ui.getTriggerHistoryForPolicy", "account", user.getAccount());
 
         ResponseBuilder builder;
 

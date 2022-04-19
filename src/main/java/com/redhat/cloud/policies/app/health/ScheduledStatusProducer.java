@@ -49,7 +49,7 @@ public class ScheduledStatusProducer {
 
     @PostConstruct
     public void init() {
-        meterRegistry.gauge("status_isDegraded", StuffHolder.getInstance().getStatusInfo().size());
+        meterRegistry.gauge("status.isDegraded", StuffHolder.getInstance().getStatusInfo().size());
     }
 
     @Scheduled(every = "10s")
