@@ -77,7 +77,7 @@ class StatusEndpointTest extends AbstractITest {
             assertTrue(body1.contains("status_isDegraded 1.0"));
 
             body1 = getMetric();
-            assertTrue(body.contains("status_isDegraded 1.0"));
+            assertTrue(body1.contains("status_isDegraded 1.0"));
 
         } finally {
             with()
