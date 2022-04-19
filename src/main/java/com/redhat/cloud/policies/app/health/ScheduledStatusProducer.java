@@ -28,6 +28,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * We gather the Status of ourselves and remotes.
@@ -47,13 +48,18 @@ public class ScheduledStatusProducer {
     @Inject
     MeterRegistry meterRegistry;
 
+    private AtomicInteger degraded = new AtomicInteger(0);
+
     @PostConstruct
     public void init() {
-        meterRegistry.gauge("status.isDegraded", StuffHolder.getInstance().getStatusInfo().size());
+        meterRegistry.gauge("status.isDegraded", degraded);
+
+        degraded.set(StuffHolder.getInstance().getStatusInfo().size());
     }
 
     @Scheduled(every = "10s")
     void gather() {
+        degraded.set(StuffHolder.getInstance().getStatusInfo().size());
 
         Map<String, String> issues;
         issues = new HashMap<>();
