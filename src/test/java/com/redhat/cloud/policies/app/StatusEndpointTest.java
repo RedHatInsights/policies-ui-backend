@@ -38,10 +38,9 @@ class StatusEndpointTest extends AbstractITest {
 
         // Run twice
         String body = getMetric();
-        System.out.println("BODY: " + body);
-        assertTrue(body.contains("application_status_isDegraded 0.0"));
+        assertTrue(body.contains("status_isDegraded 0.0"));
         body = getMetric();
-        assertTrue(body.contains("application_status_isDegraded 0.0"));
+        assertTrue(body.contains("status_isDegraded 0.0"));
     }
 
     @Order(2)
@@ -64,10 +63,10 @@ class StatusEndpointTest extends AbstractITest {
                     .statusCode(500);
 
             String body = getMetric();
-            assertTrue(body.contains("application_status_isDegraded 1.0"));
+            assertTrue(body.contains("status_isDegraded 1.0"));
 
             body = getMetric();
-            assertTrue(body.contains("application_status_isDegraded 1.0"));
+            assertTrue(body.contains("status_isDegraded 1.0"));
 
         } finally {
             with()
