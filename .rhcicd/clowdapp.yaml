@@ -19,7 +19,7 @@ objects:
     - notifications-backend
     database:
       name: policies-ui-backend
-      version: 12
+      version: 13
     testing:
       iqePlugin: policies
     deployments:
