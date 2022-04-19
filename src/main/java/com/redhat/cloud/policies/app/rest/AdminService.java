@@ -103,6 +103,7 @@ public class AdminService {
 
         StuffHolder th = StuffHolder.getInstance();
 
+        System.out.println("STATUS!: " + status.get());
         switch (status.orElse("ok")) {
             case "ok":
                 th.setDegraded(false);
