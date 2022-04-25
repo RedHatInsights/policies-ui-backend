@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +40,7 @@ abstract class AbstractITest {
 
     static final String API_BASE_V1_0 = "/api/policies/v1.0";
     static final String API_BASE_V1 = "/api/policies/v1";
-    public MockServerClient mockServerClient;
+    public ClientAndServer mockServerClient;
 
     @Inject
     EntityManager entityManager;
