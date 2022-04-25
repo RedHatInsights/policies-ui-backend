@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
-
 /**
  * Exports the following from /proc/self/status. See proc(5)
  * VmHWM:    265580 kB
@@ -58,7 +57,7 @@ public class ProcSelfStatusExporter {
     private final AtomicLong vmLib = new AtomicLong(0);
     private final AtomicLong vmData = new AtomicLong(0);
     private final AtomicLong vmSize = new AtomicLong(0);
-    private AtomicInteger threads = new AtomicInteger(0);
+    private final AtomicInteger threads = new AtomicInteger(0);
 
     @Inject
     MeterRegistry meterRegistry;

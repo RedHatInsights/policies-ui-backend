@@ -53,8 +53,6 @@ public class ScheduledStatusProducer {
     @PostConstruct
     public void init() {
         this.degraded = meterRegistry.gauge("status.isDegraded", new AtomicInteger(0));
-
-        degraded.set(StuffHolder.getInstance().getStatusInfo().size());
     }
 
     @Scheduled(every = "10s")
