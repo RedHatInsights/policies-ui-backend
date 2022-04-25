@@ -45,7 +45,6 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     private PostgreSQLContainer postgreSQLContainer;
 
     private static ClientAndServer mockServer;
-    private static String mockServerUrl;
 
     @Override
     public Map<String, String> start() {
@@ -94,11 +93,11 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
             System.out.println("MockServer log is disabled. Use '-D" + LOG_LEVEL_KEY + "=WARN|INFO|DEBUG|TRACE' to enable it.");
         }
         mockServer = startClientAndServer();
-        mockServerUrl = "http://localhost:" + mockServer.getPort();
 
         mockRbac();
         mockEngine();
 
+        String mockServerUrl = "http://localhost:" + mockServer.getPort();
         props.put("quarkus.rest-client.engine.url", mockServerUrl);
         props.put("quarkus.rest-client.rbac.url", mockServerUrl);
         props.put("quarkus.rest-client.notifications.url", mockServerUrl);
