@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app;
 
 import static java.util.Calendar.getInstance;
 import static java.util.Calendar.MAY;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -31,17 +32,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
-import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
 
-    PostgreSQLContainer postgreSQLContainer;
-    MockServerContainer mockEngineServer;
-    MockServerClient mockServerClient;
+    private static final String LOG_LEVEL_KEY = "mockserver.logLevel";
+
+    private PostgreSQLContainer postgreSQLContainer;
+
+    private static ClientAndServer mockServer;
+    private static String mockServerUrl;
 
     @Override
     public Map<String, String> start() {
@@ -66,7 +70,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     public void inject(Object testInstance) {
         if (testInstance instanceof AbstractITest) {
             AbstractITest test = (AbstractITest) testInstance;
-            test.mockServerClient = mockServerClient;
+            test.mockServer = mockServer;
         }
     }
 
@@ -85,12 +89,12 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     }
 
     void setupMockEngine(Map<String, String> props) {
-        mockEngineServer = new MockServerContainer();
-
-        // set up mock engine
-        mockEngineServer.start();
-        String mockServerUrl = "http://" + mockEngineServer.getContainerIpAddress() + ":" + mockEngineServer.getServerPort();
-        mockServerClient = new MockServerClient(mockEngineServer.getContainerIpAddress(), mockEngineServer.getServerPort());
+        if (System.getProperty(LOG_LEVEL_KEY) == null) {
+            System.setProperty(LOG_LEVEL_KEY, "OFF");
+            System.out.println("MockServer log is disabled. Use '-D" + LOG_LEVEL_KEY + "=WARN|INFO|DEBUG|TRACE' to enable it.");
+        }
+        mockServer = startClientAndServer();
+        mockServerUrl = "http://localhost:" + mockServer.getPort();
 
         mockRbac();
         mockEngine();
@@ -102,7 +106,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     }
 
     private void mockEngine() {
-        mockServerClient
+        mockServer
                 .when(request()
                         // special case to simulate that the engine has a general failure.
                         // must come before the more generic match below.
@@ -139,7 +143,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         trigger.lifecycle.add(ev);
         triggers.add(trigger);
 
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers")
                         .withQueryStringParameter("triggerIds", "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
@@ -158,7 +162,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         ft.trigger.id = "00000000-0000-0000-0000-000000000001";
         JsonBody ftBody = JsonBody.json(ft);
 
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/trigger/00000000-0000-0000-0000-000000000001")
                         .withMethod("GET")
@@ -169,13 +173,13 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withBody(ftBody)
                 );
 
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/.*/enable")
                         .withMethod("PUT")
                 )
                 .respond(response().withStatusCode(200));
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/.*/enable")
                         .withMethod("DELETE")
@@ -183,7 +187,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .respond(response().withStatusCode(200));
 
         // Simulate internal engine issue
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/trigger")
                         .withBody(new RegexBody(".*-dead-beef-9200-.*"))
@@ -196,7 +200,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 );
 
         // ------------ status page
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers")
                         .withQueryStringParameter("triggerIds", "dummy")
@@ -208,7 +212,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withBody("[]")
                 );
 
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/apps")
                 )
@@ -220,7 +224,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
         // ------------
 
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/trigger")
                         .withHeader("Hawkular-Tenant", "1234")
@@ -230,7 +234,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"msg\" : \"ok\" }")
                 );
-        mockServerClient
+        mockServer
                 .when(request()
                         // special case to simulate that the engine has a general failure. CPOL-130
                         // must come before the more generic match below.
@@ -242,7 +246,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"errorMessage\" : \"something went wrong\" }")
                 );
-        mockServerClient
+        mockServer
                 .when(request()
                         // special case to simulate that the engine does not have the policy. CPOL-130
                         // must come before the more generic match below.
@@ -255,7 +259,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"errorMessage\" : \"does not exist\" }")
                 );
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/.*")
                         .withMethod("DELETE")
@@ -266,7 +270,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"msg\" : \"ok\" }")
                 );
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/hawkular/alerts/triggers/trigger/.*")
                         .withMethod("PUT")
@@ -283,7 +287,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         // RBac server
         String fullAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_full_access.json", false);
         String noAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_no_access.json", false);
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies")
@@ -295,7 +299,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withBody(fullAccessRbac)
 
                 );
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies")
