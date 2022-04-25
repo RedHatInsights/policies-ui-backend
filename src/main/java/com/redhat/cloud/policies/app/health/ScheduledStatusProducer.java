@@ -59,8 +59,6 @@ public class ScheduledStatusProducer {
 
     @Scheduled(every = "10s")
     void gather() {
-        degraded.set(StuffHolder.getInstance().getStatusInfo().size());
-
         Map<String, String> issues;
         issues = new HashMap<>();
 
@@ -84,6 +82,7 @@ public class ScheduledStatusProducer {
         }
 
         StuffHolder.getInstance().setStatusInfo(issues);
+        this.degraded.set(StuffHolder.getInstance().getStatusInfo().size());
     }
 
     public void update() {
