@@ -94,7 +94,7 @@ class UserConfigServiceTest extends AbstractITest {
     }
 
     private void clearMockValue() {
-        mockServerClient.clear(HttpRequest.request()
+        mockServer.clear(HttpRequest.request()
                 .withMethod("GET")
                 .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
         );
@@ -105,7 +105,7 @@ class UserConfigServiceTest extends AbstractITest {
         UserPreferences preferences = new UserPreferences();
         preferences.instant_email = instantEmail;
         preferences.daily_email = dailyEmail;
-        mockServerClient
+        mockServer
                 .when(request()
                         .withPath("/api/notifications/v1.0/user-config/notification-preference/rhel/policies")
                         .withMethod("GET")
