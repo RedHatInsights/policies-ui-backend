@@ -596,7 +596,7 @@ class RestApiTest extends AbstractITest {
         PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
         entry.setId(UUID.randomUUID());
         entry.setTenantId(accountId);
-        entry.setPolicyId("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+        entry.setPolicyId("9b3b4429-1393-4120-95da-54c17a512367");
         entry.setCtime(new GregorianCalendar(2020, 4, 10, 10, 0, 0).getTimeInMillis());
         Transaction transaction = session.beginTransaction();
         session.persist(entry);
@@ -606,15 +606,15 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath =
                 given()
                         .header(authHeader)
-                        .when().get(API_BASE_V1_0 + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+                        .when().get(API_BASE_V1_0 + "/policies/9b3b4429-1393-4120-95da-54c17a512367")
                         .then()
                         .statusCode(200)
-                        .body(containsString("1st policy"))
+                        .body(containsString("5th policy"))
                         .extract().jsonPath();
 
         TestPolicy policy = jsonPath.getObject("", TestPolicy.class);
-        assertEquals("NOTIFICATION roadrunner@acme.org", policy.actions, "Action does not match");
-        assertEquals("\"cores\" == 1", policy.conditions, "Conditions do not match");
+        assertEquals("notification", policy.actions, "Action does not match");
+        assertEquals("\"cores\" > 4", policy.conditions, "Conditions do not match");
         assertTrue(policy.isEnabled, "Policy is not enabled");
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(policy.lastTriggered);
