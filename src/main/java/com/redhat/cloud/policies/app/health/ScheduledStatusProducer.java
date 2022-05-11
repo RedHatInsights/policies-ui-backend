@@ -16,8 +16,8 @@
  */
 package com.redhat.cloud.policies.app.health;
 
-import com.redhat.cloud.policies.app.LightweightEngine;
-import com.redhat.cloud.policies.app.LightweightEngineConfig;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;

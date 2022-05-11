@@ -1,4 +1,4 @@
-package com.redhat.cloud.policies.app;
+package com.redhat.cloud.policies.app.lightweight;
 
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;

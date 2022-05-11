@@ -17,8 +17,9 @@
 package com.redhat.cloud.policies.app.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.cloud.policies.app.LightweightEngine;
-import com.redhat.cloud.policies.app.LightweightEngineConfig;
+import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
@@ -35,7 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -113,6 +113,9 @@ public class PolicyCrudService {
     @Inject
     @RestClient
     LightweightEngine lightweightEngine;
+
+    @Inject
+    AccountLatestUpdateRepository accountLatestUpdateRepository;
 
     @Inject
     @RestClient
@@ -417,8 +420,8 @@ public class PolicyCrudService {
 
         if (lightweightEngineConfig.isEnabled()) {
             policy.store(user.getAccount(), policy);
-            // TODO POL-649 The old code returned a policy location. Was it used by the frontend?
-            return reloadEngineTrigger(user.getAccount(), policy.id, () -> Response.status(CREATED));
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            return Response.status(CREATED).build();
         } else {
             // Basic validation was successful, so try to persist.
             // This may still fail du to unique name violation, so
@@ -491,7 +494,8 @@ public class PolicyCrudService {
         } else {
             if (lightweightEngineConfig.isEnabled()) {
                 policy.delete(policy);
-                return reloadEngineTrigger(user.getAccount(), policy.id, () -> Response.ok(policy));
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                return Response.ok(policy).build();
             } else {
                 boolean deletedOnEngine = false;
                 try {
@@ -543,7 +547,7 @@ public class PolicyCrudService {
                     reallyDeleted.add(uuid);
                 }
             }
-            return reloadEngineTriggers(user.getAccount(), reallyDeleted, () -> Response.ok(deleted));
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
         } else {
             for (UUID uuid : uuids) {
                 Policy policy = Policy.findById(user.getAccount(), uuid);
@@ -602,7 +606,8 @@ public class PolicyCrudService {
                 storedPolicy.isEnabled = shouldBeEnabled;
                 storedPolicy.setMtimeToNow();
                 storedPolicy.persist();
-                return reloadEngineTrigger(user.getAccount(), policyId, () -> Response.ok());
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                return Response.ok().build();
             } else {
                 try {
                     if (shouldBeEnabled) {
@@ -656,7 +661,8 @@ public class PolicyCrudService {
                     changed.add(uuid);
                 }
             }
-            return reloadEngineTriggers(user.getAccount(), new HashSet<>(changed), () -> Response.ok(changed));
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            return Response.ok(changed).build();
         } else {
             try {
                 for (UUID uuid : uuids) {
@@ -763,7 +769,8 @@ public class PolicyCrudService {
 
                     existingTrigger.updateFromPolicy(storedPolicy);
                     if (lightweightEngineConfig.isEnabled()) {
-                        return reloadEngineTrigger(user.getAccount(), storedPolicy.id, () -> Response.ok(storedPolicy));
+                        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                        return Response.ok(storedPolicy).build();
                     } else {
                         try {
                             engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
@@ -1061,26 +1068,5 @@ public class PolicyCrudService {
         }
 
         return null;
-    }
-
-    private Response reloadEngineTriggers(String accountId, Set<UUID> policyIds, Supplier<ResponseBuilder> successResponseSupplier) {
-        try {
-            lightweightEngine.reloadTriggers(accountId, policyIds);
-        } catch (Throwable t) {
-            log.error("Failed to reload engine triggers", t);
-            try {
-                // Any change previously done to the DB data during the current transaction will be rolled back.
-                transactionManager.setRollbackOnly();
-            } catch (SystemException e) {
-                // This will most likely never be thrown.
-                throw new RuntimeException(e);
-            }
-            return Response.serverError().entity(new Msg("Connection to policies-engine failed. Please retry later.")).build();
-        }
-        return successResponseSupplier.get().build();
-    }
-
-    private Response reloadEngineTrigger(String accountId, UUID policyId, Supplier<ResponseBuilder> successResponseSupplier) {
-        return reloadEngineTriggers(accountId, Collections.singleton(policyId), successResponseSupplier);
     }
 }

@@ -1,5 +1,6 @@
 package com.redhat.cloud.policies.app;
 
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
