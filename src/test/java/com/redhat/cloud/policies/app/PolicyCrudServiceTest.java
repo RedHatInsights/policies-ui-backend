@@ -27,6 +27,9 @@ class PolicyCrudServiceTest extends AbstractITest {
     @Inject
     PoliciesHistoryTestHelper helper;
 
+    @Inject
+    LightweightEngineConfig lightweightEngineConfig;
+
     @Test
     void test() {
         UUID policyId = createPolicy();
@@ -79,5 +82,23 @@ class PolicyCrudServiceTest extends AbstractITest {
 
         JsonObject jsonPolicy = new JsonObject(responseBody);
         return UUID.fromString(jsonPolicy.getString("id"));
+    }
+
+    @Test
+    void testUnavailableSync() {
+        lightweightEngineConfig.overrideForTest(true);
+        given()
+                .header(authHeader)
+                .when().post("/admin/sync")
+                .then().statusCode(503);
+    }
+
+    @Test
+    void testUnavailableVerify() {
+        lightweightEngineConfig.overrideForTest(true);
+        given()
+                .header(authHeader)
+                .when().post("/admin/verify")
+                .then().statusCode(503);
     }
 }

@@ -23,4 +23,11 @@ public class LightweightEngineConfig {
     public boolean isEnabled() {
         return enabled;
     }
+
+    /**
+      * <b>/!\ WARNING /!\</b> Do not use this method from runtime code.
+      */
+    public void overrideForTest(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
