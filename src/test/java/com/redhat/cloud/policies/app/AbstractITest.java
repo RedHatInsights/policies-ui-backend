@@ -16,6 +16,9 @@
  */
 package com.redhat.cloud.policies.app;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import io.restassured.http.Header;
 import javax.inject.Inject;
@@ -23,6 +26,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockserver.integration.ClientAndServer;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,6 +42,8 @@ abstract class AbstractITest {
     static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
     static Header authHeaderNoAccount; // Account number is empty
 
+    static String accountId;
+
     static final String API_BASE_V1_0 = "/api/policies/v1.0";
     static final String API_BASE_V1 = "/api/policies/v1";
     public ClientAndServer mockServer;
@@ -49,10 +56,22 @@ abstract class AbstractITest {
         // provide rh-id
         String rhid = HeaderHelperTest.getStringFromFile("rhid.txt", false);
         authHeader = new Header("x-rh-identity", rhid);
+        accountId = getAccountId(rhid.trim());
         rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt", false);
         authRbacNoAccess = new Header("x-rh-identity", rhid);
         rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt", false);
         authHeaderNoAccount = new Header("x-rh-identity", rhid);
+    }
+
+    static String getAccountId(String identity) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode node = mapper.readTree(new String(Base64.getDecoder().decode(identity), StandardCharsets.UTF_8));
+            return node.get("identity").get("account_number").asText();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     void extractAndCheck(Map<String, String> links, String rel, int limit, int offset) {
