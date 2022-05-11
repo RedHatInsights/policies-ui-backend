@@ -531,7 +531,6 @@ public class PolicyCrudService {
         // TODO Temp counter used to investigate the engine instability, remove ASAP.
         registry.counter("policies_ui_deletePolicies", new Tag("account", user.getAccount())).inc();
 
-        // TODO POL-649 Do we really need to return this?
         List<UUID> deleted = new ArrayList<>(uuids.size());
 
         if (lightweightEngineConfig.isEnabled()) {
