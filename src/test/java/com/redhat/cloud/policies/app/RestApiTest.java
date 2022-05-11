@@ -53,6 +53,7 @@ import javax.json.bind.JsonbBuilder;
 import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
+import org.hibernate.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -68,6 +69,9 @@ class RestApiTest extends AbstractITest {
 
     @InjectMock
     PoliciesHistoryRepository policiesHistoryRepository;
+
+    @Inject
+    Session session;
 
     @AfterEach
     void cleanUUID() {
@@ -588,9 +592,6 @@ class RestApiTest extends AbstractITest {
 
     @Test
     void testGetOnePolicy() {
-        when(policiesHistoryRepository.getLastTriggerTime("1234", UUID.fromString("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")))
-                .thenReturn(new GregorianCalendar(2020, 4, 10, 10, 0, 0).getTimeInMillis());
-
         JsonPath jsonPath =
                 given()
                         .header(authHeader)
@@ -604,6 +605,22 @@ class RestApiTest extends AbstractITest {
         assertEquals("NOTIFICATION roadrunner@acme.org", policy.actions, "Action does not match");
         assertEquals("\"cores\" == 1", policy.conditions, "Conditions do not match");
         assertTrue(policy.isEnabled, "Policy is not enabled");
+        assertEquals(0, policy.lastTriggered);
+
+        PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
+        entry.setTenantId(policy.customerid);
+        entry.setPolicyId("bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c");
+        entry.setCtime(new GregorianCalendar(2020, 4, 10, 10, 0, 0).getTimeInMillis());
+        session.persist(entry);
+
+        policy = given()
+                        .header(authHeader)
+                        .when().get(API_BASE_V1_0 + "/policies/bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
+                        .then()
+                        .statusCode(200)
+                        .body(containsString("1st policy"))
+                        .extract().jsonPath().getObject("", TestPolicy.class);
+
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(policy.lastTriggered);
         assertEquals(2020, cal.get(Calendar.YEAR));
