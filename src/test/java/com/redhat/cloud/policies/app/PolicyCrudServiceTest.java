@@ -89,8 +89,10 @@ class PolicyCrudServiceTest extends AbstractITest {
         lightweightEngineConfig.overrideForTest(true);
         given()
                 .header(authHeader)
+                .contentType(JSON)
                 .when().post("/admin/sync")
                 .then().statusCode(503);
+        lightweightEngineConfig.overrideForTest(false);
     }
 
     @Test
@@ -98,7 +100,8 @@ class PolicyCrudServiceTest extends AbstractITest {
         lightweightEngineConfig.overrideForTest(true);
         given()
                 .header(authHeader)
-                .when().post("/admin/verify")
+                .when().get("/admin/verify")
                 .then().statusCode(503);
+        lightweightEngineConfig.overrideForTest(false);
     }
 }
