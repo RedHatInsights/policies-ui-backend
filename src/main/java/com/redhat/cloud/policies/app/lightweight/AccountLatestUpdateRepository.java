@@ -15,7 +15,7 @@ public class AccountLatestUpdateRepository {
 
     public void setLatestToNow(String accountId) {
         String sql = "INSERT INTO account_latest_update (account_id, latest) SELECT :accountId, :latest " +
-                "ON CONFLICT (accountId) DO UPDATE SET latest = :latest";
+                "ON CONFLICT (account_id) DO UPDATE SET latest = :latest";
         entityManager.createNativeQuery(sql)
                 .setParameter("accountId", accountId)
                 .setParameter("latest", LocalDateTime.now(UTC))
