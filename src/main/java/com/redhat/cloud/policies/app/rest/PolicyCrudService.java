@@ -399,15 +399,15 @@ public class PolicyCrudService {
             return invalidNameResponse;
         }
 
-        if (lightweightEngineConfig.isEnabled()) {
-            lightweightEngine.validateCondition(policy.conditions);
-        } else {
-            try {
+        try {
+            if (lightweightEngineConfig.isEnabled()) {
+                lightweightEngine.validateCondition(policy.conditions);
+            } else {
                 FullTrigger trigger = new FullTrigger(policy, true);
                 engine.storeTrigger(trigger, true, user.getAccount());
-            } catch (Exception e) {
-                return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
+        } catch (Exception e) {
+            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
 
         if (!alsoStore) {
@@ -735,15 +735,15 @@ public class PolicyCrudService {
                     return invalidNameResponse;
                 }
 
-                if (lightweightEngineConfig.isEnabled()) {
-                    lightweightEngine.validateCondition(policy.conditions);
-                } else {
-                    try {
+                try {
+                    if (lightweightEngineConfig.isEnabled()) {
+                        lightweightEngine.validateCondition(policy.conditions);
+                    } else {
                         FullTrigger trigger = new FullTrigger(policy);
                         engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                    } catch (Exception e) {
-                        return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
                     }
+                } catch (Exception e) {
+                    return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
                 }
 
                 if (dryRun) {
@@ -817,19 +817,19 @@ public class PolicyCrudService {
 
         policy.customerid = user.getAccount();
 
-        if (lightweightEngineConfig.isEnabled()) {
-            lightweightEngine.validateCondition(policy.conditions);
-        } else {
-            try {
-                FullTrigger trigger = new FullTrigger(policy, policy.id == null);
-                if (policy.id == null) {
-                    engine.storeTrigger(trigger, true, user.getAccount());
-                } else {
-                    engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                }
-            } catch (Exception e) {
-                return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+        try {
+            if (lightweightEngineConfig.isEnabled()) {
+                lightweightEngine.validateCondition(policy.conditions);
+            } else {
+                    FullTrigger trigger = new FullTrigger(policy, policy.id == null);
+                    if (policy.id == null) {
+                        engine.storeTrigger(trigger, true, user.getAccount());
+                    } else {
+                        engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+                    }
             }
+        } catch (Exception e) {
+            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
 
         return Response.status(200).entity(new Msg("Policy.condition validated")).build();
