@@ -16,9 +16,10 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
@@ -27,14 +28,12 @@ import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 
-import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,17 +61,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
-import com.redhat.cloud.policies.app.model.engine.Trigger;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
-import io.quarkus.panache.common.Sort;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
@@ -91,6 +87,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jboss.logging.Logger;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
@@ -108,6 +106,16 @@ public class PolicyCrudService {
     private final Logger log = Logger.getLogger(this.getClass());
 
     private static final ObjectMapper OM = new ObjectMapper();
+
+    @Inject
+    LightweightEngineConfig lightweightEngineConfig;
+
+    @Inject
+    @RestClient
+    LightweightEngine lightweightEngine;
+
+    @Inject
+    AccountLatestUpdateRepository accountLatestUpdateRepository;
 
     @Inject
     @RestClient
@@ -391,11 +399,15 @@ public class PolicyCrudService {
             return invalidNameResponse;
         }
 
-        try {
-            FullTrigger trigger = new FullTrigger(policy, true);
-            engine.storeTrigger(trigger, true, user.getAccount());
-        } catch (Exception e) {
-            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+        if (lightweightEngineConfig.isEnabled()) {
+            lightweightEngine.validateCondition(policy.conditions);
+        } else {
+            try {
+                FullTrigger trigger = new FullTrigger(policy, true);
+                engine.storeTrigger(trigger, true, user.getAccount());
+            } catch (Exception e) {
+                return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+            }
         }
 
         if (!alsoStore) {
@@ -406,30 +418,35 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
         }
 
-        // Basic validation was successful, so try to persist.
-        // This may still fail du to unique name violation, so
-        // we need to check for that.
-        UUID id;
-        try {
-            FullTrigger trigger = new FullTrigger(policy);
+        if (lightweightEngineConfig.isEnabled()) {
+            policy.store(user.getAccount(), policy);
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            return Response.status(CREATED).build();
+        } else {
+            // Basic validation was successful, so try to persist.
+            // This may still fail du to unique name violation, so
+            // we need to check for that.
+            UUID id;
             try {
-                engine.storeTrigger(trigger, false, user.getAccount());
-                id = policy.store(user.getAccount(), policy);
-            } catch (Exception e) {
-                Msg engineExceptionMsg = getEngineExceptionMsg(e);
-                log.warn("Storing policy in engine failed", e);
-                return Response.status(400, e.getMessage()).entity(engineExceptionMsg).build();
+                FullTrigger trigger = new FullTrigger(policy);
+                try {
+                    engine.storeTrigger(trigger, false, user.getAccount());
+                    id = policy.store(user.getAccount(), policy);
+                } catch (Exception e) {
+                    Msg engineExceptionMsg = getEngineExceptionMsg(e);
+                    log.warn("Storing policy in engine failed", e);
+                    return Response.status(400, e.getMessage()).entity(engineExceptionMsg).build();
+                }
+            } catch (Throwable t) {
+                return getResponseSavingPolicyThrowable(t);
             }
-        } catch (Throwable t) {
-            return getResponseSavingPolicyThrowable(t);
+
+            // Policy is persisted. Return its location.
+            URI location =
+                    UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(id);
+            ResponseBuilder builder = Response.created(location).entity(policy);
+            return builder.build();
         }
-
-        // Policy is persisted. Return its location.
-        URI location =
-                UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(id);
-        ResponseBuilder builder = Response.created(location).entity(policy);
-        return builder.build();
-
     }
 
     private Response getResponseSavingPolicyThrowable(Throwable t) {
@@ -475,20 +492,26 @@ public class PolicyCrudService {
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
-            boolean deletedOnEngine = false;
-            try {
-                engine.deleteTrigger(policy.id, user.getAccount());
-                deletedOnEngine = true;
-            } catch (NotFoundException nfe) {
-                // Engine does not have it - we can delete anyway
-                deletedOnEngine = true;
-            } catch (Exception e) {
-                log.warn("Deletion on engine failed", e);
-                builder = Response.serverError().entity(new Msg(e.getMessage()));
-            }
-            if (deletedOnEngine) {
+            if (lightweightEngineConfig.isEnabled()) {
                 policy.delete(policy);
-                builder = Response.ok(policy);
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                return Response.ok(policy).build();
+            } else {
+                boolean deletedOnEngine = false;
+                try {
+                    engine.deleteTrigger(policy.id, user.getAccount());
+                    deletedOnEngine = true;
+                } catch (NotFoundException nfe) {
+                    // Engine does not have it - we can delete anyway
+                    deletedOnEngine = true;
+                } catch (Exception e) {
+                    log.warn("Deletion on engine failed", e);
+                    builder = Response.serverError().entity(new Msg(e.getMessage()));
+                }
+                if (deletedOnEngine) {
+                    policy.delete(policy);
+                    builder = Response.ok(policy);
+                }
             }
         }
 
@@ -514,25 +537,38 @@ public class PolicyCrudService {
 
         List<UUID> deleted = new ArrayList<>(uuids.size());
 
-        for (UUID uuid : uuids) {
-            Policy policy = Policy.findById(user.getAccount(), uuid);
-            if (policy == null) {
-                // Nothing to do for us
+        if (lightweightEngineConfig.isEnabled()) {
+            Set<UUID> reallyDeleted = new HashSet<>(uuids.size());
+            for (UUID uuid : uuids) {
+                Policy policy = Policy.findById(user.getAccount(), uuid);
                 deleted.add(uuid);
-            } else {
-                boolean deletedOnEngine = false;
-                try {
-                    engine.deleteTrigger(policy.id, user.getAccount());
-                    deletedOnEngine = true;
-                } catch (NotFoundException nfe) {
-                    // Engine does not have it - we can delete anyway
-                    deletedOnEngine = true;
-                } catch (Exception e) {
-                    log.warn("Deletion on engine failed", e);
-                }
-                if (deletedOnEngine) {
+                if (policy != null) {
                     policy.delete();
+                    reallyDeleted.add(uuid);
+                }
+            }
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        } else {
+            for (UUID uuid : uuids) {
+                Policy policy = Policy.findById(user.getAccount(), uuid);
+                if (policy == null) {
+                    // Nothing to do for us
                     deleted.add(uuid);
+                } else {
+                    boolean deletedOnEngine = false;
+                    try {
+                        engine.deleteTrigger(policy.id, user.getAccount());
+                        deletedOnEngine = true;
+                    } catch (NotFoundException nfe) {
+                        // Engine does not have it - we can delete anyway
+                        deletedOnEngine = true;
+                    } catch (Exception e) {
+                        log.warn("Deletion on engine failed", e);
+                    }
+                    if (deletedOnEngine) {
+                        policy.delete();
+                        deleted.add(uuid);
+                    }
                 }
             }
         }
@@ -566,21 +602,29 @@ public class PolicyCrudService {
         if (storedPolicy == null) {
             builder = Response.status(404, "Original policy not found");
         } else {
-            try {
-                if (shouldBeEnabled) {
-                    engine.enableTrigger(storedPolicy.id, user.getAccount());
-                } else {
-                    engine.disableTrigger(storedPolicy.id, user.getAccount());
-                }
+            if (lightweightEngineConfig.isEnabled()) {
                 storedPolicy.isEnabled = shouldBeEnabled;
                 storedPolicy.setMtimeToNow();
                 storedPolicy.persist();
-                builder = Response.ok();
-            } catch (NotFoundException nfe) {
-                builder = Response.status(404, "Policy not found in engine");
-                log.warn("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
-            } catch (Exception e) {
-                builder = Response.status(500, "Update failed: " + e.getMessage());
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                return Response.ok().build();
+            } else {
+                try {
+                    if (shouldBeEnabled) {
+                        engine.enableTrigger(storedPolicy.id, user.getAccount());
+                    } else {
+                        engine.disableTrigger(storedPolicy.id, user.getAccount());
+                    }
+                    storedPolicy.isEnabled = shouldBeEnabled;
+                    storedPolicy.setMtimeToNow();
+                    storedPolicy.persist();
+                    builder = Response.ok();
+                } catch (NotFoundException nfe) {
+                    builder = Response.status(404, "Policy not found in engine");
+                    log.warn("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
+                } catch (Exception e) {
+                    builder = Response.status(500, "Update failed: " + e.getMessage());
+                }
             }
         }
         return builder.build();
@@ -607,33 +651,49 @@ public class PolicyCrudService {
         registry.counter("policies_ui_setEnabledStateForPolicies", new Tag("account", user.getAccount())).inc();
 
         List<UUID> changed = new ArrayList<>(uuids.size());
-        try {
+        if (lightweightEngineConfig.isEnabled()) {
             for (UUID uuid : uuids) {
                 Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
-                boolean wasChanged = false;
                 if (storedPolicy != null) {
-                    try {
-                        if (shouldBeEnabled) {
-                            engine.enableTrigger(storedPolicy.id, user.getAccount());
-                        } else {
-                            engine.disableTrigger(storedPolicy.id, user.getAccount());
-                        }
-                        wasChanged = true;
-                    } catch (Exception e) {
-                        log.warn("Changing state in engine failed", e);
-                    }
-                    if (wasChanged) {
-                        storedPolicy.isEnabled = shouldBeEnabled;
-                        storedPolicy.setMtimeToNow();
-                        storedPolicy.persist();
-                        changed.add(uuid);
-                    }
+                    storedPolicy.isEnabled = shouldBeEnabled;
+                    storedPolicy.setMtimeToNow();
+                    storedPolicy.persist();
+                    changed.add(uuid);
                 }
             }
+            if (!changed.isEmpty()) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
             return Response.ok(changed).build();
-        } catch (Throwable e) {
-            log.error("Enabling failed: " + e.getMessage());
-            return Response.serverError().build();
+        } else {
+            try {
+                for (UUID uuid : uuids) {
+                    Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+                    boolean wasChanged = false;
+                    if (storedPolicy != null) {
+                        try {
+                            if (shouldBeEnabled) {
+                                engine.enableTrigger(storedPolicy.id, user.getAccount());
+                            } else {
+                                engine.disableTrigger(storedPolicy.id, user.getAccount());
+                            }
+                            wasChanged = true;
+                        } catch (Exception e) {
+                            log.warn("Changing state in engine failed", e);
+                        }
+                        if (wasChanged) {
+                            storedPolicy.isEnabled = shouldBeEnabled;
+                            storedPolicy.setMtimeToNow();
+                            storedPolicy.persist();
+                            changed.add(uuid);
+                        }
+                    }
+                }
+                return Response.ok(changed).build();
+            } catch (Throwable e) {
+                log.error("Enabling failed: " + e.getMessage());
+                return Response.serverError().build();
+            }
         }
     }
 
@@ -675,11 +735,15 @@ public class PolicyCrudService {
                     return invalidNameResponse;
                 }
 
-                try {
-                    FullTrigger trigger = new FullTrigger(policy);
-                    engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                } catch (Exception e) {
-                    return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                if (lightweightEngineConfig.isEnabled()) {
+                    lightweightEngine.validateCondition(policy.conditions);
+                } else {
+                    try {
+                        FullTrigger trigger = new FullTrigger(policy);
+                        engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+                    } catch (Exception e) {
+                        return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                    }
                 }
 
                 if (dryRun) {
@@ -691,10 +755,14 @@ public class PolicyCrudService {
                 // so we need to first poll from it.
                 try {
                     FullTrigger existingTrigger;
-                    try {
-                        existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
-                    } catch (Exception e) {
-                        return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                    if (lightweightEngineConfig.isEnabled()) {
+                        existingTrigger = new FullTrigger(storedPolicy);
+                    } else {
+                        try {
+                            existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
+                        } catch (Exception e) {
+                            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                        }
                     }
 
                     storedPolicy.populateFrom(policy);
@@ -702,11 +770,16 @@ public class PolicyCrudService {
                     storedPolicy.setMtimeToNow();
 
                     existingTrigger.updateFromPolicy(storedPolicy);
-                    try {
-                        engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
-                    } catch (Exception e) {
-                        transactionManager.setRollbackOnly();
-                        return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                    if (lightweightEngineConfig.isEnabled()) {
+                        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                        return Response.ok(storedPolicy).build();
+                    } else {
+                        try {
+                            engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
+                        } catch (Exception e) {
+                            transactionManager.setRollbackOnly();
+                            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
+                        }
                     }
                 } catch (Throwable t) {
                     try {
@@ -744,15 +817,19 @@ public class PolicyCrudService {
 
         policy.customerid = user.getAccount();
 
-        try {
-            FullTrigger trigger = new FullTrigger(policy, policy.id == null);
-            if (policy.id == null) {
-                engine.storeTrigger(trigger, true, user.getAccount());
-            } else {
-                engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+        if (lightweightEngineConfig.isEnabled()) {
+            lightweightEngine.validateCondition(policy.conditions);
+        } else {
+            try {
+                FullTrigger trigger = new FullTrigger(policy, policy.id == null);
+                if (policy.id == null) {
+                    engine.storeTrigger(trigger, true, user.getAccount());
+                } else {
+                    engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+                }
+            } catch (Exception e) {
+                return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
             }
-        } catch (Exception e) {
-            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
 
         return Response.status(200).entity(new Msg("Policy.condition validated")).build();

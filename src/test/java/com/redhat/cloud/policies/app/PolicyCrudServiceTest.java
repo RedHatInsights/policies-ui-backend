@@ -1,5 +1,6 @@
 package com.redhat.cloud.policies.app;
 
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
@@ -26,6 +27,9 @@ class PolicyCrudServiceTest extends AbstractITest {
 
     @Inject
     PoliciesHistoryTestHelper helper;
+
+    @Inject
+    LightweightEngineConfig lightweightEngineConfig;
 
     @Test
     void test() {
@@ -79,5 +83,26 @@ class PolicyCrudServiceTest extends AbstractITest {
 
         JsonObject jsonPolicy = new JsonObject(responseBody);
         return UUID.fromString(jsonPolicy.getString("id"));
+    }
+
+    @Test
+    void testUnavailableSync() {
+        lightweightEngineConfig.overrideForTest(true);
+        given()
+                .header(authHeader)
+                .contentType(JSON)
+                .when().post("/admin/sync")
+                .then().statusCode(503);
+        lightweightEngineConfig.overrideForTest(false);
+    }
+
+    @Test
+    void testUnavailableVerify() {
+        lightweightEngineConfig.overrideForTest(true);
+        given()
+                .header(authHeader)
+                .when().get("/admin/verify")
+                .then().statusCode(503);
+        lightweightEngineConfig.overrideForTest(false);
     }
 }

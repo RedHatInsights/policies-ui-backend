@@ -35,6 +35,7 @@ import com.redhat.cloud.policies.app.model.engine.Trigger;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+// TODO POL-649 Remove this interface after we're done migrating to the lightweight engine.
 /**
  * Interface to the backend engine
  */
