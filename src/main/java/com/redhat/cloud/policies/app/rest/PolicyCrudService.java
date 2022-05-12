@@ -421,7 +421,7 @@ public class PolicyCrudService {
         if (lightweightEngineConfig.isEnabled()) {
             policy.store(user.getAccount(), policy);
             accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            return Response.status(CREATED).build();
+            return Response.status(CREATED).entity(policy).build();
         } else {
             // Basic validation was successful, so try to persist.
             // This may still fail du to unique name violation, so
