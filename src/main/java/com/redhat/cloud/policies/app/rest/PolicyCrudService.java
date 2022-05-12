@@ -661,7 +661,9 @@ public class PolicyCrudService {
                     changed.add(uuid);
                 }
             }
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            if (!changed.isEmpty()) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
             return Response.ok(changed).build();
         } else {
             try {
