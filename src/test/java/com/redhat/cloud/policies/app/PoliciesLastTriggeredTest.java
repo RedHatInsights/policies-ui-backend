@@ -92,7 +92,7 @@ class PoliciesLastTriggeredTest {
 
     private Policy createPolicy(String accountId, UUID policyId) {
         Policy policy = new Policy();
-        policy.id = UUID.randomUUID();
+        policy.id = policyId;
         policy.customerid = accountId;
         policy.name = "Policy: " +  policy.id.toString();
         policy.actions = "";
