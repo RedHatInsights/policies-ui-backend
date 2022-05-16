@@ -5,9 +5,7 @@ import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import org.hibernate.CacheMode;
 import org.hibernate.Session;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,13 +59,10 @@ class PoliciesLastTriggeredTest {
 
     @Test
     @TestTransaction
-    void testPolicyLastTriggeredAreSetByIdAndAccount() {
-        UUID uuid1 = UUID.randomUUID();
-        UUID uuid2 = UUID.randomUUID();
-
-        Policy policy = createPolicy(testAccountId, uuid1);
-        Policy policy2 = createPolicy(testAccountId, uuid2);
-        Policy policy3 = createPolicy(otherTestAccountId, uuid1);
+    void testPolicyLastTriggeredAreSetById() {
+        Policy policy = createPolicy(testAccountId, UUID.randomUUID());
+        Policy policy2 = createPolicy(testAccountId, UUID.randomUUID());
+        Policy policy3 = createPolicy(otherTestAccountId, UUID.randomUUID());
 
         createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)).toEpochMilli(), policy.id, policy.customerid);
         createPoliciesHistoryEntry(Instant.now().toEpochMilli(), policy.id, policy.customerid);
