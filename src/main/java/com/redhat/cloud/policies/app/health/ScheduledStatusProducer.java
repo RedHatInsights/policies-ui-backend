@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.policies.app.health;
 
+import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
@@ -40,6 +42,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ScheduledStatusProducer {
 
     public static final String DUMMY = "dummy";
+
+    private static final String DUMMY_CONDITION = "facts.arch = 'x86_64'";
+
+    @Inject
+    LightweightEngineConfig lightweightEngineConfig;
+
+    @Inject
+    @RestClient
+    LightweightEngine lightweightEngine;
 
     @Inject
     @RestClient
@@ -74,7 +85,11 @@ public class ScheduledStatusProducer {
         }
 
         try {
-            engine.findTriggersById(DUMMY, DUMMY);
+            if (lightweightEngineConfig.isEnabled()) {
+                lightweightEngine.validateCondition(DUMMY_CONDITION);
+            } else {
+                engine.findTriggersById(DUMMY, DUMMY);
+            }
         } catch (Exception e) {
             issues.put("engine", e.getMessage());
         }

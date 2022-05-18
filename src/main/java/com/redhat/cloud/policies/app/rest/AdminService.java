@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.health.ScheduledStatusProducer;
@@ -60,6 +61,9 @@ import java.util.stream.Stream;
 public class AdminService {
 
     private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+
+    @Inject
+    LightweightEngineConfig lightweightEngineConfig;
 
     @Inject
     @RestClient
@@ -135,6 +139,10 @@ public class AdminService {
     @Transactional
     public Response syncToEngine(@QueryParam("token") String token) {
 
+        if (lightweightEngineConfig.isEnabled()) {
+            return Response.status(503).entity("Sync unavailable when the lightweight engine is enabled").build();
+        }
+
         boolean validToken = StuffHolder.getInstance().compareToken(token);
         if (!validToken) {
             return Response.status(Response.Status.FORBIDDEN).entity("You don't have permission for this").build();
@@ -168,6 +176,10 @@ public class AdminService {
     @GET
     @Path("/verify")
     public Response findOrphans() {
+
+        if (lightweightEngineConfig.isEnabled()) {
+            return Response.status(503).entity("Verify unavailable when the lightweight engine is enabled").build();
+        }
 
         Map<String, List<TTT>> orphanedPolicies = new HashMap<>();
         List<TTT> orphanedInDB = new ArrayList<>();

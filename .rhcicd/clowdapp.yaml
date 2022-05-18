@@ -19,7 +19,7 @@ objects:
     - notifications-backend
     database:
       name: policies-ui-backend
-      version: 12
+      version: 13
     testing:
       iqePlugin: policies
     deployments:
@@ -66,6 +66,8 @@ objects:
         env:
         - name: ENV_NAME
           value: ${ENV_NAME}
+        - name: LIGHTWEIGHT_ENGINE_ENABLED
+          value: ${LIGHTWEIGHT_ENGINE_ENABLED}
         - name: QUARKUS_HTTP_PORT
           value: "8000"
         - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
@@ -176,6 +178,8 @@ parameters:
 - name: IMAGE_TAG
   description: Image tag
   value: latest
+- name: LIGHTWEIGHT_ENGINE_ENABLED
+  value: "false"
 - name: MEMORY_LIMIT
   description: Memory limit
   value: 500Mi
