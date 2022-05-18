@@ -16,15 +16,17 @@
  */
 package com.redhat.cloud.policies.app.health;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-
 
 /**
  * Exports the following from /proc/self/status. See proc(5)
@@ -47,15 +49,31 @@ public class ProcSelfStatusExporter {
 
     private boolean hasWarned = false;
 
-    long vmHwm;
-    long vmRss;
-    long rssAnon;
-    long rssFile;
-    long vmStk;
-    long vmLib;
-    long vmData;
-    long vmSize;
-    int threads;
+    private final AtomicLong vmHwm = new AtomicLong(0);
+    private final AtomicLong vmRss = new AtomicLong(0);
+    private final AtomicLong rssAnon = new AtomicLong(0);
+    private final AtomicLong rssFile = new AtomicLong(0);
+    private final AtomicLong vmStk = new AtomicLong(0);
+    private final AtomicLong vmLib = new AtomicLong(0);
+    private final AtomicLong vmData = new AtomicLong(0);
+    private final AtomicLong vmSize = new AtomicLong(0);
+    private final AtomicInteger threads = new AtomicInteger(0);
+
+    @Inject
+    MeterRegistry meterRegistry;
+
+    @PostConstruct
+    public void initCounters() {
+        meterRegistry.gauge("status.vmHwm", vmHwm);
+        meterRegistry.gauge("status.vmRss", vmRss);
+        meterRegistry.gauge("status.rssAnon", rssAnon);
+        meterRegistry.gauge("status.rssFile", rssFile);
+        meterRegistry.gauge("status.vmStk", vmStk);
+        meterRegistry.gauge("status.vmLib", vmLib);
+        meterRegistry.gauge("status.vmData", vmData);
+        meterRegistry.gauge("status.vmSize", vmSize);
+        meterRegistry.gauge("status.threads", threads);
+    }
 
     @Scheduled(every = "10s")
     void gather() {
@@ -76,31 +94,31 @@ public class ProcSelfStatusExporter {
 
                 switch (parts[0]) {
                     case "VmHWM:":
-                        vmHwm = Long.parseLong(parts[1]);
+                        vmHwm.set(Long.parseLong(parts[1]));
                         break;
                     case "VmRSS:":
-                        vmRss = Long.parseLong(parts[1]);
+                        vmRss.set(Long.parseLong(parts[1]));
                         break;
                     case "RssAnon:":
-                        rssAnon = Long.parseLong(parts[1]);
+                        rssAnon.set(Long.parseLong(parts[1]));
                         break;
                     case "RssFile:":
-                        rssFile = Long.parseLong(parts[1]);
+                        rssFile.set(Long.parseLong(parts[1]));
                         break;
                     case "VmStk:":
-                        vmStk = Long.parseLong(parts[1]);
+                        vmStk.set(Long.parseLong(parts[1]));
                         break;
                     case "VmLib:":
-                        vmLib = Long.parseLong(parts[1]);
+                        vmLib.set(Long.parseLong(parts[1]));
                         break;
                     case "VmData:":
-                        vmData = Long.parseLong(parts[1]);
+                        vmData.set(Long.parseLong(parts[1]));
                         break;
                     case "VmSize:":
-                        vmSize = Long.parseLong(parts[1]);
+                        vmSize.set(Long.parseLong(parts[1]));
                         break;
                     case "Threads:":
-                        threads = Integer.parseInt(parts[1]);
+                        threads.set(Integer.parseInt(parts[1]));
                         break;
                     default:
                         // That file has more entries, but which we don't care about
@@ -111,62 +129,17 @@ public class ProcSelfStatusExporter {
         }
     }
 
-    @Gauge(name = "status.vmHwm", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmHwm() {
-        return vmHwm;
-    }
-
-    @Gauge(name = "status.vmRss", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmRss() {
-        return vmRss;
-    }
-
-    @Gauge(name = "status.rssAnon", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getRssAnon() {
-        return rssAnon;
-    }
-
-    @Gauge(name = "status.rssFile", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getRssFile() {
-        return rssFile;
-    }
-
-    @Gauge(name = "status.vmStk", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmStk() {
-        return vmStk;
-    }
-
-    @Gauge(name = "status.vmLib", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmLib() {
-        return vmLib;
-    }
-
-    @Gauge(name = "status.vmData", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmData() {
-        return vmData;
-    }
-
-    @Gauge(name = "status.vmSize", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmSize() {
-        return vmSize;
-    }
-
-    @Gauge(name = "status.threads", absolute = true, unit = MetricUnits.NONE, tags = "type=proc")
-    public long getThreads() {
-        return threads;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
-        sb.append("vmHwm=").append(vmHwm / 1024);
-        sb.append(", vmRss=").append(vmRss / 1024);
-        sb.append(", rssAnon=").append(rssAnon / 1024);
-        sb.append(", rssFile=").append(rssFile / 1024);
-        sb.append(", vmStk=").append(vmStk / 1024);
-        sb.append(", vmLib=").append(vmLib / 1024);
-        sb.append(", vmData=").append(vmData / 1024);
-        sb.append(", vmSize=").append(vmSize / 1024);
+        sb.append("vmHwm=").append(vmHwm.get() / 1024);
+        sb.append(", vmRss=").append(vmRss.get() / 1024);
+        sb.append(", rssAnon=").append(rssAnon.get() / 1024);
+        sb.append(", rssFile=").append(rssFile.get() / 1024);
+        sb.append(", vmStk=").append(vmStk.get() / 1024);
+        sb.append(", vmLib=").append(vmLib.get() / 1024);
+        sb.append(", vmData=").append(vmData.get() / 1024);
+        sb.append(", vmSize=").append(vmSize.get() / 1024);
         sb.append(", threads=").append(threads);
         sb.append('}');
         return sb.toString();

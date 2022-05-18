@@ -21,15 +21,16 @@ import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * We gather the Status of ourselves and remotes.
@@ -55,16 +56,18 @@ public class ScheduledStatusProducer {
     @RestClient
     PolicyEngine engine;
 
-    //  // Quarkus only activates this after the first REST-call to any method in this class
-    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
-            description = "Returns 0 if good, value > 0 for number of entries in the status message")
-    int isDegraded() {
-        return StuffHolder.getInstance().getStatusInfo().size();
+    @Inject
+    MeterRegistry meterRegistry;
+
+    private AtomicInteger degraded;
+
+    @PostConstruct
+    public void init() {
+        this.degraded = meterRegistry.gauge("status.isDegraded", new AtomicInteger(0));
     }
 
     @Scheduled(every = "10s")
     void gather() {
-
         Map<String, String> issues;
         issues = new HashMap<>();
 
@@ -92,6 +95,7 @@ public class ScheduledStatusProducer {
         }
 
         StuffHolder.getInstance().setStatusInfo(issues);
+        this.degraded.set(StuffHolder.getInstance().getStatusInfo().size());
     }
 
     public void update() {
