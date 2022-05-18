@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
@@ -32,6 +31,7 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
@@ -107,6 +107,12 @@ public class PolicyCrudService {
     public static final String CTIME_STRING = "ctime";
 
     private final Logger log = Logger.getLogger(this.getClass());
+
+
+    public static final String USE_ORG_ID = "policies.use-org-id";
+
+    @ConfigProperty(name = USE_ORG_ID, defaultValue = "false")
+    public boolean useOrgId;
 
     @Inject
     LightweightEngineConfig lightweightEngineConfig;
@@ -772,7 +778,13 @@ public class PolicyCrudService {
 
                     existingTrigger.updateFromPolicy(storedPolicy);
                     if (lightweightEngineConfig.isEnabled()) {
-                        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+
+                        if (useOrgId) {
+                            accountLatestUpdateRepository.setLatestToNowOrgId(user.getAccount());
+                        } else {
+                            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                        }
+
                         return Response.ok(storedPolicy).build();
                     } else {
                         try {
