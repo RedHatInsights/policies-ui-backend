@@ -38,10 +38,6 @@ public class XRhIdentity {
 
         @JsonbProperty("account_number")
         public String accountNumber;
-
-        @JsonbProperty("org_id")
-        public String orgId;
-
         public String type;
         public User user;
         public Internal internal;
