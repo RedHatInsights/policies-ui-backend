@@ -84,6 +84,7 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -106,8 +107,6 @@ public class PolicyCrudService {
     public static final String CTIME_STRING = "ctime";
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    private static final ObjectMapper OM = new ObjectMapper();
 
     @Inject
     LightweightEngineConfig lightweightEngineConfig;
