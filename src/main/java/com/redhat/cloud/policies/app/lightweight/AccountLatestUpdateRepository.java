@@ -24,8 +24,8 @@ public class AccountLatestUpdateRepository {
                 .executeUpdate();
     }
 
-    public void setLatestToNowOrgId(String orgId) {
-        String sql = "INSERT INTO account_latest_update (account_id, latest) SELECT :orgId, :latest " +
+    public void setLatestOrgIdToNow(String orgId) {
+        String sql = "INSERT INTO org_id_latest_update (org_id, latest) SELECT :orgId, :latest " +
                 "ON CONFLICT (org_id) DO UPDATE SET latest = :latest";
         entityManager.createNativeQuery(sql)
                 .setParameter("orgId", orgId)

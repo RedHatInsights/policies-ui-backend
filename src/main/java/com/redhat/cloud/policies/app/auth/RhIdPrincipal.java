@@ -25,16 +25,26 @@ public class RhIdPrincipal implements Principal {
 
     private String name;
     private String account;
+    private String orgId;
     private boolean canReadPolicies;
     private boolean canWritePolicies;
     private String rawRhId;
 
-    public RhIdPrincipal() {
+    private RhIdPrincipal() {
     }
 
-    public RhIdPrincipal(String name, String account) {
-        this.name = name;
-        this.account = account;
+    public static RhIdPrincipal createRhIdPrincipalWithAccount(String name, String account) {
+        final RhIdPrincipal rhIdPrincipal = new RhIdPrincipal();
+        rhIdPrincipal.account = account;
+        rhIdPrincipal.name = name;
+        return rhIdPrincipal;
+    }
+
+    public static RhIdPrincipal createRhIdPrincipalWithOrgId(String name, String orgId) {
+        final RhIdPrincipal rhIdPrincipal = new RhIdPrincipal();
+        rhIdPrincipal.orgId = orgId;
+        rhIdPrincipal.name = name;
+        return rhIdPrincipal;
     }
 
     void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
@@ -50,6 +60,10 @@ public class RhIdPrincipal implements Principal {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getOrgId() {
+        return orgId;
     }
 
     public boolean canReadPolicies() {

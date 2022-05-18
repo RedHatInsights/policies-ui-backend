@@ -780,7 +780,7 @@ public class PolicyCrudService {
                     if (lightweightEngineConfig.isEnabled()) {
 
                         if (useOrgId) {
-                            accountLatestUpdateRepository.setLatestToNowOrgId(user.getAccount());
+                            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
                         } else {
                             accountLatestUpdateRepository.setLatestToNow(user.getAccount());
                         }
