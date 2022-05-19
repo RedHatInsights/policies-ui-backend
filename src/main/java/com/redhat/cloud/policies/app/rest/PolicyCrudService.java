@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.policies.app.config.OrgIdConfig;
 import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
@@ -108,11 +109,8 @@ public class PolicyCrudService {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-
-    public static final String USE_ORG_ID = "policies.use-org-id";
-
-    @ConfigProperty(name = USE_ORG_ID, defaultValue = "false")
-    public boolean useOrgId;
+    @Inject
+    OrgIdConfig orgIdConfig;
 
     @Inject
     LightweightEngineConfig lightweightEngineConfig;
@@ -779,7 +777,7 @@ public class PolicyCrudService {
                     existingTrigger.updateFromPolicy(storedPolicy);
                     if (lightweightEngineConfig.isEnabled()) {
 
-                        if (useOrgId) {
+                        if (orgIdConfig.isUseOrgId()) {
                             accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
                         } else {
                             accountLatestUpdateRepository.setLatestToNow(user.getAccount());
@@ -834,12 +832,12 @@ public class PolicyCrudService {
             if (lightweightEngineConfig.isEnabled()) {
                 lightweightEngine.validateCondition(policy.conditions);
             } else {
-                    FullTrigger trigger = new FullTrigger(policy, policy.id == null);
-                    if (policy.id == null) {
-                        engine.storeTrigger(trigger, true, user.getAccount());
-                    } else {
-                        engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                    }
+                FullTrigger trigger = new FullTrigger(policy, policy.id == null);
+                if (policy.id == null) {
+                    engine.storeTrigger(trigger, true, user.getAccount());
+                } else {
+                    engine.updateTrigger(policy.id, trigger, true, user.getAccount());
+                }
             }
         } catch (Exception e) {
             return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();

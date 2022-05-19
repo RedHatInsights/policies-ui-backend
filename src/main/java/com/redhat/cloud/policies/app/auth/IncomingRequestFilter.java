@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
+import com.redhat.cloud.policies.app.config.OrgIdConfig;
 import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -66,13 +67,11 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
     private final boolean logFine = log.isLoggable(Level.FINE);
 
-    public static final String USE_ORG_ID = "policies.use-org-id";
-
-    @ConfigProperty(name = USE_ORG_ID, defaultValue = "false")
-    public boolean useOrgId;
-
     @Inject
     RhIdPrincipalProducer producer;
+
+    @Inject
+    OrgIdConfig orgIdConfig;
 
     CurrentVertxRequest currentVertxRequest;
 
@@ -101,7 +100,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         }
 
         RhIdPrincipal rhPrincipal;
-        if (useOrgId) {
+        if (orgIdConfig.isUseOrgId()) {
             routingContext.put(X_RH_ORG_ID, rhIdentity.identity.orgId);
             rhPrincipal = RhIdPrincipal.createRhIdPrincipalWithOrgId(rhIdentity.getUsername(), rhIdentity.identity.orgId);
         } else {
