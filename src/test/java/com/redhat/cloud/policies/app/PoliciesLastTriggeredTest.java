@@ -83,37 +83,27 @@ class PoliciesLastTriggeredTest {
     }
 
     @Transactional
-    private Policy createPolicy(String accountId, UUID policyId) {
-        Transaction txn = session.beginTransaction();
-        try {
-            Policy policy = new Policy();
-            policy.id = policyId;
-            policy.customerid = accountId;
-            policy.name = "Policy: " +  policy.id.toString();
-            policy.actions = "";
-            policy.conditions = "foo";
-            policy.setMtimeToNow();
+    public Policy createPolicy(String accountId, UUID policyId) {
+        Policy policy = new Policy();
+        policy.id = policyId;
+        policy.customerid = accountId;
+        policy.name = "Policy: " +  policy.id.toString();
+        policy.actions = "";
+        policy.conditions = "foo";
+        policy.setMtimeToNow();
 
-            session.persist(policy);
-            return getPolicy(policy.id);
-        } finally {
-            txn.commit();
-        }
+        session.persist(policy);
+        return getPolicy(policy.id);
     }
 
     @Transactional
-    private void createPoliciesHistoryEntry(long instant, UUID policyId, String accountId) {
-        Transaction txn = session.beginTransaction();
-        try {
-            PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
-            historyEntry.setId(UUID.randomUUID());
-            historyEntry.setTenantId(accountId);
-            historyEntry.setPolicyId(policyId.toString());
-            historyEntry.setCtime(instant);
-            session.persist(historyEntry);
-        } finally {
-            txn.commit();
-        }
+    public void createPoliciesHistoryEntry(long instant, UUID policyId, String accountId) {
+        PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
+        historyEntry.setId(UUID.randomUUID());
+        historyEntry.setTenantId(accountId);
+        historyEntry.setPolicyId(policyId.toString());
+        historyEntry.setCtime(instant);
+        session.persist(historyEntry);
     }
 
 }
