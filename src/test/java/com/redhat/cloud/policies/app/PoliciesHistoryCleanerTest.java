@@ -44,7 +44,7 @@ class PoliciesHistoryCleanerTest {
         PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
         historyEntry.setId(UUID.randomUUID());
         historyEntry.setTenantId("tenant-id");
-        historyEntry.setPolicyId("policy-id");
+        historyEntry.setPolicyId(UUID.randomUUID().toString());
         historyEntry.setCtime(ctime.toEpochMilli());
         session.persist(historyEntry);
     }

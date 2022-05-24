@@ -184,7 +184,8 @@ public class PolicyCrudService {
                                     "name",
                                     "description",
                                     "is_enabled",
-                                    "mtime"
+                                    "mtime",
+                                    "last_triggered"
                             }
                     )
             ),
@@ -270,13 +271,6 @@ public class PolicyCrudService {
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
             page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
-
-            for (Policy policy : page) {
-                Long lastTriggerTime = policiesHistoryRepository.getLastTriggerTime(user.getAccount(), policy.id);
-                if (lastTriggerTime != null) {
-                    policy.setLastTriggered(lastTriggerTime);
-                }
-            }
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
         }
@@ -903,10 +897,6 @@ public class PolicyCrudService {
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
-            Long lastTriggerTime = policiesHistoryRepository.getLastTriggerTime(user.getAccount(), policy.id);
-            if (lastTriggerTime != null) {
-                policy.setLastTriggered(lastTriggerTime);
-            }
             builder = Response.ok(policy);
             EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));
             builder.header("ETag", etag);
