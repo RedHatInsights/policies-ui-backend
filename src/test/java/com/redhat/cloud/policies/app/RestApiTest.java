@@ -908,27 +908,6 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
-    void storeNewPolicyEngineProblem() {
-        TestPolicy tp = new TestPolicy();
-        tp.actions = "NOTIFICATION";
-        tp.conditions = "cores = 2";
-        tp.name = "test1";
-        // Use an explicit ID; that the mock server knows
-        String uuid = "c49e92c4-dead-beef-9200-245b31933e94";
-        uuidHelper.storeUUIDString(uuid);
-
-        given()
-                .header(authHeader)
-                .contentType(ContentType.JSON)
-                .body(tp)
-                .queryParam("alsoStore", "true")
-                .when()
-                .post(API_BASE_V1_0 + "/policies")
-                .then()
-                .statusCode(400);
-    }
-
-    @Test
     void storeNewPolicyNoActions() {
         TestPolicy tp = new TestPolicy();
         tp.conditions = "cores = 2";
@@ -1490,27 +1469,6 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
-    void deletePolicyEngineProblem() {
-
-        given()
-                .header(authHeader)
-                .when()
-                .delete(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
-                .then()
-                .statusCode(500)
-        ;
-        // Engine had a problem, so we did not delete the policy. Check that it is still there
-        given()
-                .header(authHeader)
-                .when()
-                .get(API_BASE_V1_0 + "/policies/c49e92c4-dead-beef-9200-245b31933e94")
-                .then()
-                .statusCode(200)
-        ;
-
-    }
-
-    @Test
     void deleteUnknownPolicy() {
 
         given()
@@ -1538,7 +1496,6 @@ class RestApiTest extends AbstractITest {
         uuids.add(UUID.randomUUID());
         uuids.add(UUID.fromString("cd6cceb8-65dd-4988-a566-251fd20d7e2c")); // known one
         uuids.add(UUID.randomUUID());
-        uuids.add(UUID.fromString("c49e92c4-dead-beef-9200-245b31933e94")); // simulate engine problem
 
         JsonPath jsonPath =
                 given()
@@ -1554,7 +1511,6 @@ class RestApiTest extends AbstractITest {
         List<String> list = jsonPath.getList("");
         assertEquals(3, list.size());
         assertTrue(list.contains("cd6cceb8-65dd-4988-a566-251fd20d7e2c"));
-        Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
     }
 
     @Test
@@ -1602,7 +1558,6 @@ class RestApiTest extends AbstractITest {
         uuids.add(UUID.randomUUID());
         uuids.add(UUID.fromString("9b3b4429-1393-4120-95da-54c17a512367")); // known one
         uuids.add(UUID.randomUUID());
-        uuids.add(UUID.fromString("c49e92c4-dead-beef-9200-245b31933e94")); // simulate engine problem
 
         JsonPath jsonPath =
                 given()
@@ -1619,7 +1574,6 @@ class RestApiTest extends AbstractITest {
         List<String> list = jsonPath.getList("");
         assertEquals(1, list.size());
         assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
-        Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
 
         jsonPath =
                 given()
@@ -1636,7 +1590,6 @@ class RestApiTest extends AbstractITest {
         list = jsonPath.getList("");
         assertEquals(1, list.size());
         assertTrue(list.contains("9b3b4429-1393-4120-95da-54c17a512367"));
-        Assertions.assertFalse(list.contains("c49e92c4-dead-beef-9200-245b31933e94"));
 
     }
 
