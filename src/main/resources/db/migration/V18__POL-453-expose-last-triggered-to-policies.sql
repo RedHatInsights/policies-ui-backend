@@ -1,4 +1,4 @@
-ALTER TABLE policy ADD COLUMN last_triggered bigint DEFAULT 0 NOT NULL;
+ALTER TABLE policy ADD COLUMN last_triggered bigint DEFAULT 0;
 
 CREATE RULE rule_policies_history_last_triggered AS ON INSERT TO policies_history
 DO UPDATE policy
@@ -11,3 +11,7 @@ UPDATE policy as p SET last_triggered = (
     FROM policies_history AS ph
     WHERE p.id = uuid(ph.policy_id) AND p.customerid = ph.tenant_id
 );
+
+UPDATE policy SET last_triggered = 0 WHERE last_triggered IS NULL;
+
+ALTER TABLE policy ALTER COLUMN last_triggered SET NOT NULL;
