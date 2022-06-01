@@ -225,3 +225,11 @@ parameters:
 - name: SENTRY_ENABLED
   description: Enable Sentry (or not)
   value: "false"
+- description: Host for the EAN to OrgId translator.
+  name: TENANT_TRANSLATOR_HOST
+  required: true
+  value: 'apicast.3scale-dev.svc.cluster.local'
+- description: Port for the EAN to OrgId translator.
+  name: TENANT_TRANSLATOR_PORT
+  required: true
+  value: '8892'
