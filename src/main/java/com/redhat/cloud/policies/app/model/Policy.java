@@ -35,7 +35,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -92,7 +91,7 @@ public class Policy extends PanacheEntityBase {
             implementation = String.class)
     private Timestamp ctime = new Timestamp(System.currentTimeMillis());
 
-    @Transient
+    @Column(name = "last_triggered", insertable = false, updatable = false)
     private long lastTriggered;
 
     @JsonbTransient
@@ -226,6 +225,7 @@ public class Policy extends PanacheEntityBase {
         NAME("name"),
         DESCRIPTION("description"),
         IS_ENABLED("is_enabled"),
+        LAST_TRIGGERED("last_triggered"),
         MTIME("mtime");
 
         private final String name;

@@ -16,25 +16,18 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.config.OrgIdConfig;
 import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
-import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
-import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
-import com.redhat.cloud.policies.app.model.engine.FullTrigger;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -67,7 +60,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -85,7 +77,6 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -110,21 +101,11 @@ public class PolicyCrudService {
     private final Logger log = Logger.getLogger(this.getClass());
 
     @Inject
-    OrgIdConfig orgIdConfig;
-
-    @Inject
-    LightweightEngineConfig lightweightEngineConfig;
-
-    @Inject
     @RestClient
     LightweightEngine lightweightEngine;
 
     @Inject
     AccountLatestUpdateRepository accountLatestUpdateRepository;
-
-    @Inject
-    @RestClient
-    PolicyEngine engine;
 
     @Context
     UriInfo uriInfo;
@@ -150,9 +131,6 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
-
-    @Inject
-    MetricRegistry registry;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -188,7 +166,8 @@ public class PolicyCrudService {
                                     "name",
                                     "description",
                                     "is_enabled",
-                                    "mtime"
+                                    "mtime",
+                                    "last_triggered"
                             }
                     )
             ),
@@ -267,20 +246,10 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPoliciesForCustomer", new Tag("account", user.getAccount())).inc();
-
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
             page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
-
-            for (Policy policy : page) {
-                Long lastTriggerTime = policiesHistoryRepository.getLastTriggerTime(user.getAccount(), policy.id);
-                if (lastTriggerTime != null) {
-                    policy.setLastTriggered(lastTriggerTime);
-                }
-            }
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
         }
@@ -353,9 +322,6 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicyIdsForCustomer", new Tag("account", user.getAccount())).inc();
-
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
@@ -392,9 +358,6 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_storePolicy", new Tag("account", user.getAccount())).inc();
-
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
         policy.customerid = user.getAccount();
@@ -405,12 +368,7 @@ public class PolicyCrudService {
         }
 
         try {
-            if (lightweightEngineConfig.isEnabled()) {
-                lightweightEngine.validateCondition(policy.conditions);
-            } else {
-                FullTrigger trigger = new FullTrigger(policy, true);
-                engine.storeTrigger(trigger, true, user.getAccount());
-            }
+            lightweightEngine.validateCondition(policy.conditions);
         } catch (Exception e) {
             return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
@@ -423,36 +381,14 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
         }
 
-        if (lightweightEngineConfig.isEnabled()) {
-            policy.store(user.getAccount(), policy);
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            return Response.status(CREATED).entity(policy).build();
-        } else {
-            // Basic validation was successful, so try to persist.
-            // This may still fail du to unique name violation, so
-            // we need to check for that.
-            UUID id;
-            try {
-                FullTrigger trigger = new FullTrigger(policy);
-                try {
-                    engine.storeTrigger(trigger, false, user.getAccount());
-                    id = policy.store(user.getAccount(), policy);
-                } catch (Exception e) {
-                    Msg engineExceptionMsg = getEngineExceptionMsg(e);
-                    log.warn("Storing policy in engine failed", e);
-                    return Response.status(400, e.getMessage()).entity(engineExceptionMsg).build();
-                }
-            } catch (Throwable t) {
-                return getResponseSavingPolicyThrowable(t);
-            }
+        policy.store(user.getAccount(), policy);
+        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
 
-            // Policy is persisted. Return its location.
-            URI location =
-                    UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(id);
-            ResponseBuilder builder = Response.created(location).entity(policy);
-            return builder.build();
-        }
-    }
+        // Policy is persisted. Return its location.
+        URI location =
+                UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(policy.id);
+        return Response.created(location).entity(policy).build();
+     }
 
     private Response getResponseSavingPolicyThrowable(Throwable t) {
         if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
@@ -488,40 +424,15 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicy", new Tag("account", user.getAccount())).inc();
-
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
-        ResponseBuilder builder = Response.ok();
         if (policy == null) {
-            builder = Response.status(Response.Status.NOT_FOUND);
+            return Response.status(Response.Status.NOT_FOUND).build();
         } else {
-            if (lightweightEngineConfig.isEnabled()) {
-                policy.delete(policy);
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-                return Response.ok(policy).build();
-            } else {
-                boolean deletedOnEngine = false;
-                try {
-                    engine.deleteTrigger(policy.id, user.getAccount());
-                    deletedOnEngine = true;
-                } catch (NotFoundException nfe) {
-                    // Engine does not have it - we can delete anyway
-                    deletedOnEngine = true;
-                } catch (Exception e) {
-                    log.warn("Deletion on engine failed", e);
-                    builder = Response.serverError().entity(new Msg(e.getMessage()));
-                }
-                if (deletedOnEngine) {
-                    policy.delete(policy);
-                    builder = Response.ok(policy);
-                }
-            }
+            policy.delete(policy);
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            return Response.ok(policy).build();
         }
-
-        return builder.build();
-
     }
 
     @Operation(summary = "Delete policies for a customer by the ids passed in the body. Result will be a list of deleted UUIDs")
@@ -537,48 +448,19 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_deletePolicies", new Tag("account", user.getAccount())).inc();
-
-        List<UUID> deleted = new ArrayList<>(uuids.size());
-
-        if (lightweightEngineConfig.isEnabled()) {
-            Set<UUID> reallyDeleted = new HashSet<>(uuids.size());
-            for (UUID uuid : uuids) {
-                Policy policy = Policy.findById(user.getAccount(), uuid);
-                deleted.add(uuid);
-                if (policy != null) {
-                    policy.delete();
-                    reallyDeleted.add(uuid);
-                }
-            }
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-        } else {
-            for (UUID uuid : uuids) {
-                Policy policy = Policy.findById(user.getAccount(), uuid);
-                if (policy == null) {
-                    // Nothing to do for us
-                    deleted.add(uuid);
-                } else {
-                    boolean deletedOnEngine = false;
-                    try {
-                        engine.deleteTrigger(policy.id, user.getAccount());
-                        deletedOnEngine = true;
-                    } catch (NotFoundException nfe) {
-                        // Engine does not have it - we can delete anyway
-                        deletedOnEngine = true;
-                    } catch (Exception e) {
-                        log.warn("Deletion on engine failed", e);
-                    }
-                    if (deletedOnEngine) {
-                        policy.delete();
-                        deleted.add(uuid);
-                    }
-                }
+        boolean dbUpdated = false;
+        for (UUID uuid : uuids) {
+            Policy policy = Policy.findById(user.getAccount(), uuid);
+            if (policy != null) {
+                policy.delete();
+                dbUpdated = true;
             }
         }
+        if (dbUpdated) {
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        }
 
-        return Response.ok(deleted).build();
+        return Response.ok(uuids).build();
     }
 
     @Operation(summary = "Enable/disable a policy")
@@ -598,41 +480,17 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicy", new Tag("account", user.getAccount())).inc();
-
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
-        ResponseBuilder builder;
         if (storedPolicy == null) {
-            builder = Response.status(404, "Original policy not found");
+            return Response.status(404, "Original policy not found").build();
         } else {
-            if (lightweightEngineConfig.isEnabled()) {
-                storedPolicy.isEnabled = shouldBeEnabled;
-                storedPolicy.setMtimeToNow();
-                storedPolicy.persist();
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-                return Response.ok().build();
-            } else {
-                try {
-                    if (shouldBeEnabled) {
-                        engine.enableTrigger(storedPolicy.id, user.getAccount());
-                    } else {
-                        engine.disableTrigger(storedPolicy.id, user.getAccount());
-                    }
-                    storedPolicy.isEnabled = shouldBeEnabled;
-                    storedPolicy.setMtimeToNow();
-                    storedPolicy.persist();
-                    builder = Response.ok();
-                } catch (NotFoundException nfe) {
-                    builder = Response.status(404, "Policy not found in engine");
-                    log.warn("Enable/Disable failed, policy [" + storedPolicy.id + "] not found in engine");
-                } catch (Exception e) {
-                    builder = Response.status(500, "Update failed: " + e.getMessage());
-                }
-            }
+            storedPolicy.isEnabled = shouldBeEnabled;
+            storedPolicy.setMtimeToNow();
+            storedPolicy.persist();
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            return Response.ok().build();
         }
-        return builder.build();
     }
 
     @Operation(summary = "Enable/disable policies identified by list of uuid in body")
@@ -652,54 +510,20 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_setEnabledStateForPolicies", new Tag("account", user.getAccount())).inc();
-
         List<UUID> changed = new ArrayList<>(uuids.size());
-        if (lightweightEngineConfig.isEnabled()) {
-            for (UUID uuid : uuids) {
-                Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
-                if (storedPolicy != null) {
-                    storedPolicy.isEnabled = shouldBeEnabled;
-                    storedPolicy.setMtimeToNow();
-                    storedPolicy.persist();
-                    changed.add(uuid);
-                }
-            }
-            if (!changed.isEmpty()) {
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            }
-            return Response.ok(changed).build();
-        } else {
-            try {
-                for (UUID uuid : uuids) {
-                    Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
-                    boolean wasChanged = false;
-                    if (storedPolicy != null) {
-                        try {
-                            if (shouldBeEnabled) {
-                                engine.enableTrigger(storedPolicy.id, user.getAccount());
-                            } else {
-                                engine.disableTrigger(storedPolicy.id, user.getAccount());
-                            }
-                            wasChanged = true;
-                        } catch (Exception e) {
-                            log.warn("Changing state in engine failed", e);
-                        }
-                        if (wasChanged) {
-                            storedPolicy.isEnabled = shouldBeEnabled;
-                            storedPolicy.setMtimeToNow();
-                            storedPolicy.persist();
-                            changed.add(uuid);
-                        }
-                    }
-                }
-                return Response.ok(changed).build();
-            } catch (Throwable e) {
-                log.error("Enabling failed: " + e.getMessage());
-                return Response.serverError().build();
+        for (UUID uuid : uuids) {
+            Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+            if (storedPolicy != null) {
+                storedPolicy.isEnabled = shouldBeEnabled;
+                storedPolicy.setMtimeToNow();
+                storedPolicy.persist();
+                changed.add(uuid);
             }
         }
+        if (!changed.isEmpty()) {
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        }
+        return Response.ok(changed).build();
     }
 
     @Operation(summary = "Update a single policy for a customer by its id")
@@ -722,9 +546,6 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_updatePolicy", new Tag("account", user.getAccount())).inc();
-
         Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
 
         ResponseBuilder builder;
@@ -741,12 +562,7 @@ public class PolicyCrudService {
                 }
 
                 try {
-                    if (lightweightEngineConfig.isEnabled()) {
-                        lightweightEngine.validateCondition(policy.conditions);
-                    } else {
-                        FullTrigger trigger = new FullTrigger(policy);
-                        engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                    }
+                    lightweightEngine.validateCondition(policy.conditions);
                 } catch (Exception e) {
                     return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
                 }
@@ -756,42 +572,13 @@ public class PolicyCrudService {
                 }
 
                 // All is good, we can now do the real work
-                // The engine requires that we update existing structures,
-                // so we need to first poll from it.
                 try {
-                    FullTrigger existingTrigger;
-                    if (lightweightEngineConfig.isEnabled()) {
-                        existingTrigger = new FullTrigger(storedPolicy);
-                    } else {
-                        try {
-                            existingTrigger = engine.fetchTrigger(storedPolicy.id, user.getAccount());
-                        } catch (Exception e) {
-                            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-                        }
-                    }
-
                     storedPolicy.populateFrom(policy);
                     storedPolicy.customerid = user.getAccount();
                     storedPolicy.setMtimeToNow();
 
-                    existingTrigger.updateFromPolicy(storedPolicy);
-                    if (lightweightEngineConfig.isEnabled()) {
-
-                        if (orgIdConfig.isUseOrgId()) {
-                            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-                        } else {
-                            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-                        }
-
-                        return Response.ok(storedPolicy).build();
-                    } else {
-                        try {
-                            engine.updateTrigger(storedPolicy.id, existingTrigger, false, user.getAccount());
-                        } catch (Exception e) {
-                            transactionManager.setRollbackOnly();
-                            return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
-                        }
-                    }
+                    accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                    return Response.ok(storedPolicy).build();
                 } catch (Throwable t) {
                     try {
                         transactionManager.setRollbackOnly();
@@ -801,8 +588,6 @@ public class PolicyCrudService {
 
                     return getResponseSavingPolicyThrowable(t);
                 }
-
-                builder = Response.ok(storedPolicy);
             }
         }
 
@@ -823,22 +608,10 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateCondition", new Tag("account", user.getAccount())).inc();
-
         policy.customerid = user.getAccount();
 
         try {
-            if (lightweightEngineConfig.isEnabled()) {
-                lightweightEngine.validateCondition(policy.conditions);
-            } else {
-                FullTrigger trigger = new FullTrigger(policy, policy.id == null);
-                if (policy.id == null) {
-                    engine.storeTrigger(trigger, true, user.getAccount());
-                } else {
-                    engine.updateTrigger(policy.id, trigger, true, user.getAccount());
-                }
-            }
+            lightweightEngine.validateCondition(policy.conditions);
         } catch (Exception e) {
             return Response.status(400, e.getMessage()).entity(getEngineExceptionMsg(e)).build();
         }
@@ -863,9 +636,6 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
-
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_validateName", new Tag("account", user.getAccount())).inc();
 
         Policy policy = new Policy();
         policy.id = id;
@@ -904,19 +674,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getPolicy", new Tag("account", user.getAccount())).inc();
-
         Policy policy = Policy.findById(user.getAccount(), policyId);
 
         ResponseBuilder builder;
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
-            Long lastTriggerTime = policiesHistoryRepository.getLastTriggerTime(user.getAccount(), policy.id);
-            if (lastTriggerTime != null) {
-                policy.setLastTriggered(lastTriggerTime);
-            }
             builder = Response.ok(policy);
             EntityTag etag = new EntityTag(String.valueOf(policy.hashCode()));
             builder.header("ETag", etag);
@@ -1028,9 +791,6 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
         }
-
-        // TODO Temp counter used to investigate the engine instability, remove ASAP.
-        registry.counter("policies_ui_getTriggerHistoryForPolicy", new Tag("account", user.getAccount())).inc();
 
         ResponseBuilder builder;
 

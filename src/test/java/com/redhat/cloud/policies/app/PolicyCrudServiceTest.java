@@ -1,22 +1,20 @@
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
@@ -27,9 +25,6 @@ class PolicyCrudServiceTest extends AbstractITest {
 
     @Inject
     PoliciesHistoryTestHelper helper;
-
-    @Inject
-    LightweightEngineConfig lightweightEngineConfig;
 
     @Test
     void test() {
@@ -65,44 +60,16 @@ class PolicyCrudServiceTest extends AbstractITest {
         assertEquals(5, history.getJsonObject("meta").getInteger("count"));
     }
 
-    private UUID createPolicy() {
+    @Transactional
+    UUID createPolicy() {
 
         Policy policy = new Policy();
+        policy.id = UUID.randomUUID();
+        policy.customerid = TENANT_ID;
         policy.name = "my-policy";
         policy.conditions = "arch = \"x86_64\"";
+        policy.persist();
 
-        String responseBody = given()
-                .basePath(API_BASE_V1_0)
-                .header(authHeader)
-                .contentType(JSON)
-                .body(Json.encode(policy))
-                .queryParam("alsoStore", true)
-                .when().post("/policies")
-                .then().statusCode(201)
-                .extract().asString();
-
-        JsonObject jsonPolicy = new JsonObject(responseBody);
-        return UUID.fromString(jsonPolicy.getString("id"));
-    }
-
-    @Test
-    void testUnavailableSync() {
-        lightweightEngineConfig.overrideForTest(true);
-        given()
-                .header(authHeader)
-                .contentType(JSON)
-                .when().post("/admin/sync")
-                .then().statusCode(503);
-        lightweightEngineConfig.overrideForTest(false);
-    }
-
-    @Test
-    void testUnavailableVerify() {
-        lightweightEngineConfig.overrideForTest(true);
-        given()
-                .header(authHeader)
-                .when().get("/admin/verify")
-                .then().statusCode(503);
-        lightweightEngineConfig.overrideForTest(false);
+        return policy.id;
     }
 }

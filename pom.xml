@@ -14,11 +14,11 @@
     <java.release>11</java.release>
     <java.source>11</java.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.version>2.9.1.Final</quarkus.version>
+    <quarkus.version>2.9.2.Final</quarkus.version>
     <surefire-plugin.version>2.22.2</surefire-plugin.version>
     <jacoco.version>0.8.8</jacoco.version>
 
-    <version.testcontainers>1.17.1</version.testcontainers>
+    <version.testcontainers>1.17.2</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-netty-no-dependencies.version>5.13.2</mockserver-netty-no-dependencies.version>
     <clowder-quarkus-config-source.version>1.0.0</clowder-quarkus-config-source.version>

@@ -17,8 +17,6 @@
 package com.redhat.cloud.policies.app.health;
 
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
-import com.redhat.cloud.policies.app.lightweight.LightweightEngineConfig;
-import com.redhat.cloud.policies.app.PolicyEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
 import io.quarkus.scheduler.Scheduled;
@@ -45,15 +43,8 @@ public class ScheduledStatusProducer {
     private static final String DUMMY_CONDITION = "facts.arch = 'x86_64'";
 
     @Inject
-    LightweightEngineConfig lightweightEngineConfig;
-
-    @Inject
     @RestClient
     LightweightEngine lightweightEngine;
-
-    @Inject
-    @RestClient
-    PolicyEngine engine;
 
     //  // Quarkus only activates this after the first REST-call to any method in this class
     @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
@@ -82,11 +73,7 @@ public class ScheduledStatusProducer {
         }
 
         try {
-            if (lightweightEngineConfig.isEnabled()) {
-                lightweightEngine.validateCondition(DUMMY_CONDITION);
-            } else {
-                engine.findTriggersById(DUMMY, DUMMY);
-            }
+            lightweightEngine.validateCondition(DUMMY_CONDITION);
         } catch (Exception e) {
             issues.put("engine", e.getMessage());
         }

@@ -16,25 +16,16 @@
  */
 package com.redhat.cloud.policies.app;
 
-import static java.util.Calendar.getInstance;
-import static java.util.Calendar.MAY;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-import com.redhat.cloud.policies.app.model.engine.FullTrigger;
-import com.redhat.cloud.policies.app.model.engine.Trigger;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpResponse;
-import org.mockserver.model.JsonBody;
-import org.mockserver.model.RegexBody;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
@@ -105,180 +96,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
 
     private void mockEngine() {
         mockServer
-                .when(request()
-                        // special case to simulate that the engine has a general failure.
-                        // must come before the more generic match below.
-                        .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94/enable")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(500).withReasonPhrase("Internal server error")
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"errorMessage\" : \"something went wrong\" }")
-                );
-
-        // -------------------------------
-
-        List<Trigger> triggers = new ArrayList<>();
-        Trigger trigger = new Trigger();
-        trigger.id = "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c";
-        trigger.lifecycle = new ArrayList<>();
-        Map<String, Object> ev = new HashMap<>();
-        Calendar cal = getInstance();
-        cal.set(2020, MAY, 8, 10, 0, 0);
-        ev.put("status", "ALERT_GENERATE");
-        ev.put("stime", cal.getTimeInMillis());
-        trigger.lifecycle.add(ev);
-        ev = new HashMap<>();
-        cal.set(2020, MAY, 9, 10, 0, 0);
-        ev.put("status", "ALERT_GENERATE");
-        ev.put("stime", cal.getTimeInMillis());
-        trigger.lifecycle.add(ev);
-        ev = new HashMap<>();
-        cal.set(2020, MAY, 10, 10, 0, 0);
-        ev.put("status", "ALERT_GENERATE");
-        ev.put("stime", cal.getTimeInMillis());
-        trigger.lifecycle.add(ev);
-        triggers.add(trigger);
-
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers")
-                        .withQueryStringParameter("triggerIds", "bd0ee2ec-eec0-44a6-8bb1-29c4179fc21c")
-                        .withHeader("Hawkular-Tenant", "1234")
-                        .withMethod("GET")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(JsonBody.json(triggers))
-                );
-
-        // -------------------------------
-
-        FullTrigger ft = new FullTrigger();
-        ft.trigger.id = "00000000-0000-0000-0000-000000000001";
-        JsonBody ftBody = JsonBody.json(ft);
-
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/trigger/00000000-0000-0000-0000-000000000001")
-                        .withMethod("GET")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(ftBody)
-                );
-
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/.*/enable")
-                        .withMethod("PUT")
-                )
+                .when(request().withPath("/lightweight-engine/validate"))
                 .respond(response().withStatusCode(200));
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/.*/enable")
-                        .withMethod("DELETE")
-                )
-                .respond(response().withStatusCode(200));
-
-        // Simulate internal engine issue
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/trigger")
-                        .withBody(new RegexBody(".*-dead-beef-9200-.*"))
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(500)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"msg\" : \"ok\" }")
-                );
-
-        // ------------ status page
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers")
-                        .withQueryStringParameter("triggerIds", "dummy")
-                        .withHeader("Hawkular-Tenant", "dummy")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("[]")
-                );
-
-        mockServer
-                .when(request()
-                        .withPath("/apps")
-                )
-                .respond(response()
-                        .withBody("[]")
-                        .withHeader("Content-Type", "application/json")
-                        .withStatusCode(200)
-                );
-
-        // ------------
-
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/trigger")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"msg\" : \"ok\" }")
-                );
-        mockServer
-                .when(request()
-                        // special case to simulate that the engine has a general failure. CPOL-130
-                        // must come before the more generic match below.
-                        .withPath("/hawkular/alerts/triggers/c49e92c4-dead-beef-9200-245b31933e94")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(500)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"errorMessage\" : \"something went wrong\" }")
-                );
-        mockServer
-                .when(request()
-                        // special case to simulate that the engine does not have the policy. CPOL-130
-                        // must come before the more generic match below.
-                        .withPath("/hawkular/alerts/triggers/c49e92c4-764c-4163-9200-245b31933e94")
-                        .withMethod("DELETE")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(404)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"errorMessage\" : \"does not exist\" }")
-                );
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/.*")
-                        .withMethod("DELETE")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"msg\" : \"ok\" }")
-                );
-        mockServer
-                .when(request()
-                        .withPath("/hawkular/alerts/triggers/trigger/.*")
-                        .withMethod("PUT")
-                        .withHeader("Hawkular-Tenant", "1234")
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"msg\" : \"ok\" }")
-                );
     }
 
     private void mockRbac() {
@@ -291,7 +110,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withQueryStringParameter("application", "policies")
                         .withHeader("x-rh-identity", ".*2UtZG9lLXVzZXIifQ==") // normal user all allowed
                 )
-                .respond(HttpResponse.response()
+                .respond(response()
                         .withStatusCode(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(fullAccessRbac)
@@ -303,7 +122,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withQueryStringParameter("application", "policies")
                         .withHeader("x-rh-identity", ".*kYW1wZi11c2VyIn0=") // hans dampf user nothing allowed
                 )
-                .respond(HttpResponse.response()
+                .respond(response()
                         .withStatusCode(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(noAccessRbac)
