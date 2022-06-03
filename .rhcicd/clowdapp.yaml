@@ -145,10 +145,10 @@ parameters:
   value: "false"
 - name: CPU_LIMIT
   description: CPU limit
-  value: 500m
+  value: 200m
 - name: CPU_REQUEST
   description: CPU request
-  value: 500m
+  value: 100m
 - name: DB_CLEANER_SCHEDULE
   description: Execution time specified in cron format
   value: "*/10 * * * *"
