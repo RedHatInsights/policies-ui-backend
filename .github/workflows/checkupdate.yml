@@ -19,12 +19,14 @@ jobs:
       - name: set up manifest-tool 
         run: sudo apt-get install -y skopeo
       - name: check change
-        run: skopeo inspect docker://registry.access.redhat.com/ubi8/openjdk-11:latest |grep Digest > .baseimage
+        run: skopeo inspect docker://registry.access.redhat.com/ubi8/ubi-minimal:latest |grep Digest > .baseimage
       - name: do change if the digest changed
         run: |    
           git config user.name 'Update-a-Bot'
           git config user.email 'notifications-team@redhat.com'
           git add -A
-          git commit -m "Base image digest changed" || echo "No changes to commit"
+          git commit -m "Base image version changed" || echo "No changes to commit"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
+        with:
+          title: 'Ubi minimal latest updated'
