@@ -96,11 +96,15 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
         // header was good, so now create the security context
         RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber, rhIdentity.identity.orgId);
+
+        if (rhIdentity.identity.accountNumber != null) {
+            routingContext.put(X_RH_ACCOUNT, rhIdentity.identity.accountNumber);
+        }
+        if (rhIdentity.identity.orgId != null) {
+            routingContext.put(X_RH_ORG_ID, rhIdentity.identity.orgId);
+        }
         rhPrincipal.setRawRhIdHeader(xrhid_header);
 
-        // Attach account id and user to the context so we can log it later
-        routingContext.put(X_RH_ACCOUNT, rhIdentity.identity.accountNumber);
-        routingContext.put(X_RH_ORG_ID, rhIdentity.identity.orgId);
         routingContext.put(X_RH_USER, rhIdentity.getUsername());
 
         SecurityContext sctx = new RhIdSecurityContext(rhIdentity, rhPrincipal);

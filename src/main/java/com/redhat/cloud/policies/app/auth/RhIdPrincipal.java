@@ -23,16 +23,16 @@ import java.security.Principal;
  */
 public class RhIdPrincipal implements Principal {
 
-    private final String name;
-    private final String account;
-    private final String orgId;
+    private String name;
+    private String account;
+    private String orgId;
     private boolean canReadPolicies;
     private boolean canWritePolicies;
     private String rawRhId;
 
-    public RhIdPrincipal(String username, String accountNumber, String orgId) {
-        this.name = username;
-        this.account = accountNumber;
+    public RhIdPrincipal(String name, String account, String orgId) {
+        this.name = name;
+        this.account = account;
         this.orgId = orgId;
     }
 
@@ -50,6 +50,10 @@ public class RhIdPrincipal implements Principal {
         return account;
     }
 
+    public String getOrgId() {
+        return orgId;
+    }
+
     public boolean canReadPolicies() {
         return canReadPolicies;
     }
@@ -65,9 +69,5 @@ public class RhIdPrincipal implements Principal {
 
     public String getRawRhIdHeader() {
         return rawRhId;
-    }
-
-    public String getOrgId() {
-        return orgId;
     }
 }

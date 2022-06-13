@@ -16,8 +16,6 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
 import javax.json.bind.annotation.JsonbProperty;
 
@@ -40,8 +38,10 @@ public class XRhIdentity {
 
         @JsonbProperty("account_number")
         public String accountNumber;
-        @JsonProperty("org_id")
+
+        @JsonbProperty("org_id")
         public String orgId;
+
         public String type;
         public User user;
     }
