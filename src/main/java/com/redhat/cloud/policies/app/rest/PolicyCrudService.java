@@ -378,7 +378,13 @@ public class PolicyCrudService {
         }
 
         policy.store(user.getAccount(), policy);
-        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+
+        if (user.getOrgId() != null) {
+            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+        }
+        if (user.getAccount() != null) {
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        }
 
         // Policy is persisted. Return its location.
         URI location =
@@ -426,7 +432,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.NOT_FOUND).build();
         } else {
             policy.delete(policy);
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            if (user.getOrgId() != null) {
+                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+            }
+            if (user.getAccount() != null) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
             return Response.ok(policy).build();
         }
     }
@@ -453,7 +464,12 @@ public class PolicyCrudService {
             }
         }
         if (dbUpdated) {
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            if (user.getOrgId() != null) {
+                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+            }
+            if (user.getAccount() != null) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
         }
 
         return Response.ok(uuids).build();
@@ -484,7 +500,13 @@ public class PolicyCrudService {
             storedPolicy.isEnabled = shouldBeEnabled;
             storedPolicy.setMtimeToNow();
             storedPolicy.persist();
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            if (user.getOrgId() != null) {
+                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+            }
+            if (user.getAccount() != null) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
+
             return Response.ok().build();
         }
     }
@@ -517,7 +539,12 @@ public class PolicyCrudService {
             }
         }
         if (!changed.isEmpty()) {
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            if (user.getOrgId() != null) {
+                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+            }
+            if (user.getAccount() != null) {
+                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            }
         }
         return Response.ok(changed).build();
     }
@@ -573,7 +600,13 @@ public class PolicyCrudService {
                     storedPolicy.customerid = user.getAccount();
                     storedPolicy.setMtimeToNow();
 
-                    accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                    if (user.getOrgId() != null) {
+                        accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+                    }
+                    if (user.getAccount() != null) {
+                        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                    }
+
                     return Response.ok(storedPolicy).build();
                 } catch (Throwable t) {
                     try {

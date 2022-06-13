@@ -23,4 +23,14 @@ public class AccountLatestUpdateRepository {
                 .setParameter("latest", LocalDateTime.now(UTC))
                 .executeUpdate();
     }
+
+    @Transactional
+    public void setLatestOrgIdToNow(String orgId) {
+        String sql = "INSERT INTO org_id_latest_update (org_id, latest) SELECT :orgId, :latest " +
+                "ON CONFLICT (org_id) DO UPDATE SET latest = :latest";
+        entityManager.createNativeQuery(sql)
+                .setParameter("orgId", orgId)
+                .setParameter("latest", LocalDateTime.now(UTC))
+                .executeUpdate();
+    }
 }

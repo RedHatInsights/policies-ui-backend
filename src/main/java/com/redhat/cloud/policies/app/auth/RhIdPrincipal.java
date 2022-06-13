@@ -23,22 +23,20 @@ import java.security.Principal;
  */
 public class RhIdPrincipal implements Principal {
 
-    private String name;
-    private String account;
+    private final String name;
+    private final String account;
+    private final String orgId;
     private boolean canReadPolicies;
     private boolean canWritePolicies;
     private String rawRhId;
 
-    public RhIdPrincipal() {
-    }
-
-    public RhIdPrincipal(String name, String account) {
-        this.name = name;
-        this.account = account;
+    public RhIdPrincipal(String username, String accountNumber, String orgId) {
+        this.name = username;
+        this.account = accountNumber;
+        this.orgId = orgId;
     }
 
     void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
-
         this.canReadPolicies = canReadPolicies;
         this.canWritePolicies = canWritePolicies;
     }
@@ -67,5 +65,9 @@ public class RhIdPrincipal implements Principal {
 
     public String getRawRhIdHeader() {
         return rawRhId;
+    }
+
+    public String getOrgId() {
+        return orgId;
     }
 }
