@@ -95,6 +95,7 @@ public class PolicyCrudService {
     public static final String MISSING_PERMISSIONS_TO_VERIFY_POLICY = "Missing permissions to verify policy";
     public static final String MISSING_PERMISSIONS_TO_UPDATE_POLICY = "Missing permissions to update policy";
 
+
     public static final String ERROR_STRING = "error";
     public static final String CTIME_STRING = "ctime";
 
@@ -249,7 +250,12 @@ public class PolicyCrudService {
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
+
+            if (user.getOrgId() != null) {
+                page = Policy.pagePoliciesForCustomer(entityManager, user.getOrgId(), pager);
+            } else {
+                page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
+            }
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
         }
@@ -325,7 +331,12 @@ public class PolicyCrudService {
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+
+            if (user.getOrgId() != null) {
+                uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getOrgId(), pager);
+            } else {
+                uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+            }
 
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
@@ -360,7 +371,12 @@ public class PolicyCrudService {
 
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
-        policy.customerid = user.getAccount();
+
+        if (user.getOrgId() != null) {
+            policy.customerid = user.getOrgId();
+        } else {
+            policy.customerid = user.getAccount();
+        }
 
         Response invalidNameResponse = isNameUnique(policy);
         if (invalidNameResponse != null) {
@@ -381,12 +397,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
         }
 
-        policy.store(user.getAccount(), policy);
-
         if (user.getOrgId() != null) {
+            policy.store(user.getOrgId(), policy);
             accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
         }
         if (user.getAccount() != null) {
+            policy.store(user.getAccount(), policy);
             accountLatestUpdateRepository.setLatestToNow(user.getAccount());
         }
 
@@ -394,7 +410,7 @@ public class PolicyCrudService {
         URI location =
                 UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(policy.id);
         return Response.created(location).entity(policy).build();
-     }
+    }
 
     private Response getResponseSavingPolicyThrowable(Throwable t) {
         if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
@@ -430,7 +446,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy;
+        if (user.getOrgId() != null) {
+            policy = Policy.findById(user.getOrgId(), policyId);
+        } else {
+            policy = Policy.findById(user.getAccount(), policyId);
+        }
 
         if (policy == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -461,7 +482,13 @@ public class PolicyCrudService {
 
         boolean dbUpdated = false;
         for (UUID uuid : uuids) {
-            Policy policy = Policy.findById(user.getAccount(), uuid);
+            Policy policy;
+            if (user.getOrgId() != null) {
+                policy = Policy.findById(user.getOrgId(), uuid);
+            } else {
+                policy = Policy.findById(user.getAccount(), uuid);
+            }
+
             if (policy != null) {
                 policy.delete();
                 dbUpdated = true;
@@ -496,7 +523,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+        Policy storedPolicy;
+        if (user.getOrgId() != null) {
+            storedPolicy = Policy.findById(user.getOrgId(), policyId);
+        } else {
+            storedPolicy = Policy.findById(user.getAccount(), policyId);
+        }
 
         if (storedPolicy == null) {
             return Response.status(404, "Original policy not found").build();
@@ -534,7 +566,13 @@ public class PolicyCrudService {
 
         List<UUID> changed = new ArrayList<>(uuids.size());
         for (UUID uuid : uuids) {
-            Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+            Policy storedPolicy;
+            if (user.getOrgId() != null) {
+                storedPolicy = Policy.findById(user.getOrgId(), uuid);
+            } else {
+                storedPolicy = Policy.findById(user.getAccount(), uuid);
+            }
+
             if (storedPolicy != null) {
                 storedPolicy.isEnabled = shouldBeEnabled;
                 storedPolicy.setMtimeToNow();
@@ -641,7 +679,11 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
 
-        policy.customerid = user.getAccount();
+        if (user.getOrgId() != null) {
+            policy.customerid = user.getOrgId();
+        } else {
+            policy.customerid = user.getAccount();
+        }
 
         try {
             lightweightEngine.validateCondition(policy.conditions);
@@ -707,7 +749,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy;
+        if (user.getOrgId() != null) {
+            policy = Policy.findById(user.getOrgId(), policyId);
+        } else {
+            policy = Policy.findById(user.getAccount(), policyId);
+        }
 
         ResponseBuilder builder;
         if (policy == null) {
@@ -827,7 +874,13 @@ public class PolicyCrudService {
 
         ResponseBuilder builder;
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy;
+        if (user.getOrgId() != null) {
+            policy = Policy.findById(user.getOrgId(), policyId);
+        } else {
+            policy = Policy.findById(user.getAccount(), policyId);
+        }
+
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
@@ -850,7 +903,13 @@ public class PolicyCrudService {
 
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
-        String tenantId = user.getAccount();
+
+        String tenantId;
+        if (user.getOrgId() != null) {
+            tenantId = user.getOrgId();
+        } else {
+            tenantId = user.getAccount();
+        }
 
         long totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
         if (totalCount > 0) {
@@ -867,7 +926,12 @@ public class PolicyCrudService {
     }
 
     private Response isNameUnique(Policy policy) {
-        Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+        Policy tmp;
+        if (user.getOrgId() != null) {
+            tmp = Policy.findByName(user.getOrgId(), policy.name);
+        } else {
+            tmp = Policy.findByName(user.getAccount(), policy.name);
+        }
 
         if (tmp != null && !tmp.id.equals(policy.id)) {
             return Response.status(409).entity(new Msg("Policy name is not unique")).build();
