@@ -108,7 +108,6 @@ public class PoliciesHistoryRepository {
      * The following static methods may look like simple mappers, but some of them are also used to prevent SQL
      * injections by whitelisting field names.
      */
-
     private static String getEntityFieldName(Filter.FilterItem filterItem) {
         switch (filterItem.field) {
             case "id":
