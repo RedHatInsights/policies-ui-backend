@@ -82,12 +82,14 @@ public class PoliciesHistoryRepository {
 
     private static String addFiltersConditions(String hql, List<Filter.FilterItem> filterItems) {
         // The filters from the pager are added to the HQL query.
+        StringBuilder hqlBuilder = new StringBuilder(hql);
         for (Filter.FilterItem filterItem : filterItems) {
             String entityFieldName = getEntityFieldName(filterItem);
             String operator = getHqlOperator(filterItem);
             // To be consistent with the previous implementation, the condition is always case-insensitive.
-            hql += " AND LOWER(" + entityFieldName + ")" + operator + ":" + entityFieldName;
+            hqlBuilder.append(" AND LOWER(").append(entityFieldName).append(")").append(operator).append(":").append(entityFieldName);
         }
+        hql = hqlBuilder.toString();
         return hql;
     }
 
