@@ -99,16 +99,14 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
             return;
         }
 
-        RhIdPrincipal rhPrincipal;
-        if (orgIdConfig.isUseOrgId()) {
-            routingContext.put(X_RH_ORG_ID, rhIdentity.identity.orgId);
-            rhPrincipal = RhIdPrincipal.createRhIdPrincipalWithOrgId(rhIdentity.getUsername(), rhIdentity.identity.orgId);
-        } else {
-            // header was good, so now create the security context
-            rhPrincipal = RhIdPrincipal.createRhIdPrincipalWithAccount(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
-
-            // Attach account id and user to the context so we can log it later
+        // header was good, so now create the security context
+        RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber, rhIdentity.identity.orgId);
+        
+        if (rhIdentity.identity.accountNumber != null) {
             routingContext.put(X_RH_ACCOUNT, rhIdentity.identity.accountNumber);
+        }
+        if (rhIdentity.identity.orgId != null) {
+            routingContext.put(X_RH_ORG_ID, rhIdentity.identity.orgId);
         }
         rhPrincipal.setRawRhIdHeader(xrhid_header);
 
