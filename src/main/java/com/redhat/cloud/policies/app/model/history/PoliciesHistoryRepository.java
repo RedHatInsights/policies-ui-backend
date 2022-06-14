@@ -59,6 +59,46 @@ public class PoliciesHistoryRepository {
         return query.getSingleResult();
     }
 
+    public List<PoliciesHistoryEntry> findOrgId(String orgId, UUID policyId, Pager pager) {
+        // Base HQL query.
+        String hql = "FROM PoliciesHistoryEntry WHERE orgId = :orgId AND policyId = :policyId";
+
+        hql = addFiltersConditions(hql, pager.getFilter().getItems());
+
+        // The sorts from the pager are added to the HQL query.
+        if (!pager.getSort().getColumns().isEmpty()) {
+            List<String> orderByItems = new ArrayList<>();
+            for (Sort.Column column : pager.getSort().getColumns()) {
+                getEntityFieldName(column.getName()).ifPresent(entityFieldName -> {
+                    String sortDirection = getSortDirection(column.getDirection());
+                    orderByItems.add(entityFieldName + " " + sortDirection);
+                });
+            }
+            if (!orderByItems.isEmpty()) {
+                hql += " ORDER BY " + String.join(", ", orderByItems);
+            }
+        } else {
+            hql += " ORDER BY ctime DESC, hostName ASC";
+        }
+
+        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+
+        TypedQuery<PoliciesHistoryEntry> query = session.createQuery(hql, PoliciesHistoryEntry.class)
+                .setParameter("orgId", orgId)
+                .setParameter("policyId", policyId.toString());
+
+        setFiltersValues(query, pager.getFilter().getItems());
+
+        if (pager.getLimit() > 0) {
+            query.setMaxResults(pager.getLimit());
+        }
+        if (pager.getOffset() > 0) {
+            query.setFirstResult(pager.getOffset());
+        }
+
+        return query.getResultList();
+    }
+
     public List<PoliciesHistoryEntry> find(String tenantId, UUID policyId, Pager pager) {
         // Base HQL query.
         String hql = "FROM PoliciesHistoryEntry WHERE tenantId = :tenantId AND policyId = :policyId";

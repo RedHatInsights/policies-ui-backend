@@ -908,18 +908,27 @@ public class PolicyCrudService {
         if (user.getOrgId() != null) {
             tenantId = user.getOrgId();
             totalCount = policiesHistoryRepository.countOrgId(tenantId, policyId, pager);
+
+            if (totalCount > 0) {
+                items = policiesHistoryRepository.findOrgId(tenantId, policyId, pager)
+                        .stream().map(historyEntry ->
+                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+                        ).collect(Collectors.toList());
+            } else {
+                items = Collections.emptyList();
+            }
         } else {
             tenantId = user.getAccount();
             totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
-        }
 
-        if (totalCount > 0) {
-            items = policiesHistoryRepository.find(tenantId, policyId, pager)
-                    .stream().map(historyEntry ->
-                            new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
-                    ).collect(Collectors.toList());
-        } else {
-            items = Collections.emptyList();
+            if (totalCount > 0) {
+                items = policiesHistoryRepository.find(tenantId, policyId, pager)
+                        .stream().map(historyEntry ->
+                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+                        ).collect(Collectors.toList());
+            } else {
+                items = Collections.emptyList();
+            }
         }
 
         Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
