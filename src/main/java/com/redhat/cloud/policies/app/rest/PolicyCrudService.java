@@ -399,8 +399,7 @@ public class PolicyCrudService {
         if (user.getOrgId() != null) {
             policy.store(user.getOrgId(), policy);
             accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-        }
-        if (user.getAccount() != null) {
+        } else if (user.getAccount() != null) {
             policy.store(user.getAccount(), policy);
             accountLatestUpdateRepository.setLatestToNow(user.getAccount());
         }
