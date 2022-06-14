@@ -25,6 +25,23 @@ public class PoliciesHistoryRepository {
     @Inject
     Session session;
 
+    public long countOrgId(String orgId, UUID policyId, Pager pager) {
+        // Base HQL query.
+        String hql = "SELECT COUNT(*) FROM PoliciesHistoryEntry WHERE orgId = :orgId AND policyId = :policyId";
+
+        hql = addFiltersConditions(hql, pager.getFilter().getItems());
+
+        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+
+        TypedQuery<Long> query = session.createQuery(hql, Long.class)
+                .setParameter("orgId", orgId)
+                .setParameter("policyId", policyId.toString());
+
+        setFiltersValues(query, pager.getFilter().getItems());
+
+        return query.getSingleResult();
+    }
+
     public long count(String tenantId, UUID policyId, Pager pager) {
         // Base HQL query.
         String hql = "SELECT COUNT(*) FROM PoliciesHistoryEntry WHERE tenantId = :tenantId AND policyId = :policyId";

@@ -904,13 +904,15 @@ public class PolicyCrudService {
         List<HistoryItem> items;
 
         String tenantId;
+        long totalCount;
         if (user.getOrgId() != null) {
             tenantId = user.getOrgId();
+            totalCount = policiesHistoryRepository.countOrgId(tenantId, policyId, pager);
         } else {
             tenantId = user.getAccount();
+            totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
         }
 
-        long totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
         if (totalCount > 0) {
             items = policiesHistoryRepository.find(tenantId, policyId, pager)
                     .stream().map(historyEntry ->

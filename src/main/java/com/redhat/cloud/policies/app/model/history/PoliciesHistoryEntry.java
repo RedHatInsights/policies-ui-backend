@@ -18,6 +18,9 @@ public class PoliciesHistoryEntry {
     @Column(name = "tenant_id")
     private String tenantId;
 
+    @Column(name = "org_id")
+    private String orgId;
+
     @Column(name = "policy_id")
     private String policyId;
 
