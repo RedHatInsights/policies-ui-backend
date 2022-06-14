@@ -251,7 +251,7 @@ public class PolicyCrudService {
             Pager pager = PagingUtils.extractPager(uriInfo);
 
             if (user.getOrgId() != null) {
-                page = Policy.pagePoliciesForCustomer(entityManager, user.getOrgId(), pager);
+                page = Policy.pagePoliciesForCustomerOrgId(entityManager, user.getOrgId(), pager);
             } else {
                 page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
             }
@@ -332,7 +332,7 @@ public class PolicyCrudService {
             Pager pager = PagingUtils.extractPager(uriInfo);
 
             if (user.getOrgId() != null) {
-                uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getOrgId(), pager);
+                uuids = Policy.getPolicyIdsForCustomerOrgId(entityManager, user.getOrgId(), pager);
             } else {
                 uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
             }
@@ -397,7 +397,7 @@ public class PolicyCrudService {
         }
 
         if (user.getOrgId() != null) {
-            policy.store(user.getOrgId(), policy);
+            policy.storeOrgId(user.getOrgId(), policy);
             accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
         } else if (user.getAccount() != null) {
             policy.store(user.getAccount(), policy);
@@ -446,7 +446,7 @@ public class PolicyCrudService {
 
         Policy policy;
         if (user.getOrgId() != null) {
-            policy = Policy.findById(user.getOrgId(), policyId);
+            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             policy = Policy.findById(user.getAccount(), policyId);
         }
@@ -482,7 +482,7 @@ public class PolicyCrudService {
         for (UUID uuid : uuids) {
             Policy policy;
             if (user.getOrgId() != null) {
-                policy = Policy.findById(user.getOrgId(), uuid);
+                policy = Policy.findByIdOrgId(user.getOrgId(), uuid);
             } else {
                 policy = Policy.findById(user.getAccount(), uuid);
             }
@@ -523,7 +523,7 @@ public class PolicyCrudService {
 
         Policy storedPolicy;
         if (user.getOrgId() != null) {
-            storedPolicy = Policy.findById(user.getOrgId(), policyId);
+            storedPolicy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             storedPolicy = Policy.findById(user.getAccount(), policyId);
         }
@@ -566,7 +566,7 @@ public class PolicyCrudService {
         for (UUID uuid : uuids) {
             Policy storedPolicy;
             if (user.getOrgId() != null) {
-                storedPolicy = Policy.findById(user.getOrgId(), uuid);
+                storedPolicy = Policy.findByIdOrgId(user.getOrgId(), uuid);
             } else {
                 storedPolicy = Policy.findById(user.getAccount(), uuid);
             }
@@ -609,7 +609,12 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+        Policy storedPolicy;
+        if (user.getOrgId() != null) {
+            storedPolicy = Policy.findById(user.getOrgId(), policyId);
+        } else {
+            storedPolicy = Policy.findById(user.getAccount(), policyId);
+        }
 
         ResponseBuilder builder;
         if (storedPolicy == null) {
@@ -749,7 +754,7 @@ public class PolicyCrudService {
 
         Policy policy;
         if (user.getOrgId() != null) {
-            policy = Policy.findById(user.getOrgId(), policyId);
+            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             policy = Policy.findById(user.getAccount(), policyId);
         }
@@ -937,7 +942,7 @@ public class PolicyCrudService {
     private Response isNameUnique(Policy policy) {
         Policy tmp;
         if (user.getOrgId() != null) {
-            tmp = Policy.findByName(user.getOrgId(), policy.name);
+            tmp = Policy.findByNameOrgId(user.getOrgId(), policy.name);
         } else {
             tmp = Policy.findByName(user.getAccount(), policy.name);
         }
