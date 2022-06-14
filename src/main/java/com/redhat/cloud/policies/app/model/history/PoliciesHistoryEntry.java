@@ -48,6 +48,14 @@ public class PoliciesHistoryEntry {
         this.tenantId = tenantId;
     }
 
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
     public String getPolicyId() {
         return policyId;
     }
