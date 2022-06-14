@@ -30,6 +30,9 @@ public class RhIdPrincipal implements Principal {
     private boolean canWritePolicies;
     private String rawRhId;
 
+    public RhIdPrincipal() {
+    }
+
     public RhIdPrincipal(String name, String account, String orgId) {
         this.name = name;
         this.account = account;
