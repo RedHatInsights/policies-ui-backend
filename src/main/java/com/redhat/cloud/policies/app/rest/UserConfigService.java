@@ -32,11 +32,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
+import io.quarkus.logging.Log;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
-import java.util.logging.Logger;
 
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
@@ -44,8 +43,6 @@ import java.util.logging.Logger;
 @SimplyTimed(absolute = true, name = "UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
-
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
@@ -79,7 +76,7 @@ public class UserConfigService {
         try {
             return notifications.getUserPreferences(bundle, application, user.getRawRhIdHeader());
         } catch (Exception e) {
-            log.warning("Retrieving settings failed: " + e.getMessage());
+            Log.warn("Retrieving settings failed: " + e.getMessage());
             throw new ServerErrorException(Response.serverError().entity(new Msg(e.getMessage())).build());
         }
     }
