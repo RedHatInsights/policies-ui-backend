@@ -2,9 +2,9 @@ package com.redhat.cloud.policies.app.model.history;
 
 import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.pager.Pager;
+import io.quarkus.logging.Log;
 import io.quarkus.panache.common.Sort;
 import org.hibernate.Session;
-import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,8 +20,6 @@ import static com.redhat.cloud.policies.app.model.filter.Filter.Operator.LIKE;
 @ApplicationScoped
 public class PoliciesHistoryRepository {
 
-    private static final Logger LOGGER = Logger.getLogger(PoliciesHistoryRepository.class);
-
     @Inject
     Session session;
 
@@ -31,7 +29,7 @@ public class PoliciesHistoryRepository {
 
         hql = addFiltersConditions(hql, pager.getFilter().getItems());
 
-        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+        Log.tracef("HQL query ready to be executed: %s", hql);
 
         TypedQuery<Long> query = session.createQuery(hql, Long.class)
                 .setParameter("tenantId", tenantId)
@@ -64,7 +62,7 @@ public class PoliciesHistoryRepository {
             hql += " ORDER BY ctime DESC, hostName ASC";
         }
 
-        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+        Log.tracef("HQL query ready to be executed: %s", hql);
 
         TypedQuery<PoliciesHistoryEntry> query = session.createQuery(hql, PoliciesHistoryEntry.class)
                 .setParameter("tenantId", tenantId)

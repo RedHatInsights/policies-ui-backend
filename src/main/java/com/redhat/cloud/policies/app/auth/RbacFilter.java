@@ -31,14 +31,12 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import io.quarkus.logging.Log;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
 
 @Provider
 @Priority(Priorities.HEADER_DECORATOR + 1)
 public class RbacFilter implements ContainerRequestFilter {
-
-    private static final Logger LOGGER = Logger.getLogger(RbacFilter.class);
 
     @Inject
     Tracer tracer;
@@ -79,13 +77,13 @@ public class RbacFilter implements ContainerRequestFilter {
         try (Scope ignored = tracer.scopeManager().activate(span)) {
             result = rbacClient.getRbacInfo(user.getRawRhIdHeader());
         } catch (Throwable e) {
-            LOGGER.warn("RBAC call failed", e);
+            Log.warn("RBAC call failed", e);
             requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
             return;
         } finally {
             long t2 = System.currentTimeMillis();
             if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.toMillis()) {
-                LOGGER.warnf("Call to RBAC took %d ms", t2 - t1);
+                Log.warnf("Call to RBAC took %d ms", t2 - t1);
             }
             span.finish();
         }

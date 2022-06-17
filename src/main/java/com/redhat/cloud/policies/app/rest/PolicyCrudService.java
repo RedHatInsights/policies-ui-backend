@@ -28,6 +28,7 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.opentracing.Tracer;
+import io.quarkus.logging.Log;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -42,7 +43,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hibernate.exception.ConstraintViolationException;
-import org.jboss.logging.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -82,8 +82,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.Response.Status.CREATED;
-
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
@@ -97,8 +95,6 @@ public class PolicyCrudService {
 
     public static final String ERROR_STRING = "error";
     public static final String CTIME_STRING = "ctime";
-
-    private final Logger log = Logger.getLogger(this.getClass());
 
     @Inject
     @RestClient
@@ -394,7 +390,7 @@ public class PolicyCrudService {
         if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
             return Response.status(409, t.getMessage()).entity(new Msg("Constraint violation")).build();
         } else {
-            log.warn("Getting response failed", t);
+            Log.warn("Getting response failed", t);
             return Response.status(500, t.getMessage()).build();
         }
     }
@@ -808,7 +804,7 @@ public class PolicyCrudService {
             } catch (Exception e) {
                 tracer.activeSpan().setTag(ERROR_STRING, true);
                 String msg = "Retrieval of history failed with: " + e.getMessage();
-                log.warn(msg);
+                Log.warn(msg);
                 builder = Response.serverError().entity(msg);
             }
         }

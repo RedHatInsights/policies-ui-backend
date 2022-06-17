@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
+import io.quarkus.logging.Log;
 import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
 import io.vertx.ext.web.RoutingContext;
 
@@ -29,8 +30,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Request filter. This runs on all incoming requests before method matching
@@ -60,9 +59,6 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
 
     public static final String X_RH_ACCOUNT = "x-rh-account";
     public static final String X_RH_USER = "x-rh-user";
-
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
-    private final boolean logFine = log.isLoggable(Level.FINE);
 
     @Inject
     RhIdPrincipalProducer producer;
@@ -134,9 +130,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
     }
 
     private void logIfNeeded(String logMessage) {
-        if (logFine) {
-            log.fine(logMessage);
-        }
+        Log.debug(logMessage);
     }
 
     // Helper to get the vert.x routing context
