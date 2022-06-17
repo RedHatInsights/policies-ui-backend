@@ -42,15 +42,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Path("/admin")
 @Produces("application/json")
 @Consumes("application/json")
 @RequestScoped
 public class AdminService {
-
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     @Inject
     EntityManager entityManager;

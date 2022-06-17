@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,15 +30,12 @@ import javax.ws.rs.core.Application;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
 
 /**
  * Set the base path for the application
  */
 @ApplicationPath("/")
 public class JaxRsApplication extends Application {
-
-    Logger log = Logger.getLogger("Policies UI-Backend");
 
     public static final String FILTER_REGEX = ".*(/health(/\\w+)?|/metrics|/api/policies/v1.0/status) HTTP/[0-9].[0-9]\" 200.*\\n?";
     private static final Pattern pattern = Pattern.compile(FILTER_REGEX);
@@ -49,7 +47,7 @@ public class JaxRsApplication extends Application {
     void init(@Observes StartupEvent event) {
         initAccessLogFilter();
 
-        log.info(readGitProperties());
+        Log.info(readGitProperties());
 
         logExternalServiceUrl("quarkus.rest-client.engine.url");
         logExternalServiceUrl("quarkus.rest-client.notifications.url");
@@ -74,7 +72,7 @@ public class JaxRsApplication extends Application {
         try {
             return readFromInputStream(inputStream);
         } catch (IOException e) {
-            log.error("Could not read git.properties.", e);
+            Log.error("Could not read git.properties.", e);
             return "Version information could not be retrieved";
         }
     }
@@ -94,6 +92,6 @@ public class JaxRsApplication extends Application {
     }
 
     private void logExternalServiceUrl(String configKey) {
-        log.infof(configKey + "=%s", ConfigProvider.getConfig().getValue(configKey, String.class));
+        Log.infof(configKey + "=%s", ConfigProvider.getConfig().getValue(configKey, String.class));
     }
 }

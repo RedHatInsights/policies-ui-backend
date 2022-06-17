@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.health;
 
+import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Gauge;
@@ -23,7 +24,6 @@ import org.eclipse.microprofile.metrics.annotation.Gauge;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.util.Scanner;
-import java.util.logging.Logger;
 
 
 /**
@@ -40,8 +40,6 @@ import java.util.logging.Logger;
  */
 @ApplicationScoped
 public class ProcSelfStatusExporter {
-
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     private static final String PATHNAME = "/proc/self/status";
 
@@ -63,7 +61,7 @@ public class ProcSelfStatusExporter {
         File status = new File(PATHNAME);
         if (!status.exists() || !status.canRead()) {
             if (!hasWarned) {
-                log.warning("Can't read " + PATHNAME);
+                Log.warn("Can't read " + PATHNAME);
                 hasWarned = true;
             }
             return;
@@ -107,7 +105,7 @@ public class ProcSelfStatusExporter {
                 }
             }
         } catch (Exception e) {
-            log.warning("Reading failed: " + e.getMessage());
+            Log.warn("Reading failed: " + e.getMessage());
         }
     }
 
