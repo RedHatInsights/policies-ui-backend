@@ -611,7 +611,7 @@ public class PolicyCrudService {
 
         Policy storedPolicy;
         if (user.getOrgId() != null) {
-            storedPolicy = Policy.findById(user.getOrgId(), policyId);
+            storedPolicy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             storedPolicy = Policy.findById(user.getAccount(), policyId);
         }
