@@ -117,6 +117,12 @@
       <version>4.3.1</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.quarkiverse.loggingsentry</groupId>
+      <artifactId>quarkus-logging-sentry</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
     <!-- Configuration dependencies -->
     <dependency>
       <groupId>com.redhat.cloud.common</groupId>
