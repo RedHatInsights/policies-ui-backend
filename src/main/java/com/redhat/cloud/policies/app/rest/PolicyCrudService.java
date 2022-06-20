@@ -879,7 +879,7 @@ public class PolicyCrudService {
 
         Policy policy;
         if (user.getOrgId() != null) {
-            policy = Policy.findById(user.getOrgId(), policyId);
+            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             policy = Policy.findById(user.getAccount(), policyId);
         }
