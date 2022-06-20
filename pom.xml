@@ -96,10 +96,6 @@
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-scheduler</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-logging-sentry</artifactId>
-    </dependency>
 
     <dependency>
         <groupId>io.quarkus</groupId>
@@ -115,6 +111,12 @@
       <groupId>io.quarkiverse.logging.cloudwatch</groupId>
       <artifactId>quarkus-logging-cloudwatch</artifactId>
       <version>4.3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.quarkiverse.loggingsentry</groupId>
+      <artifactId>quarkus-logging-sentry</artifactId>
+      <version>1.0.1</version>
     </dependency>
 
     <!-- Configuration dependencies -->
