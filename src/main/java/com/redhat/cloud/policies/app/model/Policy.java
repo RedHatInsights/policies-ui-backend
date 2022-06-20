@@ -242,8 +242,8 @@ public class Policy extends PanacheEntityBase {
         return find("customerid = ?1 and name = ?2", customer, name).firstResult();
     }
 
-    public static Policy findByNameOrgId(String customer, String name) {
-        return find("org_id = ?1 and name = ?2", customer, name).firstResult();
+    public static Policy findByNameOrgId(String orgId, String name) {
+        return find("org_id = ?1 and name = ?2", orgId, name).firstResult();
     }
 
     public UUID store(String customer, Policy policy) {
