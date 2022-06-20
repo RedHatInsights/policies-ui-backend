@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.policies.app.OrgIdConfig;
 import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -131,6 +132,9 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
+
+    @Inject
+    OrgIdConfig orgIdConfig;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -753,7 +757,7 @@ public class PolicyCrudService {
         }
 
         Policy policy;
-        if (user.getOrgId() != null) {
+        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
             policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             policy = Policy.findById(user.getAccount(), policyId);
@@ -878,7 +882,7 @@ public class PolicyCrudService {
         ResponseBuilder builder;
 
         Policy policy;
-        if (user.getOrgId() != null) {
+        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
             policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
         } else {
             policy = Policy.findById(user.getAccount(), policyId);
@@ -907,14 +911,14 @@ public class PolicyCrudService {
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
 
-        String tenantId;
+        String orgId;
         long totalCount;
-        if (user.getOrgId() != null) {
-            tenantId = user.getOrgId();
-            totalCount = policiesHistoryRepository.countOrgId(tenantId, policyId, pager);
+        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
+            orgId = user.getOrgId();
+            totalCount = policiesHistoryRepository.countOrgId(orgId, policyId, pager);
 
             if (totalCount > 0) {
-                items = policiesHistoryRepository.findOrgId(tenantId, policyId, pager)
+                items = policiesHistoryRepository.findOrgId(orgId, policyId, pager)
                         .stream().map(historyEntry ->
                                 new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
                         ).collect(Collectors.toList());
@@ -922,11 +926,11 @@ public class PolicyCrudService {
                 items = Collections.emptyList();
             }
         } else {
-            tenantId = user.getAccount();
-            totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
+            orgId = user.getAccount();
+            totalCount = policiesHistoryRepository.count(orgId, policyId, pager);
 
             if (totalCount > 0) {
-                items = policiesHistoryRepository.find(tenantId, policyId, pager)
+                items = policiesHistoryRepository.find(orgId, policyId, pager)
                         .stream().map(historyEntry ->
                                 new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
                         ).collect(Collectors.toList());
@@ -940,10 +944,11 @@ public class PolicyCrudService {
     }
 
     private Response isNameUnique(Policy policy) {
-        Policy tmp;
+        Policy tmp = null;
         if (user.getOrgId() != null) {
             tmp = Policy.findByNameOrgId(user.getOrgId(), policy.name);
-        } else {
+        }
+        if (tmp == null || tmp.orgId.isEmpty()) {
             tmp = Policy.findByName(user.getAccount(), policy.name);
         }
 
