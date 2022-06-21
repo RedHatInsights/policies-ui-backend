@@ -29,7 +29,7 @@ public class PoliciesHistoryRepository {
 
         hql = addFiltersConditions(hql, pager.getFilter().getItems());
 
-        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+        Log.tracef("HQL query ready to be executed: %s", hql);
 
         TypedQuery<Long> query = session.createQuery(hql, Long.class)
                 .setParameter("orgId", orgId)
@@ -79,7 +79,7 @@ public class PoliciesHistoryRepository {
             hql += " ORDER BY ctime DESC, hostName ASC";
         }
 
-        LOGGER.tracef("HQL query ready to be executed: %s", hql);
+        Log.tracef("HQL query ready to be executed: %s", hql);
 
         TypedQuery<PoliciesHistoryEntry> query = session.createQuery(hql, PoliciesHistoryEntry.class)
                 .setParameter("orgId", orgId)
