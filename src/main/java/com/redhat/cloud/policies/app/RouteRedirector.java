@@ -16,11 +16,9 @@
  */
 package com.redhat.cloud.policies.app;
 
+import io.quarkus.logging.Log;
 import io.quarkus.vertx.web.RouteFilter;
 import io.vertx.ext.web.RoutingContext;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Redirect routes with only the major version
@@ -31,8 +29,6 @@ public class RouteRedirector {
 
     private static final String API_POLICIES_V_1 = "/api/policies/v1/";
     private static final String API_POLICIES_V_1_0 = "/api/policies/v1.0/";
-
-    Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     /**
      * If the requested route is the one with major version only,
@@ -45,15 +41,15 @@ public class RouteRedirector {
     @RouteFilter(400)
     void myRedirector(RoutingContext rc) {
         String uri = rc.request().uri();
-        if (log.isLoggable(Level.FINER)) {
+        if (Log.isTraceEnabled()) {
             uri = uri.replaceAll("[\n|\r|\t]", "_");
-            log.finer("Incoming uri: " + uri);
+            Log.trace("Incoming uri: " + uri);
         }
         if (uri.startsWith(API_POLICIES_V_1)) {
             String remain = uri.substring(API_POLICIES_V_1.length());
-            if (log.isLoggable(Level.FINER)) {
+            if (Log.isTraceEnabled()) {
                 remain = remain.replaceAll("[\n|\r|\t]", "_");
-                log.finer("Rerouting to :" + API_POLICIES_V_1_0 + remain);
+                Log.trace("Rerouting to :" + API_POLICIES_V_1_0 + remain);
             }
 
             rc.reroute(API_POLICIES_V_1_0 + remain);

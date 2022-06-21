@@ -17,6 +17,7 @@
 package com.redhat.cloud.policies.app.health;
 
 import com.redhat.cloud.policies.app.StuffHolder;
+import io.quarkus.logging.Log;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
@@ -24,7 +25,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -35,15 +35,13 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class StatusEndpoint {
 
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
-
     @GET
     @Produces("application/json")
     public Response getStatus() {
         Map<String, String> issues = StuffHolder.getInstance().getStatusInfo();
 
         if (!issues.isEmpty()) {
-            log.severe("Status reports: " + makeReadable(issues));
+            Log.error("Status reports: " + makeReadable(issues));
             return Response.serverError().entity(issues).build();
         }
         return Response.ok().build();
