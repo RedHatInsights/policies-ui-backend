@@ -17,7 +17,10 @@
 package com.redhat.cloud.policies.app.auth;
 
 import io.quarkus.logging.Log;
+import io.quarkus.security.identity.SecurityIdentity;
+import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
+import io.quarkus.vertx.http.runtime.security.QuarkusHttpUser;
 import io.vertx.ext.web.RoutingContext;
 
 import javax.enterprise.inject.spi.CDI;
@@ -93,9 +96,15 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         RhIdPrincipal rhPrincipal = new RhIdPrincipal(rhIdentity.getUsername(), rhIdentity.identity.accountNumber);
         rhPrincipal.setRawRhIdHeader(xrhid_header);
 
-        // Attach account id and user to the context so we can log it later
+        // Attach account id and user to the context so we could log it later
         routingContext.put(X_RH_ACCOUNT, rhIdentity.identity.accountNumber);
         routingContext.put(X_RH_USER, rhIdentity.getUsername());
+
+        // Provide the security identity so that we can get it in the access log
+        SecurityIdentity si = QuarkusSecurityIdentity.builder()
+            .setPrincipal(rhPrincipal)
+            .build();
+        routingContext.setUser(new QuarkusHttpUser(si));
 
         SecurityContext sctx = new RhIdSecurityContext(rhIdentity, rhPrincipal);
         requestContext.setSecurityContext(sctx);
