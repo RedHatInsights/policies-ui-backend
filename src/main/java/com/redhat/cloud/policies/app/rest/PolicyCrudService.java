@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.redhat.cloud.policies.app.OrgIdConfig;
 import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -127,6 +128,9 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
+
+    @Inject
+    OrgIdConfig orgIdConfig;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -245,7 +249,12 @@ public class PolicyCrudService {
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
+            if (useOrgId()) {
+                page = Policy.pagePoliciesForCustomerOrgId(entityManager, user.getOrgId(), pager);
+            } else {
+                warnOrgIdIfNeeded();
+                page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
+            }
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
         }
@@ -321,7 +330,12 @@ public class PolicyCrudService {
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+            if (useOrgId()) {
+                uuids = Policy.getPolicyIdsForCustomerOrgId(entityManager, user.getOrgId(), pager);
+            } else {
+                warnOrgIdIfNeeded();
+                uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
+            }
 
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
@@ -357,6 +371,7 @@ public class PolicyCrudService {
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
         policy.customerid = user.getAccount();
+        policy.orgId = user.getOrgId();
 
         Response invalidNameResponse = isNameUnique(policy);
         if (invalidNameResponse != null) {
@@ -377,14 +392,14 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
         }
 
-        policy.store(user.getAccount(), policy);
-        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        policy.persist();
+        setLatestToNow();
 
         // Policy is persisted. Return its location.
         URI location =
                 UriBuilder.fromResource(PolicyCrudService.class).path(PolicyCrudService.class, "getPolicy").build(policy.id);
         return Response.created(location).entity(policy).build();
-     }
+    }
 
     private Response getResponseSavingPolicyThrowable(Throwable t) {
         if (t instanceof PersistenceException && t.getCause() instanceof ConstraintViolationException) {
@@ -420,13 +435,13 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy = findPolicy(policyId);
 
         if (policy == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } else {
             policy.delete(policy);
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            setLatestToNow();
             return Response.ok(policy).build();
         }
     }
@@ -446,16 +461,15 @@ public class PolicyCrudService {
 
         boolean dbUpdated = false;
         for (UUID uuid : uuids) {
-            Policy policy = Policy.findById(user.getAccount(), uuid);
+            Policy policy = findPolicy(uuid);
             if (policy != null) {
                 policy.delete();
                 dbUpdated = true;
             }
         }
         if (dbUpdated) {
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            setLatestToNow();
         }
-
         return Response.ok(uuids).build();
     }
 
@@ -476,7 +490,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+        Policy storedPolicy = findPolicy(policyId);
 
         if (storedPolicy == null) {
             return Response.status(404, "Original policy not found").build();
@@ -484,7 +498,7 @@ public class PolicyCrudService {
             storedPolicy.isEnabled = shouldBeEnabled;
             storedPolicy.setMtimeToNow();
             storedPolicy.persist();
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            setLatestToNow();
             return Response.ok().build();
         }
     }
@@ -508,7 +522,7 @@ public class PolicyCrudService {
 
         List<UUID> changed = new ArrayList<>(uuids.size());
         for (UUID uuid : uuids) {
-            Policy storedPolicy = Policy.findById(user.getAccount(), uuid);
+            Policy storedPolicy = findPolicy(uuid);
             if (storedPolicy != null) {
                 storedPolicy.isEnabled = shouldBeEnabled;
                 storedPolicy.setMtimeToNow();
@@ -517,7 +531,7 @@ public class PolicyCrudService {
             }
         }
         if (!changed.isEmpty()) {
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+            setLatestToNow();
         }
         return Response.ok(changed).build();
     }
@@ -542,7 +556,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy = Policy.findById(user.getAccount(), policyId);
+        Policy storedPolicy = findPolicy(policyId);
 
         ResponseBuilder builder;
         if (storedPolicy == null) {
@@ -573,7 +587,7 @@ public class PolicyCrudService {
                     storedPolicy.customerid = user.getAccount();
                     storedPolicy.setMtimeToNow();
 
-                    accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+                    setLatestToNow();
                     return Response.ok(storedPolicy).build();
                 } catch (Throwable t) {
                     try {
@@ -603,8 +617,6 @@ public class PolicyCrudService {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
-
-        policy.customerid = user.getAccount();
 
         try {
             lightweightEngine.validateCondition(policy.conditions);
@@ -670,7 +682,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy = findPolicy(policyId);
 
         ResponseBuilder builder;
         if (policy == null) {
@@ -790,7 +802,8 @@ public class PolicyCrudService {
 
         ResponseBuilder builder;
 
-        Policy policy = Policy.findById(user.getAccount(), policyId);
+        Policy policy = findPolicy(policyId);
+
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
@@ -813,16 +826,31 @@ public class PolicyCrudService {
 
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
-        String tenantId = user.getAccount();
 
-        long totalCount = policiesHistoryRepository.count(tenantId, policyId, pager);
-        if (totalCount > 0) {
-            items = policiesHistoryRepository.find(tenantId, policyId, pager)
-                    .stream().map(historyEntry ->
-                            new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
-                    ).collect(Collectors.toList());
+        long totalCount;
+        if (useOrgId()) {
+            totalCount = policiesHistoryRepository.countOrgId(user.getOrgId(), policyId, pager);
+
+            if (totalCount > 0) {
+                items = policiesHistoryRepository.findOrgId(user.getOrgId(), policyId, pager)
+                        .stream().map(historyEntry ->
+                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+                        ).collect(Collectors.toList());
+            } else {
+                items = Collections.emptyList();
+            }
         } else {
-            items = Collections.emptyList();
+            warnOrgIdIfNeeded();
+            totalCount = policiesHistoryRepository.count(user.getAccount(), policyId, pager);
+
+            if (totalCount > 0) {
+                items = policiesHistoryRepository.find(user.getAccount(), policyId, pager)
+                        .stream().map(historyEntry ->
+                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+                        ).collect(Collectors.toList());
+            } else {
+                items = Collections.emptyList();
+            }
         }
 
         Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
@@ -830,12 +858,49 @@ public class PolicyCrudService {
     }
 
     private Response isNameUnique(Policy policy) {
-        Policy tmp = Policy.findByName(user.getAccount(), policy.name);
+        Policy tmp = null;
+        if (user.getOrgId() != null) {
+            tmp = Policy.findByNameOrgId(user.getOrgId(), policy.name);
+        }
+        if (tmp == null) {
+            tmp = Policy.findByName(user.getAccount(), policy.name);
+        }
 
         if (tmp != null && !tmp.id.equals(policy.id)) {
             return Response.status(409).entity(new Msg("Policy name is not unique")).build();
         }
 
         return null;
+    }
+
+    private boolean useOrgId() {
+        return orgIdConfig.isUseOrgId() && user.getOrgId() != null && !user.getOrgId().isBlank();
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private Policy findPolicy(UUID policyId) {
+        if (useOrgId()) {
+            return Policy.findByIdOrgId(user.getOrgId(), policyId);
+        } else {
+            warnOrgIdIfNeeded();
+            return Policy.findById(user.getAccount(), policyId);
+        }
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private void warnOrgIdIfNeeded() {
+        if (orgIdConfig.isUseOrgId()) {
+            Log.warnf("The org ID is enabled but a user without an org ID called the REST API: %s", user);
+        }
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private void setLatestToNow() {
+        if (user.getAccount() != null) {
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        }
+        if (user.getOrgId() != null && !user.getOrgId().isBlank()) {
+            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+        }
     }
 }

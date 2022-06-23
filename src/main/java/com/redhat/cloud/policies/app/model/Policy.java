@@ -54,6 +54,10 @@ public class Policy extends PanacheEntityBase {
     @JsonbTransient
     public String customerid;
 
+    @JsonbTransient
+    @Column(name = "org_id")
+    public String orgId;
+
     @NotNull
     @NotEmpty
     @Schema(description = "Name of the rule. Must be unique per customer account.")
@@ -126,6 +130,37 @@ public class Policy extends PanacheEntityBase {
         return ctime.toString();
     }
 
+    public static Page<Policy> pagePoliciesForCustomerOrgId(EntityManager em, String orgid, Pager pager) {
+
+        for (Sort.Column column : pager.getSort().getColumns()) {
+            SortableColumn.fromName(column.getName());
+        }
+
+        pager.getFilter()
+                .getParameters()
+                .map()
+                .keySet()
+                .forEach(FilterableColumn::fromName);
+
+        Filter filter = pager.getFilter().and("org_id", Filter.Operator.EQUAL, orgid);
+
+        PanacheQuery<Policy> panacheQuery = find(
+                filter.getQuery(),
+                pager.getSort(),
+                filter.getParameters()
+        );
+
+        if (pager.getLimit() != Pager.NO_LIMIT) {
+            panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
+        }
+
+        return new Page<>(
+                panacheQuery.list(),
+                pager,
+                panacheQuery.count()
+        );
+    }
+
     public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
 
         for (Sort.Column column : pager.getSort().getColumns()) {
@@ -176,20 +211,39 @@ public class Policy extends PanacheEntityBase {
         return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
     }
 
+    public static List<UUID> getPolicyIdsForCustomerOrgId(EntityManager em, String orgId, Pager pager) {
+
+        pager.getFilter()
+                .getParameters()
+                .map()
+                .keySet()
+                .forEach(FilterableColumn::fromName);
+
+        Filter filter = pager.getFilter().and("org_id", Filter.Operator.EQUAL, orgId);
+
+
+        PanacheQuery<Policy> panacheQuery = find(
+                filter.getQuery(),
+                filter.getParameters()
+        );
+
+        return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
+    }
+
     public static Policy findById(String customer, UUID theId) {
         return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
+    }
+
+    public static Policy findByIdOrgId(String orgId, UUID theId) {
+        return find("org_id = ?1 and id = ?2", orgId, theId).firstResult();
     }
 
     public static Policy findByName(String customer, String name) {
         return find("customerid = ?1 and name = ?2", customer, name).firstResult();
     }
 
-    public UUID store(String customer, Policy policy) {
-        if (!customer.equals(policy.customerid)) {
-            throw new IllegalArgumentException("Store: customer id do not match");
-        }
-        policy.persist();
-        return id;
+    public static Policy findByNameOrgId(String orgId, String name) {
+        return find("org_id = ?1 and name = ?2", orgId, name).firstResult();
     }
 
     public void delete(Policy policy) {
@@ -208,6 +262,7 @@ public class Policy extends PanacheEntityBase {
         this.conditions = policy.conditions;
         this.isEnabled = policy.isEnabled;
         this.customerid = policy.customerid;
+        this.orgId = policy.orgId;
     }
 
     @Override
@@ -215,6 +270,7 @@ public class Policy extends PanacheEntityBase {
         final StringBuilder sb = new StringBuilder("Policy{");
         sb.append("id=").append(id);
         sb.append(", customerid='").append(customerid).append('\'');
+        sb.append(", orgid='").append(orgId).append('\'');
         sb.append(", name='").append(name).append('\'');
         sb.append(", mtime=").append(mtime);
         sb.append('}');
@@ -269,20 +325,6 @@ public class Policy extends PanacheEntityBase {
             }
             throw new IllegalArgumentException("Unknown Policy.FilterableColumn requested: [" + columnName + "]");
         }
-    }
-
-    static String sortToOrderBy(Sort sort) {
-        var columns = sort.getColumns();
-        StringBuilder sb = new StringBuilder(" ORDER BY ");
-        for (int i = 0; i < columns.size(); i++) {
-            Sort.Column column = columns.get(i);
-            if (i > 0)
-                sb.append(" , ");
-            sb.append(column.getName());
-            if (column.getDirection() != Sort.Direction.Ascending)
-                sb.append(" DESC");
-        }
-        return sb.toString();
     }
 }
 

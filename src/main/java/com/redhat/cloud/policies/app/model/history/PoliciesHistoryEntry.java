@@ -18,6 +18,9 @@ public class PoliciesHistoryEntry {
     @Column(name = "tenant_id")
     private String tenantId;
 
+    @Column(name = "org_id")
+    private String orgId;
+
     @Column(name = "policy_id")
     private String policyId;
 
@@ -43,6 +46,14 @@ public class PoliciesHistoryEntry {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 
     public String getPolicyId() {
