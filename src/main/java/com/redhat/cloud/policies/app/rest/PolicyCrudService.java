@@ -249,10 +249,10 @@ public class PolicyCrudService {
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-
-            if (user.getOrgId() != null) {
+            if (useOrgId()) {
                 page = Policy.pagePoliciesForCustomerOrgId(entityManager, user.getOrgId(), pager);
             } else {
+                warnOrgIdIfNeeded();
                 page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
             }
         } catch (IllegalArgumentException iae) {
@@ -330,10 +330,10 @@ public class PolicyCrudService {
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-
-            if (user.getOrgId() != null) {
+            if (useOrgId()) {
                 uuids = Policy.getPolicyIdsForCustomerOrgId(entityManager, user.getOrgId(), pager);
             } else {
+                warnOrgIdIfNeeded();
                 uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
             }
 
@@ -370,12 +370,8 @@ public class PolicyCrudService {
 
         // We use the indirection, so that for testing we can produce known UUIDs
         policy.id = uuidHelper.getUUID();
-
-        if (user.getOrgId() != null) {
-            policy.customerid = user.getOrgId();
-        } else {
-            policy.customerid = user.getAccount();
-        }
+        policy.customerid = user.getAccount();
+        policy.orgId = user.getOrgId();
 
         Response invalidNameResponse = isNameUnique(policy);
         if (invalidNameResponse != null) {
@@ -396,13 +392,8 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to store policy")).build();
         }
 
-        if (user.getOrgId() != null) {
-            policy.storeOrgId(user.getOrgId(), policy);
-            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-        } else if (user.getAccount() != null) {
-            policy.store(user.getAccount(), policy);
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-        }
+        policy.persist();
+        setLatestToNow();
 
         // Policy is persisted. Return its location.
         URI location =
@@ -444,23 +435,13 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
         }
 
-        Policy policy;
-        if (user.getOrgId() != null) {
-            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            policy = Policy.findById(user.getAccount(), policyId);
-        }
+        Policy policy = findPolicy(policyId);
 
         if (policy == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } else {
             policy.delete(policy);
-            if (user.getOrgId() != null) {
-                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-            }
-            if (user.getAccount() != null) {
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            }
+            setLatestToNow();
             return Response.ok(policy).build();
         }
     }
@@ -480,27 +461,15 @@ public class PolicyCrudService {
 
         boolean dbUpdated = false;
         for (UUID uuid : uuids) {
-            Policy policy;
-            if (user.getOrgId() != null) {
-                policy = Policy.findByIdOrgId(user.getOrgId(), uuid);
-            } else {
-                policy = Policy.findById(user.getAccount(), uuid);
-            }
-
+            Policy policy = findPolicy(uuid);
             if (policy != null) {
                 policy.delete();
                 dbUpdated = true;
             }
         }
         if (dbUpdated) {
-            if (user.getOrgId() != null) {
-                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-            }
-            if (user.getAccount() != null) {
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            }
+            setLatestToNow();
         }
-
         return Response.ok(uuids).build();
     }
 
@@ -521,12 +490,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy;
-        if (user.getOrgId() != null) {
-            storedPolicy = Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            storedPolicy = Policy.findById(user.getAccount(), policyId);
-        }
+        Policy storedPolicy = findPolicy(policyId);
 
         if (storedPolicy == null) {
             return Response.status(404, "Original policy not found").build();
@@ -534,13 +498,7 @@ public class PolicyCrudService {
             storedPolicy.isEnabled = shouldBeEnabled;
             storedPolicy.setMtimeToNow();
             storedPolicy.persist();
-            if (user.getOrgId() != null) {
-                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-            }
-            if (user.getAccount() != null) {
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            }
-
+            setLatestToNow();
             return Response.ok().build();
         }
     }
@@ -564,13 +522,7 @@ public class PolicyCrudService {
 
         List<UUID> changed = new ArrayList<>(uuids.size());
         for (UUID uuid : uuids) {
-            Policy storedPolicy;
-            if (user.getOrgId() != null) {
-                storedPolicy = Policy.findByIdOrgId(user.getOrgId(), uuid);
-            } else {
-                storedPolicy = Policy.findById(user.getAccount(), uuid);
-            }
-
+            Policy storedPolicy = findPolicy(uuid);
             if (storedPolicy != null) {
                 storedPolicy.isEnabled = shouldBeEnabled;
                 storedPolicy.setMtimeToNow();
@@ -579,12 +531,7 @@ public class PolicyCrudService {
             }
         }
         if (!changed.isEmpty()) {
-            if (user.getOrgId() != null) {
-                accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-            }
-            if (user.getAccount() != null) {
-                accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-            }
+            setLatestToNow();
         }
         return Response.ok(changed).build();
     }
@@ -609,12 +556,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
 
-        Policy storedPolicy;
-        if (user.getOrgId() != null) {
-            storedPolicy = Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            storedPolicy = Policy.findById(user.getAccount(), policyId);
-        }
+        Policy storedPolicy = findPolicy(policyId);
 
         ResponseBuilder builder;
         if (storedPolicy == null) {
@@ -645,13 +587,7 @@ public class PolicyCrudService {
                     storedPolicy.customerid = user.getAccount();
                     storedPolicy.setMtimeToNow();
 
-                    if (user.getOrgId() != null) {
-                        accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-                    }
-                    if (user.getAccount() != null) {
-                        accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-                    }
-
+                    setLatestToNow();
                     return Response.ok(storedPolicy).build();
                 } catch (Throwable t) {
                     try {
@@ -680,12 +616,6 @@ public class PolicyCrudService {
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
-        }
-
-        if (user.getOrgId() != null) {
-            policy.customerid = user.getOrgId();
-        } else {
-            policy.customerid = user.getAccount();
         }
 
         try {
@@ -752,12 +682,7 @@ public class PolicyCrudService {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
         }
 
-        Policy policy;
-        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
-            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            policy = Policy.findById(user.getAccount(), policyId);
-        }
+        Policy policy = findPolicy(policyId);
 
         ResponseBuilder builder;
         if (policy == null) {
@@ -877,12 +802,7 @@ public class PolicyCrudService {
 
         ResponseBuilder builder;
 
-        Policy policy;
-        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
-            policy = Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            policy = Policy.findById(user.getAccount(), policyId);
-        }
+        Policy policy = findPolicy(policyId);
 
         if (policy == null) {
             builder = Response.status(Response.Status.NOT_FOUND);
@@ -907,14 +827,12 @@ public class PolicyCrudService {
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
 
-        String orgId;
         long totalCount;
-        if (orgIdConfig.isUseOrgId() && user.getOrgId() != null) {
-            orgId = user.getOrgId();
-            totalCount = policiesHistoryRepository.countOrgId(orgId, policyId, pager);
+        if (useOrgId()) {
+            totalCount = policiesHistoryRepository.countOrgId(user.getOrgId(), policyId, pager);
 
             if (totalCount > 0) {
-                items = policiesHistoryRepository.findOrgId(orgId, policyId, pager)
+                items = policiesHistoryRepository.findOrgId(user.getOrgId(), policyId, pager)
                         .stream().map(historyEntry ->
                                 new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
                         ).collect(Collectors.toList());
@@ -922,11 +840,11 @@ public class PolicyCrudService {
                 items = Collections.emptyList();
             }
         } else {
-            orgId = user.getAccount();
-            totalCount = policiesHistoryRepository.count(orgId, policyId, pager);
+            warnOrgIdIfNeeded();
+            totalCount = policiesHistoryRepository.count(user.getAccount(), policyId, pager);
 
             if (totalCount > 0) {
-                items = policiesHistoryRepository.find(orgId, policyId, pager)
+                items = policiesHistoryRepository.find(user.getAccount(), policyId, pager)
                         .stream().map(historyEntry ->
                                 new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
                         ).collect(Collectors.toList());
@@ -944,7 +862,7 @@ public class PolicyCrudService {
         if (user.getOrgId() != null) {
             tmp = Policy.findByNameOrgId(user.getOrgId(), policy.name);
         }
-        if (tmp == null || tmp.orgId.isEmpty()) {
+        if (tmp == null) {
             tmp = Policy.findByName(user.getAccount(), policy.name);
         }
 
@@ -953,5 +871,36 @@ public class PolicyCrudService {
         }
 
         return null;
+    }
+
+    private boolean useOrgId() {
+        return orgIdConfig.isUseOrgId() && user.getOrgId() != null && !user.getOrgId().isBlank();
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private Policy findPolicy(UUID policyId) {
+        if (useOrgId()) {
+            return Policy.findByIdOrgId(user.getOrgId(), policyId);
+        } else {
+            warnOrgIdIfNeeded();
+            return Policy.findById(user.getAccount(), policyId);
+        }
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private void warnOrgIdIfNeeded() {
+        if (orgIdConfig.isUseOrgId()) {
+            Log.warnf("The org ID is enabled but a user without an org ID called the REST API: %s", user);
+        }
+    }
+
+    // TODO POL-650 Delete this method after the org ID migration is done.
+    private void setLatestToNow() {
+        if (user.getAccount() != null) {
+            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
+        }
+        if (user.getOrgId() != null && !user.getOrgId().isBlank()) {
+            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
+        }
     }
 }

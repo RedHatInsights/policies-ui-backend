@@ -246,22 +246,6 @@ public class Policy extends PanacheEntityBase {
         return find("org_id = ?1 and name = ?2", orgId, name).firstResult();
     }
 
-    public UUID store(String customer, Policy policy) {
-        if (!customer.equals(policy.customerid)) {
-            throw new IllegalArgumentException("Store: customer id do not match");
-        }
-        policy.persist();
-        return id;
-    }
-
-    public UUID storeOrgId(String orgId, Policy policy) {
-        if (!orgId.equals(policy.orgId)) {
-            throw new IllegalArgumentException("Store: orgId id do not match");
-        }
-        policy.persist();
-        return id;
-    }
-
     public void delete(Policy policy) {
         if (policy == null || !policy.isPersistent()) {
             throw new IllegalStateException("Policy was not persisted");

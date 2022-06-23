@@ -73,4 +73,15 @@ public class RhIdPrincipal implements Principal {
     public String getRawRhIdHeader() {
         return rawRhId;
     }
+
+    @Override
+    public String toString() {
+        return "RhIdPrincipal{" +
+                "name='" + name + '\'' +
+                ", account='" + account + '\'' +
+                ", orgId='" + orgId + '\'' +
+                ", canReadPolicies=" + canReadPolicies +
+                ", canWritePolicies=" + canWritePolicies +
+                '}';
+    }
 }
