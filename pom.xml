@@ -18,7 +18,7 @@
     <surefire-plugin.version>2.22.2</surefire-plugin.version>
     <jacoco.version>0.8.8</jacoco.version>
 
-    <version.testcontainers>1.17.2</version.testcontainers>
+    <version.testcontainers>1.17.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-netty-no-dependencies.version>5.13.2</mockserver-netty-no-dependencies.version>
     <clowder-quarkus-config-source.version>1.0.2</clowder-quarkus-config-source.version>
