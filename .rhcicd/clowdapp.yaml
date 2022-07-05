@@ -131,6 +131,8 @@ objects:
         env:
         - name: ENV_NAME
           value: ${ENV_NAME}
+        - name: POLICIES_USE_ORG_ID
+          value: ${USE_ORG_ID}
         - name: QUARKUS_HTTP_PORT
           value: "8000"
         - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
@@ -263,3 +265,5 @@ parameters:
   description: Port for the EAN to OrgId translator.
   required: true
   value: '8892'
+- name: USE_ORG_ID
+  value: "false"
