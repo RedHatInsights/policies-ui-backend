@@ -17,13 +17,13 @@
 package com.redhat.cloud.policies.app;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.when;
 import static io.restassured.RestAssured.with;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 class StatusEndpointTest extends AbstractITest {
@@ -38,9 +38,9 @@ class StatusEndpointTest extends AbstractITest {
 
         // Run twice
         String body = getMetric();
-        Assertions.assertTrue(body.contains("application_status_isDegraded 0.0"));
+        assertTrue(body.contains("status_isDegraded 0.0"));
         body = getMetric();
-        Assertions.assertTrue(body.contains("application_status_isDegraded 0.0"));
+        assertTrue(body.contains("status_isDegraded 0.0"));
     }
 
     @Order(2)
@@ -63,10 +63,10 @@ class StatusEndpointTest extends AbstractITest {
                     .statusCode(500);
 
             String body = getMetric();
-            Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
+            assertTrue(body.contains("status_isDegraded 1.0"));
 
             body = getMetric();
-            Assertions.assertTrue(body.contains("application_status_isDegraded 1.0"));
+            assertTrue(body.contains("status_isDegraded 1.0"));
 
         } finally {
             with()
