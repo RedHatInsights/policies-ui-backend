@@ -120,7 +120,15 @@ public class PagingUtils {
                     operator = Filter.Operator.BOOLEAN_IS;
                     if (value == null || value.isEmpty()) {
                         value = "true";
+                    } else {
+                      if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
+                        throw new IllegalArgumentException("Bad value for filter[isEnabled]");
+                      }
+                      else {
+                        value = String.valueOf(Boolean.parseBoolean(value));
+                      }
                     }
+
                 } else {
                     String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
                     operator = Filter.Operator.EQUAL;
