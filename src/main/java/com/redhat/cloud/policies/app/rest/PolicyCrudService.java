@@ -584,7 +584,6 @@ public class PolicyCrudService {
                 // All is good, we can now do the real work
                 try {
                     storedPolicy.populateFrom(policy);
-                    storedPolicy.customerid = user.getAccount();
                     storedPolicy.setMtimeToNow();
 
                     setLatestToNow();

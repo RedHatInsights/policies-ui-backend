@@ -255,14 +255,11 @@ public class Policy extends PanacheEntityBase {
     }
 
     public void populateFrom(Policy policy) {
-        this.id = policy.id;
         this.name = policy.name;
         this.description = policy.description;
         this.actions = policy.actions;
         this.conditions = policy.conditions;
         this.isEnabled = policy.isEnabled;
-        this.customerid = policy.customerid;
-        this.orgId = policy.orgId;
     }
 
     @Override
