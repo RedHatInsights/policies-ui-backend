@@ -496,6 +496,24 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
+    void badEnabledFilter() {
+        given()
+            .header(authHeader)
+            .when().get(API_BASE_V1_0 + "/policies/?filter[is_enabled]=hulla")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test
+    void goodEnabledFilter() {
+        given()
+            .header(authHeader)
+            .when().get(API_BASE_V1_0 + "/policies/?filter[is_enabled]=FalSe")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test
     void testGetPoliciesFilter3() {
         given()
                 .header(authHeader)
