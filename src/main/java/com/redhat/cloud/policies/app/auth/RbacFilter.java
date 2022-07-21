@@ -83,7 +83,7 @@ public class RbacFilter implements ContainerRequestFilter {
         } finally {
             long t2 = System.currentTimeMillis();
             if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.toMillis()) {
-                Log.warnf("Call to RBAC took %d ms", t2 - t1);
+                Log.warnf("Call to RBAC took %d ms for orgId %s", t2 - t1, user.getOrgId());
             }
             span.finish();
         }
