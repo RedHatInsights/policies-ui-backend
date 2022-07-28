@@ -7,7 +7,7 @@ objects:
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdJobInvocation
   metadata:
-    name: policies-ui-backend-post-deploy-tests-${IMAGE_TAG}-${UID}
+    name: policies-ui-backend-stage-tests-${IMAGE_TAG}-${UID}
   spec:
     appName: policies-ui-backend
     testing:
