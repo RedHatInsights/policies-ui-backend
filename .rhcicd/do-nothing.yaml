@@ -2,18 +2,25 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: policies-do-nothing
+  name: policies-ui-backend-do-nothing
 objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
-    name: policies-do-nothing-job-${IMAGE_TAG}-${JOBID}
+    name: policies-ui-backend-do-nothing-${IMAGE_TAG}-${JOBID}
   spec:
     template:
       spec:
         containers:
         - name: policies-do-nothing
           image: quay.io/app-sre/ubi8-ubi-minimal:latest
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi 
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         restartPolicy: Never
