@@ -13,7 +13,7 @@ objects:
       spec:
         containers:
         - name: policies-do-nothing
-          image: quay.io/app-sre/ubi8-ubi-minimal:latest
+          image: quay.io/app-sre/ubi8-ubi-minimal:8.6-902
           resources:
             limits:
               cpu: 200m
