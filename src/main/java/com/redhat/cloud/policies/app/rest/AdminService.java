@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Path("/admin")
 @Produces("application/json")
@@ -172,37 +171,5 @@ public class AdminService {
         }
         buckets.computeIfPresent(bucket, (b, c) -> buckets.get(b) + 1);
         buckets.putIfAbsent(bucket, 1);
-    }
-
-    // Trigger Tenant Tuple
-    public static class TTT {
-        String cid; // Tenant
-        String tid; // TriggerId
-
-        public TTT(String customerId, String id) {
-            this.cid = customerId;
-            this.tid = id;
-        }
-
-        public TTT(String customerid, UUID id) {
-            this(customerid, id.toString());
-        }
-
-        public String getCid() {
-            return cid;
-        }
-
-        public String getTid() {
-            return tid;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("TTT{");
-            sb.append("cId='").append(cid).append('\'');
-            sb.append(", tId='").append(tid).append('\'');
-            sb.append('}');
-            return sb.toString();
-        }
     }
 }

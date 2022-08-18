@@ -1759,18 +1759,19 @@ class RestApiTest extends AbstractITest {
 
     private void mockPoliciesHistory(String hostId, String hostName, int count) {
         String tenantId = "1234";
+        String orgId = "org-id-1234";
         UUID policyId = UUID.fromString("8671900e-9d31-47bf-9249-8f45698ede72");
         List<PoliciesHistoryEntry> entries = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
             entry.setTenantId(tenantId);
-            entry.setOrgId("org-id-1234");
+            entry.setOrgId(orgId);
             entry.setPolicyId(policyId.toString());
             entry.setHostId(hostId);
             entry.setHostName(hostName);
             entries.add(entry);
         }
-        when(policiesHistoryRepository.count(eq(tenantId), eq(policyId), any())).thenReturn((long) entries.size());
-        when(policiesHistoryRepository.find(eq(tenantId), eq(policyId), any())).thenReturn(entries);
+        when(policiesHistoryRepository.count(eq(orgId), eq(policyId), any())).thenReturn((long) entries.size());
+        when(policiesHistoryRepository.find(eq(orgId), eq(policyId), any())).thenReturn(entries);
     }
 }

@@ -107,6 +107,6 @@ public class PoliciesHistoryEntry {
 
     @Override
     public String toString() {
-        return "PoliciesHistoryEntry [id=" + id + ", tenantId=" + tenantId + ", policyId=" + policyId + ", ctime=" + ctime + ", hostId=" + hostId + ", hostName=" + hostName + "]";
+        return "PoliciesHistoryEntry [id=" + id + ", tenantId=" + tenantId + ", orgId=" + orgId + ", policyId=" + policyId + ", ctime=" + ctime + ", hostId=" + hostId + ", hostName=" + hostName + "]";
     }
 }

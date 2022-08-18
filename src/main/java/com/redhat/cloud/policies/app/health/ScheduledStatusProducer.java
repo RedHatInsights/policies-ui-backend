@@ -69,7 +69,7 @@ public class ScheduledStatusProducer {
 
         // Now the normal checks
         try {
-            Policy.findByNameOrgId(DUMMY, "-dummy-");
+            Policy.findByName(DUMMY, "-dummy-");
         } catch (Exception e) {
             issues.put("backend-db", e.getMessage());
         }
