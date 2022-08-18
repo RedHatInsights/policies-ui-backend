@@ -138,7 +138,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         if (rhIdentity.getUsername() == null || rhIdentity.getUsername().isEmpty() ||
                 rhIdentity.identity.orgId == null || rhIdentity.identity.orgId.isEmpty()
         ) {
-            logIfNeeded("X-rh-identity header has no user, account or org ID");
+            logIfNeeded("X-rh-identity header has no user or org ID");
             return null;
         }
         return rhIdentity;
