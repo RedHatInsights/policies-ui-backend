@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PolicyCrudServiceTest extends AbstractITest {
 
     private static final String TENANT_ID = "1234";
+    private static final String ORG_ID = "org-id-1234";
 
     @Inject
     PoliciesHistoryTestHelper helper;
@@ -30,12 +31,12 @@ class PolicyCrudServiceTest extends AbstractITest {
     void test() {
         UUID policyId = createPolicy();
 
-        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-1", "foo", 1L);
-        helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-2", "fooBAR", 2L);
-        helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-3", "FoOoOo", 3L);
-        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-4", " foo", 4L);
-        helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-5", "barFOO", 5L);
-        helper.createPoliciesHistoryEntry(TENANT_ID, policyId, "host-id-6", "bar", 6L);
+        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-1", "foo", 1L);
+        helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-2", "fooBAR", 2L);
+        helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-3", "FoOoOo", 3L);
+        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-4", " foo", 4L);
+        helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-5", "barFOO", 5L);
+        helper.createPoliciesHistoryEntry(TENANT_ID, ORG_ID, policyId, "host-id-6", "bar", 6L);
 
         String responseBody = given()
                 .basePath(API_BASE_V1_0)
@@ -66,6 +67,7 @@ class PolicyCrudServiceTest extends AbstractITest {
         Policy policy = new Policy();
         policy.id = UUID.randomUUID();
         policy.customerid = TENANT_ID;
+        policy.orgId = ORG_ID;
         policy.name = "my-policy";
         policy.conditions = "arch = \"x86_64\"";
         policy.persist();

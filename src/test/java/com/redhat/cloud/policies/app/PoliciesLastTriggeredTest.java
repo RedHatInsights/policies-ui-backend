@@ -27,6 +27,8 @@ class PoliciesLastTriggeredTest {
 
     private final String testAccountId = "lt-test-account-id";
     private final String otherTestAccountId = "lt-test-2-account-id";
+    private final String testOrgId = "lt-test-org-id";
+    private final String otherTestOrgId = "lt-test-2-org-id";
 
     @Transactional
     @BeforeEach
@@ -41,18 +43,18 @@ class PoliciesLastTriggeredTest {
 
     @Test
     void testPolicyLastTriggeredIs0ByDefault() {
-        Policy policy = createPolicy(testAccountId, UUID.randomUUID());
+        Policy policy = createPolicy(testAccountId, testOrgId, UUID.randomUUID());
         assertEquals(0, policy.getLastTriggered());
     }
 
     @Test
     void testPolicyLastTriggeredShouldUpdateToGreatestHistory() {
-        Policy policy = createPolicy(testAccountId, UUID.randomUUID());
+        Policy policy = createPolicy(testAccountId, testOrgId, UUID.randomUUID());
         long lastTime = Instant.now().toEpochMilli();
 
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)).toEpochMilli(), policy.id, policy.customerid);
-        createPoliciesHistoryEntry(lastTime, policy.id, policy.customerid);
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)).toEpochMilli(), policy.id, policy.customerid);
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)).toEpochMilli(), policy.id, policy.customerid, policy.orgId);
+        createPoliciesHistoryEntry(lastTime, policy.id, policy.customerid, policy.orgId);
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)).toEpochMilli(), policy.id, policy.customerid, policy.orgId);
 
         policy = getPolicy(policy.id);
 
@@ -61,13 +63,13 @@ class PoliciesLastTriggeredTest {
 
     @Test
     void testPolicyLastTriggeredAreSetById() {
-        Policy policy = createPolicy(testAccountId, UUID.randomUUID());
-        Policy policy2 = createPolicy(testAccountId, UUID.randomUUID());
-        Policy policy3 = createPolicy(otherTestAccountId, UUID.randomUUID());
+        Policy policy = createPolicy(testAccountId, testOrgId, UUID.randomUUID());
+        Policy policy2 = createPolicy(testAccountId, testOrgId, UUID.randomUUID());
+        Policy policy3 = createPolicy(otherTestAccountId, otherTestOrgId, UUID.randomUUID());
 
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)).toEpochMilli(), policy.id, policy.customerid);
-        createPoliciesHistoryEntry(Instant.now().toEpochMilli(), policy.id, policy.customerid);
-        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)).toEpochMilli(), policy.id, policy.customerid);
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofHours(1L)).toEpochMilli(), policy.id, policy.customerid, policy.orgId);
+        createPoliciesHistoryEntry(Instant.now().toEpochMilli(), policy.id, policy.customerid, policy.orgId);
+        createPoliciesHistoryEntry(Instant.now().minus(Duration.ofDays(28L)).toEpochMilli(), policy.id, policy.customerid, policy.orgId);
 
         policy = getPolicy(policy.id);
         policy2 = getPolicy(policy2.id);
@@ -83,10 +85,11 @@ class PoliciesLastTriggeredTest {
     }
 
     @Transactional
-    public Policy createPolicy(String accountId, UUID policyId) {
+    public Policy createPolicy(String accountId, String orgId, UUID policyId) {
         Policy policy = new Policy();
         policy.id = policyId;
         policy.customerid = accountId;
+        policy.orgId = orgId;
         policy.name = "Policy: " +  policy.id.toString();
         policy.actions = "";
         policy.conditions = "foo";
@@ -97,10 +100,11 @@ class PoliciesLastTriggeredTest {
     }
 
     @Transactional
-    public void createPoliciesHistoryEntry(long instant, UUID policyId, String accountId) {
+    public void createPoliciesHistoryEntry(long instant, UUID policyId, String accountId, String orgId) {
         PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
         historyEntry.setId(UUID.randomUUID());
         historyEntry.setTenantId(accountId);
+        historyEntry.setOrgId(orgId);
         historyEntry.setPolicyId(policyId.toString());
         historyEntry.setCtime(instant);
         session.persist(historyEntry);

@@ -614,6 +614,7 @@ class RestApiTest extends AbstractITest {
         PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
         entry.setId(UUID.randomUUID());
         entry.setTenantId(accountId);
+        entry.setOrgId(orgId);
         entry.setPolicyId("9b3b4429-1393-4120-95da-54c17a512367");
         entry.setCtime(new GregorianCalendar(2020, 4, 10, 10, 0, 0).getTimeInMillis());
         Transaction transaction = session.beginTransaction();
@@ -1763,6 +1764,7 @@ class RestApiTest extends AbstractITest {
         for (int i = 0; i < count; i++) {
             PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
             entry.setTenantId(tenantId);
+            entry.setOrgId("org-id-1234");
             entry.setPolicyId(policyId.toString());
             entry.setHostId(hostId);
             entry.setHostName(hostName);

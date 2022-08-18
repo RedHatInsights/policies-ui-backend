@@ -108,7 +108,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies")
-                        .withHeader("x-rh-identity", ".*2UtZG9lLXVzZXIifQ==") // normal user all allowed
+                        .withHeader("x-rh-identity", ".*vZS1kb2UtdXNlciJ9") // normal user all allowed
                 )
                 .respond(response()
                         .withStatusCode(200)
@@ -120,7 +120,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies")
-                        .withHeader("x-rh-identity", ".*kYW1wZi11c2VyIn0=") // hans dampf user nothing allowed
+                        .withHeader("x-rh-identity", ".*hbXBmLXVzZXIifQ==") // hans dampf user nothing allowed
                 )
                 .respond(response()
                         .withStatusCode(200)
