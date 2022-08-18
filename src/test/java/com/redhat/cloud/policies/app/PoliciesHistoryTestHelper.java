@@ -15,10 +15,11 @@ public class PoliciesHistoryTestHelper {
     Session session;
 
     @Transactional
-    public PoliciesHistoryEntry createPoliciesHistoryEntry(String tenantId, UUID policyId, String hostId, String hostName, long ctime) {
+    public PoliciesHistoryEntry createPoliciesHistoryEntry(String tenantId, String orgId, UUID policyId, String hostId, String hostName, long ctime) {
         PoliciesHistoryEntry historyEntry = new PoliciesHistoryEntry();
         historyEntry.setId(UUID.randomUUID());
         historyEntry.setTenantId(tenantId);
+        historyEntry.setOrgId(orgId);
         historyEntry.setPolicyId(policyId.toString());
         historyEntry.setHostId(hostId);
         historyEntry.setHostName(hostName);

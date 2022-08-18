@@ -43,6 +43,7 @@ abstract class AbstractITest {
     static Header authHeaderNoAccount; // Account number is empty
 
     static String accountId;
+    static String orgId;
 
     static final String API_BASE_V1_0 = "/api/policies/v1.0";
     static final String API_BASE_V1 = "/api/policies/v1";
@@ -57,6 +58,7 @@ abstract class AbstractITest {
         String rhid = HeaderHelperTest.getStringFromFile("rhid.txt", false);
         authHeader = new Header("x-rh-identity", rhid);
         accountId = getAccountId(rhid.trim());
+        orgId = getOrgId(rhid.trim());
         rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt", false);
         authRbacNoAccess = new Header("x-rh-identity", rhid);
         rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt", false);
@@ -68,6 +70,17 @@ abstract class AbstractITest {
         try {
             JsonNode node = mapper.readTree(new String(Base64.getDecoder().decode(identity), StandardCharsets.UTF_8));
             return node.get("identity").get("account_number").asText();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    static String getOrgId(String identity) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode node = mapper.readTree(new String(Base64.getDecoder().decode(identity), StandardCharsets.UTF_8));
+            return node.get("identity").get("org_id").asText();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

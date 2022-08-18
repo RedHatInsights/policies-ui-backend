@@ -25,6 +25,8 @@ class PoliciesHistoryRepositoryTest {
 
     private static final String TENANT_ID_1 = "tenant-id-1";
     private static final String TENANT_ID_2 = "tenant-id-2";
+    private static final String ORG_ID_1 = "org-id-1";
+    private static final String ORG_ID_2 = "org-id-2";
     private static final UUID POLICY_ID_1 = UUID.randomUUID();
     private static final UUID POLICY_ID_2 = UUID.randomUUID();
     private static final String HOST_ID_1 = "host-id-1";
@@ -45,12 +47,12 @@ class PoliciesHistoryRepositoryTest {
          * Some of the following history entries don't make sense from a functional perspective, but it doesn't matter.
          * The only goal here is to test things from a technical perspective.
          */
-        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID_1, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 1L);
-        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 2L);
-        PoliciesHistoryEntry historyEntry3 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_1, 3L);
-        PoliciesHistoryEntry historyEntry4 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_2, 3L);
-        PoliciesHistoryEntry historyEntry5 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_2 + "-foo", HOST_NAME_2, 4L);
-        PoliciesHistoryEntry historyEntry6 = helper.createPoliciesHistoryEntry(TENANT_ID_2, POLICY_ID_2, HOST_ID_2, "bar-" + HOST_NAME_2, 5L);
+        PoliciesHistoryEntry historyEntry1 = helper.createPoliciesHistoryEntry(TENANT_ID_1, ORG_ID_1, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 1L);
+        PoliciesHistoryEntry historyEntry2 = helper.createPoliciesHistoryEntry(TENANT_ID_2, ORG_ID_2, POLICY_ID_1, HOST_ID_1, HOST_NAME_1, 2L);
+        PoliciesHistoryEntry historyEntry3 = helper.createPoliciesHistoryEntry(TENANT_ID_2, ORG_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_1, 3L);
+        PoliciesHistoryEntry historyEntry4 = helper.createPoliciesHistoryEntry(TENANT_ID_2, ORG_ID_2, POLICY_ID_2, HOST_ID_1, HOST_NAME_2, 3L);
+        PoliciesHistoryEntry historyEntry5 = helper.createPoliciesHistoryEntry(TENANT_ID_2, ORG_ID_2, POLICY_ID_2, HOST_ID_2 + "-foo", HOST_NAME_2, 4L);
+        PoliciesHistoryEntry historyEntry6 = helper.createPoliciesHistoryEntry(TENANT_ID_2, ORG_ID_2, POLICY_ID_2, HOST_ID_2, "bar-" + HOST_NAME_2, 5L);
 
         /*
          * Pager #1: empty settings.
