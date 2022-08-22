@@ -40,7 +40,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
-@Timed
+@Timed("UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
 
