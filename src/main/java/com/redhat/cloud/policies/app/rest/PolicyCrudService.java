@@ -86,7 +86,7 @@ import java.util.stream.Collectors;
 @Path("/api/policies/v1.0/policies")
 @Produces("application/json")
 @Consumes("application/json")
-@Timed
+@Timed("PolicySvc")
 @RequestScoped
 public class PolicyCrudService {
 
