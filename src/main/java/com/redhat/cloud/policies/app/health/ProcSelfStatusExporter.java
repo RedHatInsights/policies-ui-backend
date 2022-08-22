@@ -17,6 +17,8 @@
 package com.redhat.cloud.policies.app.health;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
 
 import javax.annotation.PostConstruct;
@@ -24,8 +26,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+import java.util.Set;
 
 /**
  * Exports the following from /proc/self/status. See proc(5)
@@ -42,36 +43,35 @@ import java.util.logging.Logger;
 @ApplicationScoped
 public class ProcSelfStatusExporter {
 
-    private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
-
     private static final String PATHNAME = "/proc/self/status";
 
     private boolean hasWarned = false;
 
-    @Inject
-    MeterRegistry registry;
+    long vmHwm;
+    long vmRss;
+    long rssAnon;
+    long rssFile;
+    long vmStk;
+    long vmLib;
+    long vmData;
+    long vmSize;
+    int threads;
 
-    AtomicLong vmHwm;
-    AtomicLong vmRss;
-    AtomicLong rssAnon;
-    AtomicLong rssFile;
-    AtomicLong vmStk;
-    AtomicLong vmLib;
-    AtomicLong vmData;
-    AtomicLong vmSize;
-    Integer threads;
+    @Inject
+    MeterRegistry meterRegistry;
 
     @PostConstruct
-    public void init() {
-        vmHwm = registry.gauge("status.vmHwm", new AtomicLong(0L));
-        vmRss = registry.gauge("status.vmRss", new AtomicLong(0L));
-        rssAnon = registry.gauge("status.rssAnon", new AtomicLong(0L));
-        rssFile = registry.gauge("status.rssFile", new AtomicLong(0L));
-        vmStk = registry.gauge("status.vmStk", new AtomicLong(0L));
-        vmLib = registry.gauge("status.vmLib", new AtomicLong(0L));
-        vmData = registry.gauge("status.vmData", new AtomicLong(0L));
-        vmSize = registry.gauge("status.vmSize", new AtomicLong(0L));
-        threads = registry.gauge("status.threads", 0);
+    void postConstruct() {
+        Set<Tag> tags = Set.of(Tag.of("type", "proc"));
+        meterRegistry.gauge("status.vmHwm", tags, vmHwm);
+        meterRegistry.gauge("status.vmRss", tags, vmRss);
+        meterRegistry.gauge("status.rssAnon", tags, rssAnon);
+        meterRegistry.gauge("status.rssFile", tags, rssFile);
+        meterRegistry.gauge("status.vmStk", tags, vmStk);
+        meterRegistry.gauge("status.vmLib", tags, vmLib);
+        meterRegistry.gauge("status.vmData", tags, vmData);
+        meterRegistry.gauge("status.vmSize", tags, vmSize);
+        meterRegistry.gauge("status.threads", tags, threads);
     }
 
     @Scheduled(every = "10s")
@@ -80,7 +80,7 @@ public class ProcSelfStatusExporter {
         File status = new File(PATHNAME);
         if (!status.exists() || !status.canRead()) {
             if (!hasWarned) {
-                log.warning("Can't read " + PATHNAME);
+                Log.warn("Can't read " + PATHNAME);
                 hasWarned = true;
             }
             return;
@@ -93,28 +93,28 @@ public class ProcSelfStatusExporter {
 
                 switch (parts[0]) {
                     case "VmHWM:":
-                        vmHwm.set(Long.parseLong(parts[1]));
+                        vmHwm = Long.parseLong(parts[1]);
                         break;
                     case "VmRSS:":
-                        vmRss.set(Long.parseLong(parts[1]));
+                        vmRss = Long.parseLong(parts[1]);
                         break;
                     case "RssAnon:":
-                        rssAnon.set(Long.parseLong(parts[1]));
+                        rssAnon = Long.parseLong(parts[1]);
                         break;
                     case "RssFile:":
-                        rssFile.set(Long.parseLong(parts[1]));
+                        rssFile = Long.parseLong(parts[1]);
                         break;
                     case "VmStk:":
-                        vmStk.set(Long.parseLong(parts[1]));
+                        vmStk = Long.parseLong(parts[1]);
                         break;
                     case "VmLib:":
-                        vmLib.set(Long.parseLong(parts[1]));
+                        vmLib = Long.parseLong(parts[1]);
                         break;
                     case "VmData:":
-                        vmData.set(Long.parseLong(parts[1]));
+                        vmData = Long.parseLong(parts[1]);
                         break;
                     case "VmSize:":
-                        vmSize.set(Long.parseLong(parts[1]));
+                        vmSize = Long.parseLong(parts[1]);
                         break;
                     case "Threads:":
                         threads = Integer.parseInt(parts[1]);
@@ -124,21 +124,21 @@ public class ProcSelfStatusExporter {
                 }
             }
         } catch (Exception e) {
-            log.warning("Reading failed: " + e.getMessage());
+            Log.warn("Reading failed: " + e.getMessage());
         }
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ProcSelfStatusExporter{");
-        sb.append("vmHwm=").append(vmHwm.get() / 1024);
-        sb.append(", vmRss=").append(vmRss.get() / 1024);
-        sb.append(", rssAnon=").append(rssAnon.get() / 1024);
-        sb.append(", rssFile=").append(rssFile.get() / 1024);
-        sb.append(", vmStk=").append(vmStk.get() / 1024);
-        sb.append(", vmLib=").append(vmLib.get() / 1024);
-        sb.append(", vmData=").append(vmData.get() / 1024);
-        sb.append(", vmSize=").append(vmSize.get() / 1024);
+        sb.append("vmHwm=").append(vmHwm / 1024);
+        sb.append(", vmRss=").append(vmRss / 1024);
+        sb.append(", rssAnon=").append(rssAnon / 1024);
+        sb.append(", rssFile=").append(rssFile / 1024);
+        sb.append(", vmStk=").append(vmStk / 1024);
+        sb.append(", vmLib=").append(vmLib / 1024);
+        sb.append(", vmData=").append(vmData / 1024);
+        sb.append(", vmSize=").append(vmSize / 1024);
         sb.append(", threads=").append(threads);
         sb.append('}');
         return sb.toString();
