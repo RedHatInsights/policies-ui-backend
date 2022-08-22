@@ -32,15 +32,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
+import io.micrometer.core.annotation.Timed;
 import io.quarkus.logging.Log;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @Path("/api/policies/v1.0/user-config")
 @Produces("application/json")
 @Consumes("application/json")
-@SimplyTimed(absolute = true, name = "UserConfigSvc")
+@Timed("UserConfigSvc")
 @RequestScoped
 public class UserConfigService {
 

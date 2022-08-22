@@ -19,11 +19,12 @@ package com.redhat.cloud.policies.app.health;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.StuffHolder;
 import com.redhat.cloud.policies.app.model.Policy;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -46,11 +47,12 @@ public class ScheduledStatusProducer {
     @RestClient
     LightweightEngine lightweightEngine;
 
-    //  // Quarkus only activates this after the first REST-call to any method in this class
-    @Gauge(name = "status_isDegraded", unit = MetricUnits.NONE, absolute = true,
-            description = "Returns 0 if good, value > 0 for number of entries in the status message")
-    int isDegraded() {
-        return StuffHolder.getInstance().getStatusInfo().size();
+    @Inject
+    MeterRegistry registry;
+
+    @PostConstruct
+    void init() {
+        Gauge.builder("status_isDegraded", () -> StuffHolder.getInstance().getStatusInfo().size()).register(registry);
     }
 
     @Scheduled(every = "10s")

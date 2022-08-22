@@ -16,15 +16,17 @@
  */
 package com.redhat.cloud.policies.app.health;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
 import java.util.Scanner;
-
+import java.util.Set;
 
 /**
  * Exports the following from /proc/self/status. See proc(5)
@@ -54,6 +56,23 @@ public class ProcSelfStatusExporter {
     long vmData;
     long vmSize;
     int threads;
+
+    @Inject
+    MeterRegistry meterRegistry;
+
+    @PostConstruct
+    void postConstruct() {
+        Set<Tag> tags = Set.of(Tag.of("type", "proc"));
+        meterRegistry.gauge("status.vmHwm", tags, vmHwm);
+        meterRegistry.gauge("status.vmRss", tags, vmRss);
+        meterRegistry.gauge("status.rssAnon", tags, rssAnon);
+        meterRegistry.gauge("status.rssFile", tags, rssFile);
+        meterRegistry.gauge("status.vmStk", tags, vmStk);
+        meterRegistry.gauge("status.vmLib", tags, vmLib);
+        meterRegistry.gauge("status.vmData", tags, vmData);
+        meterRegistry.gauge("status.vmSize", tags, vmSize);
+        meterRegistry.gauge("status.threads", tags, threads);
+    }
 
     @Scheduled(every = "10s")
     void gather() {
@@ -107,51 +126,6 @@ public class ProcSelfStatusExporter {
         } catch (Exception e) {
             Log.warn("Reading failed: " + e.getMessage());
         }
-    }
-
-    @Gauge(name = "status.vmHwm", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmHwm() {
-        return vmHwm;
-    }
-
-    @Gauge(name = "status.vmRss", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmRss() {
-        return vmRss;
-    }
-
-    @Gauge(name = "status.rssAnon", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getRssAnon() {
-        return rssAnon;
-    }
-
-    @Gauge(name = "status.rssFile", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getRssFile() {
-        return rssFile;
-    }
-
-    @Gauge(name = "status.vmStk", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmStk() {
-        return vmStk;
-    }
-
-    @Gauge(name = "status.vmLib", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmLib() {
-        return vmLib;
-    }
-
-    @Gauge(name = "status.vmData", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmData() {
-        return vmData;
-    }
-
-    @Gauge(name = "status.vmSize", absolute = true, unit = MetricUnits.KILOBYTES, tags = "type=proc")
-    public long getVmSize() {
-        return vmSize;
-    }
-
-    @Gauge(name = "status.threads", absolute = true, unit = MetricUnits.NONE, tags = "type=proc")
-    public long getThreads() {
-        return threads;
     }
 
     @Override
