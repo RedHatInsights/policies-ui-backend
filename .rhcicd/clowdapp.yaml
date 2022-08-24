@@ -17,71 +17,6 @@ objects:
     - rbac
     optionalDependencies:
     - notifications-backend
-    jobs:
-    - name: org-id-populator-policy
-      podSpec:
-        image: quay.io/cloudservices/tenant-utils:latest
-        command:
-        - ./org-id-column-populator
-        - -C
-        - -a
-        - customerid
-        - -o
-        - org_id
-        - -t
-        - policy
-        - --ean-translator-addr
-        - http://${TENANT_TRANSLATOR_HOST}:${TENANT_TRANSLATOR_PORT}
-        - --db-operation-timeout
-        - "10"
-        env:
-        - name: TENANT_TRANSLATOR_HOST
-          value: ${TENANT_TRANSLATOR_HOST}
-        - name: TENANT_TRANSLATOR_PORT
-          value: ${TENANT_TRANSLATOR_PORT}
-        - name: LOG_FORMAT
-          value: ${LOG_FORMAT}
-        - name: LOG_BATCH_FREQUENCY
-          value: '1'
-        resources:
-          limits:
-            cpu: 300m
-            memory: 1Gi
-          requests:
-            cpu: 50m
-            memory: 512Mi
-    - name: org-id-populator-policies-history
-      podSpec:
-        image: quay.io/cloudservices/tenant-utils:latest
-        command:
-        - ./org-id-column-populator
-        - -C
-        - -a
-        - tenant_id
-        - -o
-        - org_id
-        - -t
-        - policies_history
-        - --ean-translator-addr
-        - http://${TENANT_TRANSLATOR_HOST}:${TENANT_TRANSLATOR_PORT}
-        - --db-operation-timeout
-        - "10"
-        env:
-        - name: TENANT_TRANSLATOR_HOST
-          value: ${TENANT_TRANSLATOR_HOST}
-        - name: TENANT_TRANSLATOR_PORT
-          value: ${TENANT_TRANSLATOR_PORT}
-        - name: LOG_FORMAT
-          value: ${LOG_FORMAT}
-        - name: LOG_BATCH_FREQUENCY
-          value: '1'
-        resources:
-          limits:
-            cpu: 300m
-            memory: 1Gi
-          requests:
-            cpu: 50m
-            memory: 512Mi
     database:
       name: policies-ui-backend
       version: 13
@@ -257,13 +192,5 @@ parameters:
 - name: SENTRY_ENABLED
   description: Enable Sentry (or not)
   value: "false"
-- name: TENANT_TRANSLATOR_HOST
-  description: Host for the EAN to OrgId translator.
-  required: true
-  value: 'apicast.3scale-dev.svc.cluster.local'
-- name: TENANT_TRANSLATOR_PORT
-  description: Port for the EAN to OrgId translator.
-  required: true
-  value: '8892'
 - name: USE_ORG_ID
   value: "false"
