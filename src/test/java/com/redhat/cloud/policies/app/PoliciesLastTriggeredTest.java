@@ -35,9 +35,9 @@ class PoliciesLastTriggeredTest {
     void beforeEach() {
         session.createQuery("DELETE FROM PoliciesHistoryEntry")
                 .executeUpdate();
-        session.createQuery("DELETE FROM Policy where customerid = :customerid1 OR customerid= :customerid2")
-                .setParameter("customerid1", testAccountId)
-                .setParameter("customerid2", otherTestAccountId)
+        session.createQuery("DELETE FROM Policy where orgId = :orgId1 OR orgId= :orgId2")
+                .setParameter("orgId1", testOrgId)
+                .setParameter("orgId2", otherTestOrgId)
                 .executeUpdate();
     }
 

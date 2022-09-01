@@ -95,8 +95,8 @@ abstract class AbstractITest {
     }
 
     long countPoliciesInDB() {
-        Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.customerid = :cid");
-        q.setParameter("cid", "1234");
+        Query q = entityManager.createQuery("SELECT count(p) FROM Policy p WHERE p.orgId = :orgId");
+        q.setParameter("orgId", "org-id-1234");
         return (long) q.getSingleResult();
     }
 }

@@ -60,7 +60,7 @@ public class Policy extends PanacheEntityBase {
 
     @NotNull
     @NotEmpty
-    @Schema(description = "Name of the rule. Must be unique per customer account.")
+    @Schema(description = "Name of the rule. Must be unique per customer organization.")
     @Size(max = 150)
     public String name;
 
@@ -130,7 +130,7 @@ public class Policy extends PanacheEntityBase {
         return ctime.toString();
     }
 
-    public static Page<Policy> pagePoliciesForCustomerOrgId(EntityManager em, String orgid, Pager pager) {
+    public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String orgid, Pager pager) {
 
         for (Sort.Column column : pager.getSort().getColumns()) {
             SortableColumn.fromName(column.getName());
@@ -161,57 +161,7 @@ public class Policy extends PanacheEntityBase {
         );
     }
 
-    public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String customer, Pager pager) {
-
-        for (Sort.Column column : pager.getSort().getColumns()) {
-            SortableColumn.fromName(column.getName());
-        }
-
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
-
-        Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-
-        PanacheQuery<Policy> panacheQuery = find(
-                filter.getQuery(),
-                pager.getSort(),
-                filter.getParameters()
-        );
-
-        if (pager.getLimit() != Pager.NO_LIMIT) {
-            panacheQuery.range(pager.getOffset(), pager.getOffset() + pager.getLimit() - 1);
-        }
-
-        return new Page<>(
-                panacheQuery.list(),
-                pager,
-                panacheQuery.count()
-        );
-    }
-
-    public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String customer, Pager pager) {
-
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
-
-        Filter filter = pager.getFilter().and("customerid", Filter.Operator.EQUAL, customer);
-
-
-        PanacheQuery<Policy> panacheQuery = find(
-                filter.getQuery(),
-                filter.getParameters()
-        );
-
-        return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
-    }
-
-    public static List<UUID> getPolicyIdsForCustomerOrgId(EntityManager em, String orgId, Pager pager) {
+    public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String orgId, Pager pager) {
 
         pager.getFilter()
                 .getParameters()
@@ -230,19 +180,11 @@ public class Policy extends PanacheEntityBase {
         return panacheQuery.project(PolicyId.class).list().stream().map(policyId -> policyId.id).collect(Collectors.toList());
     }
 
-    public static Policy findById(String customer, UUID theId) {
-        return find("customerid = ?1 and id = ?2", customer, theId).firstResult();
-    }
-
-    public static Policy findByIdOrgId(String orgId, UUID theId) {
+    public static Policy findById(String orgId, UUID theId) {
         return find("org_id = ?1 and id = ?2", orgId, theId).firstResult();
     }
 
-    public static Policy findByName(String customer, String name) {
-        return find("customerid = ?1 and name = ?2", customer, name).firstResult();
-    }
-
-    public static Policy findByNameOrgId(String orgId, String name) {
+    public static Policy findByName(String orgId, String name) {
         return find("org_id = ?1 and name = ?2", orgId, name).firstResult();
     }
 

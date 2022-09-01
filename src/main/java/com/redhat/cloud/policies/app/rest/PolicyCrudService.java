@@ -16,8 +16,7 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
-import com.redhat.cloud.policies.app.OrgIdConfig;
-import com.redhat.cloud.policies.app.lightweight.AccountLatestUpdateRepository;
+import com.redhat.cloud.policies.app.lightweight.OrgIdLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
 import com.redhat.cloud.policies.app.model.Msg;
@@ -102,7 +101,7 @@ public class PolicyCrudService {
     LightweightEngine lightweightEngine;
 
     @Inject
-    AccountLatestUpdateRepository accountLatestUpdateRepository;
+    OrgIdLatestUpdateRepository orgIdLatestUpdateRepository;
 
     @Context
     UriInfo uriInfo;
@@ -128,9 +127,6 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
-
-    @Inject
-    OrgIdConfig orgIdConfig;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -249,12 +245,7 @@ public class PolicyCrudService {
         Page<Policy> page;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            if (useOrgId()) {
-                page = Policy.pagePoliciesForCustomerOrgId(entityManager, user.getOrgId(), pager);
-            } else {
-                warnOrgIdIfNeeded();
-                page = Policy.pagePoliciesForCustomer(entityManager, user.getAccount(), pager);
-            }
+            page = Policy.pagePoliciesForCustomer(entityManager, user.getOrgId(), pager);
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
         }
@@ -330,12 +321,7 @@ public class PolicyCrudService {
         List<UUID> uuids;
         try {
             Pager pager = PagingUtils.extractPager(uriInfo);
-            if (useOrgId()) {
-                uuids = Policy.getPolicyIdsForCustomerOrgId(entityManager, user.getOrgId(), pager);
-            } else {
-                warnOrgIdIfNeeded();
-                uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getAccount(), pager);
-            }
+            uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getOrgId(), pager);
 
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
@@ -826,30 +812,15 @@ public class PolicyCrudService {
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
 
-        long totalCount;
-        if (useOrgId()) {
-            totalCount = policiesHistoryRepository.countOrgId(user.getOrgId(), policyId, pager);
+        long totalCount = policiesHistoryRepository.count(user.getOrgId(), policyId, pager);
 
-            if (totalCount > 0) {
-                items = policiesHistoryRepository.findOrgId(user.getOrgId(), policyId, pager)
-                        .stream().map(historyEntry ->
-                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
-                        ).collect(Collectors.toList());
-            } else {
-                items = Collections.emptyList();
-            }
+        if (totalCount > 0) {
+            items = policiesHistoryRepository.find(user.getOrgId(), policyId, pager)
+                    .stream().map(historyEntry ->
+                            new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
+                    ).collect(Collectors.toList());
         } else {
-            warnOrgIdIfNeeded();
-            totalCount = policiesHistoryRepository.count(user.getAccount(), policyId, pager);
-
-            if (totalCount > 0) {
-                items = policiesHistoryRepository.find(user.getAccount(), policyId, pager)
-                        .stream().map(historyEntry ->
-                                new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
-                        ).collect(Collectors.toList());
-            } else {
-                items = Collections.emptyList();
-            }
+            items = Collections.emptyList();
         }
 
         Page<HistoryItem> itemsPage = new Page<>(items, pager, totalCount);
@@ -857,13 +828,7 @@ public class PolicyCrudService {
     }
 
     private Response isNameUnique(Policy policy) {
-        Policy tmp = null;
-        if (user.getOrgId() != null) {
-            tmp = Policy.findByNameOrgId(user.getOrgId(), policy.name);
-        }
-        if (tmp == null) {
-            tmp = Policy.findByName(user.getAccount(), policy.name);
-        }
+        Policy tmp = Policy.findByName(user.getOrgId(), policy.name);
 
         if (tmp != null && !tmp.id.equals(policy.id)) {
             return Response.status(409).entity(new Msg("Policy name is not unique")).build();
@@ -872,34 +837,11 @@ public class PolicyCrudService {
         return null;
     }
 
-    private boolean useOrgId() {
-        return orgIdConfig.isUseOrgId() && user.getOrgId() != null && !user.getOrgId().isBlank();
-    }
-
-    // TODO POL-650 Delete this method after the org ID migration is done.
     private Policy findPolicy(UUID policyId) {
-        if (useOrgId()) {
-            return Policy.findByIdOrgId(user.getOrgId(), policyId);
-        } else {
-            warnOrgIdIfNeeded();
-            return Policy.findById(user.getAccount(), policyId);
-        }
+        return Policy.findById(user.getOrgId(), policyId);
     }
 
-    // TODO POL-650 Delete this method after the org ID migration is done.
-    private void warnOrgIdIfNeeded() {
-        if (orgIdConfig.isUseOrgId()) {
-            Log.warnf("The org ID is enabled but a user without an org ID called the REST API: %s", user);
-        }
-    }
-
-    // TODO POL-650 Delete this method after the org ID migration is done.
     private void setLatestToNow() {
-        if (user.getAccount() != null) {
-            accountLatestUpdateRepository.setLatestToNow(user.getAccount());
-        }
-        if (user.getOrgId() != null && !user.getOrgId().isBlank()) {
-            accountLatestUpdateRepository.setLatestOrgIdToNow(user.getOrgId());
-        }
+        orgIdLatestUpdateRepository.setLatestToNow(user.getOrgId());
     }
 }
