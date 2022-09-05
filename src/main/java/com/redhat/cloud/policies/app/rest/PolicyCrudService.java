@@ -237,6 +237,7 @@ public class PolicyCrudService {
             headers = @Header(name = "TotalCount", description = "Total number of items found",
                     schema = @Schema(type = SchemaType.INTEGER)))
     public Response getPoliciesForCustomer() {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
@@ -313,6 +314,7 @@ public class PolicyCrudService {
     @APIResponse(responseCode = "200", description = "PolicyIds found", content =
     @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = UUID.class)))
     public Response getPolicyIdsForCustomer() {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
@@ -349,6 +351,7 @@ public class PolicyCrudService {
     @Path("/")
     @Transactional
     public Response storePolicy(@QueryParam("alsoStore") boolean alsoStore, @NotNull @Valid Policy policy) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
@@ -416,6 +419,7 @@ public class PolicyCrudService {
     @Parameter(name = "id", description = "UUID of the policy")
     @Transactional
     public Response deletePolicy(@PathParam("id") UUID policyId) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
@@ -440,6 +444,7 @@ public class PolicyCrudService {
     @Path("/ids")
     @Transactional
     public Response deletePolicies(List<UUID> uuids) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to delete policy")).build();
@@ -472,6 +477,7 @@ public class PolicyCrudService {
     @Path("/{id:[0-9a-fA-F-]+}/enabled")
     @Transactional
     public Response setEnabledStateForPolicy(@PathParam("id") UUID policyId, @QueryParam("enabled") boolean shouldBeEnabled) {
+        Log.warnf("org_id=%s", user.getOrgId());
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
@@ -502,6 +508,7 @@ public class PolicyCrudService {
     @Path("/ids/enabled")
     @Transactional
     public Response setEnabledStateForPolicies(@QueryParam("enabled") boolean shouldBeEnabled, @NotEmpty List<UUID> uuids) {
+        Log.warnf("org_id=%s", user.getOrgId());
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
         }
@@ -537,6 +544,7 @@ public class PolicyCrudService {
     @Transactional
     public Response updatePolicy(@QueryParam("dry") boolean dryRun, @PathParam("policyId") UUID policyId,
                                  @NotNull @Valid Policy policy) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canWritePolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_UPDATE_POLICY)).build();
@@ -598,6 +606,7 @@ public class PolicyCrudService {
             @APIResponse(responseCode = "500", description = "Internal error")
     })
     public Response validateCondition(@Valid @NotNull Policy policy) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
@@ -626,6 +635,7 @@ public class PolicyCrudService {
     })
     @Parameter(name = "id", description = "UUID of the policy")
     public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
+        Log.warnf("org_id=%s", user.getOrgId());
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
@@ -662,6 +672,7 @@ public class PolicyCrudService {
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action", content = @Content(schema = @Schema(implementation = Msg.class)))
     @Parameter(name = "id", description = "UUID of the policy")
     public Response getPolicy(@PathParam("id") UUID policyId) {
+        Log.warnf("org_id=%s", user.getOrgId());
 
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_RETRIEVE_POLICIES)).build();
@@ -781,6 +792,7 @@ public class PolicyCrudService {
     @GET
     @Path("/{id}/history/trigger")
     public Response getTriggerHistoryForPolicy(@PathParam("id") UUID policyId) {
+        Log.warnf("org_id=%s", user.getOrgId());
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg("Missing permissions to retrieve the policy history")).build();
         }
