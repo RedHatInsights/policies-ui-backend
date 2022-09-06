@@ -136,7 +136,7 @@ public class IncomingRequestFilter implements ContainerRequestFilter {
         // Basic sanity check
         XRhIdentity rhIdentity = xrhid.get();
         if (rhIdentity.getUsername() == null || rhIdentity.getUsername().isEmpty() ||
-                rhIdentity.identity.orgId == null || rhIdentity.identity.orgId.isEmpty()
+                rhIdentity.identity.orgId == null || rhIdentity.identity.orgId.isBlank()
         ) {
             logIfNeeded("X-rh-identity header has no user or org ID");
             return null;
