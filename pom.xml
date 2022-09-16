@@ -20,7 +20,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <quarkus.version>2.12.1.Final</quarkus.version>
     <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-    <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <jacoco.version>0.8.8</jacoco.version>
 
     <version.testcontainers>1.17.3</version.testcontainers>
