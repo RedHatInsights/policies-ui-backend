@@ -1,192 +1,194 @@
----
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: policies-ui-backend
 objects:
-- apiVersion: cloud.redhat.com/v1alpha1
-  kind: ClowdApp
-  metadata:
-    name: policies-ui-backend
-    labels:
-      app: policies-ui-backend
-  spec:
-    envName: ${ENV_NAME}
-    dependencies:
-    - policies-engine
-    - rbac
-    optionalDependencies:
-    - notifications-backend
-    database:
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
       name: policies-ui-backend
-      version: 13
-    testing:
-      iqePlugin: policies
-    deployments:
-    - name: service
-      minReplicas: ${{MIN_REPLICAS}}
-      webServices:
-        public:
-          enabled: true
-      podSpec:
-        image: ${IMAGE}:${IMAGE_TAG}
-        resources:
-          requests:
-            cpu: ${CPU_REQUEST}
-            memory: ${MEMORY_REQUEST}
-          limits:
-            cpu: ${CPU_LIMIT}
-            memory: ${MEMORY_LIMIT}
-        volumes:
-        - name: rds-client-ca
-          emptyDir: {}
-        volumeMounts:
-        - name: rds-client-ca
-          mountPath: /tmp
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 8000
-            scheme: HTTP
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 1
-          successThreshold: 1
-          failureThreshold: 3
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: 8000
-            scheme: HTTP
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 1
-          successThreshold: 1
-          failureThreshold: 3
-        env:
-        - name: ENV_NAME
-          value: ${ENV_NAME}
-        - name: QUARKUS_HTTP_PORT
-          value: "8000"
-        - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
-          value: ${CLOUDWATCH_ENABLED}
-        - name: QUARKUS_LOG_CLOUDWATCH_LOG_STREAM_NAME
-          value: ${HOSTNAME}
-        - name: QUARKUS_LOG_SENTRY
-          value: ${SENTRY_ENABLED}
-        - name: QUARKUS_LOG_SENTRY_DSN
-          value: https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
-        - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
-          value: ${ENV_NAME}
-        - name: QUARKUS_REST_CLIENT_RBAC_READ_TIMEOUT
-          value: ${RBAC_READ_TIMEOUT}
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: policies-db-cleaner-config
-  data:
-    clean.sh: |
-      cat /policies-db-cleaner/clean.sql | psql > /dev/null
-    clean.sql: |
-      CALL cleanPoliciesHistory();
-- apiVersion: batch/v1
-  kind: CronJob
-  metadata:
-    name: policies-db-cleaner-cronjob
-  spec:
-    schedule: ${DB_CLEANER_SCHEDULE}
-    suspend: ${{DISABLE_DB_CLEANER}}
-    concurrencyPolicy: Forbid
-    jobTemplate:
-      spec:
-        template:
-          spec:
-            restartPolicy: Never
+      labels:
+        app: policies-ui-backend
+    spec:
+      envName: ${ENV_NAME}
+      dependencies:
+        - policies-engine
+        - rbac
+      optionalDependencies:
+        - notifications-backend
+      database:
+        name: policies-ui-backend
+        version: 13
+      testing:
+        iqePlugin: policies
+      deployments:
+        - name: service
+          minReplicas: ${{MIN_REPLICAS}}
+          webServices:
+            public:
+              enabled: true
+              apiPath: policies
+          podSpec:
+            image: ${IMAGE}:${IMAGE_TAG}
+            resources:
+              requests:
+                cpu: ${CPU_REQUEST}
+                memory: ${MEMORY_REQUEST}
+              limits:
+                cpu: ${CPU_LIMIT}
+                memory: ${MEMORY_LIMIT}
             volumes:
-            - name: policies-db-cleaner-volume
-              configMap:
-                name: policies-db-cleaner-config
-            containers:
-            - name: policies-db-cleaner
-              image: quay.io/cloudservices/postgresql-rds:12-1
+              - name: rds-client-ca
+                emptyDir: {}
+            volumeMounts:
+              - name: rds-client-ca
+                mountPath: /tmp
+            readinessProbe:
+              httpGet:
+                path: /health/ready
+                port: 8000
+                scheme: HTTP
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 1
+              successThreshold: 1
+              failureThreshold: 3
+            livenessProbe:
+              httpGet:
+                path: /health/live
+                port: 8000
+                scheme: HTTP
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 1
+              successThreshold: 1
+              failureThreshold: 3
+            env:
+              - name: ENV_NAME
+                value: ${ENV_NAME}
+              - name: QUARKUS_HTTP_PORT
+                value: "8000"
+              - name: QUARKUS_LOG_CLOUDWATCH_ENABLED
+                value: ${CLOUDWATCH_ENABLED}
+              - name: QUARKUS_LOG_CLOUDWATCH_LOG_STREAM_NAME
+                value: ${HOSTNAME}
+              - name: QUARKUS_LOG_SENTRY
+                value: ${SENTRY_ENABLED}
+              - name: QUARKUS_LOG_SENTRY_DSN
+                value: https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
+              - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
+                value: ${ENV_NAME}
+              - name: QUARKUS_REST_CLIENT_RBAC_READ_TIMEOUT
+                value: ${RBAC_READ_TIMEOUT}
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: policies-db-cleaner-config
+    data:
+      clean.sh: |
+        cat /policies-db-cleaner/clean.sql | psql > /dev/null
+      clean.sql: |
+        CALL cleanPoliciesHistory();
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: policies-db-cleaner-cronjob
+    spec:
+      schedule: ${DB_CLEANER_SCHEDULE}
+      suspend: ${{DISABLE_DB_CLEANER}}
+      concurrencyPolicy: Forbid
+      jobTemplate:
+        spec:
+          template:
+            spec:
               restartPolicy: Never
-              resources:
-                requests:
-                  cpu: 100m
-                  memory: 100Mi
-                limits:
-                  cpu: 200m
-                  memory: 200Mi
-              volumeMounts:
-              - name: policies-db-cleaner-volume
-                mountPath: /policies-db-cleaner
-              command: ['sh', '/policies-db-cleaner/clean.sh']
-              env:
-              - name: PGHOST
-                valueFrom:
-                  secretKeyRef:
-                    name: policies-ui-backend-db
-                    key: ${DB_SECRET_HOSTNAME_KEY}
-              - name: PGDATABASE
-                value: ${DB_NAME}
-              - name: PGUSER
-                valueFrom:
-                  secretKeyRef:
-                    name: policies-ui-backend-db
-                    key: ${DB_SECRET_USERNAME_KEY}
-              - name: PGPASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: policies-ui-backend-db
-                    key: ${DB_SECRET_PASSWORD_KEY}
+              volumes:
+                - name: policies-db-cleaner-volume
+                  configMap:
+                    name: policies-db-cleaner-config
+              containers:
+                - name: policies-db-cleaner
+                  image: quay.io/cloudservices/postgresql-rds:12-1
+                  restartPolicy: Never
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 100Mi
+                    limits:
+                      cpu: 200m
+                      memory: 200Mi
+                  volumeMounts:
+                    - name: policies-db-cleaner-volume
+                      mountPath: /policies-db-cleaner
+                  command:
+                    - sh
+                    - /policies-db-cleaner/clean.sh
+                  env:
+                    - name: PGHOST
+                      valueFrom:
+                        secretKeyRef:
+                          name: policies-ui-backend-db
+                          key: ${DB_SECRET_HOSTNAME_KEY}
+                    - name: PGDATABASE
+                      value: ${DB_NAME}
+                    - name: PGUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: policies-ui-backend-db
+                          key: ${DB_SECRET_USERNAME_KEY}
+                    - name: PGPASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: policies-ui-backend-db
+                          key: ${DB_SECRET_PASSWORD_KEY}
 parameters:
-- name: CLOUDWATCH_ENABLED
-  description: Enable Cloudwatch (or not)
-  value: "false"
-- name: CPU_LIMIT
-  description: CPU limit
-  value: 200m
-- name: CPU_REQUEST
-  description: CPU request
-  value: 100m
-- name: DB_CLEANER_SCHEDULE
-  description: Execution time specified in cron format
-  value: "*/10 * * * *"
-- name: DB_NAME
-  description: Database name used by the policies-db-cleaner CronJob
-  value: policies_ui_backend
-- name: DB_SECRET_HOSTNAME_KEY
-  description: Key of the hostname field in the policies-ui-backend-db secret
-  value: db.host
-- name: DB_SECRET_PASSWORD_KEY
-  description: Key of the password field in the policies-ui-backend-db secret
-  value: db.password
-- name: DB_SECRET_USERNAME_KEY
-  description: Key of the username field in the policies-ui-backend-db secret
-  value: db.user
-- name: DISABLE_DB_CLEANER
-  description: Should the DB cleaner CronJob be disabled?
-  value: "false"
-- name: ENV_NAME
-  description: ClowdEnvironment name (ephemeral, stage, prod)
-  required: true
-- name: IMAGE
-  description: Image URL
-  value: quay.io/cloudservices/policies-ui-backend
-- name: IMAGE_TAG
-  description: Image tag
-  value: latest
-- name: MEMORY_LIMIT
-  description: Memory limit
-  value: 500Mi
-- name: MEMORY_REQUEST
-  description: Memory request
-  value: 250Mi
-- name: MIN_REPLICAS
-  value: "1"
-- name: RBAC_READ_TIMEOUT
-  description: Delay in milliseconds before an RBAC query is interrupted
-  value: "2000"
-- name: SENTRY_ENABLED
-  description: Enable Sentry (or not)
-  value: "false"
+  - name: CLOUDWATCH_ENABLED
+    description: Enable Cloudwatch (or not)
+    value: "false"
+  - name: CPU_LIMIT
+    description: CPU limit
+    value: 200m
+  - name: CPU_REQUEST
+    description: CPU request
+    value: 100m
+  - name: DB_CLEANER_SCHEDULE
+    description: Execution time specified in cron format
+    value: "*/10 * * * *"
+  - name: DB_NAME
+    description: Database name used by the policies-db-cleaner CronJob
+    value: policies_ui_backend
+  - name: DB_SECRET_HOSTNAME_KEY
+    description: Key of the hostname field in the policies-ui-backend-db secret
+    value: db.host
+  - name: DB_SECRET_PASSWORD_KEY
+    description: Key of the password field in the policies-ui-backend-db secret
+    value: db.password
+  - name: DB_SECRET_USERNAME_KEY
+    description: Key of the username field in the policies-ui-backend-db secret
+    value: db.user
+  - name: DISABLE_DB_CLEANER
+    description: Should the DB cleaner CronJob be disabled?
+    value: "false"
+  - name: ENV_NAME
+    description: ClowdEnvironment name (ephemeral, stage, prod)
+    required: true
+  - name: IMAGE
+    description: Image URL
+    value: quay.io/cloudservices/policies-ui-backend
+  - name: IMAGE_TAG
+    description: Image tag
+    value: latest
+  - name: MEMORY_LIMIT
+    description: Memory limit
+    value: 500Mi
+  - name: MEMORY_REQUEST
+    description: Memory request
+    value: 250Mi
+  - name: MIN_REPLICAS
+    value: "1"
+  - name: RBAC_READ_TIMEOUT
+    description: Delay in milliseconds before an RBAC query is interrupted
+    value: "2000"
+  - name: SENTRY_ENABLED
+    description: Enable Sentry (or not)
+    value: "false"
