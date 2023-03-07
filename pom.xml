@@ -11,7 +11,7 @@
   <properties>
     <enforcer-plugin.version>3.1.0</enforcer-plugin.version>
     <maven-minimum-version>3.8.6</maven-minimum-version>
-    <java-version>11</java-version>
+    <java-version>17</java-version>
 
     <compiler-plugin.version>3.10.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
@@ -488,8 +488,8 @@
         <sonar.host.url>https://sonarqube.corp.redhat.com</sonar.host.url>
         <sonar.projectKey>cloud.redhat.com:policies-ui-backend</sonar.projectKey>
         <!-- next are needed because Sonar has issues recognizing the Java 9 -release flag -->
-        <sonar.java.source>11</sonar.java.source>
-        <sonar.java.target>11</sonar.java.target>
+        <sonar.java.source>${java-version}</sonar.java.source>
+        <sonar.java.target>${java-version}</sonar.java.target>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
       </properties>
       <build>
