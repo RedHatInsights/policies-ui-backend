@@ -84,9 +84,15 @@ class ActionValidatorTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"notification", " ;notification", "Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
-        void shouldBevalid(String input) {
+        @ValueSource(strings = {"notification", " ;notification"})
+        void shouldBeValid(String input) {
             assertTrue(testee.isValid(input, constraintValidatorContext));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"Notification", "NoTiFication", "NoTiFication123_13", " ;notificationS", " :notification"})
+        void shouldBeInvalid(String input) {
+            assertFalse(testee.isValid(input, constraintValidatorContext));
         }
     }
 }
