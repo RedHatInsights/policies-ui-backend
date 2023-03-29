@@ -34,7 +34,7 @@ public class ActionValidator implements ConstraintValidator<ValidActionS, String
     EnvironmentInfo environmentInfo;
 
     private static final List<String> VALID_ACTIONS = List.of("notification");
-    private static final List<String> VALID_ACTIONS_FEDRAMP = List.of();
+    private static final List<String> VALID_ACTIONS_FEDRAMP = List.of("notification");
 
     public List<String> getValidActions() {
         if (environmentInfo.isFedramp()) {
