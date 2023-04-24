@@ -16,16 +16,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: set up manifest-tool 
+      - name: set up manifest-tool
         run: sudo apt-get install -y skopeo
       - name: check change
-        run: skopeo inspect docker://registry.access.redhat.com/ubi8/ubi-minimal:latest |grep Digest > .baseimage
+        run: |
+          skopeo inspect docker://registry.access.redhat.com/ubi8/ubi-minimal:latest | grep -Po '(?<="Digest": ")([^"]+)' \
+            | head -n1 > .baseimage
+          docker run --rm --entrypoint sh -u 0 quay.io/cloudservices/policies-ui-backend:latest -c \
+            'microdnf update > /dev/null; rpm -qa | sort | sha256sum' \
+            >> .baseimage
       - name: do change if the digest changed
-        run: |    
+        run: |
           git config user.name 'Update-a-Bot'
           git config user.email 'notifications-team@redhat.com'
           git add -A
-          git commit -m "Update ubi-minimal:latest image digest" || echo "No changes to commit"
+          git commit -m "chore(image): update and rebuild image" || echo "No new changes"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
