@@ -1,0 +1,1 @@
+insert into fact VALUES(51, 'facts.systemd', 'STRING');
