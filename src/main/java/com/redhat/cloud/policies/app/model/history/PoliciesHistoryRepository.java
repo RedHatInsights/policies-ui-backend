@@ -7,6 +7,10 @@ import io.quarkus.panache.common.Sort;
 
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.LongType;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import org.hibernate.Session;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -29,10 +33,15 @@ public class PoliciesHistoryRepository {
     private static final String tableName = PoliciesHistoryEntry.class.getAnnotation(Table.class).name();
 
     public long count(String orgId, UUID policyId, Pager pager) {
+        return count(orgId, null, policyId, pager);
+    }
+
+    public long count(String orgId, List<UUID> hostGroupIds, UUID policyId, Pager pager) {
         // Base SQL query.
         String sql = String.format("SELECT COUNT(*) AS count FROM %s WHERE org_id = :orgId AND policy_id = :policyId",
                                    tableName);
 
+        sql = addHostGroupsConditions(sql, hostGroupIds);
         sql = addFiltersConditions(sql, pager.getFilter().getItems());
 
         Log.tracef("SQL query ready to be executed: %s", sql);
@@ -42,16 +51,22 @@ public class PoliciesHistoryRepository {
                 .setParameter("orgId", orgId)
                 .setParameter("policyId", policyId.toString());
 
+        setHostGroupsValues(query, hostGroupIds);
         setFiltersValues(query, pager.getFilter().getItems());
 
         return (Long) query.getSingleResult();
     }
 
     public List<PoliciesHistoryEntry> find(String orgId, UUID policyId, Pager pager) {
+        return find(orgId, null, policyId, pager);
+    }
+
+    public List<PoliciesHistoryEntry> find(String orgId,  List<UUID> hostGroupIds, UUID policyId, Pager pager) {
         // Base SQL query.
         String sql = String.format("SELECT * FROM %s WHERE org_id = :orgId AND policy_id = :policyId",
                                    tableName);
 
+        sql = addHostGroupsConditions(sql, hostGroupIds);
         sql = addFiltersConditions(sql, pager.getFilter().getItems());
 
         // The sorts from the pager are added to the HQL query.
@@ -77,6 +92,7 @@ public class PoliciesHistoryRepository {
                 .setParameter("orgId", orgId)
                 .setParameter("policyId", policyId.toString());
 
+        setHostGroupsValues(query, hostGroupIds);
         setFiltersValues(query, pager.getFilter().getItems());
 
         if (pager.getLimit() > 0) {
@@ -87,6 +103,40 @@ public class PoliciesHistoryRepository {
         }
 
         return query.getResultList();
+    }
+
+    private static String addHostGroupsConditions(String sql, List<UUID> hostGroupIds) {
+        if (hostGroupIds == null) {
+            return sql;
+        }
+
+        List<String> conds = new ArrayList<String>();
+        conds.add("1=0");
+        int num = 0;
+        for (UUID hostGroupId : hostGroupIds) {
+            if (hostGroupId == null) {
+                conds.add("host_groups = '[]'");
+            } else {
+                num++;
+                conds.add(String.format("host_groups @> CAST(:hostGroup%d AS jsonb)", num));
+            }
+        }
+        return String.format("%s AND (%s)", sql, String.join(" OR ", conds));
+    }
+
+    private static void setHostGroupsValues(Query query, List<UUID> hostGroupIds) {
+        if (hostGroupIds == null) {
+            return;
+        }
+
+        int num = 0;
+        for (UUID hostGroupId : hostGroupIds) {
+            if (hostGroupId != null) {
+                num++;
+                JsonArray value = JsonArray.of(JsonObject.of("id", hostGroupId.toString()));
+                query.setParameter(String.format("hostGroup%d", num), value.toString());
+            }
+        }
     }
 
     private static String addFiltersConditions(String sql, List<Filter.FilterItem> filterItems) {
