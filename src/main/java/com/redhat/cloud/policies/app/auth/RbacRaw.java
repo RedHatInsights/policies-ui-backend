@@ -21,6 +21,8 @@ import java.util.Map;
 
 public class RbacRaw {
 
+    public static final String ANY = "*";
+
     public Map<String, String> links;
     public Map<String, Integer> meta;
     public List<Map<String, Object>> data;
@@ -34,11 +36,11 @@ public class RbacRaw {
     }
 
     public boolean canReadAll() {
-        return canRead("*");
+        return canRead(ANY);
     }
 
     public boolean canWriteAll() {
-        return canWrite("*");
+        return canWrite(ANY);
     }
 
     public boolean canDo(String path, String permission) {
@@ -53,8 +55,8 @@ public class RbacRaw {
 
         for (Map<String, Object> permissionEntry : data) {
             String[] fields = getPermissionFields(permissionEntry);
-            if (fields[1].equals(path) || fields[1].equals("*")) {
-                if (fields[2].equals(what) || fields[2].equals("*")) {
+            if (fields[1].equals(path) || fields[1].equals(ANY)) {
+                if (fields[2].equals(what) || fields[2].equals(ANY)) {
                     return true;
                 }
             }
