@@ -17,6 +17,8 @@
 package com.redhat.cloud.policies.app;
 
 import java.io.File;
+import java.util.List;
+
 
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 class RbacParsingTest {
@@ -82,5 +85,23 @@ class RbacParsingTest {
         assertFalse(rbac.canWriteAll());
         assertTrue(rbac.canDo("*", "execute"));
         assertTrue(rbac.canDo("foobar", "execute"));
+    }
+
+    @Test
+    void testResourceDefinitionsParsing() throws Exception {
+        File file = new File("src/test/resources/rbac_example.json");
+        RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
+        assertEquals(3, rbac.data.size());
+
+        assertNotNull(rbac.data.get(0).resourceDefinitions);
+        assertEquals(0, rbac.data.get(0).resourceDefinitions.size());
+
+        assertNotNull(rbac.data.get(1).resourceDefinitions);
+        assertEquals(1, rbac.data.get(1).resourceDefinitions.size());
+        assertEquals(List.of("123456"), rbac.data.get(1).resourceDefinitions.get(0).attributeFilter.value);
+
+        assertNotNull(rbac.data.get(2).resourceDefinitions);
+        assertEquals(1, rbac.data.get(2).resourceDefinitions.size());
+        assertEquals(List.of("654321"), rbac.data.get(2).resourceDefinitions.get(0).attributeFilter.value);
     }
 }
