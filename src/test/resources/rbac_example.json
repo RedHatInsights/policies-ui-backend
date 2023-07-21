@@ -26,6 +26,18 @@
           }
         }
       ]
+    },
+    {
+      "permission": "foo:*:read",
+      "resourceDefinitions": [
+        {
+          "attributeFilter": {
+            "key": "hulla.accounts",
+            "operation": "in",
+            "value": ["654321"]
+          }
+        }
+      ]
     }
   ]
 }
