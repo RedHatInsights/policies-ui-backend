@@ -25,7 +25,7 @@ public class RbacRaw {
 
     public Map<String, String> links;
     public Map<String, Integer> meta;
-    public List<Map<String, Object>> data;
+    public List<Access> data;
 
     public boolean canRead(String path) {
         return findPermission(path, "read");
@@ -53,7 +53,7 @@ public class RbacRaw {
             return false;
         }
 
-        for (Map<String, Object> permissionEntry : data) {
+        for (Access permissionEntry : data) {
             String[] fields = getPermissionFields(permissionEntry);
             if (fields[1].equals(path) || fields[1].equals(ANY)) {
                 if (fields[2].equals(what) || fields[2].equals(ANY)) {
@@ -64,8 +64,7 @@ public class RbacRaw {
         return false;
     }
 
-    private String[] getPermissionFields(Map<String, Object> map) {
-        String perms = (String) map.get("permission");
-        return perms.split(":");
+    private String[] getPermissionFields(Access map) {
+        return map.permission.split(":");
     }
 }
