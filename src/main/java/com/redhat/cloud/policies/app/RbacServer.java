@@ -16,7 +16,6 @@
  */
 package com.redhat.cloud.policies.app;
 
-import com.redhat.cloud.policies.app.auth.RbacRaw;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -25,6 +24,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import com.redhat.cloud.policies.app.auth.models.RbacRaw;
 
 @Path("/api/rbac/v1")
 @RegisterRestClient(configKey = "rbac")

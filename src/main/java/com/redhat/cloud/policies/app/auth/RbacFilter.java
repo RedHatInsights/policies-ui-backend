@@ -34,6 +34,8 @@ import javax.ws.rs.ext.Provider;
 import io.quarkus.logging.Log;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import com.redhat.cloud.policies.app.auth.models.RbacRaw;
+
 @Provider
 @Priority(Priorities.HEADER_DECORATOR + 1)
 public class RbacFilter implements ContainerRequestFilter {

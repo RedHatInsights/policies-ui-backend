@@ -1,6 +1,8 @@
 package com.redhat.cloud.policies.app.auth;
 
 import com.redhat.cloud.policies.app.RbacServer;
+import com.redhat.cloud.policies.app.auth.models.RbacRaw;
+
 import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
