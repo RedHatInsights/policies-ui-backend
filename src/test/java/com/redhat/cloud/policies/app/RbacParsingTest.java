@@ -17,27 +17,29 @@
 package com.redhat.cloud.policies.app;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 
+import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.auth.models.RbacRaw;
 
+import io.quarkus.test.junit.QuarkusTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@QuarkusTest
 class RbacParsingTest {
+
+    @Inject
+    ObjectMapper objectMapper;
 
     @Test
     void testParseExample() throws Exception {
         File file = new File("src/test/resources/rbac_example.json");
-        Jsonb jb = JsonbBuilder.create();
-        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
-        assertEquals(rbac.data.size(), 2);
+        RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
+        assertEquals(3, rbac.data.size());
 
         assertTrue(rbac.canWrite("resname"));
         // We don't have explicit read permission for "resname" but we have bar:*:read.
@@ -50,8 +52,7 @@ class RbacParsingTest {
     @Test
     void testNoAccess() throws Exception {
         File file = new File("src/test/resources/rbac_example_no_access.json");
-        Jsonb jb = JsonbBuilder.create();
-        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+        RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
         assertFalse(rbac.canReadAll());
         assertFalse(rbac.canWriteAll());
@@ -62,8 +63,7 @@ class RbacParsingTest {
     @Test
     void testFullAccess() throws Exception {
         File file = new File("src/test/resources/rbac_example_full_access.json");
-        Jsonb jb = JsonbBuilder.create();
-        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+        RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
         assertTrue(rbac.canRead("*"));
         assertTrue(rbac.canRead("anything"));
@@ -74,10 +74,9 @@ class RbacParsingTest {
     }
 
     @Test
-    void testPartialAccess() throws FileNotFoundException {
+    void testPartialAccess() throws Exception {
         File file = new File("src/test/resources/rbac_example_partial_access.json");
-        Jsonb jb = JsonbBuilder.create();
-        RbacRaw rbac = jb.fromJson(new FileInputStream(file), RbacRaw.class);
+        RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
         assertTrue(rbac.canReadAll());
         assertFalse(rbac.canWriteAll());
