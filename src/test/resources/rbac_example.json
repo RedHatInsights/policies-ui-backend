@@ -32,7 +32,7 @@
       "resourceDefinitions": [
         {
           "attributeFilter": {
-            "key": "hulla.accounts",
+            "key": "group.id",
             "operation": "in",
             "value": ["654321"]
           }

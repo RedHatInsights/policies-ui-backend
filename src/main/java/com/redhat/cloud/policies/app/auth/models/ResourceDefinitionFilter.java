@@ -26,4 +26,8 @@ public class ResourceDefinitionFilter {
 
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     public List<String> value;
+
+    public boolean isPresentWithValues() {
+        return key != null && operation != null && value != null;
+    }
 }
