@@ -16,11 +16,19 @@
  */
 package com.redhat.cloud.policies.app.auth.models;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Access {
 
     public String permission;
     public List<ResourceDefinition> resourceDefinitions;
+
+    public String[] getPermissionFields() {
+        if (permission == null) {
+            return new String[3];
+        }
+        return Arrays.copyOf(permission.split(":"), 3);
+    }
 
 }
