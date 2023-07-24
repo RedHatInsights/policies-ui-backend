@@ -19,9 +19,7 @@ package com.redhat.cloud.policies.app.auth.models;
 import java.util.List;
 import java.util.Map;
 
-public class RbacRaw {
-
-    public static final String ANY = "*";
+public class RbacRaw extends RbacRawCommon {
 
     public Map<String, String> links;
     public Map<String, Integer> meta;
@@ -54,7 +52,7 @@ public class RbacRaw {
         }
 
         for (Access permissionEntry : data) {
-            String[] fields = getPermissionFields(permissionEntry);
+            String[] fields = permissionEntry.getPermissionFields();
             if (fields[1].equals(path) || fields[1].equals(ANY)) {
                 if (fields[2].equals(what) || fields[2].equals(ANY)) {
                     return true;
@@ -62,9 +60,5 @@ public class RbacRaw {
             }
         }
         return false;
-    }
-
-    private String[] getPermissionFields(Access map) {
-        return map.permission.split(":");
     }
 }
