@@ -18,8 +18,17 @@ package com.redhat.cloud.policies.app.auth.models;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class Access {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class Access extends RbacRawCommon {
+
+    @JsonIgnore
+    public static final String HOST_GROUPS_OPERATION = "in";
+
+    @JsonIgnore
+    public static final String HOST_GROUPS_KEY = "group.id";
 
     public String permission;
     public List<ResourceDefinition> resourceDefinitions;
@@ -29,6 +38,30 @@ public class Access {
             return new String[3];
         }
         return Arrays.copyOf(permission.split(":"), 3);
+    }
+
+    public boolean isInventoryHostsRead() {
+        String[] permissionFields = getPermissionFields();
+        return Objects.equals(permissionFields[0], INVENTORY_HOSTS_READ[0])
+            && (Objects.equals(permissionFields[1], INVENTORY_HOSTS_READ[1]) || Objects.equals(permissionFields[1], ANY))
+            && (Objects.equals(permissionFields[2], INVENTORY_HOSTS_READ[2]) || Objects.equals(permissionFields[2], ANY));
+    }
+
+    public List<String> hostGroupIds() {
+        if (resourceDefinitions == null || resourceDefinitions.size() == 0) {
+            return null;
+        }
+
+        for (ResourceDefinition definition : resourceDefinitions) {
+            var attributeFilter = definition.attributeFilter;
+            if (attributeFilter != null && attributeFilter.isPresentWithValues()
+                    && attributeFilter.operation.equals(HOST_GROUPS_OPERATION)
+                    && attributeFilter.key.equals(HOST_GROUPS_KEY)
+            ) {
+                return attributeFilter.value;
+            }
+        }
+        return List.of();
     }
 
 }

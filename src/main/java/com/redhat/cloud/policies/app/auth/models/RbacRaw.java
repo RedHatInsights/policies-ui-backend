@@ -16,6 +16,7 @@
  */
 package com.redhat.cloud.policies.app.auth.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +38,36 @@ public class RbacRaw extends RbacRawCommon {
     public boolean canDo(String application, String resource, String operation) {
         return findPermission(application, resource, operation);
 
+    }
+
+    /*
+     * Returns Host Group Ids if restricted.
+     * Only inventory host read permissions (incl. wildcards) are observed.
+     *
+     * Possible values:
+     *
+     *   * null -- no host groups restrictions
+     *   * empty list -- fully restricted (no visibility)
+     *   * list of ids -- list of allowed host group UUIDs (in string)
+     *   * a null in the list -- ungrouped hosts visibility
+     *
+     */
+    public List<String> hostGroupIds() {
+        List<String> gids = new ArrayList<String>();
+        if (data == null || data.size() == 0) {
+            return gids;
+        }
+        for (Access permissionEntry : data) {
+            if (permissionEntry.isInventoryHostsRead()) {
+                List<String> permHostGroups = permissionEntry.hostGroupIds();
+                if (permHostGroups == null) {
+                    // no host groups restrictions
+                    return null;
+                }
+                gids.addAll(permHostGroups);
+            }
+        }
+        return gids;
     }
 
     private boolean findPermission(String application, String resource, String operation) {

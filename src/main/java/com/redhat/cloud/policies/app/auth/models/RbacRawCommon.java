@@ -13,4 +13,7 @@ public class RbacRawCommon {
     @JsonIgnore
     public static final String WRITE_OPERATION = "write";
 
+    @JsonIgnore
+    public static final String[] INVENTORY_HOSTS_READ = "inventory:hosts:read".split(":");
+
 }
