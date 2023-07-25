@@ -44,10 +44,12 @@ class RbacParsingTest {
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
         assertEquals(3, rbac.data.size());
 
-        assertTrue(rbac.canWrite("resname"));
+        assertTrue(rbac.canWrite("bar", "resname"));
         // We don't have explicit read permission for "resname" but we have bar:*:read.
-        assertTrue(rbac.canRead("resname"));
-        assertFalse(rbac.canWrite("no-perm"));
+        assertTrue(rbac.canRead("bar", "resname"));
+        assertFalse(rbac.canWrite("bar", "no-perm"));
+        assertFalse(rbac.canWrite("foo", "no-perm"));
+        assertFalse(rbac.canWrite("hulla", "no-perm"));
 
     }
 
@@ -56,8 +58,8 @@ class RbacParsingTest {
         File file = new File("src/test/resources/rbac_example_no_access.json");
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
-        assertFalse(rbac.canWrite("foobar"));
-        assertFalse(rbac.canRead("1337"));
+        assertFalse(rbac.canWrite("foo", "foobar"));
+        assertFalse(rbac.canRead("foo", "1337"));
     }
 
     @Test
@@ -65,10 +67,10 @@ class RbacParsingTest {
         File file = new File("src/test/resources/rbac_example_full_access.json");
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
-        assertTrue(rbac.canRead("*"));
-        assertTrue(rbac.canRead("anything"));
-        assertTrue(rbac.canWrite("*"));
-        assertTrue(rbac.canWrite("anything"));
+        assertTrue(rbac.canRead("policies", "*"));
+        assertTrue(rbac.canRead("policies", "anything"));
+        assertTrue(rbac.canWrite("policies", "*"));
+        assertTrue(rbac.canWrite("policies", "anything"));
     }
 
     @Test
@@ -76,8 +78,9 @@ class RbacParsingTest {
         File file = new File("src/test/resources/rbac_example_partial_access.json");
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
-        assertTrue(rbac.canDo("*", "execute"));
-        assertTrue(rbac.canDo("foobar", "execute"));
+        assertTrue(rbac.canDo("policies", "*", "execute"));
+        assertTrue(rbac.canDo("policies", "foobar", "execute"));
+        assertFalse(rbac.canDo("notpolicies", "policies", "execute"));
     }
 
     @Test

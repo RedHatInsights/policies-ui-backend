@@ -40,6 +40,9 @@ import com.redhat.cloud.policies.app.auth.models.RbacRaw;
 @Priority(Priorities.HEADER_DECORATOR + 1)
 public class RbacFilter implements ContainerRequestFilter {
 
+    public static final String APPLICATION = "policies";
+    public static final String RESOURCE = "policies";
+
     @Inject
     Tracer tracer;
 
@@ -90,10 +93,11 @@ public class RbacFilter implements ContainerRequestFilter {
             span.finish();
         }
 
-        final String policiesPath = "policies";
+        boolean canReadPolicies = result.canRead(APPLICATION, RESOURCE);
+        boolean canWritePolicies = result.canWrite(APPLICATION, RESOURCE);
 
-        user.setRbac(result.canRead(policiesPath), result.canWrite(policiesPath));
+        user.setRbac(canReadPolicies, canWritePolicies);
         RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
-        userPrincipal.setRbac(result.canRead(policiesPath), result.canWrite(policiesPath));
+        userPrincipal.setRbac(canReadPolicies, canWritePolicies);
     }
 }

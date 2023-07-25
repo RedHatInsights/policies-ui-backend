@@ -18,6 +18,7 @@ package com.redhat.cloud.policies.app.auth.models;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class RbacRaw extends RbacRawCommon {
 
@@ -25,29 +26,31 @@ public class RbacRaw extends RbacRawCommon {
     public Map<String, Integer> meta;
     public List<Access> data;
 
-    public boolean canRead(String path) {
-        return findPermission(path, "read");
+    public boolean canRead(String application, String resource) {
+        return findPermission(application, resource, READ_OPERATION);
     }
 
-    public boolean canWrite(String path) {
-        return findPermission(path, "write");
+    public boolean canWrite(String application, String resource) {
+        return findPermission(application, resource, WRITE_OPERATION);
     }
 
-    public boolean canDo(String path, String permission) {
-        return findPermission(path, permission);
+    public boolean canDo(String application, String resource, String operation) {
+        return findPermission(application, resource, operation);
 
     }
 
-    private boolean findPermission(String path, String what) {
+    private boolean findPermission(String application, String resource, String operation) {
         if (data == null || data.size() == 0) {
             return false;
         }
 
         for (Access permissionEntry : data) {
             String[] fields = permissionEntry.getPermissionFields();
-            if (fields[1].equals(path) || fields[1].equals(ANY)) {
-                if (fields[2].equals(what) || fields[2].equals(ANY)) {
-                    return true;
+            if (Objects.equals(fields[0], application)) {
+                if (Objects.equals(fields[1], resource) || Objects.equals(fields[1], ANY)) {
+                    if (Objects.equals(fields[2], operation) || Objects.equals(fields[2], ANY)) {
+                        return true;
+                    }
                 }
             }
         }
