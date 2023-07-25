@@ -27,9 +27,12 @@ public class RbacClient {
      * as if an Exception is thrown, the cache will not store the result.
      * Catching and returning null would end up in the next call directly
      * return null from the cache without retrying the remote call.
+     *
+     * Inventory permissions are also queried to get the list of host groups
+     * that the user has access to.
      */
     @CacheResult(cacheName = "rbac-cache")
     RbacRaw getRbacInfo(String xrhidHeader) {
-        return rbac.getRbacInfo("policies", xrhidHeader);
+        return rbac.getRbacInfo("policies,inventory", xrhidHeader);
     }
 }

@@ -107,7 +107,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         mockServer
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
-                        .withQueryStringParameter("application", "policies")
+                        .withQueryStringParameter("application", "policies,inventory")
                         .withHeader("x-rh-identity", ".*vZS1kb2UtdXNlciJ9") // normal user all allowed
                 )
                 .respond(response()
@@ -119,7 +119,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
         mockServer
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
-                        .withQueryStringParameter("application", "policies")
+                        .withQueryStringParameter("application", "policies,inventory")
                         .withHeader("x-rh-identity", ".*hbXBmLXVzZXIifQ==") // hans dampf user nothing allowed
                 )
                 .respond(response()
