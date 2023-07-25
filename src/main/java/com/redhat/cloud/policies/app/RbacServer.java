@@ -37,6 +37,7 @@ public interface RbacServer {
     @Consumes("application/json")
     @Produces("application/json")
     RbacRaw getRbacInfo(@QueryParam("application") String application,
+                        @QueryParam("limit") int limit,
                         @HeaderParam("x-rh-identity") String rhIdentity
 
     );
