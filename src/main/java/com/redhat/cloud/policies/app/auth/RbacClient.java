@@ -33,6 +33,6 @@ public class RbacClient {
      */
     @CacheResult(cacheName = "rbac-cache")
     RbacRaw getRbacInfo(String xrhidHeader) {
-        return rbac.getRbacInfo("policies,inventory", xrhidHeader);
+        return rbac.getRbacInfo("policies,inventory", 100, xrhidHeader);
     }
 }
