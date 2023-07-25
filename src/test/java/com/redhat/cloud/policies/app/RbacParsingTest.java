@@ -47,7 +47,6 @@ class RbacParsingTest {
         assertTrue(rbac.canWrite("resname"));
         // We don't have explicit read permission for "resname" but we have bar:*:read.
         assertTrue(rbac.canRead("resname"));
-        assertFalse(rbac.canWriteAll());
         assertFalse(rbac.canWrite("no-perm"));
 
     }
@@ -57,8 +56,6 @@ class RbacParsingTest {
         File file = new File("src/test/resources/rbac_example_no_access.json");
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
-        assertFalse(rbac.canReadAll());
-        assertFalse(rbac.canWriteAll());
         assertFalse(rbac.canWrite("foobar"));
         assertFalse(rbac.canRead("1337"));
     }
@@ -70,10 +67,8 @@ class RbacParsingTest {
 
         assertTrue(rbac.canRead("*"));
         assertTrue(rbac.canRead("anything"));
-        assertTrue(rbac.canReadAll());
         assertTrue(rbac.canWrite("*"));
         assertTrue(rbac.canWrite("anything"));
-        assertTrue(rbac.canWriteAll());
     }
 
     @Test
@@ -81,8 +76,6 @@ class RbacParsingTest {
         File file = new File("src/test/resources/rbac_example_partial_access.json");
         RbacRaw rbac = objectMapper.readValue(file, RbacRaw.class);
 
-        assertTrue(rbac.canReadAll());
-        assertFalse(rbac.canWriteAll());
         assertTrue(rbac.canDo("*", "execute"));
         assertTrue(rbac.canDo("foobar", "execute"));
     }
