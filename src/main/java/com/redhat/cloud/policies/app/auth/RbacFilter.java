@@ -63,12 +63,9 @@ public class RbacFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        RbacRaw result;
-
         if (!isRbacEnabled) {
-            user.setRbac(true, true);
-            RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
-            userPrincipal.setRbac(true, true);
+            // Allow all
+            setPermissionsOnPrincipals(requestContext, true, true);
             return;
         }
 
@@ -77,14 +74,26 @@ public class RbacFilter implements ContainerRequestFilter {
             return;
         }
 
+        RbacRaw result = getRbacResult();
+        if (result == null) {
+            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+            return;
+        }
+
+        boolean canReadPolicies = result.canRead(APPLICATION, RESOURCE);
+        boolean canWritePolicies = result.canWrite(APPLICATION, RESOURCE);
+        setPermissionsOnPrincipals(requestContext, canReadPolicies, canWritePolicies);
+    }
+
+    private RbacRaw getRbacResult() {
+        RbacRaw result;
         long t1 = System.currentTimeMillis();
         Span span = tracer.buildSpan("getRBac").start();
         try (Scope ignored = tracer.scopeManager().activate(span)) {
             result = rbacClient.getRbacInfo(user.getRawRhIdHeader());
         } catch (Throwable e) {
             Log.warn("RBAC call failed", e);
-            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-            return;
+            return null;
         } finally {
             long t2 = System.currentTimeMillis();
             if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.toMillis()) {
@@ -93,9 +102,11 @@ public class RbacFilter implements ContainerRequestFilter {
             span.finish();
         }
 
-        boolean canReadPolicies = result.canRead(APPLICATION, RESOURCE);
-        boolean canWritePolicies = result.canWrite(APPLICATION, RESOURCE);
+        return result;
+    }
 
+    private void setPermissionsOnPrincipals(ContainerRequestContext requestContext,
+                                            boolean canReadPolicies, boolean canWritePolicies) {
         user.setRbac(canReadPolicies, canWritePolicies);
         RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
         userPrincipal.setRbac(canReadPolicies, canWritePolicies);
