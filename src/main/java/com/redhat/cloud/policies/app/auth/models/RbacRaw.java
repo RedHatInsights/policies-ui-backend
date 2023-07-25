@@ -33,14 +33,6 @@ public class RbacRaw extends RbacRawCommon {
         return findPermission(path, "write");
     }
 
-    public boolean canReadAll() {
-        return canRead(ANY);
-    }
-
-    public boolean canWriteAll() {
-        return canWrite(ANY);
-    }
-
     public boolean canDo(String path, String permission) {
         return findPermission(path, permission);
 
