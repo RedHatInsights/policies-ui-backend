@@ -17,6 +17,8 @@
 package com.redhat.cloud.policies.app.auth;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Simple implementation of {@link Principal}
@@ -28,6 +30,8 @@ public class RhIdPrincipal implements Principal {
     private String orgId;
     private boolean canReadPolicies;
     private boolean canWritePolicies;
+    private List<UUID> hostGroupIds = List.of();
+
     private String rawRhId;
 
     public RhIdPrincipal() {
@@ -39,9 +43,10 @@ public class RhIdPrincipal implements Principal {
         this.orgId = orgId;
     }
 
-    void setRbac(boolean canReadPolicies, boolean canWritePolicies) {
+    void setRbac(boolean canReadPolicies, boolean canWritePolicies, List<UUID> hostGroupIds) {
         this.canReadPolicies = canReadPolicies;
         this.canWritePolicies = canWritePolicies;
+        this.hostGroupIds = hostGroupIds;
     }
 
     @Override
@@ -65,6 +70,9 @@ public class RhIdPrincipal implements Principal {
         return canWritePolicies;
     }
 
+    public List<UUID> getHostGroupIds() {
+        return hostGroupIds;
+    }
 
     public void setRawRhIdHeader(String rawRhId) {
         this.rawRhId = rawRhId;
@@ -80,6 +88,7 @@ public class RhIdPrincipal implements Principal {
                 "name='" + name + '\'' +
                 ", account='" + account + '\'' +
                 ", orgId='" + orgId + '\'' +
+                ", hostGroupIds="+ (hostGroupIds != null ? hostGroupIds.toString() : "any") +
                 ", canReadPolicies=" + canReadPolicies +
                 ", canWritePolicies=" + canWritePolicies +
                 '}';
