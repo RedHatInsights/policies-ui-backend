@@ -6,7 +6,9 @@ import org.mockito.Mockito;
 
 import com.redhat.cloud.policies.app.auth.models.RbacRaw;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -14,6 +16,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -51,8 +56,8 @@ public class RbacFilterTest {
         rbacFilter.filter(context);
         verifyAbortedAsForbidden(context);
 
-        verify(user, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean());
-        verify(userPrincipal, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean());
+        verify(user, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
+        verify(userPrincipal, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
     }
 
     @Test
@@ -60,6 +65,7 @@ public class RbacFilterTest {
         RbacRaw rbacResult = mock(RbacRaw.class);
         Mockito.when(rbacResult.canRead("policies", "policies")).thenReturn(true);
         Mockito.when(rbacResult.canWrite("policies", "policies")).thenReturn(false);
+        Mockito.when(rbacResult.hostGroupIds()).thenReturn(null);
         Mockito.when(rbacClient.getRbacInfo(Mockito.any())).thenReturn(rbacResult);
 
         HttpRequest request = MockHttpRequest.get("/");
@@ -71,8 +77,66 @@ public class RbacFilterTest {
         verify(context, Mockito.times(0)).abortWith(Mockito.any());
 
         // two calls are made, as user and userPrincipal are the same instances
-        verify(user, times(2)).setRbac(true, false);
-        verify(userPrincipal, times(2)).setRbac(true, false);
+        verify(user, times(2)).setRbac(true, false, null);
+        verify(userPrincipal, times(2)).setRbac(true, false, null);
+    }
+
+    @Test
+    void testSetsHostGroupsOnPrincipals() throws Exception {
+        UUID ungrouped = null;
+        UUID groudOne = UUID.randomUUID();
+        UUID groupTwo = UUID.randomUUID();
+
+        List<String> groupsIn = new ArrayList<String>();
+        groupsIn.add(groudOne.toString());
+        groupsIn.add((String) null);
+        groupsIn.add(groupTwo.toString());
+
+        List<UUID> expected = new ArrayList<UUID>();
+        expected.add(groudOne);
+        expected.add(ungrouped);
+        expected.add(groupTwo);
+
+        RbacRaw rbacResult = mock(RbacRaw.class);
+        Mockito.when(rbacResult.canRead("policies", "policies")).thenReturn(true);
+        Mockito.when(rbacResult.canWrite("policies", "policies")).thenReturn(false);
+        Mockito.when(rbacResult.hostGroupIds()).thenReturn(groupsIn);
+        Mockito.when(rbacClient.getRbacInfo(Mockito.any())).thenReturn(rbacResult);
+
+        HttpRequest request = MockHttpRequest.get("/");
+        PreMatchContainerRequestContext context = spy(new PreMatchContainerRequestContext(request, null, null));
+        context.setSecurityContext(securityContext());
+
+        rbacFilter.filter(context);
+        verify(context, Mockito.times(0)).abortWith(Mockito.any());
+
+        // two calls are made, as user and userPrincipal are the same instances
+        ArgumentCaptor<List<UUID>> userSetGroupIds = ArgumentCaptor.forClass(new ArrayList<UUID>().getClass());
+        ArgumentCaptor<List<UUID>> userPrincipalSetGroupIds = ArgumentCaptor.forClass(new ArrayList<UUID>().getClass());
+        verify(user, times(2))
+            .setRbac(Mockito.eq(true), Mockito.eq(false), userSetGroupIds.capture());
+        verify(userPrincipal, times(2))
+            .setRbac(Mockito.eq(true), Mockito.eq(false), userPrincipalSetGroupIds.capture());
+        assertEquals(expected, userSetGroupIds.getValue());
+        assertEquals(expected, userPrincipalSetGroupIds.getValue());
+    }
+
+    void testAbortsOnBadHostGroups() throws Exception {
+        RbacRaw rbacResult = mock(RbacRaw.class);
+        Mockito.when(rbacResult.canRead("policies", "policies")).thenReturn(true);
+        Mockito.when(rbacResult.canWrite("policies", "policies")).thenReturn(false);
+        Mockito.when(rbacResult.hostGroupIds()).thenReturn(List.of("baduuid"));
+        Mockito.when(rbacClient.getRbacInfo(Mockito.any())).thenReturn(rbacResult);
+
+        HttpRequest request = MockHttpRequest.get("/");
+        PreMatchContainerRequestContext context = spy(new PreMatchContainerRequestContext(request, null, null));
+        context.setSecurityContext(securityContext());
+
+        rbacFilter.filter(context);
+        verifyAbortedAsForbidden(context);
+
+        verify(user, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
+        verify(userPrincipal, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
     }
 
     @Test
@@ -89,8 +153,8 @@ public class RbacFilterTest {
         rbacFilter.filter(context);
         verify(context, times(0)).abortWith(any());
 
-        verify(user, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean());
-        verify(userPrincipal, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean());
+        verify(user, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
+        verify(userPrincipal, times(0)).setRbac(Mockito.anyBoolean(), Mockito.anyBoolean(), any());
     }
 
     void verifyAbortedAsForbidden(ContainerRequestContext context) {
@@ -114,4 +178,53 @@ public class RbacFilterTest {
         };
     }
 
+    @Test
+    void testHostGroupsToUUIDs() {
+        assertNull(RbacFilter.hostGroupsToUUIDs(null));
+
+        UUID ungrouped = null;
+        UUID groudOne = UUID.randomUUID();
+        UUID groupTwo = UUID.randomUUID();
+
+        List<String> groupsIn = new ArrayList<String>();
+        groupsIn.add(groudOne.toString());
+        groupsIn.add((String) null);
+        groupsIn.add(groupTwo.toString());
+
+        List<UUID> expected = new ArrayList<UUID>();
+        expected.add(groudOne);
+        expected.add(ungrouped);
+        expected.add(groupTwo);
+
+        assertEquals(expected, RbacFilter.hostGroupsToUUIDs(groupsIn));
+    }
+
+    @Test
+    void testHostGroupsToUUIDsUniqeValues() {
+        UUID ungrouped = null;
+        UUID groudOne = UUID.randomUUID();
+        UUID groupTwo = UUID.randomUUID();
+
+        List<String> groupsIn = new ArrayList<String>();
+        groupsIn.add(groudOne.toString());
+        groupsIn.add(groudOne.toString());
+        groupsIn.add((String) null);
+        groupsIn.add((String) null);
+        groupsIn.add(groupTwo.toString());
+        groupsIn.add(groupTwo.toString());
+
+        List<UUID> expected = new ArrayList<UUID>();
+        expected.add(groudOne);
+        expected.add(ungrouped);
+        expected.add(groupTwo);
+
+        assertEquals(expected, RbacFilter.hostGroupsToUUIDs(groupsIn));
+    }
+
+    @Test
+    void testHostGroupsToUUIDsMalformed() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            RbacFilter.hostGroupsToUUIDs(List.of("baduuid"));
+        });
+    }
 }

@@ -21,6 +21,8 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Priority;
 import javax.enterprise.inject.Instance;
@@ -65,7 +67,7 @@ public class RbacFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         if (!isRbacEnabled) {
             // Allow all
-            setPermissionsOnPrincipals(requestContext, true, true);
+            setPermissionsOnPrincipals(requestContext, true, true, null);
             return;
         }
 
@@ -80,9 +82,18 @@ public class RbacFilter implements ContainerRequestFilter {
             return;
         }
 
+        List<UUID> hostGroupIds = null;
+        try {
+            hostGroupIds = hostGroupsToUUIDs(result.hostGroupIds());
+        } catch (Throwable e) {
+            Log.warnf("RBAC Host group parsing failed when reading %s: %s", result.hostGroupIds(), e);
+            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+            return;
+        }
+
         boolean canReadPolicies = result.canRead(APPLICATION, RESOURCE);
         boolean canWritePolicies = result.canWrite(APPLICATION, RESOURCE);
-        setPermissionsOnPrincipals(requestContext, canReadPolicies, canWritePolicies);
+        setPermissionsOnPrincipals(requestContext, canReadPolicies, canWritePolicies, hostGroupIds);
     }
 
     private RbacRaw getRbacResult() {
@@ -106,9 +117,20 @@ public class RbacFilter implements ContainerRequestFilter {
     }
 
     private void setPermissionsOnPrincipals(ContainerRequestContext requestContext,
-                                            boolean canReadPolicies, boolean canWritePolicies) {
-        user.setRbac(canReadPolicies, canWritePolicies);
+                                            boolean canReadPolicies, boolean canWritePolicies,
+                                            List<UUID> hostGroupIds) {
+        user.setRbac(canReadPolicies, canWritePolicies, hostGroupIds);
         RhIdPrincipal userPrincipal = (RhIdPrincipal) requestContext.getSecurityContext().getUserPrincipal();
-        userPrincipal.setRbac(canReadPolicies, canWritePolicies);
+        userPrincipal.setRbac(canReadPolicies, canWritePolicies, hostGroupIds);
+    }
+
+    public static List<UUID> hostGroupsToUUIDs(List<String> hostGroupIds) throws IllegalArgumentException {
+        if (hostGroupIds == null) {
+            return null;
+        }
+
+        return hostGroupIds.stream().map(
+            (String gid) -> gid != null ? UUID.fromString(gid) : null
+        ).distinct().toList();
     }
 }
