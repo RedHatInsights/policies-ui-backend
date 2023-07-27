@@ -1770,7 +1770,7 @@ class RestApiTest extends AbstractITest {
             entry.setHostName(hostName);
             entries.add(entry);
         }
-        when(policiesHistoryRepository.count(eq(orgId), eq(policyId), any())).thenReturn((long) entries.size());
-        when(policiesHistoryRepository.find(eq(orgId), eq(policyId), any())).thenReturn(entries);
+        when(policiesHistoryRepository.count(eq(orgId), eq(null), eq(policyId), any())).thenReturn((long) entries.size());
+        when(policiesHistoryRepository.find(eq(orgId), eq(null), eq(policyId), any())).thenReturn(entries);
     }
 }

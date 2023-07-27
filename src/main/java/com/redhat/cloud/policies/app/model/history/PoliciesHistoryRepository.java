@@ -32,10 +32,6 @@ public class PoliciesHistoryRepository {
 
     private static final String tableName = PoliciesHistoryEntry.class.getAnnotation(Table.class).name();
 
-    public long count(String orgId, UUID policyId, Pager pager) {
-        return count(orgId, null, policyId, pager);
-    }
-
     public long count(String orgId, List<UUID> hostGroupIds, UUID policyId, Pager pager) {
         // Base SQL query.
         String sql = String.format("SELECT COUNT(*) AS count FROM %s WHERE org_id = :orgId AND policy_id = :policyId",
@@ -55,10 +51,6 @@ public class PoliciesHistoryRepository {
         setFiltersValues(query, pager.getFilter().getItems());
 
         return (Long) query.getSingleResult();
-    }
-
-    public List<PoliciesHistoryEntry> find(String orgId, UUID policyId, Pager pager) {
-        return find(orgId, null, policyId, pager);
     }
 
     public List<PoliciesHistoryEntry> find(String orgId,  List<UUID> hostGroupIds, UUID policyId, Pager pager) {

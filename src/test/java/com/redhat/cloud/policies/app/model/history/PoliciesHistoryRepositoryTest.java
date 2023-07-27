@@ -76,73 +76,73 @@ class PoliciesHistoryRepositoryTest {
     void testPagerEmptySettings() {
         Pager pager = Pager.builder().build();
 
-        assertEquals(0, repository.count("unknown-org-id", POLICY_ID_1, pager));
-        assertEquals(0, repository.count(ORG_ID_1, UUID.randomUUID(), pager));
-        assertEquals(1, repository.count(ORG_ID_1, POLICY_ID_1, pager));
-        assertEquals(1, repository.count(ORG_ID_2, POLICY_ID_1, pager));
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(0, repository.count("unknown-org-id", null, POLICY_ID_1, pager));
+        assertEquals(0, repository.count(ORG_ID_1, null, UUID.randomUUID(), pager));
+        assertEquals(1, repository.count(ORG_ID_1, null, POLICY_ID_1, pager));
+        assertEquals(1, repository.count(ORG_ID_2, null, POLICY_ID_1, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
 
-        assertTrue(repository.find("unknown-org-id", POLICY_ID_1, pager).isEmpty());
-        assertTrue(repository.find(ORG_ID_1, UUID.randomUUID(), pager).isEmpty());
-        assertEquals(List.of(insertedEntries.get(0)), repository.find(ORG_ID_1, POLICY_ID_1, pager));
-        assertEquals(List.of(insertedEntries.get(1)), repository.find(ORG_ID_2, POLICY_ID_1, pager));
-        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertTrue(repository.find("unknown-org-id", null, POLICY_ID_1, pager).isEmpty());
+        assertTrue(repository.find(ORG_ID_1, null, UUID.randomUUID(), pager).isEmpty());
+        assertEquals(List.of(insertedEntries.get(0)), repository.find(ORG_ID_1, null, POLICY_ID_1, pager));
+        assertEquals(List.of(insertedEntries.get(1)), repository.find(ORG_ID_2, null, POLICY_ID_1, pager));
+        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerSingleEqualFilter() {
         Pager pager = Pager.builder().filter("name", EQUAL, "host-name").build();
-        assertEquals(0, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertTrue(repository.find(ORG_ID_2, POLICY_ID_2, pager).isEmpty());
+        assertEquals(0, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertTrue(repository.find(ORG_ID_2, null, POLICY_ID_2, pager).isEmpty());
     }
 
     @Test
     void testPagerSingleNotEqualFilter() {
         Pager pager = Pager.builder().filter("name", NOT_EQUAL, "red-hat").build();
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerSingleLikeFilter() {
         Pager pager = Pager.builder().filter("name", LIKE, "host-name-2").build();
-        assertEquals(3, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(3)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(3, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4), insertedEntries.get(3)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerCombinedEqAndLikeFilters() {
         Pager pager = Pager.builder().filter("id", EQUAL, HOST_ID_2).filter("name", LIKE, "bar-").build();
-        assertEquals(1, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(5)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(1, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(5)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerSingleSort() {
         Pager pager = Pager.builder().addSort("ctime", Ascending).build();
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(2), insertedEntries.get(3), insertedEntries.get(4), insertedEntries.get(5)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(2), insertedEntries.get(3), insertedEntries.get(4), insertedEntries.get(5)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testCombinedSorts() {
         Pager pager = Pager.builder().addSort("id", Descending).addSort("name", Ascending).build();
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(4), insertedEntries.get(5), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(4), insertedEntries.get(5), insertedEntries.get(2), insertedEntries.get(3)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerLimit() {
         Pager pager = Pager.builder().itemsPerPage(2).build();
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(5), insertedEntries.get(4)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
     void testPagerLimitAndOffset() {
         Pager pager = Pager.builder().itemsPerPage(1).page(3).build();
-        assertEquals(4, repository.count(ORG_ID_2, POLICY_ID_2, pager));
-        assertEquals(List.of(insertedEntries.get(3)), repository.find(ORG_ID_2, POLICY_ID_2, pager));
+        assertEquals(4, repository.count(ORG_ID_2, null, POLICY_ID_2, pager));
+        assertEquals(List.of(insertedEntries.get(3)), repository.find(ORG_ID_2, null, POLICY_ID_2, pager));
     }
 
     @Test
@@ -157,7 +157,7 @@ class PoliciesHistoryRepositoryTest {
                 .filter("id", LIKE, "bar")
                 .addSort("name", Ascending)
                 .addSort("ctime", Descending).build();
-        repository.find(ORG_ID_2, POLICY_ID_2, pager);
+        repository.find(ORG_ID_2, null, POLICY_ID_2, pager);
     }
 
     @Test
