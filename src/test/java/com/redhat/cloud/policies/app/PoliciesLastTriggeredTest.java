@@ -6,7 +6,7 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -31,8 +31,8 @@ class PoliciesLastTriggeredTest {
     private final String otherTestOrgId = "lt-test-2-org-id";
 
     @Transactional
-    @BeforeEach
-    void beforeEach() {
+    @AfterEach
+    void afterEach() {
         session.createQuery("DELETE FROM PoliciesHistoryEntry")
                 .executeUpdate();
         session.createQuery("DELETE FROM Policy where orgId = :orgId1 OR orgId= :orgId2")

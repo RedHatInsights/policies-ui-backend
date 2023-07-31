@@ -7,6 +7,9 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import org.hibernate.Session;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -23,9 +26,23 @@ class PolicyCrudServiceTest extends AbstractITest {
 
     private static final String TENANT_ID = "1234";
     private static final String ORG_ID = "org-id-1234";
+    private static final String POLICY_NAME = "my-policy";
 
     @Inject
     PoliciesHistoryTestHelper helper;
+
+    @Inject
+    Session session;
+
+    @Transactional
+    @AfterEach
+    void afterEach() {
+        session.createQuery("DELETE FROM Policy where orgId = :orgId AND name = :name")
+                .setParameter("orgId", ORG_ID)
+                .setParameter("name", POLICY_NAME)
+                .executeUpdate();
+    }
+
 
     @Test
     void test() {
@@ -68,7 +85,7 @@ class PolicyCrudServiceTest extends AbstractITest {
         policy.id = UUID.randomUUID();
         policy.customerid = TENANT_ID;
         policy.orgId = ORG_ID;
-        policy.name = "my-policy";
+        policy.name = POLICY_NAME;
         policy.conditions = "arch = \"x86_64\"";
         policy.persist();
 
