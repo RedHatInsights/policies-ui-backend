@@ -16,12 +16,11 @@
  */
 package com.redhat.cloud.policies.app;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.model.Msg;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Priority;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.validation.ValidationException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
@@ -55,8 +54,9 @@ public class EngineResponseExceptionMapper implements ResponseExceptionMapper<Ru
     private Msg getBody(Response response) {
         String msg = response.readEntity(String.class);
         if (msg != null && !msg.isEmpty()) {
-            try (Jsonb jsonb = JsonbBuilder.create()) {
-                Map<String, String> errorMap = jsonb.fromJson(msg, HashMap.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                Map<String, String> errorMap = objectMapper.readValue(msg, HashMap.class);
                 return new Msg(errorMap.get("errorMsg"));
             } catch (Exception e) {
                 return new Msg("Parsing of response failed. Status code was " + response.getStatus());

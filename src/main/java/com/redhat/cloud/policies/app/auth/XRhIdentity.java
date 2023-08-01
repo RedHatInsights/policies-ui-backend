@@ -16,12 +16,15 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
-import javax.json.bind.annotation.JsonbProperty;
 
 /**
  * Data model of the representation of a x-rh-identity header.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class XRhIdentity {
 
     public Map<String, Object> entitlements;
@@ -34,31 +37,33 @@ public class XRhIdentity {
         return identity.user.username;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Identity {
 
-        @JsonbProperty("account_number")
+        @JsonProperty("account_number")
         public String accountNumber;
 
-        @JsonbProperty("org_id")
+        @JsonProperty("org_id")
         public String orgId;
 
         public String type;
         public User user;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class User {
 
         public String email;
-        @JsonbProperty("first_name")
+        @JsonProperty("first_name")
         public String firstName;
-        @JsonbProperty("last_name")
+        @JsonProperty("last_name")
         public String lastName;
         public String username;
-        @JsonbProperty("is_active")
+        @JsonProperty("is_active")
         public boolean isActive;
-        @JsonbProperty("is_internal")
+        @JsonProperty("is_internal")
         public boolean isInternal;
-        @JsonbProperty("is_org_admin")
+        @JsonProperty("is_org_admin")
         public boolean isOrgAdmin;
     }
 }

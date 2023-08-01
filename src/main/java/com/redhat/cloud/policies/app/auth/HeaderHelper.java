@@ -16,16 +16,16 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Base64;
 import java.util.Optional;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbException;
 import javax.ws.rs.core.HttpHeaders;
 
 public abstract class HeaderHelper {
 
-    private static Jsonb jsonb = JsonbBuilder.create();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Optional<XRhIdentity> getRhIdFromHeader(HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -42,8 +42,8 @@ public abstract class HeaderHelper {
         XRhIdentity rhIdentity;
         try {
             String json_string = new String(Base64.getDecoder().decode(xRhIdHeader));
-            rhIdentity = jsonb.fromJson(json_string, XRhIdentity.class);
-        } catch (JsonbException jbe) {
+            rhIdentity = objectMapper.readValue(json_string, XRhIdentity.class);
+        } catch (JsonProcessingException jpe) {
             return Optional.empty();
         }
         return Optional.ofNullable(rhIdentity);
