@@ -48,8 +48,6 @@ import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.Json;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
@@ -59,6 +57,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 @QuarkusTest
 @QuarkusTestResource(TestLifecycleManager.class)
@@ -1025,7 +1024,7 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
-    void storeAndUpdatePolicy() {
+    void storeAndUpdatePolicy() throws Exception {
         TestPolicy tp = new TestPolicy();
         tp.actions = "notification";
         tp.conditions = "cores = 2";
@@ -1065,8 +1064,8 @@ class RestApiTest extends AbstractITest {
                         .body()
                         .asString();
 
-        Jsonb jsonb = JsonbBuilder.create();
-        TestPolicy ret = jsonb.fromJson(resp, TestPolicy.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        TestPolicy ret = objectMapper.readValue(resp, TestPolicy.class);
         assertEquals(tp.conditions, ret.conditions);
 
         assertNotNull(ret.ctime);
@@ -1202,7 +1201,7 @@ class RestApiTest extends AbstractITest {
     // Check that update is protected by RBAC.
     // we need to store as user with access first.
     @Test
-    void storeAndUpdatePolicyNoUpdateAccess() {
+    void storeAndUpdatePolicyNoUpdateAccess() throws Exception {
         TestPolicy tp = new TestPolicy();
         tp.actions = "notification";
         tp.conditions = "cores = 2";
@@ -1237,8 +1236,8 @@ class RestApiTest extends AbstractITest {
                         .body()
                         .asString();
 
-        Jsonb jsonb = JsonbBuilder.create();
-        TestPolicy ret = jsonb.fromJson(resp, TestPolicy.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        TestPolicy ret = objectMapper.readValue(resp, TestPolicy.class);
         assertEquals(tp.conditions, ret.conditions);
 
         try {

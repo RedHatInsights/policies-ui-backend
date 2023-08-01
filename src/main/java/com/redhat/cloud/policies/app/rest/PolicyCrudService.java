@@ -16,6 +16,8 @@
  */
 package com.redhat.cloud.policies.app.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.lightweight.OrgIdLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
@@ -46,7 +48,6 @@ import org.hibernate.exception.ConstraintViolationException;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.json.JsonString;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.SystemException;
@@ -127,6 +128,9 @@ public class PolicyCrudService {
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     // workaround for returning generic types: https://github.com/swagger-api/swagger-core/issues/498#issuecomment-74510379
     // This class is used only for swagger return type
@@ -625,14 +629,21 @@ public class PolicyCrudService {
             @APIResponse(responseCode = "500", description = "Internal error")
     })
     @Parameter(name = "id", description = "UUID of the policy")
-    public Response validateName(@NotNull JsonString policyName, @QueryParam("id") UUID id) {
+    public Response validateName(@NotNull String jsonPolicyName, @QueryParam("id") UUID id) {
         if (!user.canReadPolicies()) {
             return Response.status(Response.Status.FORBIDDEN).entity(new Msg(MISSING_PERMISSIONS_TO_VERIFY_POLICY)).build();
         }
 
+        String policyName;
+        try {
+            policyName = objectMapper.readValue(jsonPolicyName, String.class);
+        } catch (JsonProcessingException jpe) {
+            return Response.status(400, "Invalid policy name received in body").build();
+        }
+
         Policy policy = new Policy();
         policy.id = id;
-        policy.name = policyName.getString();
+        policy.name = policyName;
 
         Set<ConstraintViolation<Policy>> result = validator.validateProperty(policy, "name");
 

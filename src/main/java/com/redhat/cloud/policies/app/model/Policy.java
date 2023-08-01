@@ -16,6 +16,9 @@
  */
 package com.redhat.cloud.policies.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.model.filter.Filter;
@@ -30,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -44,6 +46,7 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Policy extends PanacheEntityBase {
 
     // The ID will be created by code.
@@ -51,10 +54,10 @@ public class Policy extends PanacheEntityBase {
     public
     UUID id;
 
-    @JsonbTransient
+    @JsonIgnore
     public String customerid;
 
-    @JsonbTransient
+    @JsonIgnore
     @Column(name = "org_id")
     public String orgId;
 
@@ -86,6 +89,7 @@ public class Policy extends PanacheEntityBase {
             readOnly = true,
             format = "yyyy-MM-dd hh:mm:ss.ddd",
             implementation = String.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Timestamp mtime = new Timestamp(System.currentTimeMillis());
 
     @Schema(type = SchemaType.STRING,
@@ -93,12 +97,13 @@ public class Policy extends PanacheEntityBase {
             readOnly = true,
             format = "yyyy-MM-dd hh:mm:ss.ddd",
             implementation = String.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Timestamp ctime = new Timestamp(System.currentTimeMillis());
 
     @Column(name = "last_triggered", insertable = false, updatable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private long lastTriggered;
 
-    @JsonbTransient
     public void setMtime(String mtime) {
         this.mtime = Timestamp.valueOf(mtime);
     }
@@ -111,8 +116,6 @@ public class Policy extends PanacheEntityBase {
         return mtime.toString();
     }
 
-
-    @JsonbTransient
     public void setLastTriggered(long tTime) {
         lastTriggered = tTime;
     }
@@ -121,7 +124,6 @@ public class Policy extends PanacheEntityBase {
         return lastTriggered;
     }
 
-    @JsonbTransient
     public void setCtime(String ctime) {
         this.ctime = Timestamp.valueOf(ctime);
     }
