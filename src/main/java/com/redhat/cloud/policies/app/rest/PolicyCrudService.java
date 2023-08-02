@@ -823,10 +823,10 @@ public class PolicyCrudService {
     private ResponseBuilder buildHistoryResponse(UUID policyId, Pager pager) {
         List<HistoryItem> items;
 
-        long totalCount = policiesHistoryRepository.count(user.getOrgId(), null, policyId, pager);
+        long totalCount = policiesHistoryRepository.count(user.getOrgId(), user.getHostGroupIds(), policyId, pager);
 
         if (totalCount > 0) {
-            items = policiesHistoryRepository.find(user.getOrgId(), null, policyId, pager)
+            items = policiesHistoryRepository.find(user.getOrgId(), user.getHostGroupIds(), policyId, pager)
                     .stream().map(historyEntry ->
                             new HistoryItem(historyEntry.getCtime(), historyEntry.getHostId(), historyEntry.getHostName())
                     ).collect(Collectors.toList());

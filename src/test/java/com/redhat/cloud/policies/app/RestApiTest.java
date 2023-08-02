@@ -51,6 +51,9 @@ import javax.json.Json;
 import javax.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
@@ -72,6 +75,10 @@ class RestApiTest extends AbstractITest {
 
     @Inject
     Session session;
+
+    final String TENANT_ID = "1234";
+    final String ORG_ID = "org-id-1234";
+    final UUID POLICY_ID = UUID.fromString("8671900e-9d31-47bf-9249-8f45698ede72");
 
     @AfterEach
     void cleanUUID() {
@@ -113,6 +120,24 @@ class RestApiTest extends AbstractITest {
         JsonPath jsonPath =
                 given()
                         .header(authHeader)
+                        .when().get(API_BASE_V1_0 + "/policies/")
+                        .then()
+                        .statusCode(200)
+                        .extract().body().jsonPath();
+
+        assertEquals(numberOfPolicies, jsonPath.getList("data").size());
+        Map<String, Object> data = (Map<String, Object>) jsonPath.getList("data").get(0);
+        assertTrue(data.containsKey("lastTriggered"));
+    }
+
+    @Test
+    void testGetPoliciesWithGroupsRestrictions() {
+
+        long numberOfPolicies = countPoliciesInDB();
+
+        JsonPath jsonPath =
+                given()
+                        .header(authHeaderHostGroups)
                         .when().get(API_BASE_V1_0 + "/policies/")
                         .then()
                         .statusCode(200)
@@ -681,6 +706,42 @@ class RestApiTest extends AbstractITest {
         List<Map<String, Object>> returnedBody = jsonPath.getList("data");
         try {
             assertEquals(2, returnedBody.size());
+            Map<String, Object> map = returnedBody.get(0);
+            assertEquals("VM 22", map.get("hostName"));
+            assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
+        } finally {
+            deletePolicyById(uuid);
+        }
+    }
+
+    @Test
+    void getOnePolicyHistoryWithGroupsRestrictions() {
+        String uuid = setupPolicyForHistory();
+
+        List<UUID> userHostGroups = new ArrayList<UUID>(); // from rbac_example_groups.json
+        userHostGroups.add(UUID.fromString("78e3dc30-cec3-4b49-be2d-37482c74a9ac"));
+        userHostGroups.add(UUID.fromString("79e3dc30-cec3-4b49-be2d-37482c74a9ad"));
+        userHostGroups.add(null); // ungrouped
+
+        int count = 3;
+        mockPoliciesHistory("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", "VM 22", count, userHostGroups);
+
+        ExtractableResponse<Response> er =
+                given()
+                        .header(authHeaderHostGroups)
+                        .contentType(ContentType.JSON)
+                        .when()
+                        .get(API_BASE_V1_0 + "/policies/8671900e-9d31-47bf-9249-8f45698ede72/history/trigger")
+                        .then()
+                        .statusCode(200)
+                        .extract();
+
+        JsonPath jsonPath = er.body().jsonPath();
+        int totalCount = jsonPath.getInt("meta.count");
+        assertEquals(count, totalCount);
+        List<Map<String, Object>> returnedBody = jsonPath.getList("data");
+        try {
+            assertEquals(count, returnedBody.size());
             Map<String, Object> map = returnedBody.get(0);
             assertEquals("VM 22", map.get("hostName"));
             assertEquals("dce4760b-d796-48f0-a7b9-7a07a6a45d1d", map.get("id"));
@@ -1757,20 +1818,39 @@ class RestApiTest extends AbstractITest {
     }
 
     private void mockPoliciesHistory(String hostId, String hostName, int count) {
-        String tenantId = "1234";
-        String orgId = "org-id-1234";
-        UUID policyId = UUID.fromString("8671900e-9d31-47bf-9249-8f45698ede72");
         List<PoliciesHistoryEntry> entries = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
-            entry.setTenantId(tenantId);
-            entry.setOrgId(orgId);
-            entry.setPolicyId(policyId.toString());
+            entry.setTenantId(TENANT_ID);
+            entry.setOrgId(ORG_ID);
+            entry.setPolicyId(POLICY_ID.toString());
             entry.setHostId(hostId);
             entry.setHostName(hostName);
             entries.add(entry);
         }
-        when(policiesHistoryRepository.count(eq(orgId), eq(null), eq(policyId), any())).thenReturn((long) entries.size());
-        when(policiesHistoryRepository.find(eq(orgId), eq(null), eq(policyId), any())).thenReturn(entries);
+        when(policiesHistoryRepository.count(eq(orgId), eq(null), eq(POLICY_ID), any())).thenReturn((long) entries.size());
+        when(policiesHistoryRepository.find(eq(orgId), eq(null), eq(POLICY_ID), any())).thenReturn(entries);
+    }
+
+    private void mockPoliciesHistory(String hostId, String hostName, int count, List<UUID> userHostGroups) {
+        List<PoliciesHistoryEntry> entries = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            PoliciesHistoryEntry entry = new PoliciesHistoryEntry();
+            // cycle host grops in each iteration
+            UUID hostGroup = userHostGroups.get(i % userHostGroups.size());
+            entry.setTenantId(TENANT_ID);
+            entry.setOrgId(ORG_ID);
+            entry.setPolicyId(POLICY_ID.toString());
+            entry.setHostId(hostId);
+            entry.setHostName(hostName);
+            if (hostGroup != null) {
+                entry.setHostGroups(JsonArray.of(JsonObject.of("id", hostGroup.toString())));
+            } else {
+                entry.setHostGroups(JsonArray.of());
+            }
+            entries.add(entry);
+        }
+        when(policiesHistoryRepository.count(eq(orgId), eq(userHostGroups), eq(POLICY_ID), any())).thenReturn((long) entries.size());
+        when(policiesHistoryRepository.find(eq(orgId), eq(userHostGroups), eq(POLICY_ID), any())).thenReturn(entries);
     }
 }

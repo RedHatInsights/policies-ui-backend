@@ -103,6 +103,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     private void mockRbac() {
         // RBac server
         String fullAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_full_access.json", false);
+        String accessWithGroupsRbac = HeaderHelperTest.getStringFromFile("rbac_example_groups.json", false);
         String noAccessRbac = HeaderHelperTest.getStringFromFile("rbac_example_no_access.json", false);
         mockServer
                 .when(request()
@@ -114,6 +115,19 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                         .withStatusCode(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(fullAccessRbac)
+
+                );
+
+        mockServer
+                .when(request()
+                        .withPath("/api/rbac/v1/access/")
+                        .withQueryStringParameter("application", "policies,inventory")
+                        .withHeader("x-rh-identity", ".*XNlci13aXRoLWdyb3VwcyJ9") // user with host groups
+                )
+                .respond(response()
+                        .withStatusCode(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(accessWithGroupsRbac)
 
                 );
         mockServer
