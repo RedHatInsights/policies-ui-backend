@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 abstract class AbstractITest {
 
     static Header authHeader;       // User with access rights
+    static Header authHeaderHostGroups; // User with host groups restrictions
     static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
     static Header authHeaderNoAccount; // Account number is empty
 
@@ -59,8 +60,13 @@ abstract class AbstractITest {
         authHeader = new Header("x-rh-identity", rhid);
         accountId = getAccountId(rhid.trim());
         orgId = getOrgId(rhid.trim());
+
+        rhid = HeaderHelperTest.getStringFromFile("rhid_host_groups.txt", false);
+        authHeaderHostGroups = new Header("x-rh-identity", rhid);
+
         rhid = HeaderHelperTest.getStringFromFile("rhid_hans.txt", false);
         authRbacNoAccess = new Header("x-rh-identity", rhid);
+
         rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt", false);
         authHeaderNoAccount = new Header("x-rh-identity", rhid);
     }

@@ -12,6 +12,10 @@
     },
     "data": [
       {
+        "permission": "policies:*:*",
+        "resourceDefinitions": []
+      },
+      {
         "permission": "inventory:hosts:read",
         "resourceDefinitions": [
           {
