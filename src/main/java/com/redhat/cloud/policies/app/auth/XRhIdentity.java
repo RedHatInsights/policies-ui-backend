@@ -61,8 +61,6 @@ public class XRhIdentity {
         public String username;
         @JsonProperty("is_active")
         public boolean isActive;
-        @JsonProperty("is_internal")
-        public boolean isInternal;
         @JsonProperty("is_org_admin")
         public boolean isOrgAdmin;
     }
