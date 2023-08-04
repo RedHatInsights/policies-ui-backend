@@ -174,7 +174,7 @@ public class RbacFilterTest {
             @Override
             public boolean isSecure() { return true; }
             @Override
-            public String getAuthenticationScheme() { return "BASIC"; }
+            public String getAuthenticationScheme() { return "X-RH-IDENTITY"; }
         };
     }
 
