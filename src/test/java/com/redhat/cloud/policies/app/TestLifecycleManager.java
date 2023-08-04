@@ -109,7 +109,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies,inventory")
-                        .withHeader("x-rh-identity", ".*vZS1kb2UtdXNlciJ9") // normal user all allowed
+                        .withHeader("x-rh-identity", ".*OiJqb2UtZG9lLXVzZXIifQo=") // normal user all allowed
                 )
                 .respond(response()
                         .withStatusCode(200)
@@ -122,7 +122,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies,inventory")
-                        .withHeader("x-rh-identity", ".*XNlci13aXRoLWdyb3VwcyJ9") // user with host groups
+                        .withHeader("x-rh-identity", ".*ZG9lLXVzZXItd2l0aC1ncm91cHMifQo=") // user with host groups
                 )
                 .respond(response()
                         .withStatusCode(200)
@@ -134,7 +134,7 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies,inventory")
-                        .withHeader("x-rh-identity", ".*hbXBmLXVzZXIifQ==") // hans dampf user nothing allowed
+                        .withHeader("x-rh-identity", ".*W1lIjoiaGFucy1kYW1wZi11c2VyIn0K") // hans dampf user nothing allowed
                 )
                 .respond(response()
                         .withStatusCode(200)
