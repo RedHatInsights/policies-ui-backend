@@ -15,8 +15,6 @@ fi
 DOCKER_CONF="$PWD/.docker"
 mkdir -p "$DOCKER_CONF"
 
-echo "GIT BRANCH: $GIT_BRANCH"
-
 IMAGE="quay.io/cloudservices/policies-ui-backend"
 IMAGE_TAG=$(git rev-parse --short=7 HEAD)
 SECURITY_COMPLIANCE_TAG="sc-$(date +%Y%m%d)-$(git rev-parse --short=7 HEAD)"
@@ -26,7 +24,7 @@ docker --config="$DOCKER_CONF" login -u="$RH_REGISTRY_USER" -p="$RH_REGISTRY_TOK
 docker --config="$DOCKER_CONF" build -t "${IMAGE}:${IMAGE_TAG}" . -f src/main/docker/Dockerfile.jvm
 docker --config="$DOCKER_CONF" push "${IMAGE}:${IMAGE_TAG}"
 
-if [[ $GIT_BRANCH == *"security-compliance"* ]]; then
+if [[ $GIT_BRANCH == "origin/security-compliance" ]]; then
     docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
     docker --config="$DOCKER_CONF" push "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
 else
