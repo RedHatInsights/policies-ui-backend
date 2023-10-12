@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://cloud.redhat.com",
+      "url": "https://console.redhat.com",
       "description": "Production Server",
       "variables": {
         "basePath": {
