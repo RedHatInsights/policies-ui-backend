@@ -30,7 +30,8 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.micrometer.core.annotation.Timed;
-import io.opentracing.Tracer;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
 import io.quarkus.logging.Log;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -94,7 +95,6 @@ public class PolicyCrudService {
     public static final String MISSING_PERMISSIONS_TO_VERIFY_POLICY = "Missing permissions to verify policy";
     public static final String MISSING_PERMISSIONS_TO_UPDATE_POLICY = "Missing permissions to update policy";
 
-    public static final String ERROR_STRING = "error";
     public static final String CTIME_STRING = "ctime";
 
     @Inject
@@ -122,9 +122,6 @@ public class PolicyCrudService {
 
     @Inject
     Validator validator;
-
-    @Inject
-    Tracer tracer;
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
@@ -804,14 +801,16 @@ public class PolicyCrudService {
             builder = Response.status(Response.Status.NOT_FOUND);
         } else {
 
+            Span span = Span.current();
             try {
                 Pager pager = PagingUtils.extractPager(uriInfo);
                 builder = buildHistoryResponse(policyId, pager);
             } catch (IllegalArgumentException iae) {
-                tracer.activeSpan().setTag(ERROR_STRING, true);
+                span.setStatus(StatusCode.ERROR);
                 builder = Response.status(400, iae.getMessage());
             } catch (Exception e) {
-                tracer.activeSpan().setTag(ERROR_STRING, true);
+                span.setStatus(StatusCode.ERROR);
+                span.recordException(e);
                 String msg = "Retrieval of history failed with: " + e.getMessage();
                 Log.warn(msg);
                 builder = Response.serverError().entity(msg);
