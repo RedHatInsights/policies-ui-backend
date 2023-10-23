@@ -30,6 +30,7 @@ class NonApplicationRootPathTest {
     @Test
     void testMetrics() {
         given()
+                .header("Accept", "text/plain")
                 .when().get("/metrics")
                 .then()
                 .statusCode(200)
