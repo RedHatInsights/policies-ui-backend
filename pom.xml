@@ -135,6 +135,13 @@
       <version>1.0.1</version>
     </dependency>
 
+    <!-- Temporary backport fixes -->
+    <dependency>
+      <groupId>com.squareup.okio</groupId>
+      <artifactId>okio</artifactId>
+      <version>1.17.6</version>
+    </dependency>
+
     <!-- Configuration dependencies -->
     <dependency>
       <groupId>com.redhat.cloud.common</groupId>
