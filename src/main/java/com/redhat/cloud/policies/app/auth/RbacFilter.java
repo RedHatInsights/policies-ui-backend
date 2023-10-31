@@ -104,6 +104,7 @@ public class RbacFilter implements ContainerRequestFilter {
             result = rbacClient.getRbacInfo(user.getRawRhIdHeader());
         } catch (Throwable e) {
             Log.warn("RBAC call failed", e);
+            span.recordException(e);
             return null;
         } finally {
             long t2 = System.currentTimeMillis();
