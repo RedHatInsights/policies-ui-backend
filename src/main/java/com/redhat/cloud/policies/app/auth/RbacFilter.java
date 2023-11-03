@@ -39,7 +39,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.redhat.cloud.policies.app.auth.models.RbacRaw;
 
 @Provider
-@Priority(Priorities.HEADER_DECORATOR + 1)
+@Priority(Priorities.USER - 10)
 public class RbacFilter implements ContainerRequestFilter {
 
     public static final String APPLICATION = "policies";
