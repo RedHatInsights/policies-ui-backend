@@ -58,14 +58,14 @@ public class RbacFilter implements ContainerRequestFilter {
     Instance<Boolean> warnSlowRbac;
 
     @ConfigProperty(name = "warn.rbac.tolerance", defaultValue = "1S")
-    Duration warnSlowRbacTolerance;
+    Instance<Duration> warnSlowRbacTolerance;
 
     @ConfigProperty(name = "rbac.enabled", defaultValue = "true")
-    Boolean isRbacEnabled;
+    Instance<Boolean> isRbacEnabled;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        if (!isRbacEnabled) {
+        if (!isRbacEnabled.get()) {
             // Allow all
             setPermissionsOnPrincipals(requestContext, true, true, null);
             return;
@@ -107,7 +107,7 @@ public class RbacFilter implements ContainerRequestFilter {
             return null;
         } finally {
             long t2 = System.currentTimeMillis();
-            if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.toMillis()) {
+            if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.get().toMillis()) {
                 Log.warnf("Call to RBAC took %d ms for orgId %s", t2 - t1, user.getOrgId());
             }
             span.finish();
