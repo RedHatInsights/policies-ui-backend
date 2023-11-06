@@ -30,7 +30,6 @@ import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import com.redhat.cloud.policies.app.rest.utils.PagingUtils;
 import io.micrometer.core.annotation.Timed;
-import io.opentracing.Tracer;
 import io.quarkus.logging.Log;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -122,9 +121,6 @@ public class PolicyCrudService {
 
     @Inject
     Validator validator;
-
-    @Inject
-    Tracer tracer;
 
     @Inject
     PoliciesHistoryRepository policiesHistoryRepository;
@@ -808,10 +804,8 @@ public class PolicyCrudService {
                 Pager pager = PagingUtils.extractPager(uriInfo);
                 builder = buildHistoryResponse(policyId, pager);
             } catch (IllegalArgumentException iae) {
-                tracer.activeSpan().setTag(ERROR_STRING, true);
                 builder = Response.status(400, iae.getMessage());
             } catch (Exception e) {
-                tracer.activeSpan().setTag(ERROR_STRING, true);
                 String msg = "Retrieval of history failed with: " + e.getMessage();
                 Log.warn(msg);
                 builder = Response.serverError().entity(msg);
