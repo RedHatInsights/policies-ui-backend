@@ -16,9 +16,6 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
@@ -44,9 +41,6 @@ public class RbacFilter implements ContainerRequestFilter {
 
     public static final String APPLICATION = "policies";
     public static final String RESOURCE = "policies";
-
-    @Inject
-    Tracer tracer;
 
     @Inject
     RbacClient rbacClient;
@@ -99,8 +93,7 @@ public class RbacFilter implements ContainerRequestFilter {
     private RbacRaw getRbacResult() {
         RbacRaw result;
         long t1 = System.currentTimeMillis();
-        Span span = tracer.buildSpan("getRBac").start();
-        try (Scope ignored = tracer.scopeManager().activate(span)) {
+        try {
             result = rbacClient.getRbacInfo(user.getRawRhIdHeader());
         } catch (Throwable e) {
             Log.warn("RBAC call failed", e);
@@ -110,7 +103,6 @@ public class RbacFilter implements ContainerRequestFilter {
             if (warnSlowRbac.get() && (t2 - t1) > warnSlowRbacTolerance.get().toMillis()) {
                 Log.warnf("Call to RBAC took %d ms for orgId %s", t2 - t1, user.getOrgId());
             }
-            span.finish();
         }
 
         return result;
