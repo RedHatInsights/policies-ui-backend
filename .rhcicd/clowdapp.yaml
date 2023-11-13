@@ -75,7 +75,7 @@ objects:
               - name: QUARKUS_LOG_SENTRY
                 value: ${SENTRY_ENABLED}
               - name: QUARKUS_LOG_SENTRY_DSN
-                value: https://1c5a768a78364f8e8f18c962b89bab49@o271843.ingest.sentry.io/5217683?environment=${ENV_NAME}
+                value: "${SENTRY_DSN}"
               - name: QUARKUS_LOG_SENTRY_ENVIRONMENT
                 value: ${ENV_NAME}
               - name: QUARKUS_REST_CLIENT_RBAC_READ_TIMEOUT
@@ -192,3 +192,6 @@ parameters:
   - name: SENTRY_ENABLED
     description: Enable Sentry (or not)
     value: "false"
+  - name: SENTRY_DSN
+    description: Sentry DSN URL
+    value: ""
