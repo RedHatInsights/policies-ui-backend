@@ -149,6 +149,24 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
+    void testGetPoliciesUsingServiceAccount() {
+
+        long numberOfPolicies = countPoliciesInDB();
+
+        JsonPath jsonPath =
+                given()
+                        .header(authHeaderSA)
+                        .when().get(API_BASE_V1_0 + "/policies/")
+                        .then()
+                        .statusCode(200)
+                        .extract().body().jsonPath();
+
+        assertEquals(numberOfPolicies, jsonPath.getList("data").size());
+        Map<String, Object> data = (Map<String, Object>) jsonPath.getList("data").get(0);
+        assertTrue(data.containsKey("lastTriggered"));
+    }
+
+    @Test
     void testGetPoliciesNoAuth() {
 
         given()

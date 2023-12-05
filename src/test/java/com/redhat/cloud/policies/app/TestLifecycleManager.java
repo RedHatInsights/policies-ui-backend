@@ -105,7 +105,8 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
                 .when(request()
                         .withPath("/api/rbac/v1/access/")
                         .withQueryStringParameter("application", "policies,inventory")
-                        .withHeader("x-rh-identity", ".*OiJqb2UtZG9lLXVzZXIifQo=") // normal user all allowed
+                        // normal user and service account all allowed
+                        .withHeader("x-rh-identity", ".*(OiJqb2UtZG9lLXVzZXIifQo=|0YTcwLTRkZDMtOTYwMC00MjNmYjViMWEyZWIifX19)")
                 )
                 .respond(response()
                         .withStatusCode(200)
