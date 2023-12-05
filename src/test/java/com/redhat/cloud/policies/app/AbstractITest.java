@@ -40,6 +40,7 @@ abstract class AbstractITest {
 
     static Header authHeader;       // User with access rights
     static Header authHeaderHostGroups; // User with host groups restrictions
+    static Header authHeaderSA;         // Service Account with access rights
     static Header authRbacNoAccess; // Hans Dampf has no rbac access rights
     static Header authHeaderNoAccount; // Account number is empty
 
@@ -69,6 +70,9 @@ abstract class AbstractITest {
 
         rhid = HeaderHelperTest.getStringFromFile("rhid_no_account.txt", false);
         authHeaderNoAccount = new Header("x-rh-identity", rhid);
+
+        rhid = HeaderHelperTest.getStringFromFile("rhid_sa.txt", false);
+        authHeaderSA = new Header("x-rh-identity", rhid);
     }
 
     static String getAccountId(String identity) {

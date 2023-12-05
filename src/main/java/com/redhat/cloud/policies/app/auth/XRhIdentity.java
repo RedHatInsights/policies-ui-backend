@@ -27,13 +27,25 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class XRhIdentity {
 
+    public static final String SERVICE_ACCOUNT_TYPE = "ServiceAccount";
+
     public Map<String, Object> entitlements;
     public Identity identity;
 
     public String getUsername() {
-        if (identity == null || identity.user == null) {
+        if (identity == null) {
             return null;
         }
+        if (identity.type != null && identity.type.equals(SERVICE_ACCOUNT_TYPE)) {
+            if (identity.serviceAccount == null) {
+                return null;
+            }
+
+            return identity.serviceAccount.username;
+        } else if (identity.user == null) {
+            return null;
+        }
+
         return identity.user.username;
     }
 
@@ -48,6 +60,9 @@ public class XRhIdentity {
 
         public String type;
         public User user;
+
+        @JsonProperty("service_account")
+        public ServiceAccount serviceAccount;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -63,5 +78,12 @@ public class XRhIdentity {
         public boolean isActive;
         @JsonProperty("is_org_admin")
         public boolean isOrgAdmin;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ServiceAccount {
+        @JsonProperty("client_id")
+        public String clientId;
+        public String username;
     }
 }
