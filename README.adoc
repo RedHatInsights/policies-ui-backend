@@ -74,6 +74,41 @@ A header `TotalCount` returns the total number of policies.
 curl  -Hx-rh-identity:`cat src/test/resources/rhid.txt` http://localhost:8080/api/policies/v1.0/facts
 ----
 
+=== Testing
+
+
+To run unit and integration tests use:
+[source,shell]
+----
+./mvnw test
+----
+
+==== Testing with Podman
+
+The project uses testcontainers utility to provide supporting services, such as database.
+
+To use testcontainers with Podman, first enable podman's socket:
+
+[source,shell]
+----
+systemctl --user enable --now podman.socket
+----
+
+and (on some systems) set:
+[source,shell]
+----
+export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
+----
+
+It is recommended to turn off RYUK container, as it is not supported by Podman:
+[source,shell]
+----
+export TESTCONTAINERS_RYUK_DISABLED=true
+----
+
+See also https://java.testcontainers.org/supported_docker_environment/#podman.
+
+
 === Validating (and storing) a policy
 
 A POST to the /policies endpoint validates and potentially stores a passed policy.
