@@ -1,6 +1,6 @@
 package com.redhat.cloud.policies.app.model.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.redhat.cloud.policies.app.EnvironmentInfo;
 import org.junit.jupiter.api.BeforeEach;

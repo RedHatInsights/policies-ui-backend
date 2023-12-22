@@ -18,13 +18,14 @@ package com.redhat.cloud.policies.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.model.Msg;
+import jakarta.annotation.Priority;
+
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Priority;
-import javax.validation.ValidationException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.validation.ValidationException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
 
 /**

@@ -16,7 +16,7 @@
  */
 package com.redhat.cloud.policies.app.model.pager;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;

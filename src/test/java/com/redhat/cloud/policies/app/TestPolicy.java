@@ -17,7 +17,7 @@
 package com.redhat.cloud.policies.app;
 
 import java.util.UUID;
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 
 /**
  * Stripped down policy object for testing purposes.

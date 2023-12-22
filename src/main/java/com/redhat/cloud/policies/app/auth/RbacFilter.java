@@ -21,16 +21,16 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Priority;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 
 import io.quarkus.logging.Log;
+import jakarta.annotation.Priority;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.redhat.cloud.policies.app.auth.models.RbacRaw;
