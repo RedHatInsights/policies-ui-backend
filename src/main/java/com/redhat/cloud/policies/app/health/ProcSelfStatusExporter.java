@@ -20,10 +20,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
+import jakarta.annotation.PostConstruct;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.util.Scanner;
 import java.util.Set;

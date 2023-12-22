@@ -19,10 +19,10 @@ package com.redhat.cloud.policies.app.model.validation;
 import com.redhat.cloud.policies.app.EnvironmentInfo;
 
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Do the validation if passed actions are good or not.

@@ -16,10 +16,11 @@
  */
 package com.redhat.cloud.policies.app.auth;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Produces;
+import jakarta.annotation.Priority;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Produces;
 
 /**
  * Produce Principals for injection

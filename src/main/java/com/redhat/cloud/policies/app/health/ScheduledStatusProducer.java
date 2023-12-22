@@ -22,11 +22,11 @@ import com.redhat.cloud.policies.app.model.Policy;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
+import jakarta.annotation.PostConstruct;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 

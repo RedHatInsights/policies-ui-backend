@@ -1,9 +1,9 @@
 package com.redhat.cloud.policies.app.lightweight;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static java.time.ZoneOffset.UTC;

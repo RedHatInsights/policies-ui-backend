@@ -30,9 +30,9 @@ import static org.mockito.Mockito.when;
 
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
@@ -46,9 +46,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.validation.constraints.NotNull;
+import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonArray;

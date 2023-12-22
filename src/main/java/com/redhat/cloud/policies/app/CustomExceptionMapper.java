@@ -2,12 +2,12 @@ package com.redhat.cloud.policies.app;
 
 import com.redhat.cloud.policies.app.model.Msg;
 
-import javax.json.stream.JsonParsingException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.json.stream.JsonParsingException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Generic exception mapper to catch runtime exceptions and make us

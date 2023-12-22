@@ -17,7 +17,7 @@
 package com.redhat.cloud.policies.app.model;
 
 import java.util.UUID;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Provider for UUIDs

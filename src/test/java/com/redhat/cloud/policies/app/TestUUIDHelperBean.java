@@ -17,10 +17,11 @@
 package com.redhat.cloud.policies.app;
 
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
+import jakarta.annotation.Priority;
+
 import java.util.UUID;
-import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * Provider for UUIDs for Tests. A test can

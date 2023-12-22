@@ -2,9 +2,9 @@ package com.redhat.cloud.policies.app;
 
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
+import jakarta.annotation.PostConstruct;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 @Startup

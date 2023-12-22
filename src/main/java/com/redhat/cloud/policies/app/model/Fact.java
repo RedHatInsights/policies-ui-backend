@@ -18,9 +18,9 @@ package com.redhat.cloud.policies.app.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 public class Fact extends PanacheEntity {

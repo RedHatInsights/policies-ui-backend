@@ -17,7 +17,7 @@
 package com.redhat.cloud.policies.app.auth;
 
 import java.security.Principal;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * An implementation of SecurityContext, that gets the data
