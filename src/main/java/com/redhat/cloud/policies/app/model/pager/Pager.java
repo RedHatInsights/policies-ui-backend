@@ -90,6 +90,7 @@ public class Pager {
             Object transformedValue = value;
             if (operator.equals(Filter.Operator.BOOLEAN_IS)) {
                 transformedValue = Boolean.valueOf(value);
+                operator = Filter.Operator.EQUAL; // force to equal for HQL
             }
 
             this.filter.and(column, operator, transformedValue);

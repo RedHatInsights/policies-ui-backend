@@ -144,7 +144,7 @@ public class Policy extends PanacheEntityBase {
                 .keySet()
                 .forEach(FilterableColumn::fromName);
 
-        Filter filter = pager.getFilter().and("org_id", Filter.Operator.EQUAL, orgid);
+        Filter filter = pager.getFilter().and("orgId", Filter.Operator.EQUAL, orgid);
 
         PanacheQuery<Policy> panacheQuery = find(
                 filter.getQuery(),
@@ -171,7 +171,7 @@ public class Policy extends PanacheEntityBase {
                 .keySet()
                 .forEach(FilterableColumn::fromName);
 
-        Filter filter = pager.getFilter().and("org_id", Filter.Operator.EQUAL, orgId);
+        Filter filter = pager.getFilter().and("orgId", Filter.Operator.EQUAL, orgId);
 
 
         PanacheQuery<Policy> panacheQuery = find(
@@ -183,11 +183,11 @@ public class Policy extends PanacheEntityBase {
     }
 
     public static Policy findById(String orgId, UUID theId) {
-        return find("org_id = ?1 and id = ?2", orgId, theId).firstResult();
+        return find("orgId = ?1 and id = ?2", orgId, theId).firstResult();
     }
 
     public static Policy findByName(String orgId, String name) {
-        return find("org_id = ?1 and name = ?2", orgId, name).firstResult();
+        return find("orgId = ?1 and name = ?2", orgId, name).firstResult();
     }
 
     public void delete(Policy policy) {
@@ -249,7 +249,7 @@ public class Policy extends PanacheEntityBase {
     enum FilterableColumn {
         NAME("name"),
         DESCRIPTION("description"),
-        IS_ENABLED("is_enabled");
+        IS_ENABLED("isEnabled");
 
         private final String name;
 
