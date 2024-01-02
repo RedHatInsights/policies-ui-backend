@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
-import jakarta.validation.constraints.NotNull;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonArray;
@@ -878,7 +877,6 @@ class RestApiTest extends AbstractITest {
     }
 
 
-    @NotNull
     private String setupPolicyForHistory() {
         TestPolicy tp = new TestPolicy();
         tp.actions = "notification";
