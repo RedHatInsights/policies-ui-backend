@@ -111,8 +111,8 @@ public class RbacFilterTest {
         verify(context, Mockito.times(0)).abortWith(Mockito.any());
 
         // two calls are made, as user and userPrincipal are the same instances
-        ArgumentCaptor<List<UUID>> userSetGroupIds = ArgumentCaptor.forClass(new ArrayList<UUID>().getClass());
-        ArgumentCaptor<List<UUID>> userPrincipalSetGroupIds = ArgumentCaptor.forClass(new ArrayList<UUID>().getClass());
+        ArgumentCaptor<List<UUID>> userSetGroupIds = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<UUID>> userPrincipalSetGroupIds = ArgumentCaptor.forClass(List.class);
         verify(user, times(2))
             .setRbac(Mockito.eq(true), Mockito.eq(false), userSetGroupIds.capture());
         verify(userPrincipal, times(2))
