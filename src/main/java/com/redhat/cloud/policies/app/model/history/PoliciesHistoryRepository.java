@@ -6,7 +6,6 @@ import io.quarkus.logging.Log;
 import io.quarkus.panache.common.Sort;
 
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.LongType;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -43,7 +42,7 @@ public class PoliciesHistoryRepository {
         Log.tracef("SQL query ready to be executed: %s", sql);
 
         NativeQuery<?> query = session.createNativeQuery(sql)
-                .addScalar("count", LongType.INSTANCE)
+                .addScalar("count", Long.class)
                 .setParameter("orgId", orgId)
                 .setParameter("policyId", policyId.toString());
 
