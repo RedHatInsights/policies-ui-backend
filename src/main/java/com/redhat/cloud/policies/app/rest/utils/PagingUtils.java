@@ -117,6 +117,7 @@ public class PagingUtils {
                 String value = queryParams.getFirst(key);
                 Filter.Operator operator;
                 if (column.equals("is_enabled")) {
+                    column = "isEnabled";
                     operator = Filter.Operator.BOOLEAN_IS;
                     if (value == null || value.isEmpty()) {
                         value = "true";

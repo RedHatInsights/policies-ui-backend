@@ -131,13 +131,13 @@ class PagingUtilsTest {
     @Test
     public void extractFilterBooleanOperator() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[is_enabled]=true&filter:op[is_enabled]=boolean_is");
-        assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
+        assertEquals(true, pager.getFilter().getParameters().map().get("isEnabled"));
     }
 
     @Test
     public void extractFilterBooleanOperator2() throws URISyntaxException {
         Pager pager = getPagerFromUriString("https://foo?filter[is_enabled]=true");
-        assertEquals(true, pager.getFilter().getParameters().map().get("is_enabled"));
+        assertEquals(true, pager.getFilter().getParameters().map().get("isEnabled"));
     }
 
     @Test
