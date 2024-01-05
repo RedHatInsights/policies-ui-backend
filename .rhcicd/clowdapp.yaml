@@ -109,7 +109,6 @@ objects:
               containers:
                 - name: policies-db-cleaner
                   image: quay.io/cloudservices/postgresql-rds:12-1
-                  restartPolicy: Never
                   resources:
                     requests:
                       cpu: 100m
