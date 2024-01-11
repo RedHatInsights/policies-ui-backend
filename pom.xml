@@ -29,7 +29,7 @@
     <version.testcontainers>1.19.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-netty-no-dependencies.version>5.14.0</mockserver-netty-no-dependencies.version>
-    <clowder-quarkus-config-source.version>2.0.0</clowder-quarkus-config-source.version>
+    <clowder-quarkus-config-source.version>2.2.0</clowder-quarkus-config-source.version>
   </properties>
 
   <dependencyManagement>
