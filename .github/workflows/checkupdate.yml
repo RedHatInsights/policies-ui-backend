@@ -32,6 +32,6 @@ jobs:
           git add -A
           git commit -m "chore(image): update and rebuild image" || echo "No new changes"
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           title: 'Update ubi-minimal:latest image digest'
