@@ -57,7 +57,21 @@ public class PagingUtils {
     Pager extract(UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
-        String itemsPerPage = queryParams.getFirst(QUERY_LIMIT);
+        // Set paging limits
+        setPaging(queryParams.getFirst(QUERY_LIMIT), queryParams.getFirst(QUERY_OFFSET));
+
+        // Handle sorting parts
+        List<String> columns = queryParams.get(QUERY_COLUMN);
+        List<String> directions = queryParams.get(QUERY_DIRECTION);
+        addSorting(columns, directions);
+
+        // Handle filters
+        addFilters(queryParams);
+
+        return pageBuilder.build();
+    }
+
+    void setPaging(String itemsPerPage, String page) {
         boolean usingNoLimit = false;
         if (itemsPerPage != null) {
             try {
@@ -77,7 +91,6 @@ public class PagingUtils {
         }
 
         if (!usingNoLimit) {
-            String page = queryParams.getFirst(QUERY_OFFSET);
             if (page != null) {
                 try {
                     pageBuilder.page(Integer.parseInt(page));
@@ -90,9 +103,9 @@ public class PagingUtils {
                 }
             }
         }
+    }
 
-        List<String> columns = queryParams.get(QUERY_COLUMN);
-        List<String> directions = queryParams.get(QUERY_DIRECTION);
+    void addSorting(List<String> columns, List<String> directions) {
         if (columns != null) {
             for (int i = 0; i < columns.size(); ++i) {
                 String column = columns.get(i);
@@ -114,7 +127,9 @@ public class PagingUtils {
 
             pageBuilder.addSort("mtime", direction);
         }
+    }
 
+    void addFilters(MultivaluedMap<String, String> queryParams) {
         for (String key : queryParams.keySet()) {
             Matcher filterMatcher = FILTER_PATTERN.matcher(key);
             if (filterMatcher.find()) {
@@ -148,8 +163,6 @@ public class PagingUtils {
                 pageBuilder.filter(column, operator, value);
             }
         }
-
-        return pageBuilder.build();
     }
 
     /**
