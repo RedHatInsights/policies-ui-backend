@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
+import com.redhat.cloud.policies.app.model.annotations.QueryableColumn;
 import com.redhat.cloud.policies.app.model.filter.Filter;
 import com.redhat.cloud.policies.app.model.validation.ValidActionS;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
@@ -65,12 +66,15 @@ public class Policy extends PanacheEntityBase {
     @NotEmpty
     @Schema(description = "Name of the rule. Must be unique per customer organization.")
     @Size(max = 150)
+    @QueryableColumn(filterable = true)
     public String name;
 
     @Schema(description = "A short description of the policy.")
+    @QueryableColumn(filterable = true)
     public String description;
 
     @Column(name = "is_enabled")
+    @QueryableColumn(filterable = true)
     public boolean isEnabled;
 
     @Schema(description = "Condition string.",
@@ -90,6 +94,7 @@ public class Policy extends PanacheEntityBase {
             format = "yyyy-MM-dd hh:mm:ss.ddd",
             implementation = String.class)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @QueryableColumn
     private Timestamp mtime = new Timestamp(System.currentTimeMillis());
 
     @Schema(type = SchemaType.STRING,
@@ -102,6 +107,7 @@ public class Policy extends PanacheEntityBase {
 
     @Column(name = "last_triggered", insertable = false, updatable = false)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @QueryableColumn
     private long lastTriggered;
 
     public void setMtime(String mtime) {
