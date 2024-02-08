@@ -37,6 +37,13 @@ import java.util.regex.Pattern;
 
 public class PagingUtils {
 
+    final static String QUERY_OFFSET = "offset";
+    final static String QUERY_LIMIT = "limit";
+    final static String QUERY_COLUMN = "sortColumn";
+    final static String QUERY_DIRECTION = "sortDirection";
+    final static Pattern FILTER_PATTERN = Pattern.compile("^filter\\[(.+)\\]$");
+    final static String FILTER_OP = "filter:op";
+
     private final Pager.PagerBuilder pageBuilder;
 
     private PagingUtils() {
@@ -49,13 +56,6 @@ public class PagingUtils {
 
     Pager extract(UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-
-        final String QUERY_OFFSET = "offset";
-        final String QUERY_LIMIT = "limit";
-        final String QUERY_COLUMN = "sortColumn";
-        final String QUERY_DIRECTION = "sortDirection";
-        final Pattern FILTER_PATTERN = Pattern.compile("^filter\\[(.+)\\]$");
-        final String FILTER_OP = "filter:op";
 
         String itemsPerPage = queryParams.getFirst(QUERY_LIMIT);
         boolean usingNoLimit = false;
