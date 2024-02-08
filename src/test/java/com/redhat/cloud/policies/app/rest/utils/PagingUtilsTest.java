@@ -3,19 +3,39 @@ package com.redhat.cloud.policies.app.rest.utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
+import com.redhat.cloud.policies.app.model.ColumnGetter;
+import com.redhat.cloud.policies.app.model.ColumnInfo;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
 import io.quarkus.panache.common.Sort;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.specimpl.ResteasyUriInfo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PagingUtilsTest {
+
+    ColumnGetter columnGetter;
+
+    @BeforeEach
+    void mockColumnGetter() {
+        this.columnGetter = mock(ColumnGetter.class);
+
+        when(columnGetter.get(eq("foo"))).thenReturn(new ColumnInfo("foo", "foo", true, true));
+        when(columnGetter.get(eq("bar"))).thenReturn(new ColumnInfo("bar", "bar", true, true));
+        when(columnGetter.get(eq("foobar"))).thenReturn(new ColumnInfo("foobar", "foobar", false, true));
+        when(columnGetter.get(eq("is_enabled"))).thenReturn(new ColumnInfo("is_enabled", "isEnabled", true, true));
+        when(columnGetter.get(eq("guy"))).thenReturn(new ColumnInfo("guy", "guy", true, true));
+    }
 
     @Test
     void extractDefaultPager() throws URISyntaxException {
@@ -35,7 +55,7 @@ class PagingUtilsTest {
     void extractPagerInvalidOffset() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=bar&limit=100"));
         assertThrows(IllegalArgumentException.class, () -> {
-            PagingUtils.extractPager(info);
+            PagingUtils.extractPager(info, columnGetter);
         });
     }
 
@@ -43,7 +63,7 @@ class PagingUtilsTest {
     void extractPagerInvalidLimit() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?offset=12&limit=foo"));
         assertThrows(IllegalArgumentException.class, () -> {
-            PagingUtils.extractPager(info);
+            PagingUtils.extractPager(info, columnGetter);
         });
     }
 
@@ -74,10 +94,27 @@ class PagingUtilsTest {
     }
 
     @Test
+    public void testExtractPagerSortWrongField() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?sortColumn=nonexisting&sortDirection=asc"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info, columnGetter);
+        });
+    }
+
+    @Test
+    public void testExtractPagerSortWrongField2() throws URISyntaxException {
+        when(columnGetter.get(eq("filteronly"))).thenReturn(new ColumnInfo("filteronly", "filteronly", true, false));
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?sortColumn=filteronly"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info, columnGetter);
+        });
+    }
+
+    @Test
     public void testExtractPagerSortWrongDirection() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?sortColumn=foo&sortDirection=bar"));
         assertThrows(IllegalArgumentException.class, () -> {
-            PagingUtils.extractPager(info);
+            PagingUtils.extractPager(info, columnGetter);
         });
     }
 
@@ -101,7 +138,7 @@ class PagingUtilsTest {
 
     private Pager getPagerFromUriString(String str) throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI(str));
-        return PagingUtils.extractPager(info);
+        return PagingUtils.extractPager(info, columnGetter);
     }
 
     @Test
@@ -120,12 +157,26 @@ class PagingUtilsTest {
     @Test
     public void extractBadFilterBooleanOperator() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=boolean_is"));
-        try {
-            PagingUtils.extractPager(info);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        fail("Should not reach this");
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info, columnGetter);
+        });
+    }
+
+    @Test
+    public void extractBadFilterField() throws URISyntaxException {
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[nonexistent]=value"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info, columnGetter);
+        });
+    }
+
+    @Test
+    public void extractBadFilterField2() throws URISyntaxException {
+        when(columnGetter.get(eq("sortableonly"))).thenReturn(new ColumnInfo("sortableonly", "sortableonly", false, true));
+        UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[sortableonly]=value"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            PagingUtils.extractPager(info, columnGetter);
+        });
     }
 
     @Test
@@ -142,6 +193,7 @@ class PagingUtilsTest {
 
     @Test
     public void extractFilterMultipleParams() throws URISyntaxException {
+        when(columnGetter.get(eq("raw"))).thenReturn(new ColumnInfo("raw", "raw", true, true));
         Pager pager = getPagerFromUriString("https://foo?filter[guy]=brush&filter[foo]=bar&filter[raw]=ewf");
         assertEquals("brush", pager.getFilter().getParameters().map().get("guy"));
         assertEquals("bar", pager.getFilter().getParameters().map().get("foo"));
@@ -152,7 +204,7 @@ class PagingUtilsTest {
     public void extractFilterInvalidOperator() throws URISyntaxException {
         UriInfo info = new ResteasyUriInfo(new URI("https://foo?filter[bar]=true&filter:op[bar]=wrong"));
         assertThrows(IllegalArgumentException.class, () -> {
-            PagingUtils.extractPager(info);
+            PagingUtils.extractPager(info, columnGetter);
         });
     }
 

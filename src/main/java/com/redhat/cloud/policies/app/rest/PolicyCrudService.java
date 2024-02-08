@@ -21,10 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.cloud.policies.app.lightweight.OrgIdLatestUpdateRepository;
 import com.redhat.cloud.policies.app.lightweight.LightweightEngine;
 import com.redhat.cloud.policies.app.auth.RhIdPrincipal;
+import com.redhat.cloud.policies.app.model.ColumnGetter;
 import com.redhat.cloud.policies.app.model.Msg;
 import com.redhat.cloud.policies.app.model.Policy;
 import com.redhat.cloud.policies.app.model.UUIDHelperBean;
 import com.redhat.cloud.policies.app.model.engine.HistoryItem;
+import com.redhat.cloud.policies.app.model.history.PoliciesHistoryEntry;
 import com.redhat.cloud.policies.app.model.history.PoliciesHistoryRepository;
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
@@ -244,7 +246,7 @@ public class PolicyCrudService {
 
         Page<Policy> page;
         try {
-            Pager pager = PagingUtils.extractPager(uriInfo);
+            Pager pager = PagingUtils.extractPager(uriInfo, new ColumnGetter(Policy.class));
             page = Policy.pagePoliciesForCustomer(entityManager, user.getOrgId(), pager);
         } catch (IllegalArgumentException iae) {
             return Response.status(400, iae.getLocalizedMessage()).build();
@@ -320,7 +322,7 @@ public class PolicyCrudService {
 
         List<UUID> uuids;
         try {
-            Pager pager = PagingUtils.extractPager(uriInfo);
+            Pager pager = PagingUtils.extractPager(uriInfo, new ColumnGetter(Policy.class));
             uuids = Policy.getPolicyIdsForCustomer(entityManager, user.getOrgId(), pager);
 
         } catch (IllegalArgumentException iae) {
@@ -801,7 +803,7 @@ public class PolicyCrudService {
         } else {
 
             try {
-                Pager pager = PagingUtils.extractPager(uriInfo);
+                Pager pager = PagingUtils.extractPager(uriInfo, new ColumnGetter(PoliciesHistoryEntry.class));
                 builder = buildHistoryResponse(policyId, pager);
             } catch (IllegalArgumentException iae) {
                 builder = Response.status(400, iae.getMessage());
