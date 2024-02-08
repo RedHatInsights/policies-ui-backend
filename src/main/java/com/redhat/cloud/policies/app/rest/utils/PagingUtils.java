@@ -20,12 +20,15 @@ import static java.lang.Integer.max;
 
 import com.redhat.cloud.policies.app.model.pager.Page;
 import com.redhat.cloud.policies.app.model.pager.Pager;
+import com.redhat.cloud.policies.app.model.ColumnGetter;
+import com.redhat.cloud.policies.app.model.ColumnInfo;
 import com.redhat.cloud.policies.app.model.filter.Filter;
 import io.quarkus.panache.common.Sort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -45,13 +48,15 @@ public class PagingUtils {
     final static String FILTER_OP = "filter:op";
 
     private final Pager.PagerBuilder pageBuilder;
+    private final ColumnGetter columnGetter;
 
-    private PagingUtils() {
+    private PagingUtils(ColumnGetter columnGetter) {
         this.pageBuilder = Pager.builder();
+        this.columnGetter = columnGetter;
     }
 
-    public static Pager extractPager(UriInfo uriInfo) {
-        return new PagingUtils().extract(uriInfo);
+    public static Pager extractPager(UriInfo uriInfo, ColumnGetter columnGetter) {
+        return new PagingUtils(columnGetter).extract(uriInfo);
     }
 
     Pager extract(UriInfo uriInfo) {
@@ -108,13 +113,13 @@ public class PagingUtils {
     void addSorting(List<String> columns, List<String> directions) {
         if (columns != null) {
             for (int i = 0; i < columns.size(); ++i) {
-                String column = columns.get(i);
+                ColumnInfo column = getSortableColumn(columns.get(i));
                 Sort.Direction direction = Sort.Direction.Ascending;
                 if (directions != null && i < directions.size()) {
                     String dir = directions.get(i);
                     direction = getDirection(dir, columns.get(i));
                 }
-                pageBuilder.addSort(column, direction);
+                pageBuilder.addSort(column.getFieldName(), direction);
             }
         } else {
             // default sort is by mtime descending, so that newest end up on top
@@ -133,17 +138,16 @@ public class PagingUtils {
         for (String key : queryParams.keySet()) {
             Matcher filterMatcher = FILTER_PATTERN.matcher(key);
             if (filterMatcher.find()) {
-                String column = filterMatcher.group(1);
+                ColumnInfo column = getFilterableColumn(filterMatcher.group(1));
                 String value = queryParams.getFirst(key);
                 Filter.Operator operator;
-                if (column.equals("is_enabled")) {
-                    column = "isEnabled";
+                if (column.getName().equals("is_enabled")) {
                     operator = Filter.Operator.BOOLEAN_IS;
                     if (value == null || value.isEmpty()) {
                         value = "true";
                     } else {
                       if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
-                        throw new IllegalArgumentException("Bad value for filter[isEnabled]");
+                        throw new IllegalArgumentException("Bad value for filter[is_enabled]");
                       }
                       else {
                         value = String.valueOf(Boolean.parseBoolean(value));
@@ -151,16 +155,16 @@ public class PagingUtils {
                     }
 
                 } else {
-                    String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column));
+                    String operatorString = queryParams.getFirst(String.format("%s[%s]", FILTER_OP, column.getName()));
                     operator = Filter.Operator.EQUAL;
                     if (operatorString != null) {
                         if (operatorString.equalsIgnoreCase(Filter.Operator.BOOLEAN_IS.name())) {
-                            throw new IllegalArgumentException("Invalid filter: Column [" + column + "] does not allow boolean_is");
+                            throw new IllegalArgumentException("Invalid filter: Column [" + column.getName() + "] does not allow boolean_is");
                         }
                         operator = Filter.Operator.fromName(operatorString);
                     }
                 }
-                pageBuilder.filter(column, operator, value);
+                pageBuilder.filter(column.getFieldName(), operator, value);
             }
         }
     }
@@ -187,6 +191,22 @@ public class PagingUtils {
                 throw new IllegalArgumentException("Unexpected sort order found: [" + column + "]");
         }
         return direction;
+    }
+
+    ColumnInfo getSortableColumn(String name) {
+        ColumnInfo info = columnGetter.get(name);
+        if (info == null || !info.isSortable()) {
+            throw new IllegalArgumentException("Unknown sortable column requested: [" + name + "]");
+        }
+        return info;
+    }
+
+    ColumnInfo getFilterableColumn(String name) {
+        ColumnInfo info = columnGetter.get(name);
+        if (info == null || !info.isFilterable()) {
+            throw new IllegalArgumentException("Unknown filterable column requested: [" + name + "]");
+        }
+        return info;
     }
 
     public static <T> ResponseBuilder responseBuilder(Page<T> page) {

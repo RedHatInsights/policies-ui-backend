@@ -160,6 +160,7 @@ public class PoliciesHistoryRepository {
         switch (filterItem.field) {
             case "id":
                 return "host_id";
+            case "hostName": // pager provides field names
             case "name":
                 return "host_name";
             case "ctime":
@@ -186,6 +187,7 @@ public class PoliciesHistoryRepository {
         switch (sortColumn) {
             case "id":
                 return Optional.of("host_id");
+            case "hostName": // pager provides field names
             case "name":
                 return Optional.of("host_name");
             case "ctime":
