@@ -37,12 +37,17 @@ import java.util.regex.Pattern;
 
 public class PagingUtils {
 
-    private PagingUtils() {
+    private final Pager.PagerBuilder pageBuilder;
 
+    private PagingUtils() {
+        this.pageBuilder = Pager.builder();
     }
 
     public static Pager extractPager(UriInfo uriInfo) {
-        Pager.PagerBuilder pageBuilder = Pager.builder();
+        return new PagingUtils().extract(uriInfo);
+    }
+
+    Pager extract(UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
         final String QUERY_OFFSET = "offset";
