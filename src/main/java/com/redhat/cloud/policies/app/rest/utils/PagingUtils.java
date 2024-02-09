@@ -49,7 +49,7 @@ public class PagingUtils {
         final String QUERY_LIMIT = "limit";
         final String QUERY_COLUMN = "sortColumn";
         final String QUERY_DIRECTION = "sortDirection";
-        final Pattern FILTER_PATTERN = Pattern.compile("filter\\[(.+)\\]");
+        final Pattern FILTER_PATTERN = Pattern.compile("^filter\\[(.+)\\]$");
         final String FILTER_OP = "filter:op";
 
         String itemsPerPage = queryParams.getFirst(QUERY_LIMIT);
