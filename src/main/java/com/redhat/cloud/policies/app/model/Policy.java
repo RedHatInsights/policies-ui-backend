@@ -139,17 +139,6 @@ public class Policy extends PanacheEntityBase {
     }
 
     public static Page<Policy> pagePoliciesForCustomer(EntityManager em, String orgid, Pager pager) {
-
-        for (Sort.Column column : pager.getSort().getColumns()) {
-            SortableColumn.fromName(column.getName());
-        }
-
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
-
         Filter filter = pager.getFilter().and("orgId", Filter.Operator.EQUAL, orgid);
 
         PanacheQuery<Policy> panacheQuery = find(
@@ -170,13 +159,6 @@ public class Policy extends PanacheEntityBase {
     }
 
     public static List<UUID> getPolicyIdsForCustomer(EntityManager em, String orgId, Pager pager) {
-
-        pager.getFilter()
-                .getParameters()
-                .map()
-                .keySet()
-                .forEach(FilterableColumn::fromName);
-
         Filter filter = pager.getFilter().and("orgId", Filter.Operator.EQUAL, orgId);
 
 
@@ -222,56 +204,6 @@ public class Policy extends PanacheEntityBase {
         sb.append(", mtime=").append(mtime);
         sb.append('}');
         return sb.toString();
-    }
-
-    enum SortableColumn {
-        NAME("name"),
-        DESCRIPTION("description"),
-        IS_ENABLED("is_enabled"),
-        LAST_TRIGGERED("last_triggered"),
-        MTIME("mtime");
-
-        private final String name;
-
-        SortableColumn(final String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public static SortableColumn fromName(String columnName) {
-            for (SortableColumn column : SortableColumn.values()) {
-                if (column.getName().equals(columnName)) {
-                    return column;
-                }
-            }
-            throw new IllegalArgumentException("Unknown Policy.SortableColumn requested: [" + columnName + "]");
-        }
-
-    }
-
-    enum FilterableColumn {
-        NAME("name"),
-        DESCRIPTION("description"),
-        IS_ENABLED("isEnabled");
-
-        private final String name;
-
-        FilterableColumn(final String name) {
-            this.name = name;
-        }
-
-        public static FilterableColumn fromName(String columnName) {
-            Optional<FilterableColumn> result = Arrays.stream(FilterableColumn.values())
-                    .filter(val -> val.name.equals(columnName))
-                    .findAny();
-            if (result.isPresent()) {
-                return result.get();
-            }
-            throw new IllegalArgumentException("Unknown Policy.FilterableColumn requested: [" + columnName + "]");
-        }
     }
 }
 
