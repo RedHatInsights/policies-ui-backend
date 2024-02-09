@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 import java.util.Objects;
 import java.util.UUID;
 import io.vertx.core.json.JsonArray;
@@ -42,6 +44,11 @@ public class PoliciesHistoryEntry {
     @Column(name = "host_name")
     @QueryableColumn(name = "name", filterable = true)
     private String hostName;
+
+    // Virtual alternative field `hostName` for backward compatiblity.
+    @QueryableColumn(name = "hostName")
+    @Transient
+    private String name;
 
     @Type(JsonBinaryType.class)
     @Column(name = "host_groups", nullable = false, columnDefinition = JsonTypes.JSON_BIN)
