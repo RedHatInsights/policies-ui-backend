@@ -57,6 +57,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -227,7 +228,7 @@ class RestApiTest extends AbstractITest {
 
 
     @Test
-    void testGetPoliciesSort() {
+    void testGetPoliciesSortedByDesc() {
         given()
                 .header(authHeader)
                 .when()
@@ -239,7 +240,41 @@ class RestApiTest extends AbstractITest {
     }
 
     @Test
-    void testGetPoliciesSort2() {
+    void testGetPoliciesSortedByName() {
+        given()
+                .header(authHeader)
+                .when()
+                .get(API_BASE_V1_0 + "/policies/?sortColumn=name")
+                .then()
+                .statusCode(200)
+                .assertThat()
+                .body(" data.get(0).name", is("1st policy"));
+    }
+
+    @Disabled("Disabled until the fix is provided")
+    @Test
+    void testGetPoliciesSortedByEnabled() {
+        given()
+                .header(authHeader)
+                .when()
+                .get(API_BASE_V1_0 + "/policies/?sortColumn=is_enabled")
+                .then()
+                .statusCode(200);
+    }
+
+    @Disabled("Disabled until the fix is provided")
+    @Test
+    void testGetPoliciesSortedByLastTriggered() {
+        given()
+                .header(authHeader)
+                .when()
+                .get(API_BASE_V1_0 + "/policies/?sortColumn=last_triggered")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void testGetPoliciesDefaultMtimeAscSort() {
         given()
                 .header(authHeader)
                 .when()
