@@ -71,7 +71,7 @@ class PolicyCrudServiceTest extends AbstractITest {
                 .pathParam("id", policyId)
                 .queryParam("filter[name]", "foo")
                 .queryParam("filter:op[name]", "LIKE")
-                .queryParam("sortColumn", "name")
+                .queryParam("sortColumn", "hostName")
                 .queryParam("sortDirection", "desc")
                 .queryParam("limit", 2)
                 .queryParam("offset", 2)
