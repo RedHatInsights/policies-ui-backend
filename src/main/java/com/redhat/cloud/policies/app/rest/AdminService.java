@@ -33,7 +33,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,14 +118,14 @@ public class AdminService {
         long totalCount = Policy.count();
         Map<String, Integer> buckets = populateBuckets();
 
-        List<Object[]> list = entityManager.createNativeQuery("select p.customerId,count (p) from policy p group by p.customerId")
+        List<Object[]> list = entityManager.createNativeQuery("select p.customerid,count (p) from policy p group by p.customerid")
                 .getResultList();
         System.out.println(list.size());
         long cCount = list.size();
 
         Map<String, Object> idsMap = new HashMap<>();
         idsMap.put("ids", filterIds);
-        long fcount = Policy.count("customerId in (:ids)", idsMap);
+        long fcount = Policy.count("customerid in (:ids)", idsMap);
 
         final long[] filteredIdsCount = {0};
         list.forEach(i -> {
@@ -135,7 +134,7 @@ public class AdminService {
             if (filterIds.contains(cid)) {
                 filteredIdsCount[0]++;
             }
-            int count = ((BigInteger) i[1]).intValue();
+            long count = (long) i[1];
             putToBucket(buckets, count);
         });
 
@@ -158,7 +157,7 @@ public class AdminService {
         return map;
     }
 
-    private void putToBucket(Map<String, Integer> buckets, int count) {
+    private void putToBucket(Map<String, Integer> buckets, long count) {
         String bucket;
 
         if (count < 5) {
