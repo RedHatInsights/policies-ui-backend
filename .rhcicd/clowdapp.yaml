@@ -140,6 +140,39 @@ objects:
                         secretKeyRef:
                           name: policies-ui-backend-db
                           key: ${DB_SECRET_PASSWORD_KEY}
+  - apiVersion: metrics.console.redhat.com/v1alpha1
+    kind: FloorPlan
+    metadata:
+      name: policies-backend-hms
+    spec:
+      database:
+        secretName: ${FLOORIST_DB_SECRET_NAME}
+      objectStore:
+        secretName: ${FLOORIST_HMS_BUCKET_SECRET_NAME}
+      logLevel: ${FLOORIST_LOGLEVEL}
+      suspend: ${{FLOORIST_SUSPEND}}
+      disabled: ${{FLOORIST_DISABLED}}
+      queries:
+        - prefix: hms_analytics/policies/status
+          chunksize: 100000
+          query: >-
+            SELECT
+              P.id AS policy_id,
+              P.org_id,
+              P.is_enabled,
+              P.mtime AS policy_mtime,
+              P.ctime AS policy_ctime,
+              P.actions,
+              PH.host_id,
+              PH.ctime AS policy_hit_time
+            FROM
+              policy P
+            LEFT JOIN
+              policies_history AS PH
+            ON
+              P.id = uuid(PH.policy_id);
+
+
 parameters:
   - name: CLOUDWATCH_ENABLED
     description: Enable Cloudwatch (or not)
@@ -171,6 +204,22 @@ parameters:
   - name: ENV_NAME
     description: ClowdEnvironment name (ephemeral, stage, prod)
     required: true
+  - name: FLOORIST_SUSPEND
+    description: Disable Floorist cronjob execution
+    required: true
+    value: 'true'
+  - name: FLOORIST_DISABLED
+    description: Determines whether to build the Floorist Job.
+    value: 'false'
+  - name: FLOORIST_DB_SECRET_NAME
+    description: database secret name
+    value: policies-ui-backend-db
+  - name: FLOORIST_HMS_BUCKET_SECRET_NAME
+    description: HMS bucket secret name
+    value: floorist-bucket
+  - name: FLOORIST_LOGLEVEL
+    description: Floorist loglevel config
+    value: 'INFO'
   - name: IMAGE
     description: Image URL
     value: quay.io/cloudservices/policies-ui-backend
