@@ -12,7 +12,7 @@ if [[ -z "$RH_REGISTRY_USER" || -z "$RH_REGISTRY_TOKEN" ]]; then
     exit 1
 fi
 
-DOCKER_CONF="$PWD/.docker"
+DOCKER_CONF="$(mktemp -d)/.docker"
 mkdir -p "$DOCKER_CONF"
 
 IMAGE="quay.io/cloudservices/policies-ui-backend"
