@@ -27,6 +27,7 @@ import java.util.Map;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpResponse;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager {
 
@@ -64,7 +65,9 @@ public class TestLifecycleManager implements QuarkusTestResourceLifecycleManager
     }
 
     void setupPostgres(Map<String, String> props) {
-        postgreSQLContainer = new PostgreSQLContainer<>("postgres");
+        postgreSQLContainer = new PostgreSQLContainer<>(
+            DockerImageName.parse("docker.io/postgres").asCompatibleSubstituteFor("postgres")
+        );
         postgreSQLContainer.start();
         String jdbcUrl = postgreSQLContainer.getJdbcUrl();
         props.put("quarkus.datasource.jdbc.url", jdbcUrl);
