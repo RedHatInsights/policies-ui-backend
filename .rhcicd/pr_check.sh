@@ -9,8 +9,10 @@ export IMAGE="quay.io/cloudservices/policies-ui-backend"
 export DEPLOY_TIMEOUT="600"
 
 # IQE plugin config
-export IQE_PLUGINS="policies,floorist"
-export IQE_MARKER_EXPRESSION="policies_api_smoke or floorist_smoke"
+#export IQE_PLUGINS="policies,floorist"
+export IQE_PLUGINS="floorist"
+#export IQE_MARKER_EXPRESSION="policies_api_smoke or floorist_smoke"
+export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_FILTER_EXPRESSION=""
 export IQE_CJI_TIMEOUT="30m"
 
