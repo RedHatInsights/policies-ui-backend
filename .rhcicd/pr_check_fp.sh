@@ -5,12 +5,12 @@ set -exv
 # Clowder config
 export APP_NAME="policies"
 export COMPONENT_NAME="policies-ui-backend"
-export IMAGE="quay.io/cloudservices/policies-ui-backend"
+export IMAGE="quay.io/cloudservices/iqe-tests:latest"
 export DEPLOY_TIMEOUT="600"
 
 # IQE plugin config
-export IQE_PLUGINS="policies"
-export IQE_MARKER_EXPRESSION="policies_api_smoke"
+export IQE_PLUGINS="floorist"
+export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_FILTER_EXPRESSION=""
 export IQE_CJI_TIMEOUT="30m"
 
