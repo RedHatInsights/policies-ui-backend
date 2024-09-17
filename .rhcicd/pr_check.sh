@@ -36,3 +36,11 @@ cat << EOF > ${WORKSPACE}/artifacts/junit-dummy.xml
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
 EOF
+
+# adding floorist tests.
+# export IMAGE="quay.io/cloudservices/policies-ui-backend"
+export IQE_PLUGINS="floorist"
+export IQE_MARKER_EXPRESSION="floorist_smoke"
+
+# Run smoke tests with ClowdJobInvocation
+source $CICD_ROOT/cji_smoke_test.sh
