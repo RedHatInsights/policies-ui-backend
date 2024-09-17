@@ -38,13 +38,11 @@ cat << EOF > ${WORKSPACE}/artifacts/junit-dummy.xml
 EOF
 
 # adding floorist tests.
-# export IMAGE="quay.io/cloudservices/policies-ui-backend"
 export COMPONENT_NAME="policies-engine"
+# I also need to pass in FLOORPLAN_2_TEST.
 export IQE_ENV_VARS="FLOORPLAN_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
-# Maybe the failure was for another reason?? Below is not needed.
-# I also need to pass in FLOORPLAN_2_TEST.
 export IMAGE="quay.io/cloudservices/iqe-tests:floorist"
 # Run smoke tests with ClowdJobInvocation
 source $CICD_ROOT/cji_smoke_test.sh
