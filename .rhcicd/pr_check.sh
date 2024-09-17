@@ -39,7 +39,7 @@ EOF
 
 # adding floorist tests.
 # export IMAGE="quay.io/cloudservices/policies-ui-backend"
-export COMPONENT_NAME="policies-engine FLOORPLAN_TO_TEST=policies-backend-hms"
+export COMPONENT_NAME="policies-engine --env-var FLOORPLAN_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
 # Maybe the failure was for another reason?? Below is not needed.
