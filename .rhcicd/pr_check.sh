@@ -37,6 +37,6 @@ mkdir -p $WORKSPACE/artifacts
 export IQE_ENV_VARS="FLOORPLAN_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
-export IQE_IMAGE_TAG="quay.io/cloudservices/iqe-tests:floorist"
+export IQE_IMAGE_TAG="floorist"
 # Run smoke tests with ClowdJobInvocation
 source $CICD_ROOT/cji_smoke_test.sh
