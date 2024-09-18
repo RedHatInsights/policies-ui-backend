@@ -34,6 +34,7 @@ mkdir -p $WORKSPACE/artifacts
 
 # adding floorist tests.
 # I also need to pass in FLOORPLAN_2_TEST.
+export COMPONENT_NAME="floorist-iqe"
 export IQE_ENV_VARS="FLOORPLAN_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
