@@ -42,4 +42,4 @@ export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_IMAGE_TAG="floorist"
 # Run smoke tests with ClowdJobInvocation
 MY_CICD_REPO_URL=https://raw.githubusercontent.com/prichard77/cicd-tools/OverideCjiName
-source MY_CICD_REPO_URL/cji_smoke_test.sh
+source https://raw.githubusercontent.com/prichard77/cicd-tools/OverideCjiName/cji_smoke_test.sh
