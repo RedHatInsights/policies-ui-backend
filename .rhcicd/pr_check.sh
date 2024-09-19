@@ -33,11 +33,13 @@ source $CICD_ROOT/cji_smoke_test.sh
 mkdir -p $WORKSPACE/artifacts
 
 # adding floorist tests.
+export COMPONENT_NAME="policies-engine"
+export IQE_CJI_NAME="floorist-iqe"
 # I also need to pass in FLOORPLAN_2_TEST.
-export COMPONENT_NAME="floorist-iqe"
 export IQE_ENV_VARS="FLOORPLAN_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_IMAGE_TAG="floorist"
 # Run smoke tests with ClowdJobInvocation
-source $CICD_ROOT/cji_smoke_test.sh
+MY_CICD_REPO_URL=https://raw.githubusercontent.com/prichard77/cicd-tools/OverideCjiName
+source MY_CICD_REPO_URL/cji_smoke_test.sh
