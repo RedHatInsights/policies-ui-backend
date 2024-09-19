@@ -43,4 +43,4 @@ export IQE_IMAGE_TAG="floorist"
 # Run smoke tests with ClowdJobInvocation
 echo $PWD
 #MY_CICD_REPO_URL=https://raw.githubusercontent.com/prichard77/cicd-tools/OverideCjiName
-source ./cji_smoke_test.sh
+source ./.rhcicd/cji_smoke_test.sh
