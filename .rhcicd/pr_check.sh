@@ -29,16 +29,16 @@ source $CICD_ROOT/deploy_ephemeral_env.sh
 # Run smoke tests with ClowdJobInvocation
 source $CICD_ROOT/cji_smoke_test.sh
 
-# Until test results produce a junit XML file, create a dummy result file so Jenkins will pass
 mkdir -p $WORKSPACE/artifacts
 
-# adding floorist tests.
+# Update IQE plugin config to run floorist plugin tests.
 export COMPONENT_NAME="policies-ui-backend"
 export IQE_CJI_NAME="floorist"
-# I also need to pass in FLOORPLAN_2_TEST.
+# Pass in FLOORPLANS_2_TEST.
 export IQE_ENV_VARS="FLOORPLANS_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_IMAGE_TAG="floorist"
+
 # Run smoke tests with ClowdJobInvocation
 source $CICD_ROOT/cji_smoke_test.sh
