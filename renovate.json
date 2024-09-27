@@ -1,0 +1,11 @@
+{
+    "extends": [
+        "github>konflux-ci/mintmaker//config/renovate/renovate.json"
+    ],
+    "schedule": [
+        "* 3-10 * * 1"
+    ],
+    "ignorePaths": [
+      ".pre-commit-config.yaml"
+    ]
+}
