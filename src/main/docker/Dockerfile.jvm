@@ -18,7 +18,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Install java
 # Also set up permissions for user `1001`
 RUN microdnf install -y openssl ca-certificates ${JAVA_PACKAGE} \
-    && microdnf update \
+    && microdnf update -y \
     && microdnf clean all \
     && mkdir /deployments \
     && chown 1001 /deployments \
