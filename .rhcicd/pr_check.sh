@@ -35,7 +35,7 @@ mkdir -p $WORKSPACE/artifacts
 export COMPONENT_NAME="policies-ui-backend"
 export IQE_CJI_NAME="floorist"
 # Pass in FLOORPLANS_2_TEST.
-export IQE_ENV_VARS="FLOORPLANS_TO_TEST=policies-backend-hms"
+# export IQE_ENV_VARS="FLOORPLANS_TO_TEST=policies-backend-hms"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_IMAGE_TAG="floorist"
