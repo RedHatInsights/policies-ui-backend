@@ -35,7 +35,7 @@ mkdir -p $WORKSPACE/artifacts
 export COMPONENT_NAME="policies-ui-backend"
 export IQE_CJI_NAME="floorist"
 # Pass in COMPONENT_NAME.
-export IQE_ENV_VARS="COMPONENT_NAME=policies-ui-backend"
+export IQE_ENV_VARS="COMPONENT_NAME=$COMPONENT_NAME"
 export IQE_PLUGINS="floorist"
 export IQE_MARKER_EXPRESSION="floorist_smoke"
 export IQE_IMAGE_TAG="floorist"
