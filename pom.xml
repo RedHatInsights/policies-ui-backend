@@ -13,7 +13,7 @@
     <maven-minimum-version>3.8.6</maven-minimum-version>
     <java-version>17</java-version>
 
-    <compiler-plugin.version>3.10.1</compiler-plugin.version>
+    <compiler-plugin.version>3.12.0</compiler-plugin.version>
     <maven.compiler.release>${java-version}</maven.compiler.release>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <java.release>${java-version}</java.release>
@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>com.redhat.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.2.12.Final-redhat-00002</quarkus.platform.version>
+    <quarkus.platform.version>3.8.3.redhat-00003</quarkus.platform.version>
     <surefire-plugin.version>3.0.0</surefire-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <jacoco.version>0.8.12</jacoco.version>
@@ -60,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-rest-client</artifactId>
+      <artifactId>quarkus-resteasy-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
