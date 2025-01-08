@@ -32,11 +32,11 @@ objects:
             image: ${IMAGE}:${IMAGE_TAG}
             resources:
               requests:
-                cpu: ${CPU_REQUEST}
-                memory: ${MEMORY_REQUEST}
+                cpu: ${CPU_REQUEST_BACKEND}
+                memory: ${MEMORY_REQUEST_BACKEND}
               limits:
-                cpu: ${CPU_LIMIT}
-                memory: ${MEMORY_LIMIT}
+                cpu: ${CPU_LIMIT_BACKEND}
+                memory: ${MEMORY_LIMIT_BACKEND}
             volumes:
               - name: rds-client-ca
                 emptyDir: {}
@@ -177,10 +177,10 @@ parameters:
   - name: CLOUDWATCH_ENABLED
     description: Enable Cloudwatch (or not)
     value: "false"
-  - name: CPU_LIMIT
+  - name: CPU_LIMIT_BACKEND
     description: CPU limit
     value: 200m
-  - name: CPU_REQUEST
+  - name: CPU_REQUEST_BACKEND
     description: CPU request
     value: 100m
   - name: DB_CLEANER_SCHEDULE
@@ -226,10 +226,10 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag
     value: latest
-  - name: MEMORY_LIMIT
+  - name: MEMORY_LIMIT_BACKEND
     description: Memory limit
     value: 500Mi
-  - name: MEMORY_REQUEST
+  - name: MEMORY_REQUEST_BACKEND
     description: Memory request
     value: 250Mi
   - name: MIN_REPLICAS
