@@ -222,7 +222,7 @@ parameters:
     value: 'INFO'
   - name: IMAGE
     description: Image URL
-    value: quay.io/redhat-services-prod/insights-management-tenant/insights-policies/policies-backend
+    value: quay.io/redhat-services-prod/insights-management-tenant/insights-policies/policies-ui-backend
   - name: IMAGE_TAG
     description: Image tag
     value: latest
