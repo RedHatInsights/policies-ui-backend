@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get install -y skopeo
       - name: check change
         run: |
-          skopeo inspect docker://registry.access.redhat.com/ubi8/ubi-minimal:latest | jq .Digest --raw-output > .baseimage
+          skopeo inspect docker://registry.access.redhat.com/ubi9/ubi-minimal:latest | jq .Digest --raw-output > .baseimage
           docker run --rm --entrypoint sh -u 0 quay.io/cloudservices/policies-ui-backend:latest -c \
             'microdnf update > /dev/null; rpm -qa | sort | sha256sum' \
             >> .baseimage
