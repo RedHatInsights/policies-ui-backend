@@ -22,7 +22,7 @@ jobs:
         run: |
           skopeo inspect docker://registry.access.redhat.com/ubi9/ubi-minimal:latest | jq .Digest --raw-output > .baseimage
           docker run --rm --entrypoint sh -u 0 quay.io/cloudservices/policies-ui-backend:latest -c \
-            'microdnf update > /dev/null; rpm -qa | sort | sha256sum' \
+            'microdnf update -y > /dev/null; rpm -qa | sort | sha256sum' \
             >> .baseimage
       - name: do change if the digest changed
         run: |
