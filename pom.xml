@@ -120,7 +120,7 @@
     <dependency>
       <groupId>io.quarkiverse.logging.cloudwatch</groupId>
       <artifactId>quarkus-logging-cloudwatch</artifactId>
-      <version>6.14.0</version>
+      <version>6.14.2</version>
     </dependency>
 
     <dependency>
