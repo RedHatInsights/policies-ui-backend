@@ -5,6 +5,7 @@
     "schedule": [
         "* 3-10 * * 1"
     ],
+    "baseBranches": ["master"],
     "ignorePaths": [
       ".pre-commit-config.yaml"
     ]
