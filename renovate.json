@@ -15,7 +15,7 @@
     ],
     "packageRules": [
       {
-        "matchPackagePatterns": ["com.redhat.quarkus.platform"],
+        "matchPackageNames": ["/com.redhat.quarkus.platform/"],
         "allowedVersions": "!/^3\\.20\\.2\\.redhat-00002$/"
       }
     ]
