@@ -24,7 +24,7 @@
     <quarkus.platform.version>3.20.2.SP1-redhat-00003</quarkus.platform.version>
     <surefire-plugin.version>3.0.0</surefire-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-    <jacoco.version>0.8.13</jacoco.version>
+    <jacoco.version>0.8.14</jacoco.version>
 
     <version.testcontainers>1.21.3</version.testcontainers>
     <openapi-parser.version>4.0.4</openapi-parser.version>
