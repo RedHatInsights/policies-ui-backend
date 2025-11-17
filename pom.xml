@@ -30,7 +30,7 @@
     <openapi-parser.version>4.0.4</openapi-parser.version>
     <mockserver-netty-no-dependencies.version>5.15.0</mockserver-netty-no-dependencies.version>
     <clowder-quarkus-config-source.version>2.7.1</clowder-quarkus-config-source.version>
-    <commons-io.version>2.20.0.redhat-00002</commons-io.version>
+    <commons-io.version>2.21.0</commons-io.version>
   </properties>
 
   <dependencyManagement>
