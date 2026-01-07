@@ -1,5 +1,10 @@
 = Policies UI backend
 
+[IMPORTANT]
+====
+*This repository has been archived. Policies service was discontinued on December 12, 2025. For more information read link:https://access.redhat.com/articles/7133051[this Red Hat article].*
+====
+
 This backend is to serve (data to) the UI for Policies
 
 For some functionality it relies on the Engine part.
